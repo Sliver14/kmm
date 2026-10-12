@@ -1,0 +1,7 @@
+- Let's add back button in asset details page and governance details page, also make all modals to be able to close when user clicks outside modal
+- let's make clicking asset from dashboard open assets details page, 
+- switching between pages don't feel smooth, it feels like the whole site is rerendering, fix
+- just hide approvals tab from unit admins 
+- make categories and subcategories tab only visible to super admin
+- currently not all assets are captured in rights & governance page, and also the details tab are blank with to placeholder text or something to users, then also let's update so admin can update, edit governance details, but audit log would be logged for every update/edit, 
+- governace details page should also have the add rights records or relevant details to that assets, so that's what the reviewer would now review and approve
