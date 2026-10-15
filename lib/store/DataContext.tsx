@@ -36,10 +36,14 @@ interface PlatformStats {
 }
 
 interface DataContextType {
-  // Users & Role
+  // Users & Role & Auth
   currentUser: UserProfile
   setCurrentUser: (user: UserProfile) => void
   availableUsers: UserProfile[]
+  isAuthenticated: boolean
+  isInitialized: boolean
+  login: (emailOrUser: string | UserProfile, password?: string) => boolean
+  logout: () => void
   canApprove: boolean
   isSuperAdmin: boolean
   isReviewer: boolean
@@ -94,6 +98,7 @@ interface DataContextType {
 
 const STORAGE_KEY = 'lovetoons_platform_data_v6'
 const USER_KEY = 'lovetoons_current_user_v6'
+const AUTH_KEY = 'lovetoons_auth_state_v6'
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
 
@@ -101,9 +106,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Loaded state
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Current User
+  // Current User & Auth
   const [currentUser, setCurrentUserState] = useState<UserProfile>(initialUsers[0])
   const [availableUsers] = useState<UserProfile[]>(initialUsers)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true)
 
   // Core Data
   const [assets, setAssets] = useState<AssetData[]>(initialAssetsData)
@@ -145,6 +151,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           const foundUser = initialUsers.find((u) => u.id === storedUserId)
           if (foundUser) setCurrentUserState(foundUser)
         }
+
+        const storedAuth = localStorage.getItem(AUTH_KEY)
+        if (storedAuth === 'false') {
+          setIsAuthenticated(false)
+        } else {
+          setIsAuthenticated(true)
+        }
       }
     } catch (e) {
       console.error('Failed to load storage data', e)
@@ -181,6 +194,48 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(USER_KEY, user.id)
     }
     showToast(`Switched active profile to ${user.name} (${user.roleLabel})`)
+  }, [showToast])
+
+  // Login handler
+  const login = useCallback(
+    (emailOrUser: string | UserProfile, password?: string): boolean => {
+      let targetUser: UserProfile | undefined
+      if (typeof emailOrUser === 'string') {
+        const trimmed = emailOrUser.trim().toLowerCase()
+        targetUser = availableUsers.find(
+          (u) => u.email.toLowerCase() === trimmed || u.name.toLowerCase() === trimmed
+        )
+        if (!targetUser) {
+          targetUser =
+            availableUsers.find((u) => u.name.toLowerCase().includes(trimmed)) || availableUsers[0]
+        }
+      } else {
+        targetUser = emailOrUser
+      }
+
+      if (targetUser) {
+        setCurrentUserState(targetUser)
+        setIsAuthenticated(true)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(USER_KEY, targetUser.id)
+          localStorage.setItem(AUTH_KEY, 'true')
+        }
+        showToast(`Welcome back, ${targetUser.name}!`)
+        return true
+      }
+      return false
+    },
+    [availableUsers, showToast]
+  )
+
+  // Logout handler
+  const logout = useCallback(() => {
+    setIsAuthenticated(false)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_KEY, 'false')
+      window.location.href = '/signin'
+    }
+    showToast('You have been logged out.')
   }, [showToast])
 
   // Activity Logger
@@ -796,6 +851,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     currentUser,
     setCurrentUser,
     availableUsers,
+    isAuthenticated,
+    isInitialized,
+    login,
+    logout,
     canApprove,
     isSuperAdmin,
     isReviewer,

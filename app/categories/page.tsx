@@ -8,11 +8,11 @@ export default function CategoriesRoutePage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#f4faff] flex items-center justify-center font-bold text-slate-500">
-          Loading Categories...
+          Loading Settings...
         </div>
       }
     >
-      <MainApp initialTab="Categories & Subcategories" />
+      <MainApp initialTab="Settings" />
     </Suspense>
   )
 }

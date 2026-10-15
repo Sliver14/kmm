@@ -8,11 +8,11 @@ export default function CategoriesAndSubcategoriesRoutePage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#f4faff] flex items-center justify-center font-bold text-slate-500">
-          Loading Categories & Subcategories...
+          Loading Settings...
         </div>
       }
     >
-      <MainApp initialTab="Categories & Subcategories" />
+      <MainApp initialTab="Settings" />
     </Suspense>
   )
 }

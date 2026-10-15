@@ -13,7 +13,7 @@ import {
   Tv, FolderPlus, ArrowUpDown, ArrowDownUp, Move, Star, CheckCircle, Play, Pause,
   Calendar, Clock, User, Folder, PlayCircle, FileCode, RotateCcw, FileCheck, Files, Copy,
   Shield, Lock, ShieldAlert, CheckSquare, MessageSquare, Send, ArrowRight, ShieldQuestion,
-  UserCheck, Sliders, RefreshCw, FileUp, FolderArchive
+  UserCheck, Sliders, RefreshCw, FileUp, FolderArchive, LogOut
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLovetoonsData } from '@/lib/store/DataContext'
@@ -37,7 +37,6 @@ import {
 export const tabToPath: Record<string, string> = {
   'Dashboard': '/dashboard',
   'Assets': '/assets',
-  'Categories & Subcategories': '/categories',
   'Relationships': '/relationships',
   'Rights & Governance': '/rights',
   'Approvals': '/approvals',
@@ -49,8 +48,8 @@ export const pathToTab: Record<string, string> = {
   '/': 'Dashboard',
   '/dashboard': 'Dashboard',
   '/assets': 'Assets',
-  '/categories': 'Categories & Subcategories',
-  '/categories-and-subcategories': 'Categories & Subcategories',
+  '/categories': 'Settings',
+  '/categories-and-subcategories': 'Settings',
   '/relationships': 'Relationships',
   '/rights': 'Rights & Governance',
   '/rights-and-governance': 'Rights & Governance',
@@ -62,8 +61,8 @@ export const pathToTab: Record<string, string> = {
 export const queryToTab: Record<string, string> = {
   'dashboard': 'Dashboard',
   'assets': 'Assets',
-  'categories': 'Categories & Subcategories',
-  'categories-and-subcategories': 'Categories & Subcategories',
+  'categories': 'Settings',
+  'categories-and-subcategories': 'Settings',
   'relationships': 'Relationships',
   'rights': 'Rights & Governance',
   'rights-and-governance': 'Rights & Governance',
@@ -75,7 +74,6 @@ export const queryToTab: Record<string, string> = {
 const nav = [
   ['Dashboard', Home],
   ['Assets', Boxes],
-  ['Categories & Subcategories', Grid2X2],
   ['Relationships', Link2],
   ['Rights & Governance', ShieldCheck],
   ['Approvals', ClipboardCheck],
@@ -130,14 +128,11 @@ function Sidebar({
   open: boolean
   setOpen: (v: boolean) => void
 }) {
-  const { stats, currentUser } = useLovetoonsData()
+  const { stats, currentUser, logout } = useLovetoonsData()
 
   const visibleNav = useMemo(() => {
     return nav.filter(([label]) => {
       if (label === 'Approvals' && currentUser.role === 'unit_admin') {
-        return false
-      }
-      if (label === 'Categories & Subcategories' && currentUser.role !== 'super_admin') {
         return false
       }
       return true
@@ -195,6 +190,14 @@ function Sidebar({
         <div className="mt-2 text-[10px] font-medium text-slate-300 bg-black/20 rounded px-2 py-0.5 truncate">
           Unit: {currentUser.unit}
         </div>
+        <button
+          onClick={logout}
+          title="Sign out of platform"
+          className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-1.5 text-[11px] font-semibold text-slate-300 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30 transition cursor-pointer"
+        >
+          <LogOut className="size-3.5" />
+          <span>Sign Out</span>
+        </button>
       </div>
 
       <div className="relative px-6 pb-6 text-[12px] italic leading-snug text-white/80 border-t border-white/10 pt-4">
@@ -512,7 +515,7 @@ function Header({
   isNotificationModalOpen?: boolean
   unreadCount?: number
 }) {
-  const { currentUser, setCurrentUser, availableUsers, resetToDefaultData } = useLovetoonsData()
+  const { currentUser, setCurrentUser, availableUsers, resetToDefaultData, logout } = useLovetoonsData()
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false)
   const [searchFilter, setSearchFilter] = useState('')
 
@@ -632,12 +635,25 @@ function Header({
                     resetToDefaultData()
                     setRoleDropdownOpen(false)
                   }}
-                  className="flex items-center gap-1.5 font-semibold text-red-600 hover:text-red-700 p-1"
+                  className="flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-800 p-1"
                 >
                   <RefreshCw className="size-3" />
                   <span>Reset Demo Data</span>
                 </button>
                 <span className="text-slate-400 font-mono text-[10px]">Lovetoons IP System</span>
+              </div>
+
+              <div className="mt-2 pt-2 border-t border-slate-100">
+                <button
+                  onClick={() => {
+                    setRoleDropdownOpen(false)
+                    logout()
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 py-2 px-3 text-xs font-bold text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition cursor-pointer"
+                >
+                  <LogOut className="size-3.5" />
+                  <span>Sign Out / Log Out</span>
+                </button>
               </div>
             </div>
           )}
@@ -5410,15 +5426,94 @@ function ReportsPage() {
 // SETTINGS PAGE
 // -------------------------------------------------------------
 function SettingsPage() {
-  const { currentUser, stats, resetToDefaultData, showToast } = useLovetoonsData()
+  const {
+    currentUser,
+    stats,
+    resetToDefaultData,
+    showToast,
+    categories,
+    subcategories,
+    assets,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    addSubcategory,
+    updateSubcategory,
+    deleteSubcategory,
+    setCurrentUser,
+    availableUsers,
+    logout,
+  } = useLovetoonsData()
+
   const [defaultRightsScope, setDefaultRightsScope] = useState('Worldwide Master Copyright')
   const [governanceScoreThreshold, setGovernanceScoreThreshold] = useState(95)
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [browserAlerts, setBrowserAlerts] = useState(true)
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
 
+  // Taxonomy Management State (Super Admin)
+  const [isAddCatOpen, setIsAddCatOpen] = useState(false)
+  const [isAddSubOpen, setIsAddSubOpen] = useState(false)
+  const [catName, setCatName] = useState('')
+  const [catDesc, setCatDesc] = useState('')
+  const [catColor, setCatColor] = useState('bg-blue-600')
+  const [subName, setSubName] = useState('')
+  const [subParent, setSubParent] = useState(categories[0]?.name || '')
+
+  // Edit States
+  const [editingCategory, setEditingCategory] = useState<CategoryItem | null>(null)
+  const [editCatName, setEditCatName] = useState('')
+  const [editCatDesc, setEditCatDesc] = useState('')
+
+  const [editingSubcategory, setEditingSubcategory] = useState<SubcategoryItem | null>(null)
+  const [editSubName, setEditSubName] = useState('')
+  const [editSubParent, setEditSubParent] = useState('')
+
+  // Delete State
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: 'category' | 'subcategory'
+    id: string
+    name: string
+    linkedAssetsCount: number
+  } | null>(null)
+
+  const [taxonomySearch, setTaxonomySearch] = useState('')
+
+  const isSuperAdmin = currentUser.role === 'super_admin'
+
+  const filteredCategories = useMemo(() => {
+    if (!taxonomySearch.trim()) return categories
+    const q = taxonomySearch.toLowerCase()
+    return categories.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.description.toLowerCase().includes(q) ||
+        subcategories.some(
+          (s) => s.parentCategory === c.name && s.name.toLowerCase().includes(q)
+        )
+    )
+  }, [categories, subcategories, taxonomySearch])
+
+  const openAddSubForCategory = (parentName: string) => {
+    setSubParent(parentName)
+    setIsAddSubOpen(true)
+  }
+
+  const handleStartEditCategory = (cat: CategoryItem) => {
+    setEditingCategory(cat)
+    setEditCatName(cat.name)
+    setEditCatDesc(cat.description)
+  }
+
+  const handleStartEditSubcategory = (sub: SubcategoryItem) => {
+    setEditingSubcategory(sub)
+    setEditSubName(sub.name)
+    setEditSubParent(sub.parentCategory)
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
+      {/* PAGE HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md shadow-blue-500/20">
@@ -5427,20 +5522,271 @@ function SettingsPage() {
           <div>
             <h1 className="text-2xl font-black tracking-tight text-[#09245a] sm:text-3xl">Platform Settings</h1>
             <p className="mt-0.5 text-[12px] font-medium text-slate-500">
-              System architecture, cloud media storage parameters, and governance clearance policies.
+              System architecture, category taxonomy governance, cloud media storage, and admin session security.
             </p>
           </div>
         </div>
 
-        <button
-          onClick={() => showToast('Platform configuration changes saved successfully!')}
-          className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition"
-        >
-          <Save className="size-4" />
-          <span>Save Changes</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => showToast('Platform configuration saved successfully!')}
+            className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition cursor-pointer"
+          >
+            <Save className="size-4" />
+            <span>Save Settings</span>
+          </button>
+        </div>
       </div>
 
+      {/* SUPER ADMIN TAXONOMY MANAGEMENT PANEL */}
+      <div className="rounded-3xl border-2 border-blue-500/25 bg-gradient-to-br from-blue-50/60 via-white to-indigo-50/40 p-5 sm:p-7 shadow-sm space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-blue-100 pb-4">
+          <div className="flex items-center gap-3.5">
+            <div className="grid size-12 place-items-center rounded-2xl bg-[#09245a] text-white shadow-md shadow-blue-900/20">
+              <Grid2X2 className="size-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-lg sm:text-xl font-black tracking-tight text-[#09245a]">
+                  Super Admin Settings: Category & Subcategory Taxonomy
+                </h2>
+                {isSuperAdmin ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 border border-purple-200 px-2.5 py-0.5 text-[10px] font-bold text-purple-800">
+                    <ShieldCheck className="size-3 text-purple-700" />
+                    <span>Super Admin Mode</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-200 px-2.5 py-0.5 text-[10px] font-bold text-amber-800">
+                    <ShieldAlert className="size-3 text-amber-700" />
+                    <span>Read Only</span>
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Manage global IP classification, add new categories & subcategories, and regulate portfolio metadata taxonomy.
+              </p>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {isSuperAdmin ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsAddCatOpen(true)}
+                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-600/20 hover:bg-blue-700 active:scale-98 transition cursor-pointer"
+                >
+                  <Plus className="size-4" />
+                  <span>Add New Category</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubParent(categories[0]?.name || '')
+                    setIsAddSubOpen(true)
+                  }}
+                  className="flex items-center gap-1.5 rounded-xl border border-blue-300 bg-white px-4 py-2.5 text-xs font-bold text-blue-700 hover:bg-blue-50 active:scale-98 transition shadow-2xs cursor-pointer"
+                >
+                  <Plus className="size-4" />
+                  <span>Add New Subcategory</span>
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  const superAdminUser = availableUsers.find((u) => u.role === 'super_admin')
+                  if (superAdminUser) {
+                    setCurrentUser(superAdminUser)
+                    showToast('Switched to Super Admin profile to unlock category creation.')
+                  }
+                }}
+                className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-purple-700 transition cursor-pointer"
+              >
+                <ShieldCheck className="size-4" />
+                <span>Switch to Super Admin to Edit</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Taxonomy KPI Metric Badges */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="rounded-xl border border-blue-100 bg-white p-3.5 shadow-2xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Categories</span>
+            <div className="text-xl font-black text-[#09245a] mt-0.5">{categories.length}</div>
+            <div className="text-[10px] text-emerald-600 font-semibold">Master Classifications</div>
+          </div>
+          <div className="rounded-xl border border-blue-100 bg-white p-3.5 shadow-2xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Subcategories</span>
+            <div className="text-xl font-black text-purple-700 mt-0.5">{subcategories.length}</div>
+            <div className="text-[10px] text-slate-400 font-medium">Specialized Types</div>
+          </div>
+          <div className="rounded-xl border border-blue-100 bg-white p-3.5 shadow-2xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Classified Assets</span>
+            <div className="text-xl font-black text-blue-600 mt-0.5">{stats.totalAssets}</div>
+            <div className="text-[10px] text-slate-400 font-medium">Mapped to Taxonomy</div>
+          </div>
+          <div className="rounded-xl border border-blue-100 bg-white p-3.5 shadow-2xs">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Registry Governance</span>
+            <div className="text-xl font-black text-emerald-700 mt-0.5">100%</div>
+            <div className="text-[10px] text-emerald-600 font-semibold">Central Verified</div>
+          </div>
+        </div>
+
+        {/* Search taxonomy */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+            <input
+              type="text"
+              value={taxonomySearch}
+              onChange={(e) => setTaxonomySearch(e.target.value)}
+              placeholder="Filter categories or subcategories..."
+              className="h-9 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-xs outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+          {taxonomySearch && (
+            <button
+              onClick={() => setTaxonomySearch('')}
+              className="text-xs text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
+            >
+              Clear filter
+            </button>
+          )}
+        </div>
+
+        {/* Categories Directory Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pt-1">
+          {filteredCategories.map((cat) => {
+            const catAssets = assets.filter((a) => a.category === cat.name)
+            const catSubs = subcategories.filter((s) => s.parentCategory === cat.name)
+
+            return (
+              <div
+                key={cat.id}
+                className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition hover:shadow-md hover:border-blue-200 group"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <CategoryBadgeIcon category={cat.name} />
+                      <div>
+                        <h3 className="font-bold text-[#09245a] text-sm leading-snug">{cat.name}</h3>
+                        <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.2">
+                          Active Category
+                        </span>
+                      </div>
+                    </div>
+
+                    {isSuperAdmin && (
+                      <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
+                        <button
+                          type="button"
+                          onClick={() => handleStartEditCategory(cat)}
+                          title="Edit category"
+                          className="grid size-7 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition cursor-pointer"
+                        >
+                          <Pencil className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDeleteTarget({
+                              type: 'category',
+                              id: cat.id,
+                              name: cat.name,
+                              linkedAssetsCount: catAssets.length,
+                            })
+                          }
+                          title="Delete category"
+                          className="grid size-7 place-items-center rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="mt-2.5 text-xs text-slate-500 leading-relaxed line-clamp-2">
+                    {cat.description}
+                  </p>
+
+                  {/* Subcategories list */}
+                  <div className="mt-4 pt-3 border-t border-slate-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Subcategories ({catSubs.length})
+                      </span>
+                      {isSuperAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => openAddSubForCategory(cat.name)}
+                          className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+                        >
+                          <Plus className="size-3" />
+                          <span>Add Sub</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto no-scrollbar pr-0.5">
+                      {catSubs.length === 0 ? (
+                        <div className="text-[11px] text-slate-400 italic">No subcategories defined yet.</div>
+                      ) : (
+                        catSubs.map((sub) => {
+                          const subAssetsCount = assets.filter(
+                            (a) => a.category === cat.name && a.subcategory === sub.name
+                          ).length
+
+                          return (
+                            <span
+                              key={sub.id}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-1 text-[11px] font-medium text-slate-700 group/sub"
+                            >
+                              <span>{sub.name}</span>
+                              <span className="rounded bg-blue-100/70 px-1 py-0.2 text-[9px] font-bold text-blue-800">
+                                {subAssetsCount}
+                              </span>
+                              {isSuperAdmin && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setDeleteTarget({
+                                      type: 'subcategory',
+                                      id: sub.id,
+                                      name: sub.name,
+                                      linkedAssetsCount: subAssetsCount,
+                                    })
+                                  }
+                                  title="Delete subcategory"
+                                  className="text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              )}
+                            </span>
+                          )
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-[11px] text-slate-500">
+                    Total Associated Assets:
+                  </span>
+                  <span className="font-bold text-blue-600">{catAssets.length} assets</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* CORE SYSTEM CONFIGURATION 2-COLUMN GRID */}
       <div className="grid gap-6 lg:grid-cols-2 items-start">
         {/* 1. Organization & Ministry Profile */}
         <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
@@ -5602,17 +5948,43 @@ function SettingsPage() {
           </div>
         </div>
 
-        {/* 4. Platform Notifications & System Maintenance */}
+        {/* 4. Active Session, Notifications & Security */}
         <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
-              <Bell className="size-4 text-amber-600" />
-              <h2 className="font-bold text-[#09245a] text-sm">Notifications & System Maintenance</h2>
+              <UserCheck className="size-4 text-blue-600" />
+              <h2 className="font-bold text-[#09245a] text-sm">Active Account Session & Maintenance</h2>
             </div>
-            <span className="text-[10px] font-bold text-slate-400 font-mono">v2.0 Production</span>
+            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              Session Live
+            </span>
           </div>
 
           <div className="space-y-3.5 text-xs">
+            {/* User Session Details */}
+            <div className="flex items-center justify-between p-3 rounded-xl border border-blue-100 bg-blue-50/40">
+              <div className="flex items-center gap-3">
+                <div className="grid size-10 place-items-center rounded-xl bg-[#03152c] text-white font-bold text-xs shadow-xs">
+                  {currentUser.initials}
+                </div>
+                <div>
+                  <div className="font-bold text-slate-900 text-xs">{currentUser.name}</div>
+                  <div className="text-[11px] text-blue-700 font-semibold">{currentUser.roleLabel} • {currentUser.unit}</div>
+                  <div className="text-[10px] text-slate-400">{currentUser.email}</div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={logout}
+                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition cursor-pointer shadow-2xs"
+              >
+                <LogOut className="size-3.5" />
+                <span>Log Out</span>
+              </button>
+            </div>
+
+            {/* Notifications */}
             <div className="space-y-2">
               <label className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100/80 transition cursor-pointer">
                 <div>
@@ -5647,7 +6019,7 @@ function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => showToast('Platform cache purged and synced with Cloud storage')}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white p-2.5 font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition text-xs"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white p-2.5 font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition text-xs cursor-pointer"
                 >
                   <RefreshCw className="size-3.5 text-slate-500" />
                   <span>Purge Cache & Refresh</span>
@@ -5656,7 +6028,7 @@ function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setIsResetConfirmOpen(true)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50/80 p-2.5 font-bold text-rose-700 hover:bg-rose-100 transition text-xs"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50/80 p-2.5 font-bold text-rose-700 hover:bg-rose-100 transition text-xs cursor-pointer"
                 >
                   <Trash2 className="size-3.5 text-rose-600" />
                   <span>Reset Demo Data</span>
@@ -5667,7 +6039,338 @@ function SettingsPage() {
         </div>
       </div>
 
-      {/* Reset Confirmation Modal */}
+      {/* MODAL 1: ADD CATEGORY (Super Admin) */}
+      {isAddCatOpen && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsAddCatOpen(false)
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="grid size-7 place-items-center rounded-lg bg-blue-100 text-blue-700 font-bold">
+                  <Plus className="size-4" />
+                </div>
+                <h3 className="font-bold text-[#09245a] text-sm">Add New Category (Super Admin)</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddCatOpen(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (!catName.trim()) return
+                addCategory({
+                  name: catName.trim(),
+                  description: catDesc.trim() || 'Central Lovetoons IP Content Category',
+                  status: 'Active',
+                  iconType: 'tv',
+                  color: catColor,
+                })
+                setIsAddCatOpen(false)
+                setCatName('')
+                setCatDesc('')
+              }}
+              className="mt-4 space-y-3.5"
+            >
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Category Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={catName}
+                  onChange={(e) => setCatName(e.target.value)}
+                  placeholder="e.g. Interactive & XR, Theatrical Outreach"
+                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Description</label>
+                <textarea
+                  value={catDesc}
+                  onChange={(e) => setCatDesc(e.target.value)}
+                  placeholder="Explain the scope and asset types for this classification..."
+                  rows={3}
+                  className="w-full rounded-lg border border-slate-200 p-2.5 text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Color Theme</label>
+                <div className="flex items-center gap-2">
+                  {[
+                    { label: 'Blue', val: 'bg-blue-600' },
+                    { label: 'Purple', val: 'bg-purple-600' },
+                    { label: 'Emerald', val: 'bg-emerald-600' },
+                    { label: 'Amber', val: 'bg-amber-600' },
+                    { label: 'Rose', val: 'bg-rose-600' },
+                  ].map((color) => (
+                    <button
+                      key={color.val}
+                      type="button"
+                      onClick={() => setCatColor(color.val)}
+                      className={cn(
+                        'size-7 rounded-full transition flex items-center justify-center',
+                        color.val,
+                        catColor === color.val ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'opacity-80'
+                      )}
+                    >
+                      {catColor === color.val && <Check className="size-3 text-white" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddCatOpen(false)}
+                  className="px-4 py-2 border rounded-lg text-slate-600 hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-sm cursor-pointer"
+                >
+                  Save Category
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: ADD SUBCATEGORY (Super Admin) */}
+      {isAddSubOpen && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsAddSubOpen(false)
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="grid size-7 place-items-center rounded-lg bg-blue-100 text-blue-700 font-bold">
+                  <Plus className="size-4" />
+                </div>
+                <h3 className="font-bold text-[#09245a] text-sm">Add New Subcategory (Super Admin)</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddSubOpen(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (!subName.trim() || !subParent) return
+                addSubcategory({
+                  name: subName.trim(),
+                  parentCategory: subParent,
+                  status: 'Active',
+                  iconType: 'tv',
+                  color: 'bg-purple-600',
+                })
+                setIsAddSubOpen(false)
+                setSubName('')
+              }}
+              className="mt-4 space-y-3.5"
+            >
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Parent Category *</label>
+                <select
+                  value={subParent}
+                  onChange={(e) => setSubParent(e.target.value)}
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-500"
+                >
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Subcategory Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={subName}
+                  onChange={(e) => setSubName(e.target.value)}
+                  placeholder="e.g. 3D CGI Short, Musical Album, Illustrated Comic"
+                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddSubOpen(false)}
+                  className="px-4 py-2 border rounded-lg text-slate-600 hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-sm cursor-pointer"
+                >
+                  Save Subcategory
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: EDIT CATEGORY */}
+      {editingCategory && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingCategory(null)
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-[#09245a] text-sm">Edit Category</h3>
+              <button
+                type="button"
+                onClick={() => setEditingCategory(null)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (!editCatName.trim()) return
+                updateCategory({
+                  ...editingCategory,
+                  name: editCatName.trim(),
+                  description: editCatDesc.trim(),
+                })
+                setEditingCategory(null)
+              }}
+              className="mt-4 space-y-3.5"
+            >
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Category Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editCatName}
+                  onChange={(e) => setEditCatName(e.target.value)}
+                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Description</label>
+                <textarea
+                  value={editCatDesc}
+                  onChange={(e) => setEditCatDesc(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-slate-200 p-2.5 text-xs outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingCategory(null)}
+                  className="px-4 py-2 border rounded-lg text-slate-600 hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-sm cursor-pointer"
+                >
+                  Update Category
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: DELETE CONFIRMATION */}
+      {deleteTarget && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setDeleteTarget(null)
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-xs cursor-default space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="grid size-10 place-items-center rounded-xl bg-rose-100 text-rose-700">
+                <AlertTriangle className="size-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-[#09245a] text-sm">
+                  Delete {deleteTarget.type === 'category' ? 'Category' : 'Subcategory'}?
+                </h3>
+                <p className="text-[11px] text-slate-500">&ldquo;{deleteTarget.name}&rdquo;</p>
+              </div>
+            </div>
+
+            <p className="text-slate-600 text-xs leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
+              {deleteTarget.linkedAssetsCount > 0 ? (
+                <span className="text-amber-700 font-semibold">
+                  Warning: There are currently {deleteTarget.linkedAssetsCount} assets catalogued under this {deleteTarget.type}. Deleting it will remove this taxonomy link.
+                </span>
+              ) : (
+                <span>Are you sure you want to remove this taxonomy item from the platform? This action cannot be undone.</span>
+              )}
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (deleteTarget.type === 'category') {
+                    deleteCategory(deleteTarget.id)
+                  } else {
+                    deleteSubcategory(deleteTarget.id)
+                  }
+                  setDeleteTarget(null)
+                }}
+                className="rounded-lg bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700 shadow-md cursor-pointer"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: RESET DATA CONFIRMATION */}
       {isResetConfirmOpen && (
         <div
           onClick={(e) => {
@@ -5682,19 +6385,19 @@ function SettingsPage() {
               </div>
               <div>
                 <h3 className="font-bold text-[#09245a] text-sm">Reset All Platform Data?</h3>
-                <p className="text-[11px] text-slate-500">This will restore initial demo assets, rights records, and relationships.</p>
+                <p className="text-[11px] text-slate-500">This will restore initial demo assets, rights records, categories, and relationships.</p>
               </div>
             </div>
 
             <p className="text-slate-600 text-xs leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
-              Any custom assets created in the browser local storage will be cleared and reset back to the default Lovetoons portfolio.
+              Any custom assets or taxonomy additions stored in your browser local storage will be refreshed back to default Lovetoons production demo state.
             </p>
 
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setIsResetConfirmOpen(false)}
-                className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
                 Cancel
               </button>
@@ -5705,7 +6408,7 @@ function SettingsPage() {
                   setIsResetConfirmOpen(false)
                   showToast('Platform data reset to factory demo state')
                 }}
-                className="rounded-lg bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700 shadow-md"
+                className="rounded-lg bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700 shadow-md cursor-pointer"
               >
                 Yes, Reset All Data
               </button>
@@ -5753,7 +6456,7 @@ export function MainApp({
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false)
   const [readAlertIds, setReadAlertIds] = useState<string[]>([])
 
-  const { currentUser, toastMessage, approvals, rightsRecords, activities } = useLovetoonsData()
+  const { currentUser, toastMessage, approvals, rightsRecords, activities, isAuthenticated, isInitialized } = useLovetoonsData()
 
   // Calculate unread alerts count
   const unreadAlertsCount = useMemo(() => {
@@ -5762,6 +6465,15 @@ export function MainApp({
     return Math.max(0, totalNotifs - readCount)
   }, [approvals, rightsRecords, activities, readAlertIds])
 
+  // Auth Guard: Redirect unauthenticated sessions to /signin
+  useEffect(() => {
+    if (isInitialized && !isAuthenticated) {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/signin'
+      }
+    }
+  }, [isInitialized, isAuthenticated])
+
   // Role Guard: Hide / Redirect restricted roles smoothly
   useEffect(() => {
     if (active === 'Approvals' && currentUser.role === 'unit_admin') {
@@ -5769,10 +6481,10 @@ export function MainApp({
       if (typeof window !== 'undefined') {
         window.history.pushState(null, '', '/dashboard')
       }
-    } else if (active === 'Categories & Subcategories' && currentUser.role !== 'super_admin') {
-      setActive('Dashboard')
+    } else if (active === 'Categories & Subcategories') {
+      setActive('Settings')
       if (typeof window !== 'undefined') {
-        window.history.pushState(null, '', '/dashboard')
+        window.history.pushState(null, '', '/settings')
       }
     }
   }, [currentUser.role, active])
@@ -5808,6 +6520,22 @@ export function MainApp({
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', fullPath)
     }
+  }
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-[#f4faff] flex items-center justify-center font-bold text-slate-500">
+        Loading Lovetoons Platform...
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#f4faff] flex items-center justify-center font-bold text-slate-500">
+        Redirecting to Sign In...
+      </div>
+    )
   }
 
   return (
@@ -5853,8 +6581,6 @@ export function MainApp({
             <RightsPage setActiveNav={handleNavigate} initialAssetId={selectedAssetId || queryAsset} />
           ) : active === 'Relationships' ? (
             <RelationshipsPage />
-          ) : active === 'Categories & Subcategories' ? (
-            <CategoriesPage setActiveNav={handleNavigate} />
           ) : (
             <Dashboard setActiveNav={handleNavigate} />
           )}
