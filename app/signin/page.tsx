@@ -16,6 +16,7 @@ import {
   LogIn,
   KeyRound,
   ShieldAlert,
+  Building2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -27,8 +28,8 @@ function SignInContent() {
 
   const { isAuthenticated, isInitialized, login, availableUsers } = useLovetoonsData()
 
-  const [email, setEmail] = useState('sylver@lovetoons.org')
-  const [password, setPassword] = useState('lovetoons2025')
+  const [email, setEmail] = useState('sylver@kiddiesmedia.org')
+  const [password, setPassword] = useState('kmm2025')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
@@ -89,20 +90,29 @@ function SignInContent() {
       <div className="pointer-events-none absolute -bottom-40 -right-40 size-[550px] rounded-full bg-purple-600/15 blur-[120px]" />
       <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[650px] rounded-full bg-cyan-500/10 blur-[150px]" />
 
-      <div className="relative z-10 w-full max-w-4xl grid lg:grid-cols-12 rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-2xl shadow-2xl overflow-hidden">
+      <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-12 rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-2xl shadow-2xl overflow-hidden">
         {/* Left Brand Panel */}
         <div className="lg:col-span-5 relative flex flex-col justify-between p-8 sm:p-10 bg-gradient-to-br from-[#041a38] via-[#03152c] to-[#020d1c] border-b lg:border-b-0 lg:border-r border-white/10 text-white">
           <div>
             <div className="flex items-center gap-3">
               <img
-                src="/lovetoons-logo.png"
-                alt="Lovetoons"
-                className="h-10 w-auto object-contain drop-shadow-md brightness-110"
+                src="/kmm-logo.png"
+                alt="Kiddies Media Ministries"
+                className="size-10 object-contain drop-shadow-md"
               />
+              <div>
+                <div className="text-lg font-black text-white tracking-tight leading-none">
+                  Kiddies Media
+                </div>
+                <div className="text-[11px] font-bold text-blue-300 uppercase tracking-widest mt-0.5">
+                  Ministries
+                </div>
+              </div>
             </div>
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-300 border border-blue-400/30">
+
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-300 border border-blue-400/30">
               <Sparkles className="size-3 text-yellow-300" />
-              <span>Kiddies Media Ministry</span>
+              <span>5 Integrated Agencies</span>
             </div>
 
             <h1 className="mt-6 text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
@@ -113,8 +123,26 @@ function SignInContent() {
             </h1>
 
             <p className="mt-3 text-xs leading-relaxed text-slate-300 font-medium">
-              Centralized platform for master media archival, intellectual property classification, copyright governance, and multi-tier approval workflows.
+              Centralized platform for master media archival, intellectual property classification, copyright governance, staff contributor tracking, and multi-tier approvals across Kiddies Media Ministries agencies.
             </p>
+
+            <div className="mt-5 grid grid-cols-2 gap-2 text-[10px] font-semibold text-slate-300">
+              <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
+                • Lovetoons Media
+              </div>
+              <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
+                • Publishing Agency
+              </div>
+              <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
+                • Digital Agency
+              </div>
+              <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
+                • Academy Agency
+              </div>
+              <div className="col-span-2 rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
+                • Educational Agency
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
@@ -124,11 +152,11 @@ function SignInContent() {
             </div>
             <div className="flex items-start gap-2.5 text-xs text-slate-300">
               <CheckCircle2 className="size-4 text-blue-400 shrink-0 mt-0.5" />
-              <span>Dynamic category metadata & relation taxonomy</span>
+              <span>Staff contributor attribution & IP deeds on file</span>
             </div>
 
-            <div className="pt-3 text-[11px] italic text-slate-400">
-              &ldquo;Building Godly Content for a Brighter Generation&rdquo;
+            <div className="pt-2 text-[11px] italic text-slate-400">
+              &ldquo;Building Godly Content & Media for a Brighter Generation — Kiddies Media Ministries&rdquo;
             </div>
           </div>
         </div>
@@ -140,7 +168,7 @@ function SignInContent() {
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-[#09245a]">Sign In to Platform</h2>
                 <p className="mt-1 text-xs text-slate-500">
-                  Enter your credentials or choose a quick demo role profile below.
+                  Enter your credentials or select an agency representative profile below.
                 </p>
               </div>
               <div className="grid size-10 place-items-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100">
@@ -169,7 +197,7 @@ function SignInContent() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="name@lovetoons.org"
+                    placeholder="name@kiddiesmedia.org"
                     className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-3 text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition"
                   />
                 </div>
@@ -179,7 +207,7 @@ function SignInContent() {
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs font-bold text-slate-700">Password</label>
                   <span className="text-[11px] text-blue-600 font-semibold cursor-pointer hover:underline">
-                    Default: lovetoons2025
+                    Default: kmm2025
                   </span>
                 </div>
                 <div className="relative">
@@ -212,7 +240,7 @@ function SignInContent() {
                   />
                   <span>Remember this device</span>
                 </label>
-                <span className="text-[11px] text-slate-400">Lovetoons IAM v2.0</span>
+                <span className="text-[11px] text-slate-400">KMM Platform v2.5</span>
               </div>
 
               <button
@@ -224,24 +252,24 @@ function SignInContent() {
                   <div className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                 ) : (
                   <>
-                    <span>Sign In to IAM Platform</span>
+                    <span>Sign In to Kiddies Media Ministries</span>
                     <ArrowRight className="size-4" />
                   </>
                 )}
               </button>
             </form>
 
-            {/* Quick Demo One-Click Access */}
+            {/* Quick Demo One-Click Access Across Agencies */}
             <div className="mt-6 pt-5 border-t border-slate-100">
               <div className="flex items-center justify-between mb-2.5">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  Quick Demo Profile Sign In
+                  Quick Sign-In by Role & Agency
                 </span>
-                <span className="text-[10px] text-slate-400">1-Click Role Switch</span>
+                <span className="text-[10px] text-slate-400">1-Click Fast Switch</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {availableUsers.slice(0, 4).map((user) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                {availableUsers.map((user) => {
                   const isSelected = selectedDemoUser === user.id
                   return (
                     <button
@@ -268,11 +296,16 @@ function SignInContent() {
                         {user.initials}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-[11px] font-bold text-slate-900 truncate">
-                          {user.name}
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-slate-900 truncate">
+                            {user.name}
+                          </span>
                         </div>
                         <div className="text-[10px] text-blue-700 font-semibold truncate">
                           {user.roleLabel}
+                        </div>
+                        <div className="text-[9px] text-slate-400 truncate">
+                          Agency: {user.agency}
                         </div>
                       </div>
                     </button>
@@ -283,7 +316,7 @@ function SignInContent() {
           </div>
 
           <div className="mt-6 pt-4 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
-            <span>© 2025–2035 Lovetoons Media Ltd</span>
+            <span>© 2025–2035 Kiddies Media Ministries</span>
             <span>All Rights Reserved Worldwide</span>
           </div>
         </div>

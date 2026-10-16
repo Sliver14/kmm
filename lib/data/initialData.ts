@@ -20,11 +20,11 @@ export const initialUsers: UserProfile[] = [
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     initials: 'SO',
     role: 'super_admin',
-    roleLabel: 'Super Admin (KMP Network)',
+    roleLabel: 'Super Admin (KMM Network)',
     agency: 'Lovetoons',
     unit: 'Lovetoons',
     skills: ['admin', 'legal_counsel', 'video_editor'],
-    bio: 'Oversees intellectual asset governance, ministry rights registry and final sign-offs across all Kiddies Media Production agencies.',
+    bio: 'Oversees intellectual asset governance, ministry rights registry and final sign-offs across all Kiddies Media Ministries agencies.',
   },
   {
     id: 'usr-2',

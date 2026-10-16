@@ -4,8 +4,8 @@ import { DataProvider } from '@/lib/store/DataContext'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Kiddies Media Production — Intellectual Asset Management Platform',
-  description: 'Manage intellectual assets, rights, governance, staff contributors and approvals across Kiddies Media Production agencies: Lovetoons, Publishing Agency, Digital Agency, Academy Agency, and Educational Agency.',
+  title: 'Kiddies Media Ministries — Intellectual Asset Management Platform',
+  description: 'Manage intellectual assets, rights, governance, staff contributors and approvals across Kiddies Media Ministries agencies: Lovetoons, Publishing Agency, Digital Agency, Academy Agency, and Educational Agency.',
   generator: 'v0.app',
   icons: {
     icon: [

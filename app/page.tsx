@@ -111,13 +111,13 @@ function Logo() {
       <div className="flex items-center gap-2">
         <img
           src="/kmm-logo.png"
-          alt="Kiddies Media Production"
+          alt="Kiddies Media Ministries"
           className="size-7 object-contain drop-shadow-md"
         />
         <span className="text-sm font-black text-white tracking-tight">Kiddies Media</span>
       </div>
       <div className="rounded-full bg-blue-500/30 px-2 py-0.5 text-[8.5px] text-blue-200 font-bold uppercase tracking-wider">
-        Production Network
+        Ministries
       </div>
     </div>
   )
@@ -991,7 +991,7 @@ function Dashboard({
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-black tracking-tight text-[#09245a] sm:text-3xl">
-                {isGlobalViewer ? 'KMP Network Governance Dashboard' : `${currentUser.agency || userAgency} Dashboard`}
+                {isGlobalViewer ? 'KMM Network Governance Dashboard' : `${currentUser.agency || userAgency} Dashboard`}
               </h1>
               <span className={cn(
                 'rounded-full px-2.5 py-0.5 text-[10px] font-bold border',

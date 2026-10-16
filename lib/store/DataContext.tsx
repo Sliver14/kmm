@@ -267,7 +267,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       localStorage.setItem(AUTH_KEY, 'false')
     }
-    showToast('Signed out of Kiddies Media Production platform.')
+    showToast('Signed out of Kiddies Media Ministries platform.')
   }, [showToast])
 
   // Role helper flags
@@ -514,7 +514,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         unit: newAssetItem.agency,
         contributors: newAssetItem.contributors,
         rightsType: 'Worldwide Media Ministry Clearance',
-        owner: newAssetItem.rightsHolder || 'Kiddies Media Production Ltd',
+        owner: newAssetItem.rightsHolder || 'Kiddies Media Ministries Ltd',
         validity: `${now.getFullYear()} – ${now.getFullYear() + 10}`,
         status: newAssetItem.status === 'Approved' ? 'Cleared' : 'Review',
         territory: 'Worldwide',
