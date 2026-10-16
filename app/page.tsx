@@ -175,17 +175,6 @@ function Sidebar({
         open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}
     >
-      {/* Floating Toggle Pill on Desktop right border */}
-      {setIsCollapsed && (
-        <button
-          onClick={() => setIsCollapsed((prev) => !prev)}
-          title={isCollapsed ? 'Expand sidebar (Ctrl+[)' : 'Collapse sidebar (Ctrl+[)'}
-          className="absolute -right-3 top-6 z-40 hidden lg:flex size-6 items-center justify-center rounded-full bg-gradient-to-b from-blue-500 to-blue-700 text-white shadow-lg border border-white/20 hover:scale-110 active:scale-95 transition-all cursor-pointer"
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <ChevronLeft className={cn('size-3.5 transition-transform duration-300', isCollapsed && 'rotate-180')} />
-        </button>
-      )}
 
       {/* Header / Logo */}
       <div className="flex h-[76px] items-center justify-center border-b border-white/10 px-3 relative">
