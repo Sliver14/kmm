@@ -118,7 +118,7 @@ function SignInContent() {
             <h1 className="mt-6 text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
               Intellectual Asset <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300">
-                Management Hub
+                Management Portal
               </span>
             </h1>
 
@@ -289,8 +289,8 @@ function SignInContent() {
                           user.role === 'super_admin'
                             ? 'bg-purple-600'
                             : user.role === 'reviewer'
-                            ? 'bg-emerald-600'
-                            : 'bg-blue-600'
+                              ? 'bg-emerald-600'
+                              : 'bg-blue-600'
                         )}
                       >
                         {user.initials}

@@ -13,7 +13,7 @@ import {
   Tv, FolderPlus, ArrowUpDown, ArrowDownUp, Move, Star, CheckCircle, Play, Pause,
   Calendar, Clock, User, Folder, PlayCircle, FileCode, RotateCcw, FileCheck, Files, Copy,
   Shield, Lock, ShieldAlert, CheckSquare, MessageSquare, Send, ArrowRight, ShieldQuestion,
-  UserCheck, Sliders, RefreshCw, FileUp, FolderArchive, LogOut
+  UserCheck, Sliders, RefreshCw, FileUp, FolderArchive, LogOut, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLovetoonsData } from '@/lib/store/DataContext'
@@ -105,18 +105,36 @@ const skillOptions: { value: UserSkill; label: string }[] = [
   { value: 'admin', label: 'Ministry Administrator' },
 ]
 
-function Logo() {
+function Logo({ collapsed = false }: { collapsed?: boolean }) {
+  if (collapsed) {
+    return (
+      <div className="flex items-center justify-center py-1 group/logo" title="Kiddies Media Ministries">
+        <div className="relative">
+          <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 opacity-60 blur-xs transition group-hover/logo:opacity-100" />
+          <img
+            src="/kmm-logo.png"
+            alt="Kiddies Media Ministries"
+            className="relative size-8 object-contain drop-shadow-md transition-transform group-hover/logo:scale-110"
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center gap-1.5 px-3 py-2 text-center">
-      <div className="flex items-center gap-2">
-        <img
-          src="/kmm-logo.png"
-          alt="Kiddies Media Ministries"
-          className="size-7 object-contain drop-shadow-md"
-        />
+    <div className="flex flex-col items-center justify-center gap-1.5 px-3 py-1 text-center transition-opacity duration-200">
+      <div className="flex items-center gap-2.5">
+        <div className="relative">
+          <div className="absolute -inset-0.5 rounded-full bg-blue-500/40 blur-xs" />
+          <img
+            src="/kmm-logo.png"
+            alt="Kiddies Media Ministries"
+            className="relative size-7 object-contain drop-shadow-md"
+          />
+        </div>
         <span className="text-sm font-black text-white tracking-tight">Kiddies Media</span>
       </div>
-      <div className="rounded-full bg-blue-500/30 px-2 py-0.5 text-[8.5px] text-blue-200 font-bold uppercase tracking-wider">
+      <div className="rounded-full bg-gradient-to-r from-blue-500/30 to-indigo-500/30 border border-blue-400/30 px-2.5 py-0.5 text-[9px] text-blue-200 font-bold uppercase tracking-wider backdrop-blur-sm shadow-xs">
         Ministries
       </div>
     </div>
@@ -128,11 +146,15 @@ function Sidebar({
   setActive,
   open,
   setOpen,
+  isCollapsed = false,
+  setIsCollapsed,
 }: {
   active: string
   setActive: (v: string) => void
   open: boolean
   setOpen: (v: boolean) => void
+  isCollapsed?: boolean
+  setIsCollapsed?: (v: boolean | ((prev: boolean) => boolean)) => void
 }) {
   const { stats, currentUser, logout } = useLovetoonsData()
 
@@ -148,71 +170,149 @@ function Sidebar({
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-30 flex w-[232px] flex-col bg-[#03152c] text-white transition-transform lg:translate-x-0',
-        open ? 'translate-x-0' : '-translate-x-full'
+        'fixed inset-y-0 left-0 z-30 flex flex-col bg-[#021024]/95 text-white transition-all duration-300 ease-in-out backdrop-blur-2xl border-r border-white/10 shadow-[4px_0_30px_rgba(0,0,0,0.35)]',
+        isCollapsed ? 'w-[76px]' : 'w-[248px]',
+        open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}
     >
-      <div className="flex h-[82px] items-center justify-center border-b border-white/10">
-        <Logo />
+      {/* Floating Toggle Pill on Desktop right border */}
+      {setIsCollapsed && (
+        <button
+          onClick={() => setIsCollapsed((prev) => !prev)}
+          title={isCollapsed ? 'Expand sidebar (Ctrl+[)' : 'Collapse sidebar (Ctrl+[)'}
+          className="absolute -right-3 top-6 z-40 hidden lg:flex size-6 items-center justify-center rounded-full bg-gradient-to-b from-blue-500 to-blue-700 text-white shadow-lg border border-white/20 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <ChevronLeft className={cn('size-3.5 transition-transform duration-300', isCollapsed && 'rotate-180')} />
+        </button>
+      )}
+
+      {/* Header / Logo */}
+      <div className="flex h-[76px] items-center justify-center border-b border-white/10 px-3 relative">
+        <Logo collapsed={isCollapsed} />
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 px-3 py-5">
-        {visibleNav.map(([label, Icon]) => (
-          <button
-            key={label}
-            onClick={() => {
-              setActive(label)
-              setOpen(false)
-            }}
-            className={cn(
-              'flex items-center gap-3 rounded-xl px-3.5 py-3 text-left text-[13px] font-medium transition duration-150 relative group',
-              active === label
-                ? 'bg-[#0867d9] text-white shadow-[0_7px_18px_rgba(0,99,220,.35)]'
-                : 'text-white/80 hover:bg-white/10 hover:text-white'
-            )}
-          >
-            <Icon className="size-5 shrink-0" strokeWidth={1.8} />
-            <span className="flex-1 truncate">{label}</span>
-            {label === 'Approvals' && stats.pendingApprovalsCount > 0 && (
-              <span className="grid size-5 place-items-center rounded-full bg-red-500 text-[11px] font-bold text-white shadow-sm">
-                {stats.pendingApprovalsCount}
-              </span>
-            )}
-          </button>
-        ))}
+      {/* Navigation List */}
+      <nav className="flex flex-1 flex-col gap-1.5 px-3 py-5 overflow-y-auto overflow-x-hidden">
+        {visibleNav.map(([label, Icon]) => {
+          const isActive = active === label
+          return (
+            <button
+              key={label}
+              onClick={() => {
+                setActive(label)
+                setOpen(false)
+              }}
+              className={cn(
+                'group relative flex items-center rounded-xl font-medium transition-all duration-200 cursor-pointer',
+                isCollapsed ? 'justify-center p-3 text-sm' : 'gap-3 px-3.5 py-2.5 text-left text-sm',
+                isActive
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.45)] border border-white/25'
+                  : 'text-slate-300 hover:bg-white/10 hover:text-white hover:backdrop-blur-sm'
+              )}
+            >
+              <Icon className="size-5 shrink-0" strokeWidth={1.8} />
+              {!isCollapsed && <span className="flex-1 truncate text-xs font-semibold">{label}</span>}
+              {!isCollapsed && label === 'Approvals' && stats.pendingApprovalsCount > 0 && (
+                <span className="grid size-5 place-items-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-[#021024]">
+                  {stats.pendingApprovalsCount}
+                </span>
+              )}
+
+              {/* Collapsed floating indicator dot */}
+              {isCollapsed && label === 'Approvals' && stats.pendingApprovalsCount > 0 && (
+                <span className="absolute top-2 right-2 size-2.5 rounded-full bg-rose-500 ring-2 ring-[#021024]" />
+              )}
+
+              {/* Tooltip for collapsed view */}
+              {isCollapsed && (
+                <div className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-xl bg-slate-900/95 px-3 py-1.5 text-xs font-semibold text-white shadow-2xl backdrop-blur-md border border-white/10 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto lg:block z-50">
+                  {label}
+                  {label === 'Approvals' && stats.pendingApprovalsCount > 0 && ` (${stats.pendingApprovalsCount})`}
+                </div>
+              )}
+            </button>
+          )
+        })}
       </nav>
 
       {/* Current User Role Pill */}
-      <div className="mx-3 mb-3 rounded-xl bg-white/5 p-3 border border-white/10 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="grid size-7 place-items-center rounded-lg bg-blue-600 text-[11px] font-bold text-white">
-            {currentUser.initials}
+      <div className={cn(
+        'mx-2.5 mb-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md transition-all',
+        isCollapsed ? 'p-2 flex flex-col items-center gap-2' : 'p-3'
+      )}>
+        <div className={cn('flex items-center gap-2.5', isCollapsed && 'justify-center')}>
+          <div className="relative group/user">
+            <div className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-md">
+              {currentUser.initials}
+            </div>
+            {isCollapsed && (
+              <div className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-xl bg-slate-900/95 p-2.5 text-xs text-white shadow-2xl backdrop-blur-md border border-white/10 opacity-0 group-hover/user:opacity-100 lg:block z-50">
+                <div className="font-bold text-white">{currentUser.name}</div>
+                <div className="text-[10px] text-blue-300">{currentUser.roleLabel}</div>
+                <div className="text-[9px] text-slate-400">{currentUser.agency || currentUser.unit}</div>
+              </div>
+            )}
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="font-bold truncate text-white text-[11px]">{currentUser.name}</div>
-            <div className="text-[10px] text-blue-300 truncate">{currentUser.roleLabel}</div>
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1">
+              <div className="font-bold truncate text-white text-xs">{currentUser.name}</div>
+              <div className="text-[10px] text-blue-300 truncate font-medium">{currentUser.roleLabel}</div>
+            </div>
+          )}
+        </div>
+
+        {!isCollapsed && (
+          <div className="mt-2 text-[10px] font-semibold text-slate-300 bg-white/5 border border-white/5 rounded-lg px-2.5 py-1 truncate">
+            Agency: {currentUser.agency || currentUser.unit}
           </div>
-        </div>
-        <div className="mt-2 text-[10px] font-medium text-slate-300 bg-black/20 rounded px-2 py-0.5 truncate">
-          Unit: {currentUser.unit}
-        </div>
+        )}
+
         <button
           onClick={logout}
           title="Sign out of platform"
-          className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-1.5 text-[11px] font-semibold text-slate-300 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30 transition cursor-pointer"
+          className={cn(
+            'flex items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-300 hover:bg-rose-500/20 hover:text-rose-200 hover:border-rose-500/30 transition cursor-pointer',
+            isCollapsed ? 'size-8 mt-1' : 'w-full mt-2.5 gap-1.5 py-1.5 text-xs font-medium'
+          )}
         >
           <LogOut className="size-3.5" />
-          <span>Sign Out</span>
+          {!isCollapsed && <span>Sign Out</span>}
         </button>
       </div>
 
-      <div className="relative px-6 pb-6 text-[12px] italic leading-snug text-white/80 border-t border-white/10 pt-4">
-        <div className="relative z-10">
-          Building Godly<br />Content for a Brighter<br />Generation
-          <div className="mt-3 not-italic text-[11px] font-medium text-blue-400">v2.0 • Live Data</div>
+      {/* Footer Bottom Bar */}
+      {!isCollapsed ? (
+        <div className="relative px-4 pb-4 text-[11px] leading-relaxed text-white/70 border-t border-white/10 pt-3">
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <span className="italic font-light">Building Godly Content</span>
+              <div className="not-italic text-[10px] font-medium text-blue-400">KMM Platform • v2.1</div>
+            </div>
+            {setIsCollapsed && (
+              <button
+                onClick={() => setIsCollapsed(true)}
+                title="Collapse sidebar (Ctrl+[)"
+                className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              >
+                <PanelLeftClose className="size-4" />
+              </button>
+            )}
+          </div>
         </div>
-        <div className="absolute right-6 top-4 text-white/30">✦</div>
-      </div>
+      ) : (
+        <div className="hidden lg:flex items-center justify-center p-3 border-t border-white/10">
+          {setIsCollapsed && (
+            <button
+              onClick={() => setIsCollapsed(false)}
+              title="Expand sidebar (Ctrl+[)"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            >
+              <PanelLeftOpen className="size-4" />
+            </button>
+          )}
+        </div>
+      )}
     </aside>
   )
 }
@@ -514,35 +614,57 @@ function Header({
   onOpenNotifications,
   isNotificationModalOpen = false,
   unreadCount = 0,
+  isCollapsed = false,
+  setIsCollapsed,
 }: {
   setOpen: (v: boolean) => void
   setActiveNav?: (v: string, assetId?: string | null) => void
   onOpenNotifications?: () => void
   isNotificationModalOpen?: boolean
   unreadCount?: number
+  isCollapsed?: boolean
+  setIsCollapsed?: (v: boolean | ((prev: boolean) => boolean)) => void
 }) {
   const { currentUser, setCurrentUser, availableUsers, resetToDefaultData, logout } = useLovetoonsData()
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false)
   const [searchFilter, setSearchFilter] = useState('')
 
   return (
-    <header className="sticky top-0 z-20 flex h-[70px] items-center gap-4 border-b border-blue-100 bg-white/95 px-4 backdrop-blur lg:px-7">
-      <button className="lg:hidden" onClick={() => setOpen(true)} aria-label="Open sidebar menu">
-        <Menu className="size-6 text-blue-900" />
+    <header className="sticky top-0 z-20 flex h-16 items-center gap-3.5 border-b border-slate-200/70 bg-white/80 px-4 backdrop-blur-xl transition-all lg:px-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)]">
+      <button className="lg:hidden p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 cursor-pointer" onClick={() => setOpen(true)} aria-label="Open sidebar menu">
+        <Menu className="size-5 text-[#09245a]" />
       </button>
 
+      {/* Desktop Sidebar Toggle in Header */}
+      {setIsCollapsed && (
+        <button
+          onClick={() => setIsCollapsed((prev) => !prev)}
+          className="hidden lg:flex size-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white/70 text-slate-600 hover:text-blue-600 hover:bg-white shadow-2xs transition cursor-pointer"
+          title={isCollapsed ? 'Expand sidebar (Ctrl+[)' : 'Collapse sidebar (Ctrl+[)'}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {isCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+        </button>
+      )}
+
+      {/* Mobile Branding */}
       <div className="flex items-center gap-2 lg:hidden">
-        <img src="/lovetoons-logo.png" alt="Lovetoons" className="h-7 w-auto object-contain" />
+        <img src="/kmm-logo.png" alt="Kiddies Media Ministries" className="size-7 object-contain" />
+        <span className="text-xs font-black text-[#09245a] tracking-tight">KMM</span>
       </div>
 
+      {/* Search Input with Glossy Finish */}
       <div className="relative max-w-[520px] flex-1">
-        <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <input
           value={searchFilter}
           onChange={(e) => setSearchFilter(e.target.value)}
-          className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/60 pl-11 pr-4 text-[12px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition"
+          className="h-10 w-full rounded-xl border border-slate-200/80 bg-slate-100/60 pl-10 pr-12 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition backdrop-blur-sm"
           placeholder="Search intellectual assets, categories, titles, or rights..."
         />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-400 shadow-2xs">
+          ⌘K
+        </div>
       </div>
 
       <div className="ml-auto flex items-center gap-3 sm:gap-4">
@@ -551,15 +673,17 @@ function Header({
           <button
             onClick={onOpenNotifications}
             className={cn(
-              'grid size-9 place-items-center rounded-full transition',
-              isNotificationModalOpen ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-500/20' : 'text-slate-600 hover:bg-slate-100'
+              'grid size-9 place-items-center rounded-xl transition border cursor-pointer',
+              isNotificationModalOpen
+                ? 'bg-blue-50 text-blue-700 border-blue-200 ring-2 ring-blue-500/20'
+                : 'border-slate-200/80 bg-white/70 text-slate-600 hover:bg-white hover:text-blue-600 shadow-2xs'
             )}
             aria-label="Notifications"
           >
-            <Bell className="size-5" />
+            <Bell className="size-4" />
           </button>
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 grid min-w-4 px-1 h-4 place-items-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-sm ring-2 ring-white">
+            <span className="absolute -right-1 -top-1 grid min-w-4 px-1 h-4 place-items-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-sm ring-2 ring-white animate-pulse">
               {unreadCount}
             </span>
           )}
@@ -569,25 +693,25 @@ function Header({
         <div className="relative">
           <button
             onClick={() => setRoleDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 shadow-2xs hover:border-blue-300 hover:bg-blue-50/40 transition"
+            className="flex items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white/80 px-2.5 sm:px-3 py-1.5 shadow-2xs hover:border-blue-300 hover:bg-white transition cursor-pointer backdrop-blur-sm"
           >
-            <div className="grid size-8 place-items-center rounded-lg bg-[#03152c] text-xs font-bold text-white shadow-sm">
+            <div className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-[#021024] to-[#09245a] text-xs font-bold text-white shadow-sm">
               {currentUser.initials}
             </div>
             <div className="hidden text-left sm:block">
-              <div className="text-[12px] font-bold leading-tight text-[#09245a] flex items-center gap-1.5">
-                <span>{currentUser.name}</span>
-                <span className="rounded bg-blue-100 px-1.5 py-0.2 text-[9px] font-bold text-blue-700">
+              <div className="text-xs font-bold leading-tight text-[#09245a] flex items-center gap-1.5">
+                <span className="truncate max-w-[120px]">{currentUser.name}</span>
+                <span className="rounded-md bg-blue-50 border border-blue-100 px-1.5 py-0.5 text-[9px] font-bold text-blue-700">
                   {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role === 'reviewer' ? 'Reviewer' : 'Agency Rep'}
                 </span>
               </div>
-              <div className="text-[10px] font-medium text-slate-500">{currentUser.agency || currentUser.unit}</div>
+              <div className="text-[10px] font-medium text-slate-500 truncate max-w-[140px]">{currentUser.agency || currentUser.unit}</div>
             </div>
             <ChevronDown className="size-3.5 text-slate-400" />
           </button>
 
           {roleDropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 z-40 w-72 sm:w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl animate-in fade-in">
+            <div className="absolute right-0 top-full mt-2 z-40 w-72 sm:w-80 rounded-2xl border border-slate-200/80 bg-white/95 p-3 shadow-2xl backdrop-blur-xl animate-in fade-in">
               <div className="border-b border-slate-100 pb-2.5 px-1">
                 <div className="text-xs font-bold text-[#09245a]">Active Role & Profile Switcher</div>
                 <p className="text-[11px] text-slate-500">Switch user profile to test role permissions</p>
@@ -604,7 +728,7 @@ function Header({
                         setRoleDropdownOpen(false)
                       }}
                       className={cn(
-                        'w-full flex items-start gap-2.5 rounded-xl p-2 text-left transition border',
+                        'w-full flex items-start gap-2.5 rounded-xl p-2 text-left transition border cursor-pointer',
                         isSelected
                           ? 'bg-blue-50/80 border-blue-200 shadow-2xs'
                           : 'border-transparent hover:bg-slate-50'
@@ -612,7 +736,7 @@ function Header({
                     >
                       <div
                         className={cn(
-                          'grid size-8 shrink-0 place-items-center rounded-lg font-bold text-xs text-white',
+                          'grid size-8 shrink-0 place-items-center rounded-lg font-bold text-xs text-white shadow-xs',
                           user.role === 'super_admin'
                             ? 'bg-purple-600'
                             : user.role === 'reviewer'
@@ -641,12 +765,12 @@ function Header({
                     resetToDefaultData()
                     setRoleDropdownOpen(false)
                   }}
-                  className="flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-800 p-1"
+                  className="flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-800 p-1 cursor-pointer"
                 >
                   <RefreshCw className="size-3" />
                   <span>Reset Demo Data</span>
                 </button>
-                <span className="text-slate-400 font-mono text-[10px]">Lovetoons IP System</span>
+                <span className="text-slate-400 font-mono text-[10px]">KMM Platform</span>
               </div>
 
               <div className="mt-2 pt-2 border-t border-slate-100">
@@ -884,36 +1008,37 @@ function StatusPill({ status }: { status: AssetStatus | 'Active' | 'Inactive' | 
     case 'Approved':
     case 'Cleared':
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#e6f9f0] px-2.5 py-0.5 text-[11px] font-semibold text-[#00a86b] border border-[#a3e6cd]/40">
-          <span className="text-[10px]">★</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50/80 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200/70 shadow-2xs backdrop-blur-xs">
+          <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
           {status}
         </span>
       )
     case 'Pending':
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#fff8e6] px-2.5 py-0.5 text-[11px] font-semibold text-[#d97706] border border-[#fde68a]/50">
-          <span className="text-[9px] font-bold">▶</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50/80 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200/70 shadow-2xs backdrop-blur-xs">
+          <span className="size-1.5 rounded-full bg-amber-500" />
           Pending
         </span>
       )
     case 'Requires Attention':
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#fee2e2] px-2.5 py-0.5 text-[11px] font-semibold text-[#dc2626] border border-[#fca5a5]/40">
-          <span className="text-[10px]">★</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50/80 px-2.5 py-0.5 text-xs font-semibold text-rose-700 border border-rose-200/70 shadow-2xs backdrop-blur-xs">
+          <span className="size-1.5 rounded-full bg-rose-500" />
           Attention
         </span>
       )
     case 'In Review':
     case 'Review':
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#eff6ff] px-2.5 py-0.5 text-[11px] font-semibold text-[#2563eb] border border-[#bfdbfe]/50">
-          <span className="text-[10px]">★</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/80 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-200/70 shadow-2xs backdrop-blur-xs">
+          <span className="size-1.5 rounded-full bg-blue-500" />
           In Review
         </span>
       )
     case 'Inactive':
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100/80 px-2.5 py-0.5 text-xs font-semibold text-slate-500 border border-slate-200/60">
+          <span className="size-1.5 rounded-full bg-slate-400" />
           Inactive
         </span>
       )
@@ -923,18 +1048,24 @@ function StatusPill({ status }: { status: AssetStatus | 'Active' | 'Inactive' | 
 }
 
 function Stat({ icon: Icon, label, value, color, trend }: { icon: any; label: string; value: string | number; color: string; trend: string }) {
+  const isPositive = trend.includes('↑') || trend.startsWith('+')
   return (
-    <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-[0_5px_18px_rgba(26,91,160,.035)]">
-      <div className="flex items-start gap-3">
-        <div className={cn('grid size-12 place-items-center rounded-xl text-white', color)}>
-          <Icon className="size-6" />
+    <div className="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/80 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgb(0,0,0,0.07)] hover:border-blue-200/80">
+      <div className="flex items-start justify-between">
+        <div className={cn('grid size-11 place-items-center rounded-xl text-white shadow-md transition-transform group-hover:scale-105', color)}>
+          <Icon className="size-5" strokeWidth={2} />
         </div>
-        <div>
-          <div className="text-[12px] text-blue-700">{label}</div>
-          <div className="mt-1 text-[27px] font-bold leading-none text-[#09245a]">{value}</div>
-          <div className="mt-2 text-[11px] font-medium text-emerald-600">{trend}</div>
-          <div className="text-[10px] text-blue-500">vs. last month</div>
-        </div>
+        <span className={cn(
+          'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold backdrop-blur-xs',
+          isPositive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-slate-100 text-slate-700 border border-slate-200'
+        )}>
+          {trend}
+        </span>
+      </div>
+      <div className="mt-4">
+        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</div>
+        <div className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">{value}</div>
+        <div className="mt-1 text-[11px] text-slate-400 font-medium">vs. previous period</div>
       </div>
     </div>
   )
@@ -947,15 +1078,15 @@ function Donut({ approved, pending, attention }: { approved: number; pending: nu
 
   return (
     <div
-      className="relative grid size-40 place-items-center rounded-full"
+      className="relative grid size-40 place-items-center rounded-full p-1.5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]"
       style={{
-        background: `conic-gradient(#10b981 0% ${appPct}%, #fbb13c ${appPct}% ${appPct + pendPct}%, #ef4444 ${appPct + pendPct}% 100%)`,
+        background: `conic-gradient(#10b981 0% ${appPct}%, #f59e0b ${appPct}% ${appPct + pendPct}%, #ef4444 ${appPct + pendPct}% 100%)`,
       }}
     >
-      <div className="grid size-24 place-items-center rounded-full bg-white text-center shadow-xs">
+      <div className="grid size-28 place-items-center rounded-full bg-white/95 backdrop-blur-md text-center shadow-lg border border-white/60">
         <div>
-          <div className="text-2xl font-black text-[#09245a]">{total}</div>
-          <div className="text-[10px] text-blue-600 font-semibold">Total Assets</div>
+          <div className="text-2xl font-black text-slate-900 tracking-tight">{total}</div>
+          <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Total Assets</div>
         </div>
       </div>
     </div>
@@ -982,10 +1113,10 @@ function Dashboard({
   )
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-in fade-in duration-200">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md shadow-blue-500/20">
+          <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 border border-white/20">
             <Activity className="size-6" strokeWidth={2.2} />
           </div>
           <div>
@@ -994,13 +1125,13 @@ function Dashboard({
                 {isGlobalViewer ? 'KMM Network Governance Dashboard' : `${currentUser.agency || userAgency} Dashboard`}
               </h1>
               <span className={cn(
-                'rounded-full px-2.5 py-0.5 text-[10px] font-bold border',
-                isGlobalViewer ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-blue-100 text-blue-700 border-blue-200'
+                'rounded-full px-2.5 py-0.5 text-[10px] font-bold border backdrop-blur-xs',
+                isGlobalViewer ? 'bg-purple-100/80 text-purple-700 border-purple-200' : 'bg-blue-100/80 text-blue-700 border-blue-200'
               )}>
                 {isGlobalViewer ? 'All Agencies Scope' : `${currentUser.agency} Rep`}
               </span>
             </div>
-            <p className="mt-0.5 text-[12px] font-medium text-slate-500">
+            <p className="mt-0.5 text-xs font-medium text-slate-500">
               {isGlobalViewer
                 ? 'Centralized oversight of Lovetoons, Publishing Agency, Digital Agency, Academy Agency, and Educational Agency.'
                 : `Viewing intellectual assets, clearance compliance and staff contributors exclusively for ${currentUser.agency || userAgency}.`}
@@ -1008,7 +1139,7 @@ function Dashboard({
           </div>
         </div>
 
-        <button className="flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-xs font-medium text-blue-800 shadow-2xs hover:bg-blue-50 transition">
+        <button className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-white hover:border-blue-300 transition cursor-pointer backdrop-blur-sm">
           <CalendarDays className="size-3.5 text-blue-600" />
           <span>Active Q3 Period</span>
           <ChevronDown className="size-3 text-slate-400" />
@@ -1016,39 +1147,39 @@ function Dashboard({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat icon={Boxes} label="Total Assets" value={stats.totalAssets} color="bg-violet-600" trend="↑ 12%" />
-        <Stat icon={Check} label="Approved" value={stats.approvedAssets} color="bg-emerald-500" trend="↑ 8%" />
-        <Stat icon={Clock3} label="Pending Approval" value={stats.pendingAssets} color="bg-amber-500" trend="↓ 3%" />
-        <Stat icon={AlertCircle} label="Requires Attention" value={stats.attentionAssets} color="bg-red-500" trend="↓ 5%" />
+        <Stat icon={Boxes} label="Total Assets" value={stats.totalAssets} color="bg-gradient-to-br from-violet-600 to-purple-600" trend="↑ 12%" />
+        <Stat icon={Check} label="Approved" value={stats.approvedAssets} color="bg-gradient-to-br from-emerald-500 to-teal-600" trend="↑ 8%" />
+        <Stat icon={Clock3} label="Pending Approval" value={stats.pendingAssets} color="bg-gradient-to-br from-amber-500 to-orange-600" trend="↓ 3%" />
+        <Stat icon={AlertCircle} label="Requires Attention" value={stats.attentionAssets} color="bg-gradient-to-br from-rose-500 to-red-600" trend="↓ 5%" />
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[1.6fr_.8fr]">
-        <section className="rounded-xl border border-blue-100 bg-white p-5 shadow-xs">
+      <div className="grid gap-5 xl:grid-cols-[1.6fr_.8fr]">
+        <section className="rounded-2xl border border-white/80 bg-white/80 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="font-bold text-[#09245a] text-sm">Assets by Category</h2>
-              <p className="text-[11px] text-blue-600">Distribution across active content streams</p>
+              <p className="text-xs text-blue-600">Distribution across active content streams</p>
             </div>
-            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-700">
+            <span className="rounded-lg bg-blue-50/80 border border-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700">
               {categories.length} Categories
             </span>
           </div>
 
-          <div className="flex h-56 items-end justify-between gap-2 border-b border-blue-100 px-2 pb-2">
+          <div className="flex h-56 items-end justify-between gap-2 border-b border-slate-100 px-2 pb-2">
             {categories.slice(0, 8).map((cat, i) => {
               const count = assets.filter((a) => a.category === cat.name).length
               const heightPct = Math.max(10, Math.min(100, (count / Math.max(1, assets.length)) * 250))
               return (
-                <div key={cat.id} className="flex h-full flex-1 flex-col items-center justify-end gap-1 group">
-                  <span className="text-[11px] font-bold text-blue-900 group-hover:scale-110 transition">{count}</span>
+                <div key={cat.id} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5 group">
+                  <span className="text-xs font-bold text-slate-800 group-hover:scale-110 transition">{count}</span>
                   <div
                     className={cn(
-                      'w-full max-w-8 rounded-t-md transition-all group-hover:brightness-110',
-                      ['bg-blue-600', 'bg-violet-600', 'bg-emerald-500', 'bg-orange-400', 'bg-red-400', 'bg-cyan-500', 'bg-purple-500', 'bg-amber-500'][i % 8]
+                      'w-full max-w-8 rounded-t-lg transition-all group-hover:brightness-110 shadow-xs',
+                      ['bg-blue-600', 'bg-violet-600', 'bg-emerald-500', 'bg-orange-400', 'bg-rose-500', 'bg-cyan-500', 'bg-purple-500', 'bg-amber-500'][i % 8]
                     )}
                     style={{ height: `${heightPct}%` }}
                   />
-                  <span className="text-[9px] font-medium text-slate-500 truncate max-w-[65px] text-center mt-1" title={cat.name}>
+                  <span className="text-[10px] font-medium text-slate-500 truncate max-w-[65px] text-center mt-1" title={cat.name}>
                     {cat.name.split(' ')[0]}
                   </span>
                 </div>
@@ -1057,7 +1188,7 @@ function Dashboard({
           </div>
         </section>
 
-        <section className="rounded-xl border border-blue-100 bg-white p-5 shadow-xs">
+        <section className="rounded-2xl border border-white/80 bg-white/80 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md">
           <h2 className="font-bold text-[#09245a] text-sm">Asset Governance Status</h2>
           <div className="flex items-center justify-center gap-5 py-4">
             <Donut approved={stats.approvedAssets} pending={stats.pendingAssets} attention={stats.attentionAssets} />
@@ -1078,7 +1209,7 @@ function Dashboard({
               </div>
               <div className="flex items-center justify-between gap-3">
                 <span className="flex items-center gap-1.5 text-slate-600">
-                  <span className="size-2.5 rounded-full bg-red-500" />
+                  <span className="size-2.5 rounded-full bg-rose-500" />
                   Attention
                 </span>
                 <b className="text-slate-900">{stats.attentionAssets}</b>
@@ -1088,7 +1219,7 @@ function Dashboard({
         </section>
       </div>
 
-      <section className="rounded-xl border border-blue-100 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-white/80 bg-white/80 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-bold text-[#09245a] text-sm">Recent Registered Assets</h2>
@@ -1446,17 +1577,17 @@ function AssetsPage({
   }
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-in fade-in duration-200">
       {/* TOP HEADER / TITLE SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md shadow-blue-500/20">
+          <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 border border-white/20">
             <Boxes className="size-6" strokeWidth={2.2} />
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-tight text-[#09245a] sm:text-3xl">Intellectual Assets</h1>
-            <p className="mt-0.5 text-[12px] font-medium text-slate-500">
-              View, manage, and track all central Lovetoons IP assets with dynamic category metadata.
+            <p className="mt-0.5 text-xs font-medium text-slate-500">
+              View, manage, and track all intellectual property assets across Kiddies Media Ministries agencies.
             </p>
           </div>
         </div>
@@ -1466,7 +1597,7 @@ function AssetsPage({
             setIsAddModalOpen(true)
             setModalStep(1)
           }}
-          className="flex items-center gap-2 rounded-xl bg-[#1d64ec] px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700 active:scale-98"
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-600/30 transition hover:from-blue-700 hover:to-indigo-700 active:scale-98 cursor-pointer border border-white/20"
         >
           <Plus className="size-4" strokeWidth={2.5} />
           <span>Add New Asset</span>
@@ -1482,16 +1613,16 @@ function AssetsPage({
               key={pill.label}
               onClick={() => handlePillClick(pill.label)}
               className={cn(
-                'whitespace-nowrap rounded-xl px-3.5 py-2 font-semibold transition border shadow-2xs flex items-center gap-1.5',
+                'whitespace-nowrap rounded-xl px-3.5 py-2 font-semibold transition border flex items-center gap-2 cursor-pointer backdrop-blur-xs',
                 isSelected
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-600 text-white shadow-md shadow-blue-600/25'
+                  : 'bg-white/80 border-slate-200/80 text-slate-700 hover:bg-white hover:border-slate-300 shadow-2xs'
               )}
             >
               <span>{pill.label}</span>
               <span
                 className={cn(
-                  'rounded-full px-1.5 py-0.2 text-[10px] font-bold',
+                  'rounded-full px-2 py-0.5 text-[10px] font-bold',
                   isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                 )}
               >
@@ -1503,16 +1634,16 @@ function AssetsPage({
       </div>
 
       {/* SEARCH AND FILTER BAR */}
-      <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs">
+      <div className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
           {/* Search Box */}
           <div className="relative lg:col-span-2">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search assets by title, ID, creator, or unit..."
-              className="h-10 w-full rounded-lg border border-slate-200 pl-9 pr-4 text-xs text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              placeholder="Search assets by title, ID, creator, or agency..."
+              className="h-10 w-full rounded-xl border border-slate-200/80 bg-slate-50/70 pl-10 pr-4 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition"
             />
           </div>
 
@@ -1521,7 +1652,7 @@ function AssetsPage({
             <select
               value={selectedCategory}
               onChange={(e) => handleCategoryDropdownChange(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-blue-400 focus:outline-none"
+              className="h-10 w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition"
             >
               <option value="All Categories">All Categories</option>
               {categories.map((c) => (
@@ -1538,7 +1669,7 @@ function AssetsPage({
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-blue-400 focus:outline-none"
+              className="h-10 w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition"
             >
               <option value="All Statuses">All Statuses</option>
               <option value="Approved">Approved</option>
@@ -1556,7 +1687,7 @@ function AssetsPage({
                 <select
                   value={selectedAgency}
                   onChange={(e) => setSelectedAgency(e.target.value)}
-                  className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-semibold text-slate-700 focus:border-blue-400 focus:outline-none"
+                  className="h-10 w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 pl-3 pr-8 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition"
                 >
                   <option value="All Agencies">All Agencies ({assets.length})</option>
                   {agencies.map((agency) => (
@@ -1568,9 +1699,9 @@ function AssetsPage({
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
               </>
             ) : (
-              <div className="flex h-10 items-center justify-between rounded-lg border border-blue-200 bg-blue-50/70 px-3 text-xs font-bold text-blue-900">
+              <div className="flex h-10 items-center justify-between rounded-xl border border-blue-200 bg-blue-50/80 px-3 text-xs font-bold text-blue-900">
                 <span className="truncate">Agency: {currentUser.agency || userAgency}</span>
-                <span className="rounded bg-blue-200/80 px-1.5 py-0.5 text-[9px] text-blue-800 shrink-0">Agency Scoped</span>
+                <span className="rounded-md bg-blue-200/80 px-1.5 py-0.5 text-[9px] text-blue-800 shrink-0">Agency Scoped</span>
               </div>
             )}
           </div>
@@ -1578,7 +1709,7 @@ function AssetsPage({
 
         {/* Bulk Action Toolbar */}
         {selectedRows.length > 0 && (
-          <div className="mt-3 flex items-center justify-between rounded-lg bg-blue-50/80 px-3.5 py-2 border border-blue-100 text-xs">
+          <div className="mt-3 flex items-center justify-between rounded-xl bg-blue-50/90 px-4 py-2.5 border border-blue-200 text-xs backdrop-blur-sm animate-in fade-in">
             <span className="font-semibold text-blue-900">
               {selectedRows.length} {selectedRows.length === 1 ? 'asset' : 'assets'} selected
             </span>
@@ -1588,7 +1719,7 @@ function AssetsPage({
                   bulkApproveAssets(selectedRows)
                   setSelectedRows([])
                 }}
-                className="rounded-md bg-emerald-600 px-3 py-1 text-white font-medium hover:bg-emerald-700 transition"
+                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-white font-medium hover:bg-emerald-700 transition cursor-pointer shadow-xs"
               >
                 Approve Selected
               </button>
@@ -1597,11 +1728,11 @@ function AssetsPage({
                   bulkDeleteAssets(selectedRows)
                   setSelectedRows([])
                 }}
-                className="rounded-md border border-red-200 bg-white px-3 py-1 text-red-600 font-medium hover:bg-red-50 transition"
+                className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-red-600 font-medium hover:bg-red-50 transition cursor-pointer shadow-xs"
               >
                 Delete Selected
               </button>
-              <button onClick={() => setSelectedRows([])} className="text-slate-500 hover:text-slate-800 ml-2 font-medium">
+              <button onClick={() => setSelectedRows([])} className="text-slate-500 hover:text-slate-800 ml-2 font-medium cursor-pointer">
                 Clear
               </button>
             </div>
@@ -1610,11 +1741,11 @@ function AssetsPage({
       </div>
 
       {/* ASSETS TABLE */}
-      <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-xs">
+      <div className="overflow-hidden rounded-2xl border border-white/80 bg-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[850px] text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+              <tr className="border-b border-slate-200/80 bg-slate-50/90 backdrop-blur-md text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="w-10 px-4 py-3">
                   <input
                     type="checkbox"
@@ -6737,6 +6868,40 @@ export function MainApp({
   const [open, setOpen] = useState(false)
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false)
   const [readAlertIds, setReadAlertIds] = useState<string[]>([])
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('kmm_sidebar_collapsed') === 'true'
+    }
+    return false
+  })
+
+  // Keyboard shortcut Ctrl+[ or Cmd+[ to toggle desktop sidebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === '[') {
+        e.preventDefault()
+        setIsCollapsed((prev) => {
+          const next = !prev
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('kmm_sidebar_collapsed', String(next))
+          }
+          return next
+        })
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  const handleSetCollapsed = (val: boolean | ((p: boolean) => boolean)) => {
+    setIsCollapsed((prev) => {
+      const next = typeof val === 'function' ? val(prev) : val
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('kmm_sidebar_collapsed', String(next))
+      }
+      return next
+    })
+  }
 
   const { currentUser, toastMessage, approvals, rightsRecords, activities, isAuthenticated, isInitialized } = useLovetoonsData()
 
@@ -6806,25 +6971,25 @@ export function MainApp({
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-[#f4faff] flex items-center justify-center font-bold text-slate-500">
-        Loading Lovetoons Platform...
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-slate-500">
+        Loading KMM Platform...
       </div>
     )
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#f4faff] flex items-center justify-center font-bold text-slate-500">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-slate-500">
         Redirecting to Sign In...
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#f4faff] text-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-[#f6f9fd] to-[#edf4fc] text-slate-900 selection:bg-blue-600 selection:text-white">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-[#09245a] px-4 py-3 text-xs font-semibold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-5">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-[#021024]/95 px-4 py-3 text-xs font-semibold text-white shadow-2xl backdrop-blur-xl border border-white/10 animate-in fade-in slide-in-from-bottom-5">
           <Sparkles className="size-4 text-yellow-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
@@ -6839,16 +7004,28 @@ export function MainApp({
         setReadAlertIds={setReadAlertIds}
       />
 
-      <Sidebar active={active} setActive={handleNavigate} open={open} setOpen={setOpen} />
-      <div className="lg:pl-[232px]">
+      <Sidebar
+        active={active}
+        setActive={handleNavigate}
+        open={open}
+        setOpen={setOpen}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={handleSetCollapsed}
+      />
+      <div className={cn(
+        'transition-all duration-300 ease-in-out min-h-screen flex flex-col',
+        isCollapsed ? 'lg:pl-[76px]' : 'lg:pl-[248px]'
+      )}>
         <Header
           setOpen={setOpen}
           setActiveNav={handleNavigate}
           onOpenNotifications={() => setIsNotificationModalOpen(true)}
           isNotificationModalOpen={isNotificationModalOpen}
           unreadCount={unreadAlertsCount}
+          isCollapsed={isCollapsed}
+          setIsCollapsed={handleSetCollapsed}
         />
-        <main className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-7">
+        <main className="flex-1 mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
           {active === 'Dashboard' ? (
             <Dashboard setActiveNav={handleNavigate} />
           ) : active === 'Assets' ? (
