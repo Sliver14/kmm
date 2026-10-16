@@ -2701,10 +2701,10 @@ function AssetDetailsPage({
       </div>
 
       {/* Hero Header Card */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+      <div className="rounded-2xl border border-white/80 bg-white/85 p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex flex-col sm:flex-row items-start gap-5 flex-1 min-w-0">
-            <div className="relative size-32 sm:size-36 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-purple-100 to-blue-100 shadow-sm">
+            <div className="relative size-32 sm:size-36 shrink-0 overflow-hidden rounded-2xl border border-white/80 bg-gradient-to-br from-purple-100 to-blue-100 shadow-sm">
               {asset.id === 'LT-TS-001' || asset.posterUrl ? (
                 <img src={asset.posterUrl || '/tv_series_poster.jpg'} alt={asset.name} className="size-full object-cover" />
               ) : (
@@ -2716,11 +2716,11 @@ function AssetDetailsPage({
 
             <div className="space-y-2.5 flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-lg bg-purple-100 px-2.5 py-1 text-xs font-bold text-purple-700">
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-purple-50 border border-purple-200/80 px-2.5 py-1 text-xs font-bold text-purple-700 backdrop-blur-xs">
                   <Tv className="size-3.5" />
                   <span>{asset.category}</span>
                 </span>
-                <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                <span className="rounded-lg bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-xs font-bold text-blue-700">
                   Agency: {asset.agency || asset.unit}
                 </span>
               </div>
@@ -2730,7 +2730,7 @@ function AssetDetailsPage({
 
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 {asset.tags.map((t) => (
-                  <span key={t} className="rounded-full bg-blue-50 border border-blue-200/80 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">
+                  <span key={t} className="rounded-full bg-slate-100/80 border border-slate-200/70 px-2.5 py-0.5 text-[10px] font-semibold text-slate-600">
                     {t}
                   </span>
                 ))}
@@ -2742,14 +2742,14 @@ function AssetDetailsPage({
             <div className="relative">
               <button
                 onClick={() => setStatusMenuOpen((prev) => !prev)}
-                className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-3.5 py-2 text-xs font-bold text-emerald-700 shadow-2xs hover:bg-emerald-100 transition"
+                className="flex items-center gap-2 rounded-xl bg-emerald-50/80 border border-emerald-200 px-3.5 py-2 text-xs font-bold text-emerald-700 shadow-2xs hover:bg-emerald-100 transition cursor-pointer backdrop-blur-xs"
               >
                 <CheckCircle2 className="size-4 text-emerald-600" />
                 <span>{asset.status}</span>
                 <ChevronDown className="size-3 text-emerald-600" />
               </button>
               {statusMenuOpen && (
-                <div className="absolute right-0 top-full mt-1.5 z-30 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl text-xs font-semibold">
+                <div className="absolute right-0 top-full mt-1.5 z-30 w-44 rounded-xl border border-slate-200/80 bg-white/95 p-1.5 shadow-xl text-xs font-semibold backdrop-blur-xl animate-in fade-in">
                   {(['Approved', 'Pending', 'Requires Attention', 'In Review'] as AssetStatus[]).map((s) => (
                     <button
                       key={s}
@@ -2757,7 +2757,7 @@ function AssetDetailsPage({
                         updateAsset({ ...asset, status: s })
                         setStatusMenuOpen(false)
                       }}
-                      className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-left text-slate-700 hover:bg-slate-50 transition"
+                      className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-left text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                     >
                       <span>{s}</span>
                       {asset.status === s && <Check className="size-3.5 text-blue-600" />}
@@ -2782,14 +2782,14 @@ function AssetDetailsPage({
       </div>
 
       {/* Tabs Bar */}
-      <div className="border-b border-slate-200/90 bg-white px-2 sm:px-4 rounded-xl shadow-2xs">
+      <div className="border border-white/80 bg-white/80 px-2 sm:px-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md">
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
           {tabs.map((t) => (
             <button
               key={t}
               onClick={() => setActiveTab(t)}
               className={cn(
-                'whitespace-nowrap px-4 py-3.5 text-xs font-bold transition border-b-2 -mb-[1px]',
+                'whitespace-nowrap px-4 py-3 text-xs font-bold transition border-b-2 -mb-[1px] cursor-pointer',
                 activeTab === t
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-slate-500 hover:text-slate-900'

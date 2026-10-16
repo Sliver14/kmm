@@ -31,7 +31,7 @@ export function AssetArchiveHub({ asset, showToast }: AssetArchiveHubProps) {
   return (
     <div className="space-y-5 animate-in fade-in duration-150">
       {/* 1. Cloud Storage & Digital Endpoints Card */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+      <div className="rounded-2xl border border-white/80 bg-white/85 p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="size-9 rounded-xl bg-blue-50 text-blue-600 grid place-items-center font-bold">
@@ -39,7 +39,7 @@ export function AssetArchiveHub({ asset, showToast }: AssetArchiveHubProps) {
             </div>
             <div>
               <h3 className="font-bold text-[#09245a] text-sm">
-                {isDigital ? 'Digital Endpoints, Repositories & Server Clusters' : 'Lovetoons Cloud Media Storage & Distribution Endpoints'}
+                {isDigital ? 'Digital Endpoints, Repositories & Server Clusters' : 'KMM Cloud Media Storage & Distribution Endpoints'}
               </h3>
               <p className="text-[11px] text-slate-500">
                 {isDigital
