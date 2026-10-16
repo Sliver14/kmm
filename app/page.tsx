@@ -339,16 +339,16 @@ function NotificationModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-slate-950/65 backdrop-blur-md animate-in fade-in cursor-pointer"
+      className="fixed inset-0 z-[100] flex justify-end bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer overflow-hidden"
       role="dialog"
       aria-modal="true"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl rounded-2xl border border-slate-200/90 bg-white shadow-2xl text-xs overflow-hidden flex flex-col max-h-[88vh] cursor-default animate-in zoom-in-95 duration-150"
+        className="w-full sm:w-[440px] md:w-[480px] h-full border-l border-slate-200/90 bg-white shadow-2xl text-xs flex flex-col cursor-default animate-in slide-in-from-right duration-300 ease-out"
       >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 p-4 sm:p-5 bg-gradient-to-r from-slate-50 to-blue-50/50">
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 p-4 sm:p-5 bg-gradient-to-r from-slate-50 to-blue-50/50 shrink-0">
           <div className="flex items-center gap-3">
             <div className="grid size-10 place-items-center rounded-xl bg-blue-600 text-white shadow-sm shrink-0">
               <Bell className="size-5" />
@@ -385,7 +385,7 @@ function NotificationModal({
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/70 p-2.5 text-xs overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/70 p-2.5 text-xs overflow-x-auto no-scrollbar shrink-0">
           {[
             { key: 'all', label: 'All Alerts', count: allNotifications.length },
             { key: 'approvals', label: 'Approvals', count: allNotifications.filter((n) => n.type === 'approval').length },
@@ -483,8 +483,8 @@ function NotificationModal({
           )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="border-t border-slate-100 p-3.5 bg-slate-50/90 flex items-center justify-between">
+        {/* Drawer Footer */}
+        <div className="border-t border-slate-100 p-3.5 bg-slate-50/90 flex items-center justify-between shrink-0">
           <button
             onClick={() => {
               onClose()
