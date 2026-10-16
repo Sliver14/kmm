@@ -1,4 +1,4 @@
-export type UserRole = 'super_admin' | 'reviewer' | 'unit_admin'
+export type UserRole = 'super_admin' | 'reviewer' | 'agency_admin' | 'unit_admin'
 
 export type UserSkill =
   | 'video_editor'
@@ -10,14 +10,27 @@ export type UserSkill =
   | 'designer'
   | 'legal_counsel'
 
-export type OperationalUnit =
-  | 'Animation & TV'
-  | 'Music & Audio'
-  | 'Publishing & Literature'
-  | 'Digital & Tech'
-  | 'Events & Outreach'
-  | 'Brand & Merchandise'
-  | 'General Ministry'
+export type Agency =
+  | 'Lovetoons'
+  | 'Publishing Agency'
+  | 'Digital Agency'
+  | 'Academy Agency'
+  | 'Educational Agency'
+
+// Backward-compatibility alias
+export type OperationalUnit = Agency
+
+export interface AssetContributor {
+  id: string
+  name: string
+  role: string // e.g. 'Lead Animator', 'Scriptwriter', 'Voice Actor', 'Illustrator', 'Sound Producer', 'Curriculum Specialist', 'Software Developer'
+  agency: Agency
+  email?: string
+  avatar?: string
+  skills?: UserSkill[]
+  contributionType?: 'Lead Author' | 'Core Creative' | 'Technical Specialist' | 'Contributing Artist' | 'Reviewer'
+  joinedDate?: string
+}
 
 export interface UserProfile {
   id: string
@@ -27,7 +40,8 @@ export interface UserProfile {
   initials: string
   role: UserRole
   roleLabel: string
-  unit: OperationalUnit
+  agency: Agency
+  unit?: Agency // Backward-compatibility
   skills: UserSkill[]
   bio?: string
 }
@@ -139,10 +153,12 @@ export interface AssetData {
   category: string
   categoryGroup: string
   subcategory: string
-  unit: OperationalUnit
+  agency: Agency
+  unit?: Agency // Backward-compatibility
   creatorName: string
   creatorRole: string
   creatorSkill: UserSkill
+  contributors: AssetContributor[]
   status: AssetStatus
   createdDate: string
   createdTime: string
@@ -194,7 +210,9 @@ export interface RightsRecord {
   category: string
   categoryGroup?: string
   subcategory: string
-  unit?: OperationalUnit
+  agency?: Agency
+  unit?: Agency // Backward-compatibility
+  contributors?: AssetContributor[]
   rightsType: string
   owner: string
   validity: string
@@ -256,7 +274,9 @@ export interface ApprovalRequest {
   assetName: string
   category: string
   subcategory: string
-  unit: OperationalUnit
+  agency: Agency
+  unit?: Agency // Backward-compatibility
+  contributors?: AssetContributor[]
   requesterName: string
   requesterRole: string
   requesterSkill: UserSkill
@@ -288,7 +308,8 @@ export interface ActivityLog {
   subtitle: string
   time: string
   user: string
-  unit?: string
+  agency?: string
+  unit?: string // Backward-compatibility
   iconType: 'shield' | 'file' | 'check' | 'alert' | 'link' | 'user'
   color: string
   timestamp: number

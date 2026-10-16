@@ -7,6 +7,8 @@ import {
   RelationshipItem,
   ApprovalRequest,
   ActivityLog,
+  AssetContributor,
+  Agency,
 } from '@/types'
 import { generateAssetArchive } from './assetArchiveData'
 
@@ -14,74 +16,106 @@ export const initialUsers: UserProfile[] = [
   {
     id: 'usr-1',
     name: 'Sylver Oyinaga',
-    email: 'sylver@lovetoons.org',
+    email: 'sylver@kiddiesmedia.org',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     initials: 'SO',
     role: 'super_admin',
-    roleLabel: 'Super Admin',
-    unit: 'General Ministry',
+    roleLabel: 'Super Admin (KMP Network)',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     skills: ['admin', 'legal_counsel', 'video_editor'],
-    bio: 'Oversees intellectual asset governance, ministry rights registry and final sign-offs.',
+    bio: 'Oversees intellectual asset governance, ministry rights registry and final sign-offs across all Kiddies Media Production agencies.',
   },
   {
     id: 'usr-2',
     name: 'Faith Daniel',
-    email: 'faith.d@lovetoons.org',
+    email: 'faith.d@kiddiesmedia.org',
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
     initials: 'FD',
     role: 'reviewer',
     roleLabel: 'Content Reviewer & Approver',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     skills: ['animation', 'video_editor', 'writer'],
-    bio: 'Lead reviewer for media compliance, doctrine consistency and broadcast clearances.',
+    bio: 'Lead reviewer for media compliance, doctrine consistency and broadcast clearances across agencies.',
   },
   {
     id: 'usr-3',
     name: 'David Kolawole',
-    email: 'david.k@lovetoons.org',
+    email: 'david.k@kiddiesmedia.org',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     initials: 'DK',
-    role: 'unit_admin',
-    roleLabel: 'Animation Unit Admin',
-    unit: 'Animation & TV',
+    role: 'agency_admin',
+    roleLabel: 'Lovetoons Agency Admin',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     skills: ['animation', 'video_editor'],
-    bio: 'Unit administrator managing animated series production assets and rights submissions.',
+    bio: 'Agency administrator managing animated series production assets, character turnarounds and rights submissions.',
   },
   {
     id: 'usr-4',
-    name: 'Grace Emmanuel',
-    email: 'grace.e@lovetoons.org',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    initials: 'GE',
-    role: 'unit_admin',
-    roleLabel: 'Music & Audio Unit Admin',
-    unit: 'Music & Audio',
-    skills: ['audio_producer'],
-    bio: 'Coordinates music recordings, publishing royalties, and audio rights agreements.',
+    name: 'Samuel Adeleke',
+    email: 'samuel.a@kiddiesmedia.org',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    initials: 'SA',
+    role: 'agency_admin',
+    roleLabel: 'Publishing Agency Admin',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+    skills: ['writer', 'designer'],
+    bio: 'Directs illustrated devotional storybooks, comic magazines, faith literature and international translation prints.',
   },
   {
     id: 'usr-5',
-    name: 'Samuel Adeleke',
-    email: 'samuel.a@lovetoons.org',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    initials: 'SA',
-    role: 'unit_admin',
-    roleLabel: 'Publishing Unit Admin',
-    unit: 'Publishing & Literature',
-    skills: ['writer', 'designer'],
-    bio: 'Manages illustrated devotional storybooks, comic magazines and printed works.',
+    name: 'Emmanuel Vance',
+    email: 'emmanuel.v@kiddiesmedia.org',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
+    initials: 'EV',
+    role: 'agency_admin',
+    roleLabel: 'Digital Agency Admin',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
+    skills: ['developer', 'designer'],
+    bio: 'Leads kiddies digital streaming platform, interactive web games, cloud archives and mobile apps.',
   },
   {
     id: 'usr-6',
-    name: 'Emmanuel Vance',
-    email: 'emmanuel.v@lovetoons.org',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    initials: 'EV',
-    role: 'unit_admin',
-    roleLabel: 'Digital & Tech Admin',
-    unit: 'Digital & Tech',
-    skills: ['developer', 'designer'],
-    bio: 'Leads kiddies digital streaming platform, interactive web games and mobile apps.',
+    name: 'Dr. Miriam Peters',
+    email: 'miriam.p@kiddiesmedia.org',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    initials: 'MP',
+    role: 'agency_admin',
+    roleLabel: 'Academy Agency Admin',
+    agency: 'Academy Agency',
+    unit: 'Academy Agency',
+    skills: ['writer', 'admin'],
+    bio: 'Oversees Kiddies Media Academy creative training programs, animation masterclasses and certification curriculum.',
+  },
+  {
+    id: 'usr-7',
+    name: 'Pastor Joshua Davies',
+    email: 'joshua.d@kiddiesmedia.org',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
+    initials: 'JD',
+    role: 'agency_admin',
+    roleLabel: 'Educational Agency Admin',
+    agency: 'Educational Agency',
+    unit: 'Educational Agency',
+    skills: ['writer', 'designer'],
+    bio: 'Heads faith-based school outreach curricula, Bible reading fiesta campaigns and early literacy initiatives.',
+  },
+  {
+    id: 'usr-8',
+    name: 'Grace Emmanuel',
+    email: 'grace.e@kiddiesmedia.org',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+    initials: 'GE',
+    role: 'agency_admin',
+    roleLabel: 'Lovetoons Audio & Music Admin',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    skills: ['audio_producer'],
+    bio: 'Coordinates children music recordings, animated soundtrack stems, publishing royalties and audio licensing.',
   },
 ]
 
@@ -271,9 +305,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Animated Programme',
     categoryGroup: 'Animated Programme',
     subcategory: 'TV Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-AP-001-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-AP-001-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-AP-001-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-AP-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'animation',
     status: 'Approved',
     createdDate: 'Sep 21, 2025',
@@ -300,9 +370,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Animated Programme',
     categoryGroup: 'Animated Programme',
     subcategory: 'TV Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-AP-002-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-AP-002-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-AP-002-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-AP-002-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'animation',
     status: 'Approved',
     createdDate: 'Sep 20, 2025',
@@ -328,9 +434,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Animated Programme',
     categoryGroup: 'Animated Programme',
     subcategory: 'Short Clips',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-AN-001-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-AN-001-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-AN-001-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-AN-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'animation',
     status: 'Approved',
     createdDate: 'Sep 18, 2025',
@@ -357,9 +499,45 @@ const rawAssetsData: AssetData[] = [
     category: 'TV Programme',
     categoryGroup: 'TV Programme',
     subcategory: 'Broadcast Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-TS-001-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-TS-001-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-TS-001-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-TS-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'animation',
     status: 'Approved',
     createdDate: 'Sep 20, 2025',
@@ -388,9 +566,45 @@ const rawAssetsData: AssetData[] = [
     category: 'TV Programme',
     categoryGroup: 'TV Programme',
     subcategory: 'Live Action & Sing-Along',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-TV-002-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-TV-002-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-TV-002-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-TV-002-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'video_editor',
     status: 'Approved',
     createdDate: 'Sep 17, 2025',
@@ -416,9 +630,45 @@ const rawAssetsData: AssetData[] = [
     category: 'TV Programme',
     categoryGroup: 'TV Programme',
     subcategory: 'Broadcast Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-TV-003-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-TV-003-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-TV-003-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-TV-003-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'video_editor',
     status: 'Approved',
     createdDate: 'Sep 16, 2025',
@@ -443,9 +693,45 @@ const rawAssetsData: AssetData[] = [
     category: 'TV Programme',
     categoryGroup: 'TV Programme',
     subcategory: 'Episodes',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-EP-003-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-EP-003-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-EP-003-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-EP-003-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'video_editor',
     status: 'Approved',
     createdDate: 'Sep 19, 2025',
@@ -467,9 +753,37 @@ const rawAssetsData: AssetData[] = [
     category: 'Documentary / Video',
     categoryGroup: 'Documentary / Video',
     subcategory: 'Feature Documentaries',
-    unit: 'General Ministry',
-    creatorName: 'Sylver Oyinaga',
+    agency: 'Academy Agency',
+    unit: 'Academy Agency',
     creatorRole: 'Super Admin',
+    contributors: [
+          {
+                "id": "c-LT-DOC-001-1",
+                "name": "Dr. Miriam Peters",
+                "role": "Masterclass Dean & Lead Instructor",
+                "agency": "Academy Agency",
+                "email": "miriam.p@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-DOC-001-2",
+                "name": "David Kolawole",
+                "role": "Senior Animation Mentor",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-DOC-001-3",
+                "name": "Samuel Adeleke",
+                "role": "Scriptwriting Workshop Faculty",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
+    creatorName: 'Sylver Oyinaga',
+    
     creatorSkill: 'legal_counsel',
     status: 'Approved',
     createdDate: 'Sep 14, 2025',
@@ -494,9 +808,37 @@ const rawAssetsData: AssetData[] = [
     category: 'Documentary / Video',
     categoryGroup: 'Documentary / Video',
     subcategory: 'Educational Short Videos',
-    unit: 'General Ministry',
-    creatorName: 'Sylver Oyinaga',
+    agency: 'Educational Agency',
+    unit: 'Educational Agency',
     creatorRole: 'Super Admin',
+    contributors: [
+          {
+                "id": "c-LT-DOC-002-1",
+                "name": "Pastor Joshua Davies",
+                "role": "Curriculum Director & Outreach Lead",
+                "agency": "Educational Agency",
+                "email": "joshua.d@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-DOC-002-2",
+                "name": "Grace Emmanuel",
+                "role": "Children Praise Coordinator",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-DOC-002-3",
+                "name": "Samuel Adeleke",
+                "role": "Literacy Manual Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
+    creatorName: 'Sylver Oyinaga',
+    
     creatorSkill: 'video_editor',
     status: 'Approved',
     createdDate: 'Sep 15, 2025',
@@ -518,9 +860,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Film / Short Movie',
     categoryGroup: 'Film / Short Movie',
     subcategory: 'Short Films',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-FLM-001-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-FLM-001-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-FLM-001-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-FLM-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'video_editor',
     status: 'Approved',
     createdDate: 'Sep 12, 2025',
@@ -545,9 +923,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Film / Short Movie',
     categoryGroup: 'Film / Short Movie',
     subcategory: 'Faith Dramas',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-FLM-002-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-FLM-002-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-FLM-002-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-FLM-002-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'video_editor',
     status: 'Approved',
     createdDate: 'Sep 10, 2025',
@@ -569,9 +983,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Consumer Product / Merchandise',
     categoryGroup: 'Consumer Product / Merchandise',
     subcategory: 'School Bags & Stationery',
-    unit: 'Brand & Merchandise',
-    creatorName: 'Sylver Oyinaga',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     creatorRole: 'Super Admin',
+    contributors: [
+          {
+                "id": "c-LT-CP-001-1",
+                "name": "Sylver Oyinaga",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-CP-001-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-CP-001-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-CP-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Sylver Oyinaga',
+    
     creatorSkill: 'designer',
     status: 'Approved',
     createdDate: 'Sep 18, 2025',
@@ -596,9 +1046,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Consumer Product / Merchandise',
     categoryGroup: 'Consumer Product / Merchandise',
     subcategory: 'Food & Beverage',
-    unit: 'Brand & Merchandise',
-    creatorName: 'Sylver Oyinaga',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     creatorRole: 'Super Admin',
+    contributors: [
+          {
+                "id": "c-LT-CP-002-1",
+                "name": "Sylver Oyinaga",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-CP-002-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-CP-002-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-CP-002-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Sylver Oyinaga',
+    
     creatorSkill: 'designer',
     status: 'In Review',
     createdDate: 'Sep 19, 2025',
@@ -623,9 +1109,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Consumer Product / Merchandise',
     categoryGroup: 'Consumer Product / Merchandise',
     subcategory: 'Apparel & Accessories',
-    unit: 'Brand & Merchandise',
-    creatorName: 'Sylver Oyinaga',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     creatorRole: 'Super Admin',
+    contributors: [
+          {
+                "id": "c-LT-CP-003-1",
+                "name": "Sylver Oyinaga",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-CP-003-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-CP-003-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-CP-003-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Sylver Oyinaga',
+    
     creatorSkill: 'designer',
     status: 'Approved',
     createdDate: 'Sep 14, 2025',
@@ -647,9 +1169,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Publishing / Book',
     categoryGroup: 'Publishing / Book',
     subcategory: 'Devotional Books',
-    unit: 'Publishing & Literature',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+    creatorRole: 'Publishing Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-BK-001-1",
+                "name": "Samuel Adeleke",
+                "role": "Lead Author & Chief Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-BK-001-2",
+                "name": "Joy Okon",
+                "role": "Senior Illustrator & Layout Artist",
+                "agency": "Publishing Agency",
+                "email": "joy.o@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-BK-001-3",
+                "name": "Faith Daniel",
+                "role": "Doctrinal Accuracy Reviewer",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          },
+          {
+                "id": "c-LT-BK-001-4",
+                "name": "Emmanuel Vance",
+                "role": "E-Book Digital Typesetter",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     creatorName: 'Samuel Adeleke',
-    creatorRole: 'Publishing Unit Admin',
+    
     creatorSkill: 'writer',
     status: 'Approved',
     createdDate: 'Sep 15, 2025',
@@ -675,9 +1233,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Publishing / Book',
     categoryGroup: 'Publishing / Book',
     subcategory: 'Illustrated Storybooks',
-    unit: 'Publishing & Literature',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+    creatorRole: 'Publishing Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-BK-002-1",
+                "name": "Samuel Adeleke",
+                "role": "Lead Author & Chief Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-BK-002-2",
+                "name": "Joy Okon",
+                "role": "Senior Illustrator & Layout Artist",
+                "agency": "Publishing Agency",
+                "email": "joy.o@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-BK-002-3",
+                "name": "Faith Daniel",
+                "role": "Doctrinal Accuracy Reviewer",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          },
+          {
+                "id": "c-LT-BK-002-4",
+                "name": "Emmanuel Vance",
+                "role": "E-Book Digital Typesetter",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     creatorName: 'Samuel Adeleke',
-    creatorRole: 'Publishing Unit Admin',
+    
     creatorSkill: 'writer',
     status: 'Approved',
     createdDate: 'Sep 11, 2025',
@@ -704,9 +1298,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Publishing / Comics',
     categoryGroup: 'Publishing / Comics',
     subcategory: 'Comic Volumes',
-    unit: 'Publishing & Literature',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+    creatorRole: 'Publishing Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-CM-001-1",
+                "name": "Samuel Adeleke",
+                "role": "Lead Author & Chief Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-CM-001-2",
+                "name": "Joy Okon",
+                "role": "Senior Illustrator & Layout Artist",
+                "agency": "Publishing Agency",
+                "email": "joy.o@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-CM-001-3",
+                "name": "Faith Daniel",
+                "role": "Doctrinal Accuracy Reviewer",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          },
+          {
+                "id": "c-LT-CM-001-4",
+                "name": "Emmanuel Vance",
+                "role": "E-Book Digital Typesetter",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     creatorName: 'Samuel Adeleke',
-    creatorRole: 'Publishing Unit Admin',
+    
     creatorSkill: 'designer',
     status: 'Approved',
     createdDate: 'Sep 13, 2025',
@@ -732,9 +1362,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Publishing / Comics',
     categoryGroup: 'Publishing / Comics',
     subcategory: 'Special Manga Editions',
-    unit: 'Publishing & Literature',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+    creatorRole: 'Publishing Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-CM-002-1",
+                "name": "Samuel Adeleke",
+                "role": "Lead Author & Chief Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-CM-002-2",
+                "name": "Joy Okon",
+                "role": "Senior Illustrator & Layout Artist",
+                "agency": "Publishing Agency",
+                "email": "joy.o@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-CM-002-3",
+                "name": "Faith Daniel",
+                "role": "Doctrinal Accuracy Reviewer",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          },
+          {
+                "id": "c-LT-CM-002-4",
+                "name": "Emmanuel Vance",
+                "role": "E-Book Digital Typesetter",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     creatorName: 'Samuel Adeleke',
-    creatorRole: 'Publishing Unit Admin',
+    
     creatorSkill: 'designer',
     status: 'Approved',
     createdDate: 'Sep 09, 2025',
@@ -756,9 +1422,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Digital / Interactive Platform',
     categoryGroup: 'Digital / Interactive Platform',
     subcategory: 'Mobile Applications',
-    unit: 'Digital & Tech',
-    creatorName: 'Emmanuel Vance',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
     creatorRole: 'Digital & Tech Admin',
+    contributors: [
+          {
+                "id": "c-LT-DGT-001-1",
+                "name": "Emmanuel Vance",
+                "role": "Lead Software Architect",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-DGT-001-2",
+                "name": "Kemi Balogun",
+                "role": "Senior UI/UX Product Designer",
+                "agency": "Digital Agency",
+                "email": "kemi.b@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-DGT-001-3",
+                "name": "David Kolawole",
+                "role": "Sprite & 3D Assets Animator",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-DGT-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Data Privacy & COPPA Officer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Emmanuel Vance',
+    
     creatorSkill: 'developer',
     status: 'Approved',
     createdDate: 'Sep 22, 2025',
@@ -783,9 +1485,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Digital / Interactive Platform',
     categoryGroup: 'Digital / Interactive Platform',
     subcategory: 'Web Portals & Apps',
-    unit: 'Digital & Tech',
-    creatorName: 'Emmanuel Vance',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
     creatorRole: 'Digital & Tech Admin',
+    contributors: [
+          {
+                "id": "c-LT-DGT-002-1",
+                "name": "Emmanuel Vance",
+                "role": "Lead Software Architect",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-DGT-002-2",
+                "name": "Kemi Balogun",
+                "role": "Senior UI/UX Product Designer",
+                "agency": "Digital Agency",
+                "email": "kemi.b@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-DGT-002-3",
+                "name": "David Kolawole",
+                "role": "Sprite & 3D Assets Animator",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-DGT-002-4",
+                "name": "Sylver Oyinaga",
+                "role": "Data Privacy & COPPA Officer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Emmanuel Vance',
+    
     creatorSkill: 'developer',
     status: 'Approved',
     createdDate: 'Sep 16, 2025',
@@ -805,9 +1543,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Digital / Interactive Platform',
     categoryGroup: 'Digital / Interactive Platform',
     subcategory: 'Mobile Applications',
-    unit: 'Digital & Tech',
-    creatorName: 'Emmanuel Vance',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
     creatorRole: 'Digital & Tech Admin',
+    contributors: [
+          {
+                "id": "c-LT-DGT-003-1",
+                "name": "Emmanuel Vance",
+                "role": "Lead Software Architect",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-DGT-003-2",
+                "name": "Kemi Balogun",
+                "role": "Senior UI/UX Product Designer",
+                "agency": "Digital Agency",
+                "email": "kemi.b@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-DGT-003-3",
+                "name": "David Kolawole",
+                "role": "Sprite & 3D Assets Animator",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-DGT-003-4",
+                "name": "Sylver Oyinaga",
+                "role": "Data Privacy & COPPA Officer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Emmanuel Vance',
+    
     creatorSkill: 'developer',
     status: 'Approved',
     createdDate: 'Sep 11, 2025',
@@ -827,9 +1601,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Digital / Interactive Platform',
     categoryGroup: 'Digital / Interactive Platform',
     subcategory: 'Interactive Kiddies Games',
-    unit: 'Digital & Tech',
-    creatorName: 'Emmanuel Vance',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
     creatorRole: 'Digital & Tech Admin',
+    contributors: [
+          {
+                "id": "c-LT-GM-001-1",
+                "name": "Emmanuel Vance",
+                "role": "Lead Software Architect",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-GM-001-2",
+                "name": "Kemi Balogun",
+                "role": "Senior UI/UX Product Designer",
+                "agency": "Digital Agency",
+                "email": "kemi.b@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-GM-001-3",
+                "name": "David Kolawole",
+                "role": "Sprite & 3D Assets Animator",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-GM-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Data Privacy & COPPA Officer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Emmanuel Vance',
+    
     creatorSkill: 'developer',
     status: 'In Review',
     createdDate: 'Sep 18, 2025',
@@ -856,9 +1666,37 @@ const rawAssetsData: AssetData[] = [
     category: 'Outreach / Event Format',
     categoryGroup: 'Outreach / Event Format',
     subcategory: 'Bible Reading Fiestas',
-    unit: 'Events & Outreach',
+    agency: 'Educational Agency',
+    unit: 'Educational Agency',
+    creatorRole: 'Educational Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-EV-001-1",
+                "name": "Pastor Joshua Davies",
+                "role": "Curriculum Director & Outreach Lead",
+                "agency": "Educational Agency",
+                "email": "joshua.d@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-EV-001-2",
+                "name": "Grace Emmanuel",
+                "role": "Children Praise Coordinator",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-EV-001-3",
+                "name": "Samuel Adeleke",
+                "role": "Literacy Manual Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'video_editor',
     status: 'Approved',
     createdDate: 'Sep 17, 2025',
@@ -883,9 +1721,37 @@ const rawAssetsData: AssetData[] = [
     category: 'Outreach / Event Format',
     categoryGroup: 'Outreach / Event Format',
     subcategory: 'Conferences & Rallies',
-    unit: 'Events & Outreach',
-    creatorName: 'Sylver Oyinaga',
+    agency: 'Educational Agency',
+    unit: 'Educational Agency',
     creatorRole: 'Super Admin',
+    contributors: [
+          {
+                "id": "c-LT-EV-002-1",
+                "name": "Pastor Joshua Davies",
+                "role": "Curriculum Director & Outreach Lead",
+                "agency": "Educational Agency",
+                "email": "joshua.d@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-EV-002-2",
+                "name": "Grace Emmanuel",
+                "role": "Children Praise Coordinator",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-EV-002-3",
+                "name": "Samuel Adeleke",
+                "role": "Literacy Manual Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
+    creatorName: 'Sylver Oyinaga',
+    
     creatorSkill: 'admin',
     status: 'Approved',
     createdDate: 'Sep 14, 2025',
@@ -905,9 +1771,37 @@ const rawAssetsData: AssetData[] = [
     category: 'Outreach / Event Format',
     categoryGroup: 'Outreach / Event Format',
     subcategory: 'Conferences & Rallies',
-    unit: 'Events & Outreach',
+    agency: 'Educational Agency',
+    unit: 'Educational Agency',
+    creatorRole: 'Educational Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-EV-003-1",
+                "name": "Pastor Joshua Davies",
+                "role": "Curriculum Director & Outreach Lead",
+                "agency": "Educational Agency",
+                "email": "joshua.d@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-EV-003-2",
+                "name": "Grace Emmanuel",
+                "role": "Children Praise Coordinator",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-EV-003-3",
+                "name": "Samuel Adeleke",
+                "role": "Literacy Manual Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'video_editor',
     status: 'Approved',
     createdDate: 'Sep 05, 2025',
@@ -929,9 +1823,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Character / Named IP',
     categoryGroup: 'Character / Named IP',
     subcategory: '3D Rigs & Turnarounds',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-CH-001-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-CH-001-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-CH-001-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-CH-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'animation',
     status: 'Approved',
     createdDate: 'Sep 21, 2025',
@@ -957,9 +1887,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Character / Named IP',
     categoryGroup: 'Character / Named IP',
     subcategory: '3D Rigs & Turnarounds',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-CH-002-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-CH-002-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-CH-002-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-CH-002-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'animation',
     status: 'Approved',
     createdDate: 'Sep 02, 2025',
@@ -979,9 +1945,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Character / Named IP',
     categoryGroup: 'Character / Named IP',
     subcategory: '2D Visual Character Bibles',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-CH-003-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-CH-003-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-CH-003-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-CH-003-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'David Kolawole',
-    creatorRole: 'Animation Unit Admin',
+    
     creatorSkill: 'animation',
     status: 'Approved',
     createdDate: 'Sep 08, 2025',
@@ -1003,9 +2005,37 @@ const rawAssetsData: AssetData[] = [
     category: 'Music / Audio',
     categoryGroup: 'Music / Audio',
     subcategory: 'Theme Songs',
-    unit: 'Music & Audio',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-MU-001-1",
+                "name": "Grace Emmanuel",
+                "role": "Lead Music Producer & Composer",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-MU-001-2",
+                "name": "David Kolawole",
+                "role": "Sound Mixing & Mastering Engineer",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-MU-001-3",
+                "name": "Faith Daniel",
+                "role": "Lyrics Reviewer & Script Sync",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'Grace Emmanuel',
-    creatorRole: 'Music Unit Admin',
+    
     creatorSkill: 'audio_producer',
     status: 'Approved',
     createdDate: 'Sep 20, 2025',
@@ -1033,9 +2063,37 @@ const rawAssetsData: AssetData[] = [
     category: 'Music / Audio',
     categoryGroup: 'Music / Audio',
     subcategory: 'Sing-Alongs & Tracks',
-    unit: 'Music & Audio',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+    creatorRole: 'Lovetoons Agency Admin',
+    contributors: [
+          {
+                "id": "c-LT-MU-002-1",
+                "name": "Grace Emmanuel",
+                "role": "Lead Music Producer & Composer",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-MU-002-2",
+                "name": "David Kolawole",
+                "role": "Sound Mixing & Mastering Engineer",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-MU-002-3",
+                "name": "Faith Daniel",
+                "role": "Lyrics Reviewer & Script Sync",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     creatorName: 'Grace Emmanuel',
-    creatorRole: 'Music Unit Admin',
+    
     creatorSkill: 'audio_producer',
     status: 'Approved',
     createdDate: 'Sep 15, 2025',
@@ -1057,9 +2115,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Brand & Guidelines',
     categoryGroup: 'Brand & Guidelines',
     subcategory: 'Master Logo Marks',
-    unit: 'Brand & Merchandise',
-    creatorName: 'Sylver Oyinaga',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     creatorRole: 'Super Admin',
+    contributors: [
+          {
+                "id": "c-LT-BR-001-1",
+                "name": "Sylver Oyinaga",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-BR-001-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-BR-001-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-BR-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Sylver Oyinaga',
+    
     creatorSkill: 'designer',
     status: 'Approved',
     createdDate: 'Aug 10, 2025',
@@ -1083,9 +2177,45 @@ const rawAssetsData: AssetData[] = [
     category: 'Brand & Guidelines',
     categoryGroup: 'Brand & Guidelines',
     subcategory: 'Network Identity Bibles',
-    unit: 'Brand & Merchandise',
-    creatorName: 'Emmanuel Vance',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     creatorRole: 'Digital & Tech Admin',
+    contributors: [
+          {
+                "id": "c-LT-BR-002-1",
+                "name": "Emmanuel Vance",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-BR-002-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-BR-002-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-BR-002-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
+    creatorName: 'Emmanuel Vance',
+    
     creatorSkill: 'designer',
     status: 'Approved',
     createdDate: 'Sep 01, 2025',
@@ -1113,7 +2243,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Rhapsody of Realities for Early Readers Animation',
     category: 'Animated Programme',
     subcategory: 'TV Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-001-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-001-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-001-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-001-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Worldwide Broadcast, VOD & Educational Rights',
     owner: 'Lovetoons Media Ltd',
     validity: '2025 – 2035',
@@ -1144,7 +2309,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Tick Talks (Animation Series)',
     category: 'Animated Programme',
     subcategory: 'TV Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-002-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-002-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-002-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-002-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Theatrical, Streaming & Broadcast Clearance',
     owner: 'Lovetoons Media Ltd',
     validity: '2025 – 2035',
@@ -1166,7 +2366,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Brave Boy Adventure (Short)',
     category: 'Animated Programme',
     subcategory: 'Short Clips',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-003-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-003-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-003-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-003-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Theatrical & Digital Broadcast Rights',
     owner: 'Lovetoons Media Ltd',
     validity: '2025 – 2035',
@@ -1190,7 +2425,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Lovetoons TV Series (Season 1)',
     category: 'TV Programme',
     subcategory: 'Broadcast Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-004-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-004-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-004-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-004-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Worldwide Broadcast & OTT Streaming',
     owner: 'Lovetoons Media Ltd',
     validity: '2025 – 2035',
@@ -1221,7 +2491,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Sing Along With Lovetoons',
     category: 'TV Programme',
     subcategory: 'Live Action & Sing-Along',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-005-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-005-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-005-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-005-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Music Synchronization & Broadcast License',
     owner: 'Lovetoons Media Ltd',
     validity: '2025 – 2035',
@@ -1243,7 +2548,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Gratia’s Diary',
     category: 'TV Programme',
     subcategory: 'Broadcast Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-006-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-006-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-006-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-006-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Script, Performance & Broadcast Rights',
     owner: 'Lovetoons Media Ltd',
     validity: '2025 – 2035',
@@ -1267,7 +2607,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'The Deception of Kids Media Industry (Documentary)',
     category: 'Documentary / Video',
     subcategory: 'Feature Documentaries',
-    unit: 'General Ministry',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-007-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-007-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-007-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-007-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Global Documentary, Archival & Broadcast Rights',
     owner: 'Lovetoons Media Ltd',
     validity: 'Perpetual',
@@ -1289,7 +2664,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Malaria Vaccine Educational Short Video',
     category: 'Documentary / Video',
     subcategory: 'Educational Short Videos',
-    unit: 'General Ministry',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-008-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-008-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-008-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-008-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Public Domain & Educational Distribution Rights',
     owner: 'Lovetoons Media Ltd',
     validity: 'Perpetual',
@@ -1313,7 +2723,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Timothia Questions (Short Film)',
     category: 'Film / Short Movie',
     subcategory: 'Short Films',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-009-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-009-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-009-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-009-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Theatrical, Film Festival & VOD Streaming',
     owner: 'Lovetoons Media Ltd',
     validity: '2025 – 2035',
@@ -1335,7 +2780,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Water In the Desert (Faith Film)',
     category: 'Film / Short Movie',
     subcategory: 'Faith Dramas',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-010-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-010-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-010-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-010-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Theatrical & Ministry Broadcast Clearance',
     owner: 'Lovetoons Media Ltd',
     validity: '2025 – 2035',
@@ -1359,7 +2839,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Tick Talks Kids School Bag',
     category: 'Consumer Product / Merchandise',
     subcategory: 'School Bags & Stationery',
-    unit: 'Brand & Merchandise',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-011-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-011-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-011-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-011-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Trademark & Commercial Merchandise Rights',
     owner: 'Lovetoons Consumer Goods Ltd',
     validity: '2025 – 2030',
@@ -1381,7 +2896,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Zobo Drink (Special Edition)',
     category: 'Consumer Product / Merchandise',
     subcategory: 'Food & Beverage',
-    unit: 'Brand & Merchandise',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-012-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-012-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-012-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-012-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Merchandise Licensing & Trademark Use',
     owner: 'Lovetoons Consumer Goods Ltd',
     validity: '2025 – 2027',
@@ -1403,7 +2953,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Lovetoons Official T-Shirt for Kids & Adults',
     category: 'Consumer Product / Merchandise',
     subcategory: 'Apparel & Accessories',
-    unit: 'Brand & Merchandise',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-013-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-013-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-013-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-013-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Apparel Trademark & Ministry Merchandising',
     owner: 'Lovetoons Brand Ltd',
     validity: 'Perpetual',
@@ -1427,7 +3012,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'My Book of Bible Prayers',
     category: 'Publishing / Book',
     subcategory: 'Devotional Books',
-    unit: 'Publishing & Literature',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+        contributors: [
+          {
+                "id": "c-LT-RG-014-1",
+                "name": "David Kolawole",
+                "role": "Lead Author & Chief Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-014-2",
+                "name": "Joy Okon",
+                "role": "Senior Illustrator & Layout Artist",
+                "agency": "Publishing Agency",
+                "email": "joy.o@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-014-3",
+                "name": "Faith Daniel",
+                "role": "Doctrinal Accuracy Reviewer",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          },
+          {
+                "id": "c-LT-RG-014-4",
+                "name": "Emmanuel Vance",
+                "role": "E-Book Digital Typesetter",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     rightsType: 'Print, E-Book & Translation Publishing Rights',
     owner: 'Lovetoons Publishing Ltd',
     validity: '2025 – 2035',
@@ -1449,7 +3069,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Lovetoons TV Devotional Storybook (Vol 1)',
     category: 'Publishing / Book',
     subcategory: 'Illustrated Storybooks',
-    unit: 'Publishing & Literature',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+        contributors: [
+          {
+                "id": "c-LT-RG-015-1",
+                "name": "David Kolawole",
+                "role": "Lead Author & Chief Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-015-2",
+                "name": "Joy Okon",
+                "role": "Senior Illustrator & Layout Artist",
+                "agency": "Publishing Agency",
+                "email": "joy.o@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-015-3",
+                "name": "Faith Daniel",
+                "role": "Doctrinal Accuracy Reviewer",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          },
+          {
+                "id": "c-LT-RG-015-4",
+                "name": "Emmanuel Vance",
+                "role": "E-Book Digital Typesetter",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     rightsType: 'Illustrated Publishing & Digital Book Rights',
     owner: 'Lovetoons Publishing Ltd',
     validity: '2025 – 2035',
@@ -1473,7 +3128,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Lovetoons Comics (Volume 1: The Story of Ibra)',
     category: 'Publishing / Comics',
     subcategory: 'Comic Volumes',
-    unit: 'Publishing & Literature',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+        contributors: [
+          {
+                "id": "c-LT-RG-016-1",
+                "name": "David Kolawole",
+                "role": "Lead Author & Chief Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-016-2",
+                "name": "Joy Okon",
+                "role": "Senior Illustrator & Layout Artist",
+                "agency": "Publishing Agency",
+                "email": "joy.o@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-016-3",
+                "name": "Faith Daniel",
+                "role": "Doctrinal Accuracy Reviewer",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          },
+          {
+                "id": "c-LT-RG-016-4",
+                "name": "Emmanuel Vance",
+                "role": "E-Book Digital Typesetter",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     rightsType: 'Graphic Novel, Adaptation & Merchandising Rights',
     owner: 'Lovetoons Publishing Ltd',
     validity: '2025 – 2035',
@@ -1495,7 +3185,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Faith Heroes Comic Book (Special Edition)',
     category: 'Publishing / Comics',
     subcategory: 'Special Manga Editions',
-    unit: 'Publishing & Literature',
+    agency: 'Publishing Agency',
+    unit: 'Publishing Agency',
+        contributors: [
+          {
+                "id": "c-LT-RG-017-1",
+                "name": "David Kolawole",
+                "role": "Lead Author & Chief Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-017-2",
+                "name": "Joy Okon",
+                "role": "Senior Illustrator & Layout Artist",
+                "agency": "Publishing Agency",
+                "email": "joy.o@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-017-3",
+                "name": "Faith Daniel",
+                "role": "Doctrinal Accuracy Reviewer",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          },
+          {
+                "id": "c-LT-RG-017-4",
+                "name": "Emmanuel Vance",
+                "role": "E-Book Digital Typesetter",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     rightsType: 'Manga & Digital Serialization Rights',
     owner: 'Lovetoons Publishing Ltd',
     validity: '2025 – 2030',
@@ -1520,7 +3245,42 @@ export const initialRightsRecords: RightsRecord[] = [
     category: 'Digital / Interactive Platform',
     categoryGroup: 'Digital / Interactive Platform',
     subcategory: 'Mobile Applications',
-    unit: 'Digital & Tech',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
+        contributors: [
+          {
+                "id": "c-LT-RG-018-1",
+                "name": "David Kolawole",
+                "role": "Lead Software Architect",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-018-2",
+                "name": "Kemi Balogun",
+                "role": "Senior UI/UX Product Designer",
+                "agency": "Digital Agency",
+                "email": "kemi.b@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-018-3",
+                "name": "David Kolawole",
+                "role": "Sprite & 3D Assets Animator",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-018-4",
+                "name": "Sylver Oyinaga",
+                "role": "Data Privacy & COPPA Officer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Software Source Code, App Store Distribution & OTT Rights',
     owner: 'Lovetoons Tech Ltd',
     validity: 'Perpetual',
@@ -1543,7 +3303,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Lovetoons TV Official Website',
     category: 'Digital / Interactive Platform',
     subcategory: 'Web Portals & Apps',
-    unit: 'Digital & Tech',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
+        contributors: [
+          {
+                "id": "c-LT-RG-019-1",
+                "name": "David Kolawole",
+                "role": "Lead Software Architect",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-019-2",
+                "name": "Kemi Balogun",
+                "role": "Senior UI/UX Product Designer",
+                "agency": "Digital Agency",
+                "email": "kemi.b@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-019-3",
+                "name": "David Kolawole",
+                "role": "Sprite & 3D Assets Animator",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-019-4",
+                "name": "Sylver Oyinaga",
+                "role": "Data Privacy & COPPA Officer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Domain Name & Web Infrastructure Rights',
     owner: 'Lovetoons Tech Ltd',
     validity: 'Perpetual',
@@ -1565,7 +3360,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Bible Quest Interactive Kiddies App',
     category: 'Digital / Interactive Platform',
     subcategory: 'Interactive Kiddies Games',
-    unit: 'Digital & Tech',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
+        contributors: [
+          {
+                "id": "c-LT-RG-020-1",
+                "name": "David Kolawole",
+                "role": "Lead Software Architect",
+                "agency": "Digital Agency",
+                "email": "emmanuel.v@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-020-2",
+                "name": "Kemi Balogun",
+                "role": "Senior UI/UX Product Designer",
+                "agency": "Digital Agency",
+                "email": "kemi.b@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-020-3",
+                "name": "David Kolawole",
+                "role": "Sprite & 3D Assets Animator",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-020-4",
+                "name": "Sylver Oyinaga",
+                "role": "Data Privacy & COPPA Officer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Game Code, 3D Assets & Unity Engine License',
     owner: 'Lovetoons Tech Ltd',
     validity: '2025 – 2035',
@@ -1589,7 +3419,34 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Lovetoons Bible Reading Fiesta',
     category: 'Outreach / Event Format',
     subcategory: 'Bible Reading Fiestas',
-    unit: 'Events & Outreach',
+    agency: 'Educational Agency',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-021-1",
+                "name": "Pastor Joshua Davies",
+                "role": "Curriculum Director & Outreach Lead",
+                "agency": "Educational Agency",
+                "email": "joshua.d@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-021-2",
+                "name": "Grace Emmanuel",
+                "role": "Children Praise Coordinator",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-021-3",
+                "name": "Samuel Adeleke",
+                "role": "Literacy Manual Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     rightsType: 'Live Event Format, Global Broadcast & Performance Rights',
     owner: 'Lovetoons Outreach Ministry',
     validity: '2025 – 2035',
@@ -1611,7 +3468,34 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Global Kids Connect with Pastor Chris',
     category: 'Outreach / Event Format',
     subcategory: 'Conferences & Rallies',
-    unit: 'Events & Outreach',
+    agency: 'Educational Agency',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-022-1",
+                "name": "Pastor Joshua Davies",
+                "role": "Curriculum Director & Outreach Lead",
+                "agency": "Educational Agency",
+                "email": "joshua.d@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-022-2",
+                "name": "Grace Emmanuel",
+                "role": "Children Praise Coordinator",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-022-3",
+                "name": "Samuel Adeleke",
+                "role": "Literacy Manual Editor",
+                "agency": "Publishing Agency",
+                "email": "samuel.a@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          }
+    ],
     rightsType: 'Master Satellite & Digital Broadcast Rights',
     owner: 'Lovetoons Outreach Ministry',
     validity: 'Perpetual',
@@ -1635,7 +3519,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Tick Talks Character (3D Turnaround Rig)',
     category: 'Character / Named IP',
     subcategory: '3D Rigs & Turnarounds',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-023-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-023-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-023-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-023-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Master Character IP, 3D Turnaround & Merchandising Rights',
     owner: 'Lovetoons Brand Ltd',
     validity: '2025 – 2045',
@@ -1657,7 +3576,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Tilly the Kangaroo (Character Rig)',
     category: 'Character / Named IP',
     subcategory: '3D Rigs & Turnarounds',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-024-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-024-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-024-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-024-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Original Mascot IP & Multi-Platform Licensing',
     owner: 'Lovetoons Brand Ltd',
     validity: '2025 – 2040',
@@ -1679,7 +3633,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Stickman Animated Character',
     category: 'Character / Named IP',
     subcategory: '2D Visual Character Bibles',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-025-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-025-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-025-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-025-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: '2D Vector Character Design & Broadcast Rights',
     owner: 'Lovetoons Brand Ltd',
     validity: 'Perpetual',
@@ -1703,7 +3692,34 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Lovetoons Official Theme Song',
     category: 'Music / Audio',
     subcategory: 'Theme Songs',
-    unit: 'Music & Audio',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-026-1",
+                "name": "Grace Emmanuel",
+                "role": "Lead Music Producer & Composer",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-026-2",
+                "name": "David Kolawole",
+                "role": "Sound Mixing & Mastering Engineer",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-026-3",
+                "name": "Faith Daniel",
+                "role": "Lyrics Reviewer & Script Sync",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Music Synchronization & Master Recording Rights',
     owner: 'Lovetoons Music Ltd',
     validity: '2025 – 2035',
@@ -1733,7 +3749,34 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Let\'s Read the Bible Song & Audio Track',
     category: 'Music / Audio',
     subcategory: 'Sing-Alongs & Tracks',
-    unit: 'Music & Audio',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-027-1",
+                "name": "Grace Emmanuel",
+                "role": "Lead Music Producer & Composer",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-027-2",
+                "name": "David Kolawole",
+                "role": "Sound Mixing & Mastering Engineer",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-027-3",
+                "name": "Faith Daniel",
+                "role": "Lyrics Reviewer & Script Sync",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Vocal Performance & Synchronization Clearance',
     owner: 'Lovetoons Music Ltd',
     validity: '2025 – 2035',
@@ -1757,7 +3800,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'Lovetoons Official Brand Logo',
     category: 'Brand & Guidelines',
     subcategory: 'Master Logo Marks',
-    unit: 'Brand & Merchandise',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-028-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-028-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-028-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-028-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Master Trademark & Visual Identity (Class 41)',
     owner: 'Lovetoons Brand Ltd',
     validity: 'Perpetual',
@@ -1779,7 +3857,42 @@ export const initialRightsRecords: RightsRecord[] = [
     name: 'LovetoonsTV Network Master Identity',
     category: 'Brand & Guidelines',
     subcategory: 'Network Identity Bibles',
-    unit: 'Brand & Merchandise',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
+        contributors: [
+          {
+                "id": "c-LT-RG-029-1",
+                "name": "David Kolawole",
+                "role": "Lead 3D Animator & Director",
+                "agency": "Lovetoons",
+                "email": "david.k@kiddiesmedia.org",
+                "contributionType": "Lead Author"
+          },
+          {
+                "id": "c-LT-RG-029-2",
+                "name": "Faith Daniel",
+                "role": "Screenwriter & Showrunner",
+                "agency": "Lovetoons",
+                "email": "faith.d@kiddiesmedia.org",
+                "contributionType": "Core Creative"
+          },
+          {
+                "id": "c-LT-RG-029-3",
+                "name": "Grace Emmanuel",
+                "role": "Voice Director & Sound Foley",
+                "agency": "Lovetoons",
+                "email": "grace.e@kiddiesmedia.org",
+                "contributionType": "Technical Specialist"
+          },
+          {
+                "id": "c-LT-RG-029-4",
+                "name": "Sylver Oyinaga",
+                "role": "Executive Producer",
+                "agency": "Lovetoons",
+                "email": "sylver@kiddiesmedia.org",
+                "contributionType": "Reviewer"
+          }
+    ],
     rightsType: 'Visual Identity, Style Guide & Network Brand Architecture',
     owner: 'Lovetoons Brand Ltd',
     validity: 'Perpetual',
@@ -1967,7 +4080,8 @@ export const initialApprovals: ApprovalRequest[] = [
     assetName: 'Zobo Drink (Special Edition)',
     category: 'Consumer Product / Merchandise',
     subcategory: 'Food & Beverage',
-    unit: 'Brand & Merchandise',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     requesterName: 'Sylver Oyinaga',
     requesterRole: 'Super Admin',
     requesterSkill: 'admin',
@@ -2024,7 +4138,8 @@ export const initialApprovals: ApprovalRequest[] = [
     assetName: 'Bible Quest Interactive Kiddies App',
     category: 'Digital / Interactive Platform',
     subcategory: 'Interactive Kiddies Games',
-    unit: 'Digital & Tech',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
     requesterName: 'Emmanuel Vance',
     requesterRole: 'Digital & Tech Admin',
     requesterSkill: 'developer',
@@ -2073,7 +4188,8 @@ export const initialApprovals: ApprovalRequest[] = [
     assetName: 'LovetoonsTV Network Master Identity',
     category: 'Brand & Guidelines',
     subcategory: 'Network Identity Bibles',
-    unit: 'Brand & Merchandise',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     requesterName: 'Sylver Oyinaga',
     requesterRole: 'Super Admin',
     requesterSkill: 'designer',
@@ -2130,7 +4246,8 @@ export const initialApprovals: ApprovalRequest[] = [
     assetName: 'Rhapsody of Realities for Early Readers Animation',
     category: 'Animated Programme',
     subcategory: 'TV Series',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     requesterName: 'David Kolawole',
     requesterRole: 'Animation Unit Admin',
     requesterSkill: 'animation',
@@ -2180,7 +4297,8 @@ export const initialActivityLogs: ActivityLog[] = [
     subtitle: 'Cleared for global broadcast distribution • 100% Compliance Score',
     time: '10 mins ago',
     user: 'Faith Daniel',
-    unit: 'Animation & TV',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     iconType: 'check',
     color: 'bg-emerald-100 text-emerald-700',
     timestamp: Date.now() - 1000 * 60 * 10,
@@ -2191,7 +4309,8 @@ export const initialActivityLogs: ActivityLog[] = [
     subtitle: 'Software source code, privacy & OTT streaming rights logged',
     time: '2 hours ago',
     user: 'Emmanuel Vance',
-    unit: 'Digital & Tech',
+    agency: 'Digital Agency',
+    unit: 'Digital Agency',
     iconType: 'shield',
     color: 'bg-purple-100 text-purple-700',
     timestamp: Date.now() - 1000 * 60 * 120,
@@ -2202,7 +4321,8 @@ export const initialActivityLogs: ActivityLog[] = [
     subtitle: 'Outreach event format & live broadcast recordings catalogued',
     time: '5 hours ago',
     user: 'David Kolawole',
-    unit: 'Events & Outreach',
+    agency: 'Educational Agency',
+    unit: 'Educational Agency',
     iconType: 'file',
     color: 'bg-blue-100 text-blue-700',
     timestamp: Date.now() - 1000 * 60 * 300,
@@ -2213,7 +4333,8 @@ export const initialActivityLogs: ActivityLog[] = [
     subtitle: 'Submitted by Sylver Oyinaga for reviewer quality & trademark audit',
     time: '1 day ago',
     user: 'Sylver Oyinaga',
-    unit: 'Brand & Merchandise',
+    agency: 'Lovetoons',
+    unit: 'Lovetoons',
     iconType: 'alert',
     color: 'bg-amber-100 text-amber-700',
     timestamp: Date.now() - 1000 * 60 * 1440,

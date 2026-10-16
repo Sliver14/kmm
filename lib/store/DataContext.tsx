@@ -10,6 +10,8 @@ import {
   RelationshipItem,
   ApprovalRequest,
   ActivityLog,
+  AssetContributor,
+  Agency,
 } from '@/types'
 import {
   initialUsers,
@@ -22,7 +24,7 @@ import {
   initialActivityLogs,
 } from '@/lib/data/initialData'
 
-interface PlatformStats {
+export interface PlatformStats {
   totalAssets: number
   approvedAssets: number
   pendingAssets: number
@@ -47,10 +49,14 @@ interface DataContextType {
   canApprove: boolean
   isSuperAdmin: boolean
   isReviewer: boolean
-  isUnitAdmin: boolean
+  isAgencyAdmin: boolean
+  isUnitAdmin: boolean // backward-compatibility alias
+  isGlobalViewer: boolean
+  userAgency: Agency
 
-  // Assets
+  // Assets (Role-scoped: Global for Super Admin & Reviewer, Agency-scoped for Agency Reps)
   assets: AssetData[]
+  allAssets: AssetData[]
   addAsset: (asset: Omit<AssetData, 'id' | 'createdDate' | 'createdTime'> & { id?: string }) => AssetData
   updateAsset: (asset: AssetData) => void
   deleteAsset: (id: string) => void
@@ -67,38 +73,43 @@ interface DataContextType {
   updateSubcategory: (sub: SubcategoryItem) => void
   deleteSubcategory: (id: string) => void
 
-  // Rights & Governance
+  // Rights & Governance (Role-scoped)
   rightsRecords: RightsRecord[]
+  allRightsRecords: RightsRecord[]
   addRightsRecord: (record: Omit<RightsRecord, 'id'> & { id?: string }) => RightsRecord
   updateRightsRecord: (record: RightsRecord) => void
   deleteRightsRecord: (id: string) => void
 
-  // Relationships
+  // Relationships (Role-scoped)
   relationships: RelationshipItem[]
+  allRelationships: RelationshipItem[]
   addRelationship: (rel: Omit<RelationshipItem, 'id' | 'createdDate' | 'createdTime'>) => RelationshipItem
   deleteRelationship: (id: string) => void
 
-  // Approvals
+  // Approvals (Role-scoped)
   approvals: ApprovalRequest[]
+  allApprovals: ApprovalRequest[]
   approveRequest: (approvalId: string, reviewerNotes?: string) => void
   declineRequest: (approvalId: string, reason: string) => void
   requestFeedback: (approvalId: string, feedbackNotes: string) => void
   createApprovalRequest: (assetId: string, priority?: ApprovalRequest['priority']) => ApprovalRequest
 
-  // Activity Logs
+  // Activity Logs (Role-scoped)
   activities: ActivityLog[]
-  addActivity: (title: string, subtitle: string, iconType?: ActivityLog['iconType'], color?: string) => void
+  allActivities: ActivityLog[]
+  addActivity: (title: string, subtitle: string, iconType?: ActivityLog['iconType'], color?: string, agency?: Agency) => void
 
   // Stats & Utilities
   stats: PlatformStats
+  globalStats: PlatformStats
   resetToDefaultData: () => void
   toastMessage: string | null
   showToast: (msg: string) => void
 }
 
-const STORAGE_KEY = 'lovetoons_platform_data_v6'
-const USER_KEY = 'lovetoons_current_user_v6'
-const AUTH_KEY = 'lovetoons_auth_state_v6'
+const STORAGE_KEY = 'kmp_platform_data_v8'
+const USER_KEY = 'kmp_current_user_v8'
+const AUTH_KEY = 'kmp_auth_state_v8'
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
 
@@ -111,14 +122,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [availableUsers] = useState<UserProfile[]>(initialUsers)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true)
 
-  // Core Data
-  const [assets, setAssets] = useState<AssetData[]>(initialAssetsData)
+  // Core Data Stores (Master Global Collections)
+  const [masterAssets, setMasterAssets] = useState<AssetData[]>(initialAssetsData)
   const [categories, setCategories] = useState<CategoryItem[]>(initialCategories)
   const [subcategories, setSubcategories] = useState<SubcategoryItem[]>(initialSubcategories)
-  const [rightsRecords, setRightsRecords] = useState<RightsRecord[]>(initialRightsRecords)
-  const [relationships, setRelationships] = useState<RelationshipItem[]>(initialRelationships)
-  const [approvals, setApprovals] = useState<ApprovalRequest[]>(initialApprovals)
-  const [activities, setActivities] = useState<ActivityLog[]>(initialActivityLogs)
+  const [masterRightsRecords, setMasterRightsRecords] = useState<RightsRecord[]>(initialRightsRecords)
+  const [masterRelationships, setMasterRelationships] = useState<RelationshipItem[]>(initialRelationships)
+  const [masterApprovals, setMasterApprovals] = useState<ApprovalRequest[]>(initialApprovals)
+  const [masterActivities, setMasterActivities] = useState<ActivityLog[]>(initialActivityLogs)
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -137,13 +148,38 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         const storedData = localStorage.getItem(STORAGE_KEY)
         if (storedData) {
           const parsed = JSON.parse(storedData)
-          if (parsed.assets) setAssets(parsed.assets)
+          if (parsed.assets && Array.isArray(parsed.assets)) {
+            // Migrate any legacy asset formats
+            const migrated = parsed.assets.map((a: any) => ({
+              ...a,
+              agency: a.agency || a.unit || 'Lovetoons',
+              unit: a.agency || a.unit || 'Lovetoons',
+              contributors: a.contributors || [],
+            }))
+            setMasterAssets(migrated)
+          }
           if (parsed.categories) setCategories(parsed.categories)
           if (parsed.subcategories) setSubcategories(parsed.subcategories)
-          if (parsed.rightsRecords) setRightsRecords(parsed.rightsRecords)
-          if (parsed.relationships) setRelationships(parsed.relationships)
-          if (parsed.approvals) setApprovals(parsed.approvals)
-          if (parsed.activities) setActivities(parsed.activities)
+          if (parsed.rightsRecords) {
+            setMasterRightsRecords(
+              parsed.rightsRecords.map((r: any) => ({
+                ...r,
+                agency: r.agency || r.unit || 'Lovetoons',
+                unit: r.agency || r.unit || 'Lovetoons',
+              }))
+            )
+          }
+          if (parsed.relationships) setMasterRelationships(parsed.relationships)
+          if (parsed.approvals) {
+            setMasterApprovals(
+              parsed.approvals.map((app: any) => ({
+                ...app,
+                agency: app.agency || app.unit || 'Lovetoons',
+                unit: app.agency || app.unit || 'Lovetoons',
+              }))
+            )
+          }
+          if (parsed.activities) setMasterActivities(parsed.activities)
         }
 
         const storedUserId = localStorage.getItem(USER_KEY)
@@ -172,20 +208,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     try {
       if (typeof window !== 'undefined') {
         const payload = {
-          assets,
+          assets: masterAssets,
           categories,
           subcategories,
-          rightsRecords,
-          relationships,
-          approvals,
-          activities,
+          rightsRecords: masterRightsRecords,
+          relationships: masterRelationships,
+          approvals: masterApprovals,
+          activities: masterActivities,
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
       }
     } catch (e) {
       console.error('Failed to persist storage data', e)
     }
-  }, [assets, categories, subcategories, rightsRecords, relationships, approvals, activities, isInitialized])
+  }, [masterAssets, categories, subcategories, masterRightsRecords, masterRelationships, masterApprovals, masterActivities, isInitialized])
 
   // Change User
   const setCurrentUser = useCallback((user: UserProfile) => {
@@ -193,7 +229,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       localStorage.setItem(USER_KEY, user.id)
     }
-    showToast(`Switched active profile to ${user.name} (${user.roleLabel})`)
+    showToast(`Switched active profile to ${user.name} (${user.roleLabel} • ${user.agency})`)
   }, [showToast])
 
   // Login handler
@@ -201,29 +237,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     (emailOrUser: string | UserProfile, password?: string): boolean => {
       let targetUser: UserProfile | undefined
       if (typeof emailOrUser === 'string') {
-        const trimmed = emailOrUser.trim().toLowerCase()
         targetUser = availableUsers.find(
-          (u) => u.email.toLowerCase() === trimmed || u.name.toLowerCase() === trimmed
+          (u) => u.email.toLowerCase() === emailOrUser.toLowerCase() || u.name.toLowerCase() === emailOrUser.toLowerCase()
         )
-        if (!targetUser) {
-          targetUser =
-            availableUsers.find((u) => u.name.toLowerCase().includes(trimmed)) || availableUsers[0]
-        }
       } else {
         targetUser = emailOrUser
       }
 
-      if (targetUser) {
-        setCurrentUserState(targetUser)
-        setIsAuthenticated(true)
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(USER_KEY, targetUser.id)
-          localStorage.setItem(AUTH_KEY, 'true')
-        }
-        showToast(`Welcome back, ${targetUser.name}!`)
-        return true
+      if (!targetUser) {
+        showToast('User not found. Please try another account.')
+        return false
       }
-      return false
+
+      setCurrentUserState(targetUser)
+      setIsAuthenticated(true)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(USER_KEY, targetUser.id)
+        localStorage.setItem(AUTH_KEY, 'true')
+      }
+      showToast(`Welcome back, ${targetUser.name}! Logged in as ${targetUser.roleLabel}.`)
+      return true
     },
     [availableUsers, showToast]
   )
@@ -233,585 +266,83 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(false)
     if (typeof window !== 'undefined') {
       localStorage.setItem(AUTH_KEY, 'false')
-      window.location.href = '/signin'
     }
-    showToast('You have been logged out.')
+    showToast('Signed out of Kiddies Media Production platform.')
   }, [showToast])
 
-  // Activity Logger
-  const addActivity = useCallback((
-    title: string,
-    subtitle: string,
-    iconType: ActivityLog['iconType'] = 'check',
-    color = 'bg-blue-100 text-blue-700'
-  ) => {
-    const newAct: ActivityLog = {
-      id: `act-${Date.now()}`,
-      title,
-      subtitle,
-      time: 'Just now',
-      user: currentUser.name,
-      unit: currentUser.unit,
-      iconType,
-      color,
-      timestamp: Date.now(),
-    }
-    setActivities((prev) => [newAct, ...prev.slice(0, 24)])
-  }, [currentUser])
+  // Role helper flags
+  const isSuperAdmin = currentUser.role === 'super_admin'
+  const isReviewer = currentUser.role === 'reviewer'
+  const isAgencyAdmin = currentUser.role === 'agency_admin' || (currentUser.role as any) === 'unit_admin'
+  const isUnitAdmin = isAgencyAdmin
+  const canApprove = isReviewer || isSuperAdmin
+  const isGlobalViewer = isSuperAdmin || isReviewer
+  const userAgency: Agency = currentUser.agency || (currentUser.unit as Agency) || 'Lovetoons'
 
-  // Asset CRUD
-  const addAsset = useCallback((
-    data: Omit<AssetData, 'id' | 'createdDate' | 'createdTime'> & { id?: string }
-  ): AssetData => {
-    const now = new Date()
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
-    const categoryPrefix = (data.category || 'AS').slice(0, 2).toUpperCase()
-    const autoId = data.id || `LT-${categoryPrefix}-${String(assets.length + 1).padStart(3, '0')}`
-
-    const newAssetItem: AssetData = {
-      ...data,
-      id: autoId,
-      createdDate: dateStr,
-      createdTime: timeStr,
-      status: data.status || 'Pending',
-      unit: data.unit || currentUser.unit,
-      creatorName: data.creatorName || currentUser.name,
-      creatorRole: data.creatorRole || currentUser.roleLabel,
-      creatorSkill: data.creatorSkill || currentUser.skills[0] || 'admin',
-      tags: data.tags && data.tags.length > 0 ? data.tags : ['New Asset'],
-    }
-
-    setAssets((prev) => [newAssetItem, ...prev])
-
-    // Update Category asset counts
-    setCategories((prev) =>
-      prev.map((cat) =>
-        cat.name === newAssetItem.category ? { ...cat, assetsCount: cat.assetsCount + 1 } : cat
-      )
-    )
-
-    // Update Subcategory asset counts
-    setSubcategories((prev) =>
-      prev.map((sub) =>
-        sub.name === newAssetItem.subcategory ? { ...sub, assetsCount: sub.assetsCount + 1 } : sub
-      )
-    )
-
-    // Automatically create approval request if asset is pending or in review
-    if (newAssetItem.status === 'Pending' || newAssetItem.status === 'In Review') {
-      const newApproval: ApprovalRequest = {
-        id: `APP-${now.getFullYear()}-${String(approvals.length + 1).padStart(3, '0')}`,
-        assetId: newAssetItem.id,
-        assetName: newAssetItem.name,
-        category: newAssetItem.category,
-        subcategory: newAssetItem.subcategory,
-        unit: newAssetItem.unit,
-        requesterName: newAssetItem.creatorName,
-        requesterRole: newAssetItem.creatorRole,
-        requesterSkill: newAssetItem.creatorSkill,
-        reviewerName: 'Faith Daniel',
-        stage: 'Initial Content & Ministry Doctrine Review',
-        currentStep: 1,
-        totalSteps: 3,
-        status: 'Pending',
-        priority: 'Medium',
-        submittedDate: dateStr,
-        submittedTime: timeStr,
-        history: [
-          {
-            stage: 'Submitted for Review',
-            author: newAssetItem.creatorName,
-            authorRole: newAssetItem.creatorRole,
-            date: `${dateStr} ${timeStr}`,
-            status: 'Submitted',
-            notes: 'Asset submitted for review and approval workflow.',
-          },
-        ],
+  // Activity logger
+  const addActivity = useCallback(
+    (
+      title: string,
+      subtitle: string,
+      iconType: ActivityLog['iconType'] = 'file',
+      color = 'bg-blue-100 text-blue-700',
+      agency?: Agency
+    ) => {
+      const targetAgency = agency || currentUser.agency || 'Lovetoons'
+      const newAct: ActivityLog = {
+        id: `act-${Date.now()}`,
+        title,
+        subtitle,
+        time: 'Just now',
+        user: currentUser.name,
+        agency: targetAgency,
+        unit: targetAgency,
+        iconType,
+        color,
+        timestamp: Date.now(),
       }
-      setApprovals((prev) => [newApproval, ...prev])
-    }
+      setMasterActivities((prev) => [newAct, ...prev.slice(0, 29)])
+    },
+    [currentUser]
+  )
 
-    // Automatically create Rights Record for the newly created asset
-    const newRights: RightsRecord = {
-      id: `LT-RG-${String(rightsRecords.length + 1).padStart(3, '0')}`,
-      assetId: newAssetItem.id,
-      name: newAssetItem.name,
-      category: newAssetItem.category,
-      subcategory: newAssetItem.subcategory,
-      unit: newAssetItem.unit,
-      rightsType: 'Master Intellectual Property & Broadcast',
-      owner: newAssetItem.rightsHolder || 'Lovetoons Media Ltd',
-      validity: '2025 – 2035',
-      status: newAssetItem.status === 'Approved' ? 'Cleared' : 'Review',
-      territory: 'Worldwide',
-      term: '10 Years',
-      exclusivity: 'Exclusive Ministry Rights',
-      licenceType: 'Proprietary Content License',
-      royaltyTerms: '100% In-House Retained',
-      thumbType: newAssetItem.thumbType,
-      governanceScore: newAssetItem.status === 'Approved' ? 100 : 85,
-      documents: [
-        {
-          id: `doc-${Date.now()}`,
-          name: `${newAssetItem.name.replace(/[^a-zA-Z0-9]/g, '_')}_Filing_Deed.pdf`,
-          size: '2.1 MB',
-          date: dateStr,
-          type: 'CERT',
-        },
-      ],
-      governanceChecks: {
-        biblicalAlignment: true,
-        ageAppropriate: true,
-        musicSync: true,
-        copyrightReg: newAssetItem.status === 'Approved',
-        voiceReleases: true,
-      },
-    }
-    setRightsRecords((prev) => [newRights, ...prev])
+  // -------------------------------------------------------------
+  // ROLE SCOPING LOGIC:
+  // Super Admin & Reviewer -> Cover ALL agencies' details
+  // Agency Reps -> View details for JUST their agency
+  // -------------------------------------------------------------
+  const assets = useMemo(() => {
+    if (isGlobalViewer) return masterAssets
+    return masterAssets.filter((a) => (a.agency || a.unit) === userAgency)
+  }, [masterAssets, isGlobalViewer, userAgency])
 
-    addActivity(
-      `New asset created: ${newAssetItem.name}`,
-      `Created by ${newAssetItem.creatorName} (${newAssetItem.unit}) • ID ${newAssetItem.id}`,
-      'file',
-      'bg-blue-100 text-blue-700'
-    )
+  const rightsRecords = useMemo(() => {
+    if (isGlobalViewer) return masterRightsRecords
+    return masterRightsRecords.filter((r) => (r.agency || r.unit) === userAgency)
+  }, [masterRightsRecords, isGlobalViewer, userAgency])
 
-    showToast(`Asset "${newAssetItem.name}" successfully created with ID ${newAssetItem.id}!`)
-    return newAssetItem
-  }, [assets.length, currentUser, approvals.length, rightsRecords.length, addActivity, showToast])
+  const approvals = useMemo(() => {
+    if (isGlobalViewer) return masterApprovals
+    return masterApprovals.filter((app) => (app.agency || app.unit) === userAgency)
+  }, [masterApprovals, isGlobalViewer, userAgency])
 
-  const updateAsset = useCallback((updated: AssetData) => {
-    setAssets((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))
-    addActivity(
-      `Asset updated: ${updated.name}`,
-      `Modified by ${currentUser.name} • Status: ${updated.status}`,
-      'file',
-      'bg-indigo-100 text-indigo-700'
-    )
-    showToast(`Asset "${updated.name}" updated successfully!`)
-  }, [currentUser.name, addActivity, showToast])
+  const relationships = useMemo(() => {
+    if (isGlobalViewer) return masterRelationships
+    return masterRelationships.filter((rel) => {
+      const src = masterAssets.find((a) => a.id === rel.sourceId || a.id === rel.sourceAssetId)
+      const tgt = masterAssets.find((a) => a.id === rel.targetId || a.id === rel.targetAssetId)
+      const srcAgency = src?.agency || src?.unit
+      const tgtAgency = tgt?.agency || tgt?.unit
+      return srcAgency === userAgency || tgtAgency === userAgency
+    })
+  }, [masterRelationships, masterAssets, isGlobalViewer, userAgency])
 
-  const deleteAsset = useCallback((id: string) => {
-    const found = assets.find((a) => a.id === id)
-    if (!found) return
+  const activities = useMemo(() => {
+    if (isGlobalViewer) return masterActivities
+    return masterActivities.filter((act) => !act.agency || act.agency === userAgency || act.unit === userAgency)
+  }, [masterActivities, isGlobalViewer, userAgency])
 
-    setAssets((prev) => prev.filter((a) => a.id !== id))
-    setRelationships((prev) => prev.filter((r) => r.sourceId !== id && r.targetId !== id))
-    setApprovals((prev) => prev.filter((app) => app.assetId !== id))
-    setRightsRecords((prev) => prev.filter((rg) => rg.assetId !== id))
-
-    addActivity(
-      `Asset removed: ${found.name}`,
-      `Deleted from repository by ${currentUser.name}`,
-      'alert',
-      'bg-rose-100 text-rose-700'
-    )
-    showToast(`Asset "${found.name}" removed from platform.`)
-  }, [assets, currentUser.name, addActivity, showToast])
-
-  const bulkApproveAssets = useCallback((ids: string[]) => {
-    setAssets((prev) =>
-      prev.map((a) => (ids.includes(a.id) ? { ...a, status: 'Approved' } : a))
-    )
-    setApprovals((prev) =>
-      prev.map((app) => (ids.includes(app.assetId) ? { ...app, status: 'Approved' } : app))
-    )
-    addActivity(
-      `Bulk approved ${ids.length} assets`,
-      `Approved by ${currentUser.name} (${currentUser.roleLabel})`,
-      'check',
-      'bg-emerald-100 text-emerald-700'
-    )
-    showToast(`Approved ${ids.length} assets successfully!`)
-  }, [currentUser.name, currentUser.roleLabel, addActivity, showToast])
-
-  const bulkDeleteAssets = useCallback((ids: string[]) => {
-    setAssets((prev) => prev.filter((a) => !ids.includes(a.id)))
-    setRelationships((prev) =>
-      prev.filter((r) => !ids.includes(r.sourceId) && !ids.includes(r.targetId))
-    )
-    setApprovals((prev) => prev.filter((app) => !ids.includes(app.assetId)))
-    showToast(`Deleted ${ids.length} assets.`)
-  }, [showToast])
-
-  // Categories & Subcategories CRUD
-  const addCategory = useCallback((
-    cat: Omit<CategoryItem, 'id' | 'subcategoriesCount' | 'assetsCount'>
-  ): CategoryItem => {
-    const newCat: CategoryItem = {
-      ...cat,
-      id: `cat-${Date.now()}`,
-      subcategoriesCount: 0,
-      assetsCount: 0,
-    }
-    setCategories((prev) => [...prev, newCat])
-    showToast(`Category "${newCat.name}" added successfully!`)
-    return newCat
-  }, [showToast])
-
-  const updateCategory = useCallback((cat: CategoryItem) => {
-    setCategories((prev) => prev.map((c) => (c.id === cat.id ? cat : c)))
-    showToast(`Category "${cat.name}" updated.`)
-  }, [showToast])
-
-  const deleteCategory = useCallback((id: string) => {
-    setCategories((prev) => prev.filter((c) => c.id !== id))
-    showToast('Category removed.')
-  }, [showToast])
-
-  const addSubcategory = useCallback((
-    sub: Omit<SubcategoryItem, 'id' | 'assetsCount'>
-  ): SubcategoryItem => {
-    const newSub: SubcategoryItem = {
-      ...sub,
-      id: `sub-${Date.now()}`,
-      assetsCount: 0,
-    }
-    setSubcategories((prev) => [...prev, newSub])
-    setCategories((prev) =>
-      prev.map((c) =>
-        c.name === newSub.parentCategory
-          ? { ...c, subcategoriesCount: c.subcategoriesCount + 1 }
-          : c
-      )
-    )
-    showToast(`Subcategory "${newSub.name}" added!`)
-    return newSub
-  }, [showToast])
-
-  const updateSubcategory = useCallback((sub: SubcategoryItem) => {
-    setSubcategories((prev) => prev.map((s) => (s.id === sub.id ? sub : s)))
-    showToast(`Subcategory "${sub.name}" updated.`)
-  }, [showToast])
-
-  const deleteSubcategory = useCallback((id: string) => {
-    const target = subcategories.find((s) => s.id === id)
-    if (target) {
-      setCategories((prev) =>
-        prev.map((c) =>
-          c.name === target.parentCategory
-            ? { ...c, subcategoriesCount: Math.max(0, c.subcategoriesCount - 1) }
-            : c
-        )
-      )
-    }
-    setSubcategories((prev) => prev.filter((s) => s.id !== id))
-    showToast('Subcategory removed.')
-  }, [subcategories, showToast])
-
-  // Rights CRUD
-  const addRightsRecord = useCallback((
-    record: Omit<RightsRecord, 'id'> & { id?: string }
-  ): RightsRecord => {
-    const now = new Date()
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
-    const autoId = record.id || `LT-RG-${String(rightsRecords.length + 1).padStart(3, '0')}`
-    const newRecord: RightsRecord = {
-      ...record,
-      id: autoId,
-      governanceScore: record.governanceScore || (record.status === 'Cleared' ? 100 : 85),
-      documents: record.documents || [],
-      governanceChecks: record.governanceChecks || {
-        biblicalAlignment: true,
-        ageAppropriate: true,
-        musicSync: true,
-        copyrightReg: true,
-        voiceReleases: true,
-      },
-    }
-    setRightsRecords((prev) => [newRecord, ...prev])
-
-    // If rights scope requires review, automatically push to reviewer queue
-    if (newRecord.status === 'Review' || newRecord.status === 'Pending') {
-      const newApproval: ApprovalRequest = {
-        id: `APP-${now.getFullYear()}-${String(approvals.length + 1).padStart(3, '0')}`,
-        assetId: newRecord.assetId || newRecord.id,
-        assetName: `${newRecord.name} (Rights Scope Clearance)`,
-        category: newRecord.category,
-        subcategory: newRecord.subcategory,
-        unit: newRecord.unit || currentUser.unit,
-        requesterName: currentUser.name,
-        requesterRole: currentUser.roleLabel,
-        requesterSkill: currentUser.skills[0] || 'admin',
-        reviewerName: 'Faith Daniel',
-        stage: 'Rights Clearance & Territorial Governance Review',
-        currentStep: 1,
-        totalSteps: 2,
-        status: 'Pending',
-        priority: 'High',
-        submittedDate: dateStr,
-        submittedTime: timeStr,
-        history: [
-          {
-            stage: 'Rights Clearance Submission',
-            author: currentUser.name,
-            authorRole: currentUser.roleLabel,
-            date: `${dateStr} ${timeStr}`,
-            status: 'Submitted',
-            notes: `Submitted scope: ${newRecord.rightsType} (${newRecord.territory || 'Worldwide'}, ${newRecord.term || '10 Years'})`,
-          },
-        ],
-      }
-      setApprovals((prev) => [newApproval, ...prev])
-    }
-
-    addActivity(
-      `Rights scope submitted: ${newRecord.name}`,
-      `Submitted by ${currentUser.name} (${newRecord.rightsType}) • Territory: ${newRecord.territory || 'Worldwide'}`,
-      'shield',
-      'bg-purple-100 text-purple-700'
-    )
-    showToast(`Rights record for "${newRecord.name}" submitted! Reviewer notified.`)
-    return newRecord
-  }, [rightsRecords.length, approvals.length, currentUser, addActivity, showToast])
-
-  const updateRightsRecord = useCallback((record: RightsRecord) => {
-    setRightsRecords((prev) => prev.map((r) => (r.id === record.id ? record : r)))
-    addActivity(
-      `Governance details updated: ${record.name}`,
-      `Modified by ${currentUser.name} (${currentUser.roleLabel}) • Score: ${record.governanceScore || 100}% • Status: ${record.status}`,
-      'shield',
-      'bg-purple-100 text-purple-700'
-    )
-    showToast(`Governance & Rights details for "${record.name}" updated and audit logged!`)
-  }, [currentUser.name, currentUser.roleLabel, addActivity, showToast])
-
-  const deleteRightsRecord = useCallback((id: string) => {
-    setRightsRecords((prev) => prev.filter((r) => r.id !== id))
-    showToast('Rights record removed.')
-  }, [showToast])
-
-  // Relationships CRUD
-  const addRelationship = useCallback((
-    rel: Omit<RelationshipItem, 'id' | 'createdDate' | 'createdTime'>
-  ): RelationshipItem => {
-    const now = new Date()
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
-    const newRel: RelationshipItem = {
-      ...rel,
-      id: `rel-${Date.now()}`,
-      createdDate: dateStr,
-      createdTime: timeStr,
-    }
-
-    setRelationships((prev) => [newRel, ...prev])
-    addActivity(
-      `Asset link created: ${rel.sourceAsset} → ${rel.targetAsset}`,
-      `Relationship type: ${rel.relationshipType}`,
-      'link',
-      'bg-teal-100 text-teal-700'
-    )
-    showToast(`Connected "${rel.sourceAsset}" to "${rel.targetAsset}"!`)
-    return newRel
-  }, [addActivity, showToast])
-
-  const deleteRelationship = useCallback((id: string) => {
-    setRelationships((prev) => prev.filter((r) => r.id !== id))
-    showToast('Relationship removed.')
-  }, [showToast])
-
-  // Approvals Workflow
-  const approveRequest = useCallback((approvalId: string, reviewerNotes?: string) => {
-    const now = new Date()
-    const dateStr = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-
-    setApprovals((prev) =>
-      prev.map((app) => {
-        if (app.id !== approvalId) return app
-        const newHistoryItem = {
-          stage: 'Approved by Reviewer',
-          author: currentUser.name,
-          authorRole: currentUser.roleLabel,
-          date: dateStr,
-          status: 'Approved',
-          notes: reviewerNotes || 'Asset & Rights clearance approved for broadcast and distribution.',
-        }
-        return {
-          ...app,
-          status: 'Approved',
-          currentStep: app.totalSteps,
-          history: [...app.history, newHistoryItem],
-        }
-      })
-    )
-
-    // Update associated asset and rights status
-    const targetApproval = approvals.find((a) => a.id === approvalId)
-    if (targetApproval) {
-      setAssets((prev) =>
-        prev.map((a) => (a.id === targetApproval.assetId ? { ...a, status: 'Approved' } : a))
-      )
-      setRightsRecords((prev) =>
-        prev.map((r) =>
-          r.assetId === targetApproval.assetId || r.id === targetApproval.assetId
-            ? { ...r, status: 'Cleared', governanceScore: 100 }
-            : r
-        )
-      )
-      addActivity(
-        `Approval & clearance granted: ${targetApproval.assetName}`,
-        `Cleared by ${currentUser.name} (${currentUser.roleLabel})`,
-        'check',
-        'bg-emerald-100 text-emerald-700'
-      )
-    }
-    showToast('Asset and rights clearance approved!')
-  }, [currentUser.name, currentUser.roleLabel, approvals, addActivity, showToast])
-
-  const declineRequest = useCallback((approvalId: string, reason: string) => {
-    const now = new Date()
-    const dateStr = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-
-    setApprovals((prev) =>
-      prev.map((app) => {
-        if (app.id !== approvalId) return app
-        const newHistoryItem = {
-          stage: 'Declined by Reviewer',
-          author: currentUser.name,
-          authorRole: currentUser.roleLabel,
-          date: dateStr,
-          status: 'Declined',
-          notes: reason,
-        }
-        return {
-          ...app,
-          status: 'Declined',
-          feedbackNotes: reason,
-          history: [...app.history, newHistoryItem],
-        }
-      })
-    )
-
-    const targetApproval = approvals.find((a) => a.id === approvalId)
-    if (targetApproval) {
-      setAssets((prev) =>
-        prev.map((a) =>
-          a.id === targetApproval.assetId ? { ...a, status: 'Requires Attention' } : a
-        )
-      )
-      addActivity(
-        `Asset declined: ${targetApproval.assetName}`,
-        `Declined by ${currentUser.name}: "${reason}"`,
-        'alert',
-        'bg-rose-100 text-rose-700'
-      )
-    }
-    showToast('Asset approval declined. Requester notified.')
-  }, [currentUser.name, approvals, addActivity, showToast])
-
-  const requestFeedback = useCallback((approvalId: string, feedbackNotes: string) => {
-    const now = new Date()
-    const dateStr = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-
-    setApprovals((prev) =>
-      prev.map((app) => {
-        if (app.id !== approvalId) return app
-        const newHistoryItem = {
-          stage: 'Feedback Requested',
-          author: currentUser.name,
-          authorRole: currentUser.roleLabel,
-          date: dateStr,
-          status: 'Needs Feedback',
-          notes: feedbackNotes,
-        }
-        return {
-          ...app,
-          status: 'Needs Feedback',
-          feedbackNotes,
-          history: [...app.history, newHistoryItem],
-        }
-      })
-    )
-
-    const targetApproval = approvals.find((a) => a.id === approvalId)
-    if (targetApproval) {
-      setAssets((prev) =>
-        prev.map((a) =>
-          a.id === targetApproval.assetId ? { ...a, status: 'In Review' } : a
-        )
-      )
-      addActivity(
-        `Feedback requested: ${targetApproval.assetName}`,
-        `Note from ${currentUser.name}: "${feedbackNotes}"`,
-        'alert',
-        'bg-amber-100 text-amber-700'
-      )
-    }
-    showToast('Feedback request submitted to creator!')
-  }, [currentUser.name, approvals, addActivity, showToast])
-
-  const createApprovalRequest = useCallback((
-    assetId: string,
-    priority: ApprovalRequest['priority'] = 'Medium'
-  ): ApprovalRequest => {
-    const targetAsset = assets.find((a) => a.id === assetId)
-    const now = new Date()
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
-    const newApproval: ApprovalRequest = {
-      id: `APP-${now.getFullYear()}-${String(approvals.length + 1).padStart(3, '0')}`,
-      assetId: targetAsset?.id || assetId,
-      assetName: targetAsset?.name || 'Asset for Review',
-      category: targetAsset?.category || 'General',
-      subcategory: targetAsset?.subcategory || 'General',
-      unit: targetAsset?.unit || currentUser.unit,
-      requesterName: currentUser.name,
-      requesterRole: currentUser.roleLabel,
-      requesterSkill: currentUser.skills[0] || 'admin',
-      reviewerName: 'Faith Daniel',
-      stage: 'Submitted for Review',
-      currentStep: 1,
-      totalSteps: 3,
-      status: 'Pending',
-      priority,
-      submittedDate: dateStr,
-      submittedTime: timeStr,
-      history: [
-        {
-          stage: 'Submitted for Review',
-          author: currentUser.name,
-          authorRole: currentUser.roleLabel,
-          date: `${dateStr} ${timeStr}`,
-          status: 'Submitted',
-          notes: 'Asset submitted for review and clearance.',
-        },
-      ],
-    }
-
-    setApprovals((prev) => [newApproval, ...prev])
-    showToast(`Approval workflow started for "${newApproval.assetName}"!`)
-    return newApproval
-  }, [assets, approvals.length, currentUser, showToast])
-
-  // Reset Data to Factory Default
-  const resetToDefaultData = useCallback(() => {
-    setAssets(initialAssetsData)
-    setCategories(initialCategories)
-    setSubcategories(initialSubcategories)
-    setRightsRecords(initialRightsRecords)
-    setRelationships(initialRelationships)
-    setApprovals(initialApprovals)
-    setActivities(initialActivityLogs)
-    setCurrentUserState(initialUsers[0])
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEY)
-      localStorage.removeItem(USER_KEY)
-    }
-    showToast('All platform data reset to initial demo state.')
-  }, [showToast])
-
-  // Computed Real-time Stats
+  // Real-time Platform Stats (Computed from the scoped views)
   const stats: PlatformStats = useMemo(() => {
     const totalAssets = assets.length
     const approvedAssets = assets.filter((a) => a.status === 'Approved').length
@@ -842,10 +373,684 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [assets, relationships, rightsRecords, approvals])
 
-  const canApprove = currentUser.role === 'reviewer' || currentUser.role === 'super_admin'
-  const isSuperAdmin = currentUser.role === 'super_admin'
-  const isReviewer = currentUser.role === 'reviewer'
-  const isUnitAdmin = currentUser.role === 'unit_admin'
+  // Global Platform Stats (Always covers the entire network across all agencies)
+  const globalStats: PlatformStats = useMemo(() => {
+    const totalAssets = masterAssets.length
+    const approvedAssets = masterAssets.filter((a) => a.status === 'Approved').length
+    const pendingAssets = masterAssets.filter((a) => a.status === 'Pending').length
+    const attentionAssets = masterAssets.filter((a) => a.status === 'Requires Attention').length
+    const inReviewAssets = masterAssets.filter((a) => a.status === 'In Review').length
+
+    const connectedAssetIds = new Set<string>()
+    masterRelationships.forEach((r) => {
+      connectedAssetIds.add(r.sourceId)
+      connectedAssetIds.add(r.targetId)
+    })
+
+    const clearedRightsCount = masterRightsRecords.filter((r) => r.status === 'Cleared').length
+    const pendingApprovalsCount = masterApprovals.filter((a) => a.status === 'Pending').length
+
+    return {
+      totalAssets,
+      approvedAssets,
+      pendingAssets,
+      attentionAssets,
+      inReviewAssets,
+      totalRelationships: masterRelationships.length,
+      connectedAssetsCount: connectedAssetIds.size,
+      totalRights: masterRightsRecords.length,
+      clearedRightsCount,
+      pendingApprovalsCount,
+    }
+  }, [masterAssets, masterRelationships, masterRightsRecords, masterApprovals])
+
+  // -------------------------------------------------------------
+  // Asset CRUD
+  // -------------------------------------------------------------
+  const addAsset = useCallback(
+    (data: Omit<AssetData, 'id' | 'createdDate' | 'createdTime'> & { id?: string }): AssetData => {
+      const now = new Date()
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+      const categoryPrefix = (data.category || 'AS').slice(0, 2).toUpperCase()
+      const autoId = data.id || `KMP-${categoryPrefix}-${String(masterAssets.length + 1).padStart(3, '0')}`
+
+      // Restrict agency for Agency Admins; Super Admin and Reviewer can assign any agency
+      const assignedAgency: Agency = isGlobalViewer
+        ? data.agency || userAgency
+        : userAgency
+
+      const contributors: AssetContributor[] =
+        data.contributors && data.contributors.length > 0
+          ? data.contributors
+          : [
+              {
+                id: `c-${autoId}-1`,
+                name: data.creatorName || currentUser.name,
+                role: data.creatorRole || currentUser.roleLabel,
+                agency: assignedAgency,
+                email: currentUser.email,
+                contributionType: 'Lead Author',
+              },
+            ]
+
+      const newAssetItem: AssetData = {
+        ...data,
+        id: autoId,
+        createdDate: dateStr,
+        createdTime: timeStr,
+        status: data.status || 'Pending',
+        agency: assignedAgency,
+        unit: assignedAgency,
+        creatorName: data.creatorName || currentUser.name,
+        creatorRole: data.creatorRole || currentUser.roleLabel,
+        creatorSkill: data.creatorSkill || currentUser.skills[0] || 'admin',
+        contributors,
+        tags: data.tags && data.tags.length > 0 ? data.tags : ['New Asset'],
+      }
+
+      setMasterAssets((prev) => [newAssetItem, ...prev])
+
+      // Update Category asset counts
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.name === newAssetItem.category ? { ...cat, assetsCount: cat.assetsCount + 1 } : cat
+        )
+      )
+
+      // Update Subcategory asset counts
+      setSubcategories((prev) =>
+        prev.map((sub) =>
+          sub.name === newAssetItem.subcategory ? { ...sub, assetsCount: sub.assetsCount + 1 } : sub
+        )
+      )
+
+      // Automatically create approval request if asset is pending or in review
+      if (newAssetItem.status === 'Pending' || newAssetItem.status === 'In Review') {
+        const newApproval: ApprovalRequest = {
+          id: `APP-${now.getFullYear()}-${String(masterApprovals.length + 1).padStart(3, '0')}`,
+          assetId: newAssetItem.id,
+          assetName: newAssetItem.name,
+          category: newAssetItem.category,
+          subcategory: newAssetItem.subcategory,
+          agency: newAssetItem.agency,
+          unit: newAssetItem.agency,
+          contributors: newAssetItem.contributors,
+          requesterName: newAssetItem.creatorName,
+          requesterRole: newAssetItem.creatorRole,
+          requesterSkill: newAssetItem.creatorSkill,
+          reviewerName: 'Faith Daniel',
+          stage: 'Initial Content & Ministry Doctrine Review',
+          currentStep: 1,
+          totalSteps: 3,
+          status: 'Pending',
+          priority: 'Medium',
+          submittedDate: dateStr,
+          submittedTime: timeStr,
+          history: [
+            {
+              stage: 'Submitted for Review',
+              author: newAssetItem.creatorName,
+              authorRole: newAssetItem.creatorRole,
+              date: `${dateStr} ${timeStr}`,
+              status: 'Submitted',
+              notes: `Asset submitted for ${newAssetItem.agency} review and clearance workflow.`,
+            },
+          ],
+        }
+        setMasterApprovals((prev) => [newApproval, ...prev])
+      }
+
+      // Automatically create companion Rights Record
+      const newRightsRecord: RightsRecord = {
+        id: `RG-${autoId}`,
+        assetId: newAssetItem.id,
+        name: newAssetItem.name,
+        category: newAssetItem.category,
+        subcategory: newAssetItem.subcategory,
+        agency: newAssetItem.agency,
+        unit: newAssetItem.agency,
+        contributors: newAssetItem.contributors,
+        rightsType: 'Worldwide Media Ministry Clearance',
+        owner: newAssetItem.rightsHolder || 'Kiddies Media Production Ltd',
+        validity: `${now.getFullYear()} – ${now.getFullYear() + 10}`,
+        status: newAssetItem.status === 'Approved' ? 'Cleared' : 'Review',
+        territory: 'Worldwide',
+        term: '10 Years (Renewable)',
+        exclusivity: 'Exclusive Ministry Retained',
+        licenceType: 'Proprietary IP Assignment Deed',
+        royaltyTerms: '100% In-House Retained',
+        thumbType: newAssetItem.thumbType,
+        description: `Intellectual property rights and staff contributor deeds logged for ${newAssetItem.name}.`,
+        governanceScore: newAssetItem.status === 'Approved' ? 100 : 85,
+        documents: [
+          {
+            id: `doc-cert-${autoId}`,
+            name: `${newAssetItem.name.replace(/[^a-zA-Z0-9]/g, '_')}_IP_Assignment.pdf`,
+            size: '2.4 MB',
+            date: dateStr,
+            type: 'CERT',
+          },
+        ],
+        governanceChecks: {
+          biblicalAlignment: true,
+          ageAppropriate: true,
+          musicSync: true,
+          copyrightReg: true,
+          voiceReleases: true,
+        },
+      }
+      setMasterRightsRecords((prev) => [newRightsRecord, ...prev])
+
+      addActivity(
+        `Registered intellectual asset: ${newAssetItem.name}`,
+        `Created by ${newAssetItem.creatorName} (${newAssetItem.agency}) • ID ${newAssetItem.id} • ${newAssetItem.contributors.length} contributors`,
+        'file',
+        'bg-blue-100 text-blue-700',
+        newAssetItem.agency
+      )
+
+      showToast(`Asset "${newAssetItem.name}" registered successfully for ${newAssetItem.agency}!`)
+      return newAssetItem
+    },
+    [masterAssets.length, masterApprovals.length, isGlobalViewer, userAgency, currentUser, addActivity, showToast]
+  )
+
+  const updateAsset = useCallback(
+    (asset: AssetData) => {
+      setMasterAssets((prev) =>
+        prev.map((a) => (a.id === asset.id ? { ...asset, agency: asset.agency || a.agency, unit: asset.agency || a.agency } : a))
+      )
+      addActivity(
+        `Updated asset specifications: ${asset.name}`,
+        `Modified by ${currentUser.name} (${asset.agency || currentUser.agency})`,
+        'link',
+        'bg-slate-100 text-slate-700',
+        asset.agency || currentUser.agency
+      )
+      showToast(`Asset "${asset.name}" updated.`)
+    },
+    [currentUser, addActivity, showToast]
+  )
+
+  const deleteAsset = useCallback(
+    (id: string) => {
+      const target = masterAssets.find((a) => a.id === id)
+      if (!target) return
+
+      setMasterAssets((prev) => prev.filter((a) => a.id !== id))
+      setMasterRightsRecords((prev) => prev.filter((r) => r.assetId !== id))
+      setMasterApprovals((prev) => prev.filter((app) => app.assetId !== id))
+      setMasterRelationships((prev) => prev.filter((rel) => rel.sourceId !== id && rel.targetId !== id))
+
+      addActivity(
+        `Deleted asset from catalog: ${target.name}`,
+        `Removed by ${currentUser.name} (${target.agency})`,
+        'alert',
+        'bg-rose-100 text-rose-700',
+        target.agency
+      )
+      showToast(`Asset "${target.name}" removed from registry.`)
+    },
+    [masterAssets, currentUser, addActivity, showToast]
+  )
+
+  const bulkApproveAssets = useCallback(
+    (ids: string[]) => {
+      setMasterAssets((prev) =>
+        prev.map((a) => (ids.includes(a.id) ? { ...a, status: 'Approved' } : a))
+      )
+      setMasterApprovals((prev) =>
+        prev.map((app) => (ids.includes(app.assetId) ? { ...app, status: 'Approved', currentStep: app.totalSteps } : app))
+      )
+      addActivity(
+        `Batch approved ${ids.length} assets`,
+        `Authorised by ${currentUser.name} (${currentUser.roleLabel})`,
+        'check',
+        'bg-emerald-100 text-emerald-700'
+      )
+      showToast(`Bulk approved ${ids.length} assets!`)
+    },
+    [currentUser, addActivity, showToast]
+  )
+
+  const bulkDeleteAssets = useCallback(
+    (ids: string[]) => {
+      setMasterAssets((prev) => prev.filter((a) => !ids.includes(a.id)))
+      setMasterRightsRecords((prev) => prev.filter((r) => !r.assetId || !ids.includes(r.assetId)))
+      setMasterApprovals((prev) => prev.filter((app) => !ids.includes(app.assetId)))
+      addActivity(
+        `Bulk deleted ${ids.length} assets`,
+        `Action taken by ${currentUser.name}`,
+        'alert',
+        'bg-rose-100 text-rose-700'
+      )
+      showToast(`Removed ${ids.length} assets.`)
+    },
+    [currentUser, addActivity, showToast]
+  )
+
+  // -------------------------------------------------------------
+  // Categories & Subcategories
+  // -------------------------------------------------------------
+  const addCategory = useCallback(
+    (cat: Omit<CategoryItem, 'id' | 'subcategoriesCount' | 'assetsCount'>): CategoryItem => {
+      const newCat: CategoryItem = {
+        ...cat,
+        id: `cat-${Date.now()}`,
+        subcategoriesCount: 0,
+        assetsCount: 0,
+      }
+      setCategories((prev) => [newCat, ...prev])
+      addActivity(`Created category: ${newCat.name}`, `Added by ${currentUser.name}`)
+      showToast(`Category "${newCat.name}" created.`)
+      return newCat
+    },
+    [currentUser, addActivity, showToast]
+  )
+
+  const updateCategory = useCallback(
+    (cat: CategoryItem) => {
+      setCategories((prev) => prev.map((c) => (c.id === cat.id ? cat : c)))
+      showToast(`Category "${cat.name}" updated.`)
+    },
+    [showToast]
+  )
+
+  const deleteCategory = useCallback(
+    (id: string) => {
+      const target = categories.find((c) => c.id === id)
+      if (!target) return
+      setCategories((prev) => prev.filter((c) => c.id !== id))
+      showToast(`Category "${target.name}" removed.`)
+    },
+    [categories, showToast]
+  )
+
+  const addSubcategory = useCallback(
+    (sub: Omit<SubcategoryItem, 'id' | 'assetsCount'>): SubcategoryItem => {
+      const newSub: SubcategoryItem = {
+        ...sub,
+        id: `sub-${Date.now()}`,
+        assetsCount: 0,
+      }
+      setSubcategories((prev) => [newSub, ...prev])
+      setCategories((prev) =>
+        prev.map((c) => (c.name === sub.parentCategory ? { ...c, subcategoriesCount: c.subcategoriesCount + 1 } : c))
+      )
+      showToast(`Subcategory "${newSub.name}" added.`)
+      return newSub
+    },
+    [showToast]
+  )
+
+  const updateSubcategory = useCallback(
+    (sub: SubcategoryItem) => {
+      setSubcategories((prev) => prev.map((s) => (s.id === sub.id ? sub : s)))
+      showToast(`Subcategory "${sub.name}" updated.`)
+    },
+    [showToast]
+  )
+
+  const deleteSubcategory = useCallback(
+    (id: string) => {
+      const target = subcategories.find((s) => s.id === id)
+      if (!target) return
+      setSubcategories((prev) => prev.filter((s) => s.id !== id))
+      setCategories((prev) =>
+        prev.map((c) =>
+          c.name === target.parentCategory
+            ? { ...c, subcategoriesCount: Math.max(0, c.subcategoriesCount - 1) }
+            : c
+        )
+      )
+      showToast(`Subcategory "${target.name}" deleted.`)
+    },
+    [subcategories, showToast]
+  )
+
+  // -------------------------------------------------------------
+  // Rights Records CRUD
+  // -------------------------------------------------------------
+  const addRightsRecord = useCallback(
+    (record: Omit<RightsRecord, 'id'> & { id?: string }): RightsRecord => {
+      const now = new Date()
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+      const autoId = record.id || `RG-${Date.now().toString().slice(-6)}`
+      const assignedAgency = record.agency || currentUser.agency || 'Lovetoons'
+
+      const newRecord: RightsRecord = {
+        ...record,
+        id: autoId,
+        agency: assignedAgency,
+        unit: assignedAgency,
+        governanceScore: record.governanceScore || 90,
+      }
+      setMasterRightsRecords((prev) => [newRecord, ...prev])
+
+      if (newRecord.status === 'Review' || newRecord.status === 'Pending') {
+        const newApproval: ApprovalRequest = {
+          id: `APP-${now.getFullYear()}-${String(masterApprovals.length + 1).padStart(3, '0')}`,
+          assetId: newRecord.assetId || newRecord.id,
+          assetName: `${newRecord.name} (Rights Scope Clearance)`,
+          category: newRecord.category,
+          subcategory: newRecord.subcategory,
+          agency: assignedAgency,
+          unit: assignedAgency,
+          contributors: newRecord.contributors,
+          requesterName: currentUser.name,
+          requesterRole: currentUser.roleLabel,
+          requesterSkill: currentUser.skills[0] || 'admin',
+          reviewerName: 'Faith Daniel',
+          stage: 'Rights Clearance & Territorial Governance Review',
+          currentStep: 1,
+          totalSteps: 2,
+          status: 'Pending',
+          priority: 'High',
+          submittedDate: dateStr,
+          submittedTime: timeStr,
+          history: [
+            {
+              stage: 'Rights Clearance Submission',
+              author: currentUser.name,
+              authorRole: currentUser.roleLabel,
+              date: `${dateStr} ${timeStr}`,
+              status: 'Submitted',
+              notes: `Submitted scope: ${newRecord.rightsType} (${newRecord.territory || 'Worldwide'}, ${newRecord.term || '10 Years'}) for ${assignedAgency}`,
+            },
+          ],
+        }
+        setMasterApprovals((prev) => [newApproval, ...prev])
+      }
+
+      addActivity(
+        `Rights scope submitted: ${newRecord.name}`,
+        `Submitted by ${currentUser.name} (${newRecord.rightsType}) • Agency: ${assignedAgency}`,
+        'shield',
+        'bg-purple-100 text-purple-700',
+        assignedAgency
+      )
+      showToast(`Rights record for "${newRecord.name}" submitted!`)
+      return newRecord
+    },
+    [currentUser, masterApprovals.length, addActivity, showToast]
+  )
+
+  const updateRightsRecord = useCallback(
+    (record: RightsRecord) => {
+      setMasterRightsRecords((prev) =>
+        prev.map((r) => (r.id === record.id ? { ...record, agency: record.agency || r.agency, unit: record.agency || r.agency } : r))
+      )
+      addActivity(
+        `Governance rights updated: ${record.name}`,
+        `Updated by ${currentUser.name} • Status: ${record.status}`,
+        'shield',
+        'bg-indigo-100 text-indigo-700',
+        record.agency || currentUser.agency
+      )
+      showToast(`Governance details for "${record.name}" updated.`)
+    },
+    [currentUser, addActivity, showToast]
+  )
+
+  const deleteRightsRecord = useCallback(
+    (id: string) => {
+      const target = masterRightsRecords.find((r) => r.id === id)
+      if (!target) return
+      setMasterRightsRecords((prev) => prev.filter((r) => r.id !== id))
+      showToast(`Rights clearance record for "${target.name}" removed.`)
+    },
+    [masterRightsRecords, showToast]
+  )
+
+  // -------------------------------------------------------------
+  // Relationships CRUD
+  // -------------------------------------------------------------
+  const addRelationship = useCallback(
+    (rel: Omit<RelationshipItem, 'id' | 'createdDate' | 'createdTime'>): RelationshipItem => {
+      const now = new Date()
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+      const newRel: RelationshipItem = {
+        ...rel,
+        id: `rel-${Date.now()}`,
+        createdDate: dateStr,
+        createdTime: timeStr,
+      }
+      setMasterRelationships((prev) => [newRel, ...prev])
+      addActivity(
+        `Linked IP assets: ${newRel.sourceAsset} ↔ ${newRel.targetAsset}`,
+        `Relation: "${newRel.relationshipType}" established by ${currentUser.name}`,
+        'link',
+        'bg-blue-100 text-blue-700'
+      )
+      showToast(`Relationship established between "${newRel.sourceAsset}" and "${newRel.targetAsset}".`)
+      return newRel
+    },
+    [currentUser, addActivity, showToast]
+  )
+
+  const deleteRelationship = useCallback(
+    (id: string) => {
+      const target = masterRelationships.find((r) => r.id === id)
+      if (!target) return
+      setMasterRelationships((prev) => prev.filter((r) => r.id !== id))
+      showToast('Relationship unlinked.')
+    },
+    [masterRelationships, showToast]
+  )
+
+  // -------------------------------------------------------------
+  // Approvals Actions
+  // -------------------------------------------------------------
+  const approveRequest = useCallback(
+    (approvalId: string, reviewerNotes = 'Clearance and doctrinal review passed successfully.') => {
+      const now = new Date()
+      const dateStr = now.toLocaleString()
+
+      setMasterApprovals((prev) =>
+        prev.map((app) => {
+          if (app.id !== approvalId) return app
+          return {
+            ...app,
+            status: 'Approved',
+            currentStep: app.totalSteps,
+            history: [
+              ...app.history,
+              {
+                stage: 'Approved by Content Reviewer',
+                author: currentUser.name,
+                authorRole: currentUser.roleLabel,
+                date: dateStr,
+                status: 'Approved',
+                notes: reviewerNotes,
+              },
+            ],
+          }
+        })
+      )
+
+      // Also set matching asset status to Approved
+      const targetApp = masterApprovals.find((a) => a.id === approvalId)
+      if (targetApp) {
+        setMasterAssets((prev) =>
+          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'Approved' } : asset))
+        )
+        setMasterRightsRecords((prev) =>
+          prev.map((r) => (r.assetId === targetApp.assetId ? { ...r, status: 'Cleared', governanceScore: 100 } : r))
+        )
+        addActivity(
+          `Approved request: ${targetApp.assetName}`,
+          `Approved by ${currentUser.name} (${currentUser.roleLabel}) • Agency: ${targetApp.agency}`,
+          'check',
+          'bg-emerald-100 text-emerald-700',
+          targetApp.agency
+        )
+        showToast(`Approval request "${targetApp.assetName}" cleared and marked Approved!`)
+      }
+    },
+    [currentUser, masterApprovals, addActivity, showToast]
+  )
+
+  const declineRequest = useCallback(
+    (approvalId: string, reason: string) => {
+      const now = new Date()
+      const dateStr = now.toLocaleString()
+
+      setMasterApprovals((prev) =>
+        prev.map((app) => {
+          if (app.id !== approvalId) return app
+          return {
+            ...app,
+            status: 'Declined',
+            history: [
+              ...app.history,
+              {
+                stage: 'Declined by Reviewer',
+                author: currentUser.name,
+                authorRole: currentUser.roleLabel,
+                date: dateStr,
+                status: 'Declined',
+                notes: reason,
+              },
+            ],
+          }
+        })
+      )
+
+      const targetApp = masterApprovals.find((a) => a.id === approvalId)
+      if (targetApp) {
+        setMasterAssets((prev) =>
+          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'Requires Attention' } : asset))
+        )
+        addActivity(
+          `Declined review: ${targetApp.assetName}`,
+          `Declined by ${currentUser.name}: "${reason}"`,
+          'alert',
+          'bg-rose-100 text-rose-700',
+          targetApp.agency
+        )
+        showToast(`Request for "${targetApp.assetName}" declined. Notice sent.`)
+      }
+    },
+    [currentUser, masterApprovals, addActivity, showToast]
+  )
+
+  const requestFeedback = useCallback(
+    (approvalId: string, feedbackNotes: string) => {
+      const now = new Date()
+      const dateStr = now.toLocaleString()
+
+      setMasterApprovals((prev) =>
+        prev.map((app) => {
+          if (app.id !== approvalId) return app
+          return {
+            ...app,
+            status: 'Needs Feedback',
+            feedbackNotes,
+            history: [
+              ...app.history,
+              {
+                stage: 'Feedback Requested',
+                author: currentUser.name,
+                authorRole: currentUser.roleLabel,
+                date: dateStr,
+                status: 'Needs Feedback',
+                notes: feedbackNotes,
+              },
+            ],
+          }
+        })
+      )
+
+      const targetApp = masterApprovals.find((a) => a.id === approvalId)
+      if (targetApp) {
+        setMasterAssets((prev) =>
+          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'In Review' } : asset))
+        )
+        addActivity(
+          `Reviewer requested feedback: ${targetApp.assetName}`,
+          `Notes from ${currentUser.name}: "${feedbackNotes}"`,
+          'alert',
+          'bg-amber-100 text-amber-700',
+          targetApp.agency
+        )
+        showToast('Feedback notes registered and sent to creator.')
+      }
+    },
+    [currentUser, masterApprovals, addActivity, showToast]
+  )
+
+  const createApprovalRequest = useCallback(
+    (assetId: string, priority: ApprovalRequest['priority'] = 'Medium'): ApprovalRequest => {
+      const now = new Date()
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+      const targetAsset = masterAssets.find((a) => a.id === assetId)
+      const assignedAgency: Agency = targetAsset?.agency || currentUser.agency || 'Lovetoons'
+
+      const newApproval: ApprovalRequest = {
+        id: `APP-${now.getFullYear()}-${String(masterApprovals.length + 1).padStart(3, '0')}`,
+        assetId: targetAsset?.id || assetId,
+        assetName: targetAsset?.name || 'Asset for Review',
+        category: targetAsset?.category || 'General',
+        subcategory: targetAsset?.subcategory || 'General',
+        agency: assignedAgency,
+        unit: assignedAgency,
+        contributors: targetAsset?.contributors || [],
+        requesterName: currentUser.name,
+        requesterRole: currentUser.roleLabel,
+        requesterSkill: currentUser.skills[0] || 'admin',
+        reviewerName: 'Faith Daniel',
+        stage: 'Submitted for Review',
+        currentStep: 1,
+        totalSteps: 3,
+        status: 'Pending',
+        priority,
+        submittedDate: dateStr,
+        submittedTime: timeStr,
+        history: [
+          {
+            stage: 'Submitted for Review',
+            author: currentUser.name,
+            authorRole: currentUser.roleLabel,
+            date: `${dateStr} ${timeStr}`,
+            status: 'Submitted',
+            notes: `Asset submitted for ${assignedAgency} review and clearance.`,
+          },
+        ],
+      }
+
+      setMasterApprovals((prev) => [newApproval, ...prev])
+      showToast(`Approval request logged for "${newApproval.assetName}".`)
+      return newApproval
+    },
+    [masterAssets, masterApprovals.length, currentUser, showToast]
+  )
+
+  // Reset to default
+  const resetToDefaultData = useCallback(() => {
+    setMasterAssets(initialAssetsData)
+    setCategories(initialCategories)
+    setSubcategories(initialSubcategories)
+    setMasterRightsRecords(initialRightsRecords)
+    setMasterRelationships(initialRelationships)
+    setMasterApprovals(initialApprovals)
+    setMasterActivities(initialActivityLogs)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+    showToast('All platform data reset to default state.')
+  }, [showToast])
 
   const value = {
     currentUser,
@@ -858,8 +1063,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     canApprove,
     isSuperAdmin,
     isReviewer,
+    isAgencyAdmin,
     isUnitAdmin,
+    isGlobalViewer,
+    userAgency,
     assets,
+    allAssets: masterAssets,
     addAsset,
     updateAsset,
     deleteAsset,
@@ -874,20 +1083,25 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     updateSubcategory,
     deleteSubcategory,
     rightsRecords,
+    allRightsRecords: masterRightsRecords,
     addRightsRecord,
     updateRightsRecord,
     deleteRightsRecord,
     relationships,
+    allRelationships: masterRelationships,
     addRelationship,
     deleteRelationship,
     approvals,
+    allApprovals: masterApprovals,
     approveRequest,
     declineRequest,
     requestFeedback,
     createApprovalRequest,
     activities,
+    allActivities: masterActivities,
     addActivity,
     stats,
+    globalStats,
     resetToDefaultData,
     toastMessage,
     showToast,

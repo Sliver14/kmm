@@ -27,7 +27,9 @@ import {
   RightsDocument,
   RelationshipItem,
   ApprovalRequest,
+  Agency,
   OperationalUnit,
+  AssetContributor,
   UserSkill,
   UserProfile,
   AssetThumbType,
@@ -81,15 +83,16 @@ const nav = [
   ['Settings', Settings],
 ] as const
 
-const operationalUnits: OperationalUnit[] = [
-  'Animation & TV',
-  'Music & Audio',
-  'Publishing & Literature',
-  'Digital & Tech',
-  'Events & Outreach',
-  'Brand & Merchandise',
-  'General Ministry',
+export const agencies: Agency[] = [
+  'Lovetoons',
+  'Publishing Agency',
+  'Digital Agency',
+  'Academy Agency',
+  'Educational Agency',
 ]
+
+// Backward-compatibility
+export const operationalUnits = agencies
 
 const skillOptions: { value: UserSkill; label: string }[] = [
   { value: 'animation', label: 'Animation Artist / Rigger' },
@@ -104,14 +107,17 @@ const skillOptions: { value: UserSkill; label: string }[] = [
 
 function Logo() {
   return (
-    <div className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-center">
-      <img
-        src="/lovetoons-logo.png"
-        alt="Lovetoons"
-        className="h-7 w-auto max-w-[165px] object-contain drop-shadow-md brightness-105"
-      />
-      <div className="text-[9px] text-white/80 font-semibold tracking-widest uppercase">
-        Kiddies Media Ministry
+    <div className="flex flex-col items-center justify-center gap-1.5 px-3 py-2 text-center">
+      <div className="flex items-center gap-2">
+        <img
+          src="/kmm-logo.png"
+          alt="Kiddies Media Production"
+          className="size-7 object-contain drop-shadow-md"
+        />
+        <span className="text-sm font-black text-white tracking-tight">Kiddies Media</span>
+      </div>
+      <div className="rounded-full bg-blue-500/30 px-2 py-0.5 text-[8.5px] text-blue-200 font-bold uppercase tracking-wider">
+        Production Network
       </div>
     </div>
   )
@@ -572,10 +578,10 @@ function Header({
               <div className="text-[12px] font-bold leading-tight text-[#09245a] flex items-center gap-1.5">
                 <span>{currentUser.name}</span>
                 <span className="rounded bg-blue-100 px-1.5 py-0.2 text-[9px] font-bold text-blue-700">
-                  {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role === 'reviewer' ? 'Reviewer' : 'Unit Admin'}
+                  {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role === 'reviewer' ? 'Reviewer' : 'Agency Rep'}
                 </span>
               </div>
-              <div className="text-[10px] font-medium text-slate-500">{currentUser.unit}</div>
+              <div className="text-[10px] font-medium text-slate-500">{currentUser.agency || currentUser.unit}</div>
             </div>
             <ChevronDown className="size-3.5 text-slate-400" />
           </button>
@@ -622,7 +628,7 @@ function Header({
                           {isSelected && <Check className="size-3.5 text-blue-600 shrink-0" />}
                         </div>
                         <div className="text-[11px] font-semibold text-blue-700">{user.roleLabel}</div>
-                        <div className="text-[10px] text-slate-400 truncate">Unit: {user.unit}</div>
+                        <div className="text-[10px] text-slate-400 truncate">Agency: {user.agency || user.unit}</div>
                       </div>
                     </button>
                   )
@@ -964,7 +970,7 @@ function Dashboard({
 }: {
   setActiveNav?: (nav: string, assetId?: string | null) => void
 }) {
-  const { assets, stats, categories, activities } = useLovetoonsData()
+  const { assets, allAssets, stats, globalStats, categories, activities, currentUser, isGlobalViewer, userAgency } = useLovetoonsData()
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(
@@ -983,11 +989,21 @@ function Dashboard({
             <Activity className="size-6" strokeWidth={2.2} />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-[#09245a] sm:text-3xl">
-              IP & Asset Governance Dashboard
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-black tracking-tight text-[#09245a] sm:text-3xl">
+                {isGlobalViewer ? 'KMP Network Governance Dashboard' : `${currentUser.agency || userAgency} Dashboard`}
+              </h1>
+              <span className={cn(
+                'rounded-full px-2.5 py-0.5 text-[10px] font-bold border',
+                isGlobalViewer ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-blue-100 text-blue-700 border-blue-200'
+              )}>
+                {isGlobalViewer ? 'All Agencies Scope' : `${currentUser.agency} Rep`}
+              </span>
+            </div>
             <p className="mt-0.5 text-[12px] font-medium text-slate-500">
-              Manage, track and protect all Kiddies Media Ministry / Lovetoons intellectual assets in real-time.
+              {isGlobalViewer
+                ? 'Centralized oversight of Lovetoons, Publishing Agency, Digital Agency, Academy Agency, and Educational Agency.'
+                : `Viewing intellectual assets, clearance compliance and staff contributors exclusively for ${currentUser.agency || userAgency}.`}
             </p>
           </div>
         </div>
@@ -1076,7 +1092,9 @@ function Dashboard({
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-bold text-[#09245a] text-sm">Recent Registered Assets</h2>
-            <p className="text-[11px] text-blue-600">Latest intellectual property assets registered across units</p>
+            <p className="text-[11px] text-blue-600">
+              {isGlobalViewer ? 'Latest intellectual property assets registered across all agencies' : `Latest assets for ${currentUser.agency}`}
+            </p>
           </div>
           <div className="relative w-64">
             <Search className="absolute left-3 top-2.5 size-3.5 text-slate-400" />
@@ -1096,7 +1114,8 @@ function Dashboard({
                 <th className="p-3">Asset</th>
                 <th className="p-3">Category</th>
                 <th className="p-3">Subcategory</th>
-                <th className="p-3">Unit</th>
+                <th className="p-3">Agency</th>
+                <th className="p-3">Contributors</th>
                 <th className="p-3">Status</th>
                 <th className="p-3">Created On</th>
               </tr>
@@ -1128,9 +1147,29 @@ function Dashboard({
                   <td className="p-3 text-slate-700 font-medium">{item.category}</td>
                   <td className="p-3 text-slate-600">{item.subcategory}</td>
                   <td className="p-3">
-                    <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                      {item.unit}
+                    <span className="rounded-md bg-blue-50 border border-blue-200/80 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                      {item.agency || item.unit}
                     </span>
+                  </td>
+                  <td className="p-3">
+                    <div className="flex items-center -space-x-1.5" title={`${item.contributors?.length || 1} staff contributors`}>
+                      {(item.contributors && item.contributors.length > 0 ? item.contributors.slice(0, 3) : [
+                        { id: 'c1', name: item.creatorName, role: item.creatorRole }
+                      ]).map((c, i) => (
+                        <div
+                          key={c.id || i}
+                          className="grid size-6 place-items-center rounded-full bg-slate-800 text-[9px] font-bold text-white ring-2 ring-white"
+                          title={`${c.name} (${c.role})`}
+                        >
+                          {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                        </div>
+                      ))}
+                      {(item.contributors?.length || 0) > 3 && (
+                        <div className="grid size-6 place-items-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-600 ring-2 ring-white">
+                          +{(item.contributors?.length || 0) - 3}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="p-3">
                     <StatusPill status={item.status} />
@@ -1156,14 +1195,18 @@ function AssetsPage({
   setActiveNav: (nav: string) => void
   initialAssetId?: string | null
 }) {
-  const { assets, addAsset, bulkApproveAssets, bulkDeleteAssets, categories, subcategories, currentUser, showToast } = useLovetoonsData()
+  const { assets, allAssets, addAsset, bulkApproveAssets, bulkDeleteAssets, categories, subcategories, currentUser, showToast, isGlobalViewer, userAgency, availableUsers } = useLovetoonsData()
 
   const [selectedPill, setSelectedPill] = useState<string>('All Assets')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All Categories')
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('All Subcategories')
   const [selectedStatus, setSelectedStatus] = useState<string>('All Statuses')
-  const [selectedUnit, setSelectedUnit] = useState<string>('All Units')
+  const [selectedAgency, setSelectedAgency] = useState<string>('All Agencies')
+  const [newContributorName, setNewContributorName] = useState('')
+  const [newContributorRole, setNewContributorRole] = useState('Lead 3D Animator')
+  const [newContributorAgency, setNewContributorAgency] = useState<Agency>(currentUser.agency || 'Lovetoons')
+  const [newContributorType, setNewContributorType] = useState<AssetContributor['contributionType']>('Core Creative')
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [modalStep, setModalStep] = useState<1 | 2>(1)
@@ -1222,9 +1265,11 @@ function AssetsPage({
     name: string
     category: string
     subcategory: string
-    unit: OperationalUnit
+    agency: Agency
+    unit?: Agency
     creatorName: string
     creatorSkill: UserSkill
+    contributors: AssetContributor[]
     rightsHolder: string
     description: string
     tags: string
@@ -1251,9 +1296,20 @@ function AssetsPage({
     name: '',
     category: categories[0]?.name || 'Animated Programme',
     subcategory: '',
-    unit: currentUser.unit,
+    agency: currentUser.agency || 'Lovetoons',
+    unit: currentUser.agency || 'Lovetoons',
     creatorName: currentUser.name,
     creatorSkill: currentUser.skills[0] || 'admin',
+    contributors: [
+      {
+        id: 'c-init-1',
+        name: currentUser.name,
+        role: currentUser.roleLabel,
+        agency: currentUser.agency || 'Lovetoons',
+        email: currentUser.email,
+        contributionType: 'Lead Author',
+      },
+    ],
     rightsHolder: 'Lovetoons Media Ltd',
     description: '',
     tags: 'Faith, Animated, Kids',
@@ -1299,7 +1355,7 @@ function AssetsPage({
       if (selectedStatus !== 'All Statuses' && item.status !== selectedStatus) {
         return false
       }
-      if (selectedUnit !== 'All Units' && item.unit !== selectedUnit) {
+      if (selectedAgency !== 'All Agencies' && (item.agency || item.unit) !== selectedAgency) {
         return false
       }
       if (searchQuery.trim()) {
@@ -1310,12 +1366,13 @@ function AssetsPage({
           item.category.toLowerCase().includes(q) ||
           item.subcategory.toLowerCase().includes(q) ||
           item.creatorName.toLowerCase().includes(q) ||
-          item.unit.toLowerCase().includes(q)
+          (item.agency && item.agency.toLowerCase().includes(q)) ||
+          item.contributors?.some(c => c.name.toLowerCase().includes(q) || c.role.toLowerCase().includes(q))
         if (!match) return false
       }
       return true
     })
-  }, [assets, selectedCategory, selectedSubcategory, selectedStatus, selectedUnit, searchQuery])
+  }, [assets, selectedCategory, selectedSubcategory, selectedStatus, selectedAgency, searchQuery])
 
   const handleAddAssetSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -1329,10 +1386,12 @@ function AssetsPage({
       category: newAssetForm.category,
       categoryGroup: newAssetForm.category,
       subcategory: newAssetForm.subcategory || availableSubcategoriesForForm[0]?.name || 'General',
-      unit: newAssetForm.unit,
+      agency: isGlobalViewer ? newAssetForm.agency : (currentUser.agency || 'Lovetoons'),
+      unit: isGlobalViewer ? newAssetForm.agency : (currentUser.agency || 'Lovetoons'),
       creatorName: newAssetForm.creatorName || currentUser.name,
       creatorRole: currentUser.roleLabel,
       creatorSkill: newAssetForm.creatorSkill,
+      contributors: newAssetForm.contributors,
       status: 'Pending',
       thumbType: newAssetForm.thumbType,
       posterUrl: newAssetForm.posterUrl || '/tv_series_poster.jpg',
@@ -1348,7 +1407,18 @@ function AssetsPage({
       name: '',
       category: categories[0]?.name || 'Animated Programme',
       subcategory: '',
-      unit: currentUser.unit,
+      agency: currentUser.agency || 'Lovetoons',
+      unit: currentUser.agency || 'Lovetoons',
+      contributors: [
+        {
+          id: 'c-init-1',
+          name: currentUser.name,
+          role: currentUser.roleLabel,
+          agency: currentUser.agency || 'Lovetoons',
+          email: currentUser.email,
+          contributionType: 'Lead Author',
+        },
+      ],
       creatorName: currentUser.name,
       creatorSkill: currentUser.skills[0] || 'admin',
       rightsHolder: 'Lovetoons Media Ltd',
@@ -1479,21 +1549,30 @@ function AssetsPage({
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
           </div>
 
-          {/* Operational Unit Filter */}
+          {/* Agency Filter */}
           <div className="relative">
-            <select
-              value={selectedUnit}
-              onChange={(e) => setSelectedUnit(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-blue-400 focus:outline-none"
-            >
-              <option value="All Units">All Units</option>
-              {operationalUnits.map((u) => (
-                <option key={u} value={u}>
-                  {u}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+            {isGlobalViewer ? (
+              <>
+                <select
+                  value={selectedAgency}
+                  onChange={(e) => setSelectedAgency(e.target.value)}
+                  className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-semibold text-slate-700 focus:border-blue-400 focus:outline-none"
+                >
+                  <option value="All Agencies">All Agencies ({assets.length})</option>
+                  {agencies.map((agency) => (
+                    <option key={agency} value={agency}>
+                      {agency}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+              </>
+            ) : (
+              <div className="flex h-10 items-center justify-between rounded-lg border border-blue-200 bg-blue-50/70 px-3 text-xs font-bold text-blue-900">
+                <span className="truncate">Agency: {currentUser.agency || userAgency}</span>
+                <span className="rounded bg-blue-200/80 px-1.5 py-0.5 text-[9px] text-blue-800 shrink-0">Agency Scoped</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1550,7 +1629,8 @@ function AssetsPage({
                 <th className="px-4 py-3">Asset</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Subcategory</th>
-                <th className="px-4 py-3">Unit</th>
+                <th className="px-4 py-3">Agency</th>
+                <th className="px-4 py-3">Contributors</th>
                 <th className="px-4 py-3">Creator / Skill</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Created On</th>
@@ -1622,9 +1702,44 @@ function AssetsPage({
                       <td className="px-4 py-3 text-slate-600 font-medium">{asset.subcategory}</td>
 
                       <td className="px-4 py-3">
-                        <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                          {asset.unit}
+                        <span className={cn(
+                          'rounded-md px-2 py-0.5 text-[10px] font-bold border',
+                          (asset.agency || asset.unit) === 'Lovetoons'
+                            ? 'bg-purple-50 text-purple-700 border-purple-200'
+                            : (asset.agency || asset.unit) === 'Publishing Agency'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : (asset.agency || asset.unit) === 'Digital Agency'
+                            ? 'bg-cyan-50 text-cyan-700 border-cyan-200'
+                            : (asset.agency || asset.unit) === 'Academy Agency'
+                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        )}>
+                          {asset.agency || asset.unit}
                         </span>
+                      </td>
+
+                      <td className="px-4 py-3">
+                        <div className="flex items-center -space-x-1.5" title={`${asset.contributors?.length || 1} staff contributors`}>
+                          {(asset.contributors && asset.contributors.length > 0 ? asset.contributors.slice(0, 3) : [
+                            { id: 'lead', name: asset.creatorName, role: asset.creatorRole }
+                          ]).map((c, i) => (
+                            <div
+                              key={c.id || i}
+                              className="grid size-6 place-items-center rounded-full bg-slate-800 text-[9px] font-bold text-white ring-2 ring-white"
+                              title={`${c.name} (${c.role})`}
+                            >
+                              {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                            </div>
+                          ))}
+                          {(asset.contributors?.length || 0) > 3 && (
+                            <div className="grid size-6 place-items-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-600 ring-2 ring-white">
+                              +{(asset.contributors?.length || 0) - 3}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[120px]">
+                          {asset.contributors?.[0]?.name || asset.creatorName}
+                        </div>
                       </td>
 
                       <td className="px-4 py-3">
@@ -1788,18 +1903,30 @@ function AssetsPage({
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block font-semibold text-slate-700 mb-1">Operational Unit *</label>
-                      <select
-                        value={newAssetForm.unit}
-                        onChange={(e) => setNewAssetForm((prev) => ({ ...prev, unit: e.target.value as OperationalUnit }))}
-                        className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
-                      >
-                        {operationalUnits.map((u) => (
-                          <option key={u} value={u}>
-                            {u}
-                          </option>
-                        ))}
-                      </select>
+                      <label className="block font-semibold text-slate-700 mb-1">Agency *</label>
+                      {isGlobalViewer ? (
+                        <select
+                          value={newAssetForm.agency}
+                          onChange={(e) =>
+                            setNewAssetForm((prev) => ({
+                              ...prev,
+                              agency: e.target.value as Agency,
+                              unit: e.target.value as Agency,
+                            }))
+                          }
+                          className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
+                        >
+                          {agencies.map((agency) => (
+                            <option key={agency} value={agency}>
+                              {agency}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-700">
+                          {currentUser.agency || 'Lovetoons'}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -1815,6 +1942,118 @@ function AssetsPage({
                           </option>
                         ))}
                       </select>
+                    </div>
+                  </div>
+
+                  {/* STAFF CONTRIBUTORS BUILDER */}
+                  <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-3.5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="block font-bold text-[#09245a] text-xs">Staff Contributors on this IP ({newAssetForm.contributors.length})</label>
+                        <p className="text-[11px] text-slate-500">Capture contributing staff members, writers, artists, and engineers</p>
+                      </div>
+                    </div>
+
+                    {/* Contributor List Chips */}
+                    <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1">
+                      {newAssetForm.contributors.map((c, idx) => (
+                        <div
+                          key={c.id || idx}
+                          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-2xs text-xs"
+                        >
+                          <div className="grid size-6 place-items-center rounded bg-slate-800 text-[10px] font-bold text-white">
+                            {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-slate-900 leading-tight truncate max-w-[130px]">{c.name}</div>
+                            <div className="text-[10px] text-blue-700 truncate">{c.role} • {c.agency}</div>
+                          </div>
+                          {newAssetForm.contributors.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNewAssetForm((prev) => ({
+                                  ...prev,
+                                  contributors: prev.contributors.filter((_, i) => i !== idx),
+                                }))
+                              }}
+                              className="text-slate-400 hover:text-red-500 transition ml-1"
+                              title="Remove contributor"
+                            >
+                              <X className="size-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add Contributor Mini-Form */}
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-t border-blue-100/80 pt-2.5">
+                      <div className="sm:col-span-1">
+                        <input
+                          type="text"
+                          placeholder="Staff name..."
+                          value={newContributorName}
+                          onChange={(e) => setNewContributorName(e.target.value)}
+                          className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none focus:border-blue-400"
+                        />
+                      </div>
+                      <div className="sm:col-span-1">
+                        <select
+                          value={newContributorRole}
+                          onChange={(e) => setNewContributorRole(e.target.value)}
+                          className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-400"
+                        >
+                          <option value="Lead 3D Animator">Lead 3D Animator</option>
+                          <option value="Screenwriter & Author">Screenwriter & Author</option>
+                          <option value="Voice Artist / Director">Voice Artist / Director</option>
+                          <option value="Music Producer & Composer">Music Producer & Composer</option>
+                          <option value="Curriculum Author">Curriculum Author</option>
+                          <option value="Illustrator & Concept Artist">Illustrator & Concept Artist</option>
+                          <option value="Software Engineer">Software Engineer</option>
+                          <option value="UI/UX Designer">UI/UX Designer</option>
+                          <option value="Audio Sound Engineer">Audio Sound Engineer</option>
+                          <option value="Theological Reviewer">Theological Reviewer</option>
+                        </select>
+                      </div>
+                      <div className="sm:col-span-1">
+                        <select
+                          value={newContributorAgency}
+                          onChange={(e) => setNewContributorAgency(e.target.value as Agency)}
+                          className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-400"
+                        >
+                          {agencies.map((agency) => (
+                            <option key={agency} value={agency}>
+                              {agency}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="sm:col-span-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newContributorName.trim()) return
+                            setNewAssetForm((prev) => ({
+                              ...prev,
+                              contributors: [
+                                ...prev.contributors,
+                                {
+                                  id: `c-staff-${Date.now()}`,
+                                  name: newContributorName.trim(),
+                                  role: newContributorRole,
+                                  agency: newContributorAgency,
+                                  contributionType: newContributorType,
+                                },
+                              ],
+                            }))
+                            setNewContributorName('')
+                          }}
+                          className="h-8 w-full rounded-md bg-blue-600 font-bold text-white text-xs hover:bg-blue-700 transition"
+                        >
+                          + Add Staff
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -2350,8 +2589,8 @@ function AssetDetailsPage({
                   <Tv className="size-3.5" />
                   <span>{asset.category}</span>
                 </span>
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                  Unit: {asset.unit}
+                <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                  Agency: {asset.agency || asset.unit}
                 </span>
               </div>
 
@@ -2447,8 +2686,8 @@ function AssetDetailsPage({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Operational Unit</span>
-                    <div className="font-bold text-slate-900">{asset.unit}</div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Agency</span>
+                    <div className="font-bold text-slate-900">{asset.agency || asset.unit}</div>
                     <div className="text-[11px] text-slate-500">Created by {asset.creatorName} ({asset.creatorSkill})</div>
                   </div>
 
@@ -2495,6 +2734,49 @@ function AssetDetailsPage({
                     <div className="font-bold text-slate-900">{asset.rightsHolder || 'Lovetoons Media Ltd'}</div>
                     <div className="text-[11px] text-slate-500">Version {asset.version || 'v1.0'} • {asset.fileSize || '1.5 GB'}</div>
                   </div>
+                </div>
+              </div>
+
+              {/* STAFF CONTRIBUTORS & CREATIVE TEAM CARD */}
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                  <div>
+                    <h2 className="text-base font-bold text-[#09245a] flex items-center gap-2">
+                      <Users className="size-4 text-blue-600" />
+                      <span>Staff Contributors & Creative Team</span>
+                      <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-xs font-bold">
+                        {asset.contributors?.length || 1}
+                      </span>
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Staff members, artists, and specialists who contributed to this intellectual property
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {(asset.contributors && asset.contributors.length > 0 ? asset.contributors : [
+                    { id: 'lead', name: asset.creatorName, role: asset.creatorRole, agency: asset.agency || 'Lovetoons', contributionType: 'Lead Author' }
+                  ]).map((c, idx) => (
+                    <div
+                      key={c.id || idx}
+                      className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3 hover:bg-white hover:border-blue-200 hover:shadow-xs transition"
+                    >
+                      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-xs font-bold text-white shadow-2xs">
+                        {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-bold text-slate-900 text-xs truncate">{c.name}</span>
+                          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold text-blue-700 shrink-0">
+                            {c.contributionType || 'Contributor'}
+                          </span>
+                        </div>
+                        <div className="text-[11px] font-semibold text-slate-700 truncate">{c.role}</div>
+                        <div className="text-[10px] text-slate-400 truncate">{c.agency} • {(c as any).email || 'Verified Staff'}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -3730,7 +4012,7 @@ function RightsDetailsPage({
                 <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase">Registered Rights Holder</span>
                   <div className="font-bold text-slate-900 text-sm">{asset.owner}</div>
-                  <div className="text-[11px] text-slate-500">Parent Operational Unit: {asset.unit || 'General Ministry'}</div>
+                  <div className="text-[11px] text-slate-500">Parent Agency: {asset.agency || 'Lovetoons'}</div>
                 </div>
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 space-y-1">
@@ -4357,7 +4639,7 @@ function ApprovalsPage() {
                           {app.category} • {app.subcategory}
                         </span>
                         <span className="rounded bg-purple-50 border border-purple-200 px-2 py-0.5 text-[10px] font-bold text-purple-700">
-                          Unit: {app.unit}
+                          Agency: {app.agency || app.unit}
                         </span>
                         <span
                           className={cn(
@@ -5365,8 +5647,8 @@ function ReportsPage() {
           <div className="text-[11px] text-slate-400 font-medium mt-1">{stats.clearedRightsCount} of {stats.totalRights} Cleared</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
-          <div className="text-xs font-bold text-slate-500">Operational Units</div>
-          <div className="text-2xl font-black text-purple-700 mt-1">{operationalUnits.length}</div>
+          <div className="text-xs font-bold text-slate-500">Agencies</div>
+          <div className="text-2xl font-black text-purple-700 mt-1">{agencies.length}</div>
           <div className="text-[11px] text-purple-600 font-medium mt-1">All Active</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
@@ -5378,12 +5660,12 @@ function ReportsPage() {
 
       {/* Unit Breakdown Table */}
       <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-4">
-        <h2 className="font-bold text-[#09245a] text-sm">Operational Unit Asset Contributions</h2>
+        <h2 className="font-bold text-[#09245a] text-sm">Agency Asset Distribution & Contributions</h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[650px] text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600 uppercase">
-                <th className="p-3">Operational Unit</th>
+                <th className="p-3">Agency</th>
                 <th className="p-3">Total Assets</th>
                 <th className="p-3">Approved</th>
                 <th className="p-3">Pending</th>
@@ -5392,7 +5674,7 @@ function ReportsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {operationalUnits.map((u) => {
-                const unitAssets = assets.filter((a) => a.unit === u)
+                const unitAssets = assets.filter((a) => (a.agency || a.unit) === u)
                 const unitApproved = unitAssets.filter((a) => a.status === 'Approved').length
                 const unitPending = unitAssets.filter((a) => a.status === 'Pending').length
                 const rate = unitAssets.length > 0 ? Math.round((unitApproved / unitAssets.length) * 100) : 100
