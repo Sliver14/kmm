@@ -13,7 +13,8 @@ import {
   Tv, FolderPlus, ArrowUpDown, ArrowDownUp, Move, Star, CheckCircle, Play, Pause,
   Calendar, Clock, User, Folder, PlayCircle, FileCode, RotateCcw, FileCheck, Files, Copy,
   Shield, Lock, ShieldAlert, CheckSquare, MessageSquare, Send, ArrowRight, ShieldQuestion,
-  UserCheck, Sliders, RefreshCw, FileUp, FolderArchive, LogOut, PanelLeftClose, PanelLeftOpen
+  UserCheck, Sliders, RefreshCw, FileUp, FolderArchive, LogOut, PanelLeftClose, PanelLeftOpen,
+  CheckCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLovetoonsData } from '@/lib/store/DataContext'
@@ -428,44 +429,67 @@ function NotificationModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[100] flex justify-end bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer overflow-hidden"
+      className="fixed inset-0 z-[100] flex justify-end bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300 cursor-pointer overflow-hidden"
       role="dialog"
       aria-modal="true"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:w-[440px] md:w-[480px] h-full border-l border-slate-200/90 bg-white shadow-2xl text-xs flex flex-col cursor-default animate-in slide-in-from-right duration-300 ease-out"
+        className="relative w-full sm:w-[460px] md:w-[500px] h-full border-l border-white/20 bg-white/95 backdrop-blur-2xl shadow-[0_25px_70px_-15px_rgba(2,6,23,0.35)] flex flex-col cursor-default animate-in slide-in-from-right duration-300 ease-out overflow-hidden"
       >
+        {/* Ambient specular glowing gradients */}
+        <div className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-transparent blur-3xl" />
+        <div className="pointer-events-none absolute top-1/2 -left-20 size-60 rounded-full bg-gradient-to-tr from-cyan-500/10 via-blue-500/5 to-transparent blur-3xl" />
+
         {/* Drawer Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 p-4 sm:p-5 bg-gradient-to-r from-slate-50 to-blue-50/50 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="grid size-10 place-items-center rounded-xl bg-blue-600 text-white shadow-sm shrink-0">
+        <div className="relative z-10 flex items-center justify-between border-b border-slate-200/80 p-4 sm:p-5 bg-gradient-to-r from-slate-50/90 via-blue-50/40 to-slate-50/90 backdrop-blur-md shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative size-10.5 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25 ring-2 ring-white/80 grid place-items-center shrink-0">
               <Bell className="size-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex size-3.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full size-3.5 bg-rose-500 ring-2 ring-white"></span>
+                </span>
+              )}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-[#09245a] text-sm sm:text-base">Ministry Alerts & Notifications</h3>
-                {unreadCount > 0 && (
-                  <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-black text-white">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-extrabold text-[#09245a] text-sm sm:text-base tracking-tight truncate">
+                  Ministry Alerts
+                </h3>
+                {unreadCount > 0 ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-xs shadow-rose-500/20">
+                    <span className="size-1.5 rounded-full bg-white animate-pulse" />
                     {unreadCount} New
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/90 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                    <Check className="size-2.5" />
+                    All Caught Up
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-500">Live governance clearances, approvals, and media releases</p>
+              <p className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
+                Live governance clearances, approvals & activity stream
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 shrink-0">
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
-                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline px-2 py-1 rounded-lg transition"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-700 bg-blue-50/90 hover:bg-blue-100 border border-blue-200/70 rounded-xl px-2.5 py-1.5 shadow-2xs hover:shadow-xs transition-all active:scale-95 cursor-pointer"
+                title="Mark all notifications as read"
               >
-                Mark all read
+                <CheckCheck className="size-3.5" />
+                <span className="hidden sm:inline">Mark all read</span>
               </button>
             )}
             <button
               onClick={onClose}
-              className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-200/70 hover:text-slate-700 transition"
+              className="grid size-8.5 place-items-center rounded-xl bg-slate-100/90 hover:bg-slate-200/90 border border-slate-200/60 text-slate-500 hover:text-slate-800 transition-all active:scale-95 shadow-2xs cursor-pointer"
               aria-label="Close notifications"
             >
               <X className="size-4" />
@@ -474,38 +498,54 @@ function NotificationModal({
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/70 p-2.5 text-xs overflow-x-auto no-scrollbar shrink-0">
+        <div className="relative z-10 flex items-center gap-1.5 border-b border-slate-200/70 bg-gradient-to-b from-slate-50/70 to-white/80 backdrop-blur-md p-2.5 sm:px-4 text-xs overflow-x-auto no-scrollbar shrink-0">
           {[
             { key: 'all', label: 'All Alerts', count: allNotifications.length },
             { key: 'approvals', label: 'Approvals', count: allNotifications.filter((n) => n.type === 'approval').length },
-            { key: 'rights', label: 'Governance & Rights', count: allNotifications.filter((n) => n.type === 'rights').length },
+            { key: 'rights', label: 'Governance', count: allNotifications.filter((n) => n.type === 'rights').length },
             { key: 'activity', label: 'Activities', count: allNotifications.filter((n) => n.type === 'activity').length },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setNotificationFilter(tab.key as any)}
-              className={cn(
-                'rounded-lg px-3 py-1.5 font-bold transition flex items-center gap-1.5 whitespace-nowrap',
-                notificationFilter === tab.key
-                  ? 'bg-white text-blue-700 shadow-2xs border border-slate-200'
-                  : 'text-slate-600 hover:bg-white/60'
-              )}
-            >
-              <span>{tab.label}</span>
-              <span className={cn('rounded-full px-1.5 py-0.2 text-[9px] font-bold', notificationFilter === tab.key ? 'bg-blue-100 text-blue-700' : 'bg-slate-200/80 text-slate-600')}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
+          ].map((tab) => {
+            const isActive = notificationFilter === tab.key
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setNotificationFilter(tab.key as any)}
+                className={cn(
+                  'relative rounded-xl px-3 py-1.5 font-bold transition-all flex items-center gap-1.5 whitespace-nowrap text-xs active:scale-95 cursor-pointer',
+                  isActive
+                    ? 'bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 text-white shadow-md shadow-blue-600/25 ring-1 ring-white/20'
+                    : 'bg-white/80 hover:bg-white text-slate-600 hover:text-slate-900 border border-slate-200/70 hover:border-slate-300 shadow-2xs'
+                )}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={cn(
+                    'rounded-full px-1.5 py-0.2 text-[10px] font-black',
+                    isActive
+                      ? 'bg-white/25 text-white ring-1 ring-white/30'
+                      : 'bg-slate-100 text-slate-600 border border-slate-200/50'
+                  )}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
         {/* Notifications List */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 divide-y divide-slate-100">
+        <div className="relative z-10 flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 custom-scrollbar">
           {filteredNotifications.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 space-y-2">
-              <CheckCircle2 className="size-8 mx-auto text-slate-300" />
-              <div className="font-semibold text-slate-600">All caught up!</div>
-              <div className="text-[11px] text-slate-400">No notifications found for this category.</div>
+            <div className="py-16 text-center space-y-3 px-6">
+              <div className="size-14 mx-auto rounded-2xl bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-100/80 grid place-items-center text-blue-500 shadow-sm">
+                <CheckCircle2 className="size-7 text-blue-600" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-extrabold text-slate-800 text-sm">All caught up!</h4>
+                <p className="text-xs text-slate-500 max-w-[280px] mx-auto leading-relaxed">
+                  No notifications in this filter. Any new ministry approvals or rights updates will appear here automatically.
+                </p>
+              </div>
             </div>
           ) : (
             filteredNotifications.map((item) => {
@@ -515,55 +555,79 @@ function NotificationModal({
                 <div
                   key={item.id}
                   className={cn(
-                    'pt-2.5 first:pt-0 flex items-start gap-3 rounded-xl p-3.5 transition border',
+                    'group relative rounded-2xl p-3.5 sm:p-4 transition-all duration-200 border text-xs',
                     isRead
-                      ? 'bg-white border-transparent opacity-80 hover:opacity-100 hover:bg-slate-50'
-                      : 'bg-blue-50/40 border-blue-100 shadow-2xs hover:bg-blue-50/70'
+                      ? 'bg-white/80 hover:bg-white border-slate-200/70 opacity-75 hover:opacity-100 shadow-2xs hover:shadow-xs'
+                      : 'bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/30 border-blue-200/80 hover:border-blue-300 shadow-xs hover:shadow-md'
                   )}
                 >
-                  <div
-                    className={cn(
-                      'grid size-9 place-items-center rounded-xl text-xs shrink-0 font-bold',
-                      item.type === 'approval'
-                        ? 'bg-amber-100 text-amber-700'
-                        : item.type === 'rights'
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-blue-100 text-blue-700'
-                    )}
-                  >
-                    {item.type === 'approval' ? (
-                      <ClipboardCheck className="size-4" />
-                    ) : item.type === 'rights' ? (
-                      <ShieldCheck className="size-4" />
-                    ) : (
-                      <Sparkles className="size-4" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="font-bold text-[#09245a] text-xs sm:text-sm truncate">{item.title}</div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {item.badge && (
-                          <span className={cn('rounded px-1.5 py-0.5 text-[9px] font-bold', item.badgeColor)}>
-                            {item.badge}
-                          </span>
-                        )}
-                        {!isRead && <span className="size-2 rounded-full bg-blue-600 ring-2 ring-blue-200" />}
-                      </div>
+                  <div className="flex items-start gap-3">
+                    {/* Category Icon Badge */}
+                    <div
+                      className={cn(
+                        'size-9.5 rounded-xl grid place-items-center text-white shrink-0 shadow-sm ring-2 ring-white',
+                        item.type === 'approval'
+                          ? 'bg-gradient-to-tr from-amber-500 to-amber-600 shadow-amber-500/20'
+                          : item.type === 'rights'
+                          ? 'bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-purple-500/20'
+                          : 'bg-gradient-to-tr from-blue-600 to-cyan-600 shadow-blue-500/20'
+                      )}
+                    >
+                      {item.type === 'approval' ? (
+                        <ClipboardCheck className="size-4.5" />
+                      ) : item.type === 'rights' ? (
+                        <ShieldCheck className="size-4.5" />
+                      ) : (
+                        <Sparkles className="size-4.5" />
+                      )}
                     </div>
 
-                    <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-snug">{item.subtitle}</p>
+                    {/* Notification Body */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="font-bold text-[#09245a] text-xs sm:text-[13px] leading-snug group-hover:text-blue-700 transition-colors line-clamp-1">
+                          {item.title}
+                        </h4>
 
-                    <div className="flex items-center justify-between pt-2.5 mt-1 text-[10px] text-slate-400">
-                      <span>{item.time}</span>
-                      <button
-                        onClick={() => handleNotificationClick(item.targetTab, item.assetId, item.id)}
-                        className="font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline"
-                      >
-                        <span>Open in {item.targetTab}</span>
-                        <ArrowRight className="size-3" />
-                      </button>
+                        <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
+                          {item.badge && (
+                            <span
+                              className={cn(
+                                'rounded-lg px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-2xs',
+                                item.badgeColor
+                              )}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                          {!isRead && (
+                            <span className="relative flex size-2 shrink-0">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full size-2 bg-blue-600 ring-2 ring-white"></span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed font-normal">
+                        {item.subtitle}
+                      </p>
+
+                      {/* Bottom metadata & Action */}
+                      <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-100/90 text-[11px]">
+                        <div className="flex items-center gap-1.5 text-slate-400 font-medium">
+                          <Clock className="size-3 text-slate-400" />
+                          <span>{item.time}</span>
+                        </div>
+
+                        <button
+                          onClick={() => handleNotificationClick(item.targetTab, item.assetId, item.id)}
+                          className="font-bold text-blue-600 hover:text-blue-800 bg-blue-50/70 hover:bg-blue-100/90 border border-blue-200/60 rounded-lg px-2.5 py-1 flex items-center gap-1 transition-all active:scale-95 shadow-2xs group/btn cursor-pointer"
+                        >
+                          <span>Open in {item.targetTab}</span>
+                          <ArrowRight className="size-3 transition-transform group-hover/btn:translate-x-0.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -573,21 +637,21 @@ function NotificationModal({
         </div>
 
         {/* Drawer Footer */}
-        <div className="border-t border-slate-100 p-3.5 bg-slate-50/90 flex items-center justify-between shrink-0">
+        <div className="relative z-10 border-t border-slate-200/80 p-3.5 sm:p-4 bg-gradient-to-b from-white/90 to-slate-50/95 backdrop-blur-xl flex items-center justify-between gap-3 shrink-0">
           <button
             onClick={() => {
               onClose()
               if (setActiveNav) setActiveNav('Approvals')
             }}
-            className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline"
+            className="flex items-center gap-2 text-xs font-bold text-blue-700 hover:text-blue-900 bg-blue-50/80 hover:bg-blue-100/90 border border-blue-200/60 rounded-xl px-3 py-2 transition-all shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer"
           >
-            <ClipboardCheck className="size-3.5" />
-            <span>Open Approvals Portal ({stats.pendingApprovalsCount} pending)</span>
+            <ClipboardCheck className="size-4 text-blue-600" />
+            <span>Approvals Portal ({stats.pendingApprovalsCount})</span>
           </button>
 
           <button
             onClick={onClose}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-1.5 font-bold text-slate-700 hover:bg-slate-100 shadow-2xs transition"
+            className="rounded-xl border border-slate-200 bg-white hover:bg-slate-100 px-4 py-2 font-bold text-slate-700 text-xs shadow-2xs hover:shadow-xs transition active:scale-95 cursor-pointer"
           >
             Close
           </button>
