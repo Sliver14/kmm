@@ -105,6 +105,7 @@ interface DataContextType {
   resetToDefaultData: () => void
   toastMessage: string | null
   showToast: (msg: string) => void
+  dismissToast: () => void
 }
 
 const STORAGE_KEY = 'kmp_platform_data_v8'
@@ -134,11 +135,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
+  const dismissToast = useCallback(() => {
+    setToastMessage(null)
+  }, [])
+
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg)
     setTimeout(() => {
       setToastMessage((prev) => (prev === msg ? null : prev))
-    }, 3800)
+    }, 4000)
   }, [])
 
   // Load from LocalStorage
@@ -1105,6 +1110,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     resetToDefaultData,
     toastMessage,
     showToast,
+    dismissToast,
   }
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

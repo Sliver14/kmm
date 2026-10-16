@@ -655,16 +655,26 @@ function Header({
 
       {/* Search Input with Glossy Finish */}
       <div className="relative max-w-[520px] flex-1">
-        <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <input
           value={searchFilter}
           onChange={(e) => setSearchFilter(e.target.value)}
-          className="h-10 w-full rounded-xl border border-slate-200/80 bg-slate-100/60 pl-10 pr-12 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition backdrop-blur-sm"
+          className="h-10 w-full rounded-xl border border-slate-200/80 bg-slate-100/60 pl-4 pr-11 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition backdrop-blur-sm"
           placeholder="Search intellectual assets, categories, titles, or rights..."
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-400 shadow-2xs">
-          ⌘K
-        </div>
+        {searchFilter ? (
+          <button
+            onClick={() => setSearchFilter('')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 grid size-6 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+            title="Clear search"
+            aria-label="Clear search"
+          >
+            <X className="size-3.5" />
+          </button>
+        ) : (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 grid size-7 place-items-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xs pointer-events-none">
+            <Search className="size-3.5" strokeWidth={2.2} />
+          </div>
+        )}
       </div>
 
       <div className="ml-auto flex items-center gap-3 sm:gap-4">
@@ -6903,7 +6913,7 @@ export function MainApp({
     })
   }
 
-  const { currentUser, toastMessage, approvals, rightsRecords, activities, isAuthenticated, isInitialized } = useLovetoonsData()
+  const { currentUser, toastMessage, dismissToast, approvals, rightsRecords, activities, isAuthenticated, isInitialized } = useLovetoonsData()
 
   // Calculate unread alerts count
   const unreadAlertsCount = useMemo(() => {
@@ -6987,12 +6997,50 @@ export function MainApp({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-[#f6f9fd] to-[#edf4fc] text-slate-900 selection:bg-blue-600 selection:text-white">
-      {/* Toast Notification */}
+      {/* Glossy System Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-[#021024]/95 px-4 py-3 text-xs font-semibold text-white shadow-2xl backdrop-blur-xl border border-white/10 animate-in fade-in slide-in-from-bottom-5">
-          <Sparkles className="size-4 text-yellow-400 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
+        <aside
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-3.5 rounded-2xl bg-slate-900/90 px-4 py-3.5 text-xs text-white shadow-[0_20px_50px_rgba(0,0,0,0.4),0_0_20px_rgba(59,130,246,0.25)] backdrop-blur-2xl border border-white/20 animate-in fade-in slide-in-from-bottom-5 duration-300 max-w-md overflow-hidden group"
+        >
+          {/* Ambient Specular Glow */}
+          <div className="pointer-events-none absolute -left-6 -top-6 size-24 rounded-full bg-blue-500/30 blur-xl" />
+
+          {/* Luminous Icon Badge */}
+          <div className="relative grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 text-white shadow-md shadow-blue-500/30 border border-white/20">
+            <Sparkles className="size-4.5 text-yellow-300 animate-pulse" />
+          </div>
+
+          {/* Toast Message Body */}
+          <div className="relative flex-1 min-w-0 pr-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-blue-300">
+                KMM Notice
+              </span>
+              <span className="size-1 rounded-full bg-blue-400" />
+              <span className="text-[10px] font-medium text-slate-400">Just now</span>
+            </div>
+            <p className="mt-0.5 text-xs font-semibold text-slate-100 leading-snug break-words">
+              {toastMessage}
+            </p>
+          </div>
+
+          {/* Quick Dismiss Button */}
+          <button
+            onClick={dismissToast}
+            title="Dismiss notification"
+            className="relative size-7 shrink-0 grid place-items-center rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            aria-label="Dismiss notification"
+          >
+            <X className="size-3.5" />
+          </button>
+
+          {/* Auto-Dismiss Countdown Bar */}
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 animate-toast-progress" />
+          </div>
+        </aside>
       )}
 
       {/* Standalone Full-Viewport Notification Modal */}
