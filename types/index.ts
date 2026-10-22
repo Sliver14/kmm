@@ -46,7 +46,15 @@ export interface UserProfile {
   bio?: string
 }
 
-export type AssetStatus = 'Approved' | 'Pending' | 'Requires Attention' | 'In Review'
+export type AssetStatus =
+  | 'In Production'
+  | 'Discontinued'
+  | 'Yet to Launch'
+  | 'Under Review'
+  | 'Approved'
+  | 'Pending'
+  | 'Requires Attention'
+  | 'In Review'
 
 export type AssetThumbType =
   | 'tv_series'
@@ -60,16 +68,31 @@ export type AssetThumbType =
   | 'theme_song'
   | 'brand_guidelines'
 
+export interface AssetEpisode {
+  id: string
+  episodeNumber: number
+  title: string
+  durationMinutes?: number
+  synopsis?: string
+  airDate?: string
+  status?: 'In Production' | 'Mastered' | 'Approved' | 'Broadcast Ready'
+  videoUrl?: string
+  scriptRef?: string
+}
+
 export interface AssetDynamicAttributes {
   // TV & Animation
   episodesCount?: number
+  episodes?: AssetEpisode[]
   durationMinutes?: number
   seasonNumber?: number
   aspectRatio?: '16:9' | '4:3' | '21:9'
   resolution?: '4K UHD' | '1080p Full HD' | '720p HD'
   audioMix?: 'Stereo 2.0' | 'Surround 5.1' | 'Dolby Atmos'
   targetAgeGroup?: '3-5 Years' | '6-9 Years' | '10-14 Years' | 'All Ages'
-  
+  videoMasterUrl?: string
+  cloudStorageNotice?: string
+
   // Music & Audio
   audioFormat?: 'WAV (24-bit/48kHz)' | 'FLAC' | 'MP3 (320kbps)'
   bpm?: number
@@ -78,6 +101,7 @@ export interface AssetDynamicAttributes {
   producer?: string
   vocalist?: string
   isrcCode?: string
+  audioMasterUrl?: string
 
   // Publishing / Books / Comics
   pageCount?: number
@@ -99,7 +123,13 @@ export interface AssetDynamicAttributes {
   colorPalette?: string[]
   voiceActor?: string
 
-  // Digital Platform / Games
+  // Digital Platform / Games (URL, Git, Server as requested)
+  liveUrl?: string
+  gitRepoUrl?: string
+  serverHost?: string
+  techStack?: string
+  stagingUrl?: string
+  apiDocsUrl?: string
   platformTarget?: 'Web' | 'iOS' | 'Android' | 'Cross-Platform'
   engineVersion?: string
   repositoryUrl?: string
@@ -108,6 +138,14 @@ export interface AssetDynamicAttributes {
   eventDate?: string
   venueLocation?: string
   liveStreamUrl?: string
+
+  // Official Schedule & Legal Filing Metadata
+  scheduleNumber?: number
+  officialStatus?: string
+  attorneyGeneralSchedule?: string
+  governanceClearance?: string
+  archiveStorageNotice?: string
+  [key: string]: any
 }
 
 export interface ArchiveFileItem {
@@ -155,14 +193,14 @@ export interface AssetData {
   subcategory: string
   agency: Agency
   unit?: Agency // Backward-compatibility
-  creatorName: string
-  creatorRole: string
-  creatorSkill: UserSkill
+  creatorName?: string
+  creatorRole?: string
+  creatorSkill?: UserSkill
   contributors: AssetContributor[]
   status: AssetStatus
   createdDate: string
   createdTime: string
-  thumbType: AssetThumbType
+  thumbType?: AssetThumbType
   posterUrl?: string
   rightsHolder: string
   description: string
@@ -171,6 +209,11 @@ export interface AssetData {
   fileSize?: string
   version?: string
   archive?: AssetArchive
+  scheduleNumber?: number | string
+  officialStatus?: string
+  attorneyGeneralSchedule?: string
+  governanceClearance?: string
+  archiveStorageNotice?: string
 }
 
 export interface CategoryItem {
@@ -199,8 +242,12 @@ export interface RightsDocument {
   name: string
   size: string
   date: string
-  type: 'PDF' | 'DOCX' | 'CERT' | 'LICENSE'
+  type: 'PDF' | 'DOCX' | 'CERT' | 'LICENSE' | 'TALENT_RELEASE' | 'DEED' | string
   url?: string
+  assigneeName?: string
+  assigneeRole?: string
+  targetScope?: 'individual' | 'asset'
+  notes?: string
 }
 
 export interface RightsRecord {
@@ -313,4 +360,45 @@ export interface ActivityLog {
   iconType: 'shield' | 'file' | 'check' | 'alert' | 'link' | 'user'
   color: string
   timestamp: number
+  assetId?: string
+  assetName?: string
+  actionType?: 'CREATE' | 'UPDATE' | 'DELETE' | 'APPROVAL' | 'GOVERNANCE' | 'DOCUMENT' | 'STATUS_CHANGE' | 'RESET'
+  details?: string
+  meta?: {
+    assetId?: string
+    assetName?: string
+    actionType?: string
+    details?: string
+  }
+}
+
+export type NotificationType = 'approval' | 'governance' | 'document' | 'asset' | 'activity'
+
+export interface NotificationItem {
+  id: string
+  type: NotificationType
+  title: string
+  subtitle: string
+  time: string
+  timestamp: number
+  read: boolean
+  targetTab: string
+  assetId?: string
+  priority?: 'Low' | 'Medium' | 'High' | 'Urgent'
+  badge?: string
+  badgeColor?: string
+  agency?: string
+}
+
+export type RiskTier = 'Low' | 'Medium' | 'High' | 'Critical'
+
+export interface AssetRiskAssessment {
+  level: RiskTier
+  score: number // 0-100 scale
+  category: 'Operational' | 'Chain of Title' | 'Pre-Launch' | 'Cleared'
+  primaryVector: string
+  remediationAction: string
+  riskBadgeColor: string
+  riskTextColor: string
+  exposureSummary: string
 }

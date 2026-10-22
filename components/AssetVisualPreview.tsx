@@ -1,74 +1,45 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   Play, Pause, Volume2, VolumeX, Maximize2, SkipForward, SkipBack,
   Smartphone, Monitor, Gamepad2, Music, BookOpen, Layers, Sparkles,
   ShieldCheck, Download, Copy, Check, Terminal, Globe, Server, Code,
   FileText, Film, Eye, ZoomIn, ZoomOut, Sparkle, Package, Calendar,
-  ChevronRight, ChevronLeft, Mic, Disc3, BookMarked, FileCode, CheckSquare
+  ChevronRight, ChevronLeft, Mic, Disc3, BookMarked, FileCode, CheckSquare, UploadCloud, Plus
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { AssetData } from '@/types'
+import { AssetData, AssetEpisode } from '@/types'
 import { generateAssetArchive } from '@/lib/data/assetArchiveData'
 
 interface AssetVisualPreviewProps {
   asset: AssetData
   showToast: (msg: string) => void
+  onOpenEditModal?: () => void
 }
 
-export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps) {
+export function AssetVisualPreview({ asset, showToast, onOpenEditModal }: AssetVisualPreviewProps) {
   const archive = asset.archive || generateAssetArchive(asset)
 
   // -------------------------------------------------------------
   // 1. VIDEO / ANIMATION / TV / FILM / DOCUMENTARY STATE
   // -------------------------------------------------------------
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(30)
+  const [currentTime, setCurrentTime] = useState(0)
   const duration = asset.attributes?.durationMinutes ? asset.attributes.durationMinutes * 60 : 900
   const [isMuted, setIsMuted] = useState(false)
   const [selectedDub, setSelectedDub] = useState<'English 5.1' | 'French' | 'Spanish'>('English 5.1')
   const [selectedRes, setSelectedRes] = useState<'4K UHD' | '1080p'>('4K UHD')
   const [activeChapter, setActiveChapter] = useState(0)
 
-  const videoThumbnails = [
-    {
-      id: 'ep-1',
-      title: '01. Opening Credits & Praise Theme',
-      time: 0,
-      duration: '03:15',
-      thumb: asset.posterUrl || '/tv_series_poster.jpg',
-      badge: 'Intro',
-    },
-    {
-      id: 'ep-2',
-      title: '02. Bible Quest: David & The Giant',
-      time: 195,
-      duration: '08:40',
-      thumb: '/tv_series_showcase.jpg',
-      badge: 'Main Story',
-    },
-    {
-      id: 'ep-3',
-      title: '03. Tilly & Friends Character Song',
-      time: 715,
-      duration: '04:10',
-      thumb: '/tv_series_poster.jpg',
-      badge: 'Musical',
-    },
-    {
-      id: 'ep-4',
-      title: '04. Scripture Memory Verse & Prayer',
-      time: 965,
-      duration: '03:30',
-      thumb: '/tv_series_showcase.jpg',
-      badge: 'Declaration',
-    },
-  ]
+  // Real episodes from asset data (NO fake/mock episodes)
+  const realEpisodes = useMemo(() => {
+    return asset.attributes?.episodes || []
+  }, [asset.attributes?.episodes])
 
   useEffect(() => {
     let interval: any
-    if (isPlaying) {
+    if (isPlaying && duration > 0) {
       interval = setInterval(() => {
         setCurrentTime((prev) => (prev >= duration ? 0 : prev + 1))
       }, 1000)
@@ -181,9 +152,9 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
           {/* Top Control Bar */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 bg-[#020b18] px-4 py-2.5 text-xs">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-black tracking-wider text-red-400 border border-red-500/30">
-                <span className="size-1.5 rounded-full bg-red-500 animate-pulse" />
-                <span>CLOUD STREAM</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-black tracking-wider text-amber-300 border border-amber-500/30">
+                <span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <span>CLOUD STORAGE: IN PROVISIONING (COMING SOON)</span>
               </span>
               <span className="font-bold text-slate-200 truncate max-w-xs">{asset.name}</span>
             </div>
@@ -199,22 +170,30 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
                 <option value="Spanish">Audio: Spanish Dub</option>
               </select>
 
-              <span className="rounded-md bg-amber-400/20 border border-amber-400/30 text-amber-300 px-2 py-0.5 font-mono text-[10px] font-bold">
-                {selectedRes}
+              <span className="rounded-md bg-cyan-400/20 border border-cyan-400/30 text-cyan-300 px-2 py-0.5 font-mono text-[10px] font-bold">
+                {asset.attributes?.resolution || selectedRes}
               </span>
             </div>
           </div>
 
-          {/* Compact Split Layout: Compact Player on Left, Chapter Thumbnails on Right */}
+          {/* Compact Split Layout: Compact Player on Left, Real Episodes on Right */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
             {/* Left: Compact Video Player (Constrained Max Height ~260px) */}
             <div className="lg:col-span-7 relative h-64 sm:h-72 bg-gradient-to-br from-[#051833] via-[#09245a] to-[#010914] flex flex-col justify-between overflow-hidden group">
               {/* Background Poster Image with Gradient Overlay */}
-              <img
-                src={asset.posterUrl || '/tv_series_poster.jpg'}
-                alt={asset.name}
-                className="absolute inset-0 size-full object-cover opacity-35 group-hover:scale-105 transition duration-500"
-              />
+              {asset.posterUrl ? (
+                <img
+                  src={asset.posterUrl}
+                  alt={asset.name}
+                  className="absolute inset-0 size-full object-cover opacity-35 group-hover:scale-105 transition duration-500"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center opacity-25">
+                  <div className="size-32 rounded-3xl bg-blue-600/40 border border-white/20 grid place-items-center text-4xl font-black text-white">
+                    {asset.name.slice(0, 2).toUpperCase()}
+                  </div>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30" />
 
               {/* Top Meta Overlay */}
@@ -223,21 +202,33 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
                   <Film className="size-3 text-cyan-400" />
                   <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
                 </div>
-                <span className="bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 px-2 py-0.5 rounded text-[10px] font-bold">
-                  PRORES 422 HQ
+                <span className="bg-amber-950/80 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded text-[10px] font-bold">
+                  {asset.attributes?.videoMasterUrl ? 'DIRECT MASTER LINK' : 'CLOUD STORAGE PROVISIONING'}
                 </span>
               </div>
 
               {/* Center Play Button Overlay */}
-              <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 space-y-1">
+              <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 space-y-1.5">
                 <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="size-12 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-xl flex items-center justify-center transform hover:scale-110 transition border border-blue-400"
+                  onClick={() => {
+                    if (asset.attributes?.videoMasterUrl) {
+                      window.open(asset.attributes.videoMasterUrl, '_blank')
+                    } else {
+                      setIsPlaying(!isPlaying)
+                      showToast('Cloud media storage is currently provisioning. Video stream preview simulated.')
+                    }
+                  }}
+                  className="size-12 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-xl flex items-center justify-center transform hover:scale-110 transition border border-blue-400 cursor-pointer"
                 >
                   {isPlaying ? <Pause className="size-5" /> : <Play className="size-5 ml-0.5" />}
                 </button>
                 <div className="text-xs font-bold text-white drop-shadow-md truncate max-w-sm mt-1">
-                  {videoThumbnails[activeChapter]?.title || asset.name}
+                  {realEpisodes[activeChapter]?.title || asset.name}
+                </div>
+                <div className="text-[10px] text-amber-200/90 bg-black/60 px-2.5 py-0.5 rounded-full border border-amber-400/20">
+                  {realEpisodes.length > 0
+                    ? `Episode ${realEpisodes[activeChapter]?.episodeNumber || 1} Selected`
+                    : 'Awaiting Real Video Upload via Cloud Storage'}
                 </div>
               </div>
 
@@ -246,16 +237,16 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
                 <div className="relative w-full h-1.5 bg-slate-700/80 rounded-full cursor-pointer overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-blue-500 to-cyan-400"
-                    style={{ width: `${(currentTime / duration) * 100}%` }}
+                    style={{ width: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
                   />
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-slate-300">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setIsPlaying(!isPlaying)} className="hover:text-white">
+                    <button onClick={() => setIsPlaying(!isPlaying)} className="hover:text-white cursor-pointer">
                       {isPlaying ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
                     </button>
-                    <button onClick={() => setIsMuted(!isMuted)} className="hover:text-white">
+                    <button onClick={() => setIsMuted(!isMuted)} className="hover:text-white cursor-pointer">
                       {isMuted ? <VolumeX className="size-3.5 text-rose-400" /> : <Volume2 className="size-3.5" />}
                     </button>
                     <span className="font-mono text-[10px] text-slate-400">
@@ -265,8 +256,8 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => showToast('Switched to fullscreen')}
-                      className="hover:text-white"
+                      onClick={() => showToast('Switched to fullscreen mode')}
+                      className="hover:text-white cursor-pointer"
                       title="Fullscreen"
                     >
                       <Maximize2 className="size-3.5" />
@@ -276,66 +267,75 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
               </div>
             </div>
 
-            {/* Right: Subcategory / Episode Video Thumbnails List */}
+            {/* Right: Real Catalogued Episodes */}
             <div className="lg:col-span-5 bg-[#020b18] border-t lg:border-t-0 lg:border-l border-slate-800 p-3 flex flex-col justify-between max-h-72 overflow-y-auto">
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-800">
-                  <span>Scene Chapters & Episodes ({videoThumbnails.length})</span>
-                  <span className="text-cyan-400 font-semibold">Master Renditions</span>
+                  <span>Production Episodes ({realEpisodes.length})</span>
+                  <span className="text-cyan-400 font-semibold">{asset.attributes?.episodesCount || realEpisodes.length} Planned</span>
                 </div>
 
-                <div className="space-y-1.5">
-                  {videoThumbnails.map((item, idx) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveChapter(idx)
-                        setCurrentTime(item.time)
-                        setIsPlaying(true)
-                      }}
-                      className={cn(
-                        'w-full flex items-center gap-2.5 rounded-xl p-1.5 text-left transition border',
-                        activeChapter === idx
-                          ? 'bg-blue-950/80 border-blue-500 text-white'
-                          : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white'
-                      )}
-                    >
-                      {/* Rich Thumbnail with Play Icon */}
-                      <div className="relative size-12 shrink-0 rounded-lg overflow-hidden border border-slate-700 bg-slate-800">
-                        <img src={item.thumb} alt={item.title} className="size-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 grid place-items-center">
-                          <Play className="size-3.5 text-white" />
+                {realEpisodes.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {realEpisodes.map((ep: AssetEpisode, idx: number) => (
+                      <button
+                        key={ep.id || idx}
+                        onClick={() => {
+                          setActiveChapter(idx)
+                          setCurrentTime(0)
+                          setIsPlaying(true)
+                        }}
+                        className={cn(
+                          'w-full flex items-center gap-2.5 rounded-xl p-2 text-left transition border cursor-pointer',
+                          activeChapter === idx
+                            ? 'bg-blue-950/80 border-blue-500 text-white'
+                            : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white'
+                        )}
+                      >
+                        <div className="size-8 rounded-lg bg-blue-600/30 border border-blue-500/40 grid place-items-center text-cyan-300 font-mono text-xs font-bold shrink-0">
+                          {ep.episodeNumber || idx + 1}
                         </div>
-                      </div>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-[11px] truncate pr-1">{item.title}</span>
-                          <span className="font-mono text-[9px] text-cyan-400 shrink-0">{item.duration}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-[11px] truncate pr-1">{ep.title}</span>
+                            <span className="font-mono text-[9px] text-cyan-400 shrink-0">
+                              {ep.durationMinutes ? `${ep.durationMinutes}m` : '15m'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[9px] text-slate-400 mt-0.5">
+                            <span className="rounded bg-slate-800 px-1.5 py-0.2 text-emerald-400 font-semibold">
+                              {ep.status || 'Broadcast Ready'}
+                            </span>
+                            {ep.airDate && <span>• {ep.airDate}</span>}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[9px] text-slate-400 mt-0.5">
-                          <span className="rounded bg-slate-800 px-1.5 py-0.2 text-amber-300 font-semibold">{item.badge}</span>
-                          <span>• 4K Master</span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-4 text-center space-y-2 my-2">
+                    <Film className="size-6 text-slate-600 mx-auto" />
+                    <div className="text-xs font-bold text-slate-300">No Production Episodes Yet</div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      This programme does not have any catalogued episodes yet. Use the <strong>Episodes & Releases</strong> manager below to record real episodes.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Quick Actions at bottom of right panel */}
               <div className="pt-2 border-t border-slate-800 flex items-center justify-between gap-2 text-xs">
                 <button
-                  onClick={() => showToast(`Downloading ProRes master for ${asset.name}...`)}
-                  className="flex items-center gap-1 rounded-lg bg-blue-600 hover:bg-blue-500 px-2.5 py-1 text-[11px] font-bold text-white transition shadow-xs"
+                  onClick={() => showToast('Cloud media upload will activate once cloud storage provisioning completes.')}
+                  className="flex items-center gap-1 rounded-lg bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 px-2.5 py-1 text-[11px] font-bold text-amber-300 transition cursor-pointer"
                 >
-                  <Download className="size-3" />
-                  <span>Download ProRes ({asset.fileSize || '4.8 GB'})</span>
+                  <UploadCloud className="size-3" />
+                  <span>Upload Video (Coming Soon)</span>
                 </button>
 
-                <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                  <ShieldCheck className="size-3 text-emerald-400" />
-                  <span>Cloud Ready</span>
+                <span className="text-[10px] text-cyan-400 font-mono font-semibold">
+                  {asset.attributes?.resolution || '4K UHD'}
                 </span>
               </div>
             </div>
@@ -395,51 +395,109 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
             </div>
           </div>
 
-          {/* Direct Deployment & Repository Bar (Only for Digital Platform!) */}
+          {/* Direct Deployment & Repository Bar (Live Production Details) */}
           <div className="px-4 py-2.5 bg-blue-50/70 border-y border-blue-100 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-2">
-              {archive.websiteUrl && (
+              {asset.attributes?.liveUrl ? (
                 <a
-                  href={archive.websiteUrl}
+                  href={asset.attributes.liveUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 font-bold text-white hover:bg-blue-700 text-[11px]"
+                  className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 font-bold text-white hover:bg-blue-700 text-[11px] cursor-pointer"
                 >
                   <Globe className="size-3" />
-                  <span>Visit Portal ↗</span>
+                  <span>Visit Live Platform ↗</span>
                 </a>
-              )}
-
-              {archive.repositoryUrl && (
-                <a
-                  href={archive.repositoryUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-bold text-slate-800 hover:bg-slate-50 text-[11px]"
-                >
-                  <Code className="size-3 text-purple-600" />
-                  <span>GitHub Repo ↗</span>
-                </a>
-              )}
-
-              {archive.cloneCommand && (
+              ) : (
                 <button
+                  type="button"
                   onClick={() => {
-                    handleCopy(archive.cloneCommand!, 'Git clone command')
-                    setCopiedClone(true)
-                    setTimeout(() => setCopiedClone(false), 2000)
+                    if (onOpenEditModal) onOpenEditModal()
+                    else showToast('Click "Edit Asset" to add Live Production URL')
                   }}
-                  className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50 text-[11px]"
+                  className="flex items-center gap-1.5 rounded-lg border border-dashed border-blue-400 bg-white hover:bg-blue-50 px-3 py-1.5 font-bold text-blue-700 text-[11px] transition cursor-pointer"
                 >
-                  {copiedClone ? <Check className="size-3 text-emerald-600" /> : <Terminal className="size-3 text-slate-500" />}
-                  <span>{copiedClone ? 'Copied' : 'Copy git clone'}</span>
+                  <Plus className="size-3 text-blue-600" />
+                  <span>+ Add Live URL</span>
+                </button>
+              )}
+
+              {asset.attributes?.gitRepoUrl ? (
+                <>
+                  <a
+                    href={asset.attributes.gitRepoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-bold text-slate-800 hover:bg-slate-50 text-[11px] cursor-pointer"
+                  >
+                    <Code className="size-3 text-purple-600" />
+                    <span>GitHub Repository ↗</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cmd = `git clone ${asset.attributes!.gitRepoUrl}`
+                      handleCopy(cmd, 'Git clone command')
+                      setCopiedClone(true)
+                      setTimeout(() => setCopiedClone(false), 2000)
+                    }}
+                    className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50 text-[11px] cursor-pointer"
+                  >
+                    {copiedClone ? <Check className="size-3 text-emerald-600" /> : <Terminal className="size-3 text-slate-500" />}
+                    <span>{copiedClone ? 'Copied' : 'Copy git clone'}</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenEditModal) onOpenEditModal()
+                    else showToast('Click "Edit Asset" to link Git Repository')
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg border border-dashed border-purple-300 bg-white hover:bg-purple-50 px-3 py-1.5 font-bold text-purple-700 text-[11px] transition cursor-pointer"
+                >
+                  <Plus className="size-3 text-purple-500" />
+                  <span>+ Add Git Repo</span>
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-[11px] text-slate-600">
-              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Cloud Server: Online</span>
+            <div className="flex flex-wrap items-center gap-2 text-[11px]">
+              {asset.attributes?.serverHost ? (
+                <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-800 px-2.5 py-0.5 rounded-full font-semibold">
+                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Host: {asset.attributes.serverHost}</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenEditModal) onOpenEditModal()
+                    else showToast('Click "Edit Asset" to specify server host')
+                  }}
+                  className="rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 px-2.5 py-0.5 text-[10px] font-semibold transition cursor-pointer"
+                >
+                  + Add Server Host
+                </button>
+              )}
+
+              {asset.attributes?.techStack ? (
+                <span className="rounded bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 font-mono text-[10px]">
+                  {asset.attributes.techStack}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenEditModal) onOpenEditModal()
+                    else showToast('Click "Edit Asset" to specify tech stack')
+                  }}
+                  className="rounded bg-white hover:bg-slate-50 border border-dashed border-slate-300 text-slate-500 px-2 py-0.5 font-mono text-[10px] transition cursor-pointer"
+                >
+                  + Add Tech Stack
+                </button>
+              )}
             </div>
           </div>
 
@@ -458,49 +516,70 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
                   <span className="size-2 rounded-full bg-emerald-500" />
                 </div>
                 <div className="bg-slate-900 px-3 py-0.5 rounded text-cyan-400 font-semibold truncate max-w-xs">
-                  {archive.websiteUrl || 'https://tv.lovetoons.org'}
+                  {asset.attributes?.liveUrl || 'Live URL Not Configured'}
                 </div>
-                <span className="text-emerald-400 font-bold text-[9px]">● Live</span>
+                {asset.attributes?.liveUrl ? (
+                  <span className="text-emerald-400 font-bold text-[9px]">● Live Production</span>
+                ) : (
+                  <span className="text-amber-400 font-bold text-[9px]">○ Pending Setup</span>
+                )}
               </div>
 
-              <div className="bg-[#03152c] rounded-lg p-3 text-white space-y-3 min-h-[220px]">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <div className="flex items-center gap-1.5">
-                    <img src="/lovetoons-logo.png" alt="Lovetoons" className="h-5 w-auto object-contain" />
-                    <span className="font-extrabold text-xs text-white">Lovetoons Kids</span>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search shows..."
-                    value={appSearch}
-                    onChange={(e) => setAppSearch(e.target.value)}
-                    className="rounded bg-slate-900 border border-slate-700 px-2 py-0.5 text-[10px] text-white placeholder-slate-500 focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {[
-                    { title: 'The Shield of Faith', category: 'Animation', img: '/tv_series_poster.jpg' },
-                    { title: 'Praise Sing-Along', category: 'Audio', img: '/tv_series_showcase.jpg' },
-                    { title: 'Bible Quest 3D', category: 'Game', img: '/tv_series_poster.jpg' },
-                  ].map((card) => (
-                    <div
-                      key={card.title}
-                      onClick={() => showToast(`Playing sample from "${card.title}"`)}
-                      className="rounded-lg border border-slate-800 bg-slate-900 p-2 hover:border-blue-400 transition cursor-pointer space-y-1"
-                    >
-                      <div className="relative aspect-video w-full rounded overflow-hidden">
-                        <img src={card.img} alt={card.title} className="size-full object-cover" />
-                        <div className="absolute inset-0 bg-black/30 grid place-items-center">
-                          <Play className="size-4 text-amber-400" />
-                        </div>
-                      </div>
-                      <div className="font-bold text-[10px] text-white truncate">{card.title}</div>
-                      <div className="text-[9px] text-slate-400">{card.category}</div>
+              {asset.attributes?.liveUrl ? (
+                <div className="bg-[#03152c] rounded-lg p-3 text-white space-y-3 min-h-[220px]">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <div className="flex items-center gap-1.5">
+                      <img src="/lovetoons-logo.png" alt="Lovetoons" className="h-5 w-auto object-contain" />
+                      <span className="font-extrabold text-xs text-white">{asset.name}</span>
                     </div>
-                  ))}
+                    <a
+                      href={asset.attributes.liveUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded bg-blue-600 hover:bg-blue-500 border border-blue-400 px-2.5 py-1 text-[10px] text-white font-bold flex items-center gap-1"
+                    >
+                      <Globe className="size-3" />
+                      <span>Open Live Site ↗</span>
+                    </a>
+                  </div>
+
+                  <div className="rounded-xl border border-blue-900/40 bg-blue-950/40 p-4 text-center space-y-2">
+                    <Globe className="size-8 text-cyan-400 mx-auto animate-pulse" />
+                    <div className="text-xs font-bold text-white">{asset.name} Live Deployment</div>
+                    <div className="font-mono text-[11px] text-cyan-300 truncate max-w-sm mx-auto bg-black/40 py-1 px-3 rounded-lg border border-white/10">
+                      {asset.attributes.liveUrl}
+                    </div>
+                    {asset.attributes.techStack && (
+                      <p className="text-[10px] text-slate-400">
+                        Built with {asset.attributes.techStack} • Hosted on {asset.attributes.serverHost || 'Cloud Infrastructure'}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-[#03152c] rounded-lg p-6 text-white text-center space-y-3 min-h-[200px] flex flex-col items-center justify-center">
+                  <div className="size-11 rounded-2xl bg-blue-500/20 border border-blue-400/30 text-blue-300 grid place-items-center mx-auto">
+                    <Globe className="size-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-black text-xs text-white">Live Platform URL Not Configured</div>
+                    <p className="text-[11px] text-slate-400 max-w-sm mx-auto leading-relaxed">
+                      No live production URL was specified during asset creation. Add a live URL to activate simulated interactive viewing.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onOpenEditModal) onOpenEditModal()
+                      else showToast('Click "Edit Asset" to add platform details')
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 font-bold text-white text-xs shadow-md transition cursor-pointer"
+                  >
+                    <Plus className="size-3.5" />
+                    <span>+ Configure Platform Details</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -517,21 +596,67 @@ export function AssetVisualPreview({ asset, showToast }: AssetVisualPreviewProps
                 <Music className="size-4" />
               </div>
               <div>
-                <h3 className="font-bold text-xs text-white">{asset.name}</h3>
-                <p className="text-[10px] text-pink-300">Master Studio Multi-Track Audio Deck</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-xs text-white">{asset.name}</h3>
+                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-bold text-amber-300 border border-amber-500/30">
+                    Cloud Storage: Coming Soon
+                  </span>
+                </div>
+                <p className="text-[10px] text-pink-300">Master Studio Multi-Track Audio Deck • Multi-Track Stems Deck</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 text-[10px] font-mono">
-              <span className="rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-cyan-400">
-                {asset.attributes?.bpm || 128} BPM
-              </span>
-              <span className="rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-amber-400">
-                {asset.attributes?.keySignature || 'C Major'}
-              </span>
-              <span className="rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-emerald-400">
-                24-bit / 48kHz WAV
-              </span>
+              {asset.attributes?.bpm ? (
+                <span className="rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-cyan-400">
+                  {asset.attributes.bpm} BPM
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenEditModal) onOpenEditModal()
+                    else showToast('Click "Edit Asset" to set BPM')
+                  }}
+                  className="rounded bg-slate-900 hover:bg-slate-800 border border-dashed border-slate-700 px-2 py-0.5 text-slate-400 hover:text-white cursor-pointer"
+                >
+                  + Add BPM
+                </button>
+              )}
+
+              {asset.attributes?.keySignature ? (
+                <span className="rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-amber-400">
+                  {asset.attributes.keySignature}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenEditModal) onOpenEditModal()
+                    else showToast('Click "Edit Asset" to set Key Signature')
+                  }}
+                  className="rounded bg-slate-900 hover:bg-slate-800 border border-dashed border-slate-700 px-2 py-0.5 text-slate-400 hover:text-white cursor-pointer"
+                >
+                  + Add Key
+                </button>
+              )}
+
+              {asset.attributes?.audioFormat ? (
+                <span className="rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-emerald-400">
+                  {asset.attributes.audioFormat}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenEditModal) onOpenEditModal()
+                    else showToast('Click "Edit Asset" to set Audio Format')
+                  }}
+                  className="rounded bg-slate-900 hover:bg-slate-800 border border-dashed border-slate-700 px-2 py-0.5 text-slate-400 hover:text-white cursor-pointer"
+                >
+                  + Add Format
+                </button>
+              )}
             </div>
           </div>
 

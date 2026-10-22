@@ -12,6 +12,7 @@ import {
   ActivityLog,
   AssetContributor,
   Agency,
+  NotificationItem,
 } from '@/types'
 import {
   initialUsers,
@@ -38,13 +39,15 @@ export interface PlatformStats {
 }
 
 interface DataContextType {
+  // Initialization
+  isInitialized: boolean
+
   // Users & Role & Auth
   currentUser: UserProfile
   setCurrentUser: (user: UserProfile) => void
   availableUsers: UserProfile[]
   isAuthenticated: boolean
-  isInitialized: boolean
-  login: (emailOrUser: string | UserProfile, password?: string) => boolean
+  login: (emailOrUser: string | UserProfile, password?: string) => Promise<boolean> | boolean
   logout: () => void
   canApprove: boolean
   isSuperAdmin: boolean
@@ -97,7 +100,30 @@ interface DataContextType {
   // Activity Logs (Role-scoped)
   activities: ActivityLog[]
   allActivities: ActivityLog[]
-  addActivity: (title: string, subtitle: string, iconType?: ActivityLog['iconType'], color?: string, agency?: Agency) => void
+  addActivity: (
+    title: string,
+    subtitle: string,
+    iconType?: ActivityLog['iconType'],
+    color?: string,
+    agency?: Agency,
+    meta?: {
+      assetId?: string
+      assetName?: string
+      actionType?: ActivityLog['actionType']
+      details?: string
+    }
+  ) => void
+
+  // Notifications (Interactive & Persistent)
+  notifications: NotificationItem[]
+  allNotifications: NotificationItem[]
+  unreadNotificationsCount: number
+  addNotification: (notif: Omit<NotificationItem, 'id' | 'timestamp' | 'read' | 'time'> & { id?: string }) => NotificationItem
+  markNotificationAsRead: (id: string) => void
+  markAllNotificationsAsRead: () => void
+  toggleNotificationRead: (id: string) => void
+  dismissNotification: (id: string) => void
+  clearAllNotifications: () => void
 
   // Stats & Utilities
   stats: PlatformStats
@@ -108,9 +134,73 @@ interface DataContextType {
   dismissToast: () => void
 }
 
-const STORAGE_KEY = 'kmp_platform_data_v8'
-const USER_KEY = 'kmp_current_user_v8'
-const AUTH_KEY = 'kmp_auth_state_v8'
+const STORAGE_KEY = 'kmp_platform_data_v10'
+const USER_KEY = 'kmp_current_user_v9'
+const AUTH_KEY = 'kmp_auth_state_v9'
+const NOTIF_KEY = 'kmp_notifications_v3'
+
+const defaultInitialNotifications: NotificationItem[] = [
+  {
+    id: 'notif-init-1',
+    type: 'approval',
+    title: 'Approval Scheduled: Super Book Adventures',
+    subtitle: 'Submitted for Review with legal deeds & talent release attached',
+    time: 'Today, 10:45 AM',
+    timestamp: Date.now() - 3600000,
+    read: false,
+    targetTab: 'Approvals',
+    assetId: 'KMP-TV-001',
+    priority: 'High',
+    badge: 'High Priority',
+    badgeColor: 'bg-amber-100 text-amber-800',
+    agency: 'Lovetoons',
+  },
+  {
+    id: 'notif-init-2',
+    type: 'governance',
+    title: 'Governance Cleared: Pastor Chris Animated Sermons',
+    subtitle: '100% Governance checklist completed with chain of title deeds',
+    time: 'Yesterday, 4:20 PM',
+    timestamp: Date.now() - 86400000,
+    read: false,
+    targetTab: 'Rights & Governance',
+    assetId: 'KMP-TV-002',
+    priority: 'Medium',
+    badge: 'Governance 100%',
+    badgeColor: 'bg-emerald-100 text-emerald-800',
+    agency: 'Lovetoons',
+  },
+  {
+    id: 'notif-init-3',
+    type: 'document',
+    title: 'Document Uploaded: Talent Release Form - Master',
+    subtitle: 'Document verified and attached to asset rights registry',
+    time: '2 days ago',
+    timestamp: Date.now() - 172800000,
+    read: true,
+    targetTab: 'Rights & Governance',
+    assetId: 'KMP-TV-001',
+    priority: 'Low',
+    badge: 'Document Added',
+    badgeColor: 'bg-blue-100 text-blue-800',
+    agency: 'Lovetoons',
+  },
+  {
+    id: 'notif-init-4',
+    type: 'asset',
+    title: 'Asset Registered: Little David Storybook Vol 1',
+    subtitle: 'Registered by Publishing Agency with 3 contributors',
+    time: '3 days ago',
+    timestamp: Date.now() - 259200000,
+    read: true,
+    targetTab: 'Assets',
+    assetId: 'KMP-PU-001',
+    priority: 'Medium',
+    badge: 'New Asset',
+    badgeColor: 'bg-purple-100 text-purple-800',
+    agency: 'Publishing Agency',
+  },
+]
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
 
@@ -131,6 +221,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [masterRelationships, setMasterRelationships] = useState<RelationshipItem[]>(initialRelationships)
   const [masterApprovals, setMasterApprovals] = useState<ApprovalRequest[]>(initialApprovals)
   const [masterActivities, setMasterActivities] = useState<ActivityLog[]>(initialActivityLogs)
+  const [masterNotifications, setMasterNotifications] = useState<NotificationItem[]>(defaultInitialNotifications)
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -154,14 +245,21 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (storedData) {
           const parsed = JSON.parse(storedData)
           if (parsed.assets && Array.isArray(parsed.assets)) {
-            // Migrate any legacy asset formats
+            // Preserve official status from Schedule / DB
             const migrated = parsed.assets.map((a: any) => ({
               ...a,
+              status: a.status || 'In Production',
               agency: a.agency || a.unit || 'Lovetoons',
               unit: a.agency || a.unit || 'Lovetoons',
               contributors: a.contributors || [],
+              rightsHolder: a.rightsHolder || 'Lovetoons / KMM Network',
             }))
-            setMasterAssets(migrated)
+            // If stored assets is missing newly catalogued items, fallback to full initialAssetsData
+            if (migrated.length < initialAssetsData.length) {
+              setMasterAssets(initialAssetsData)
+            } else {
+              setMasterAssets(migrated)
+            }
           }
           if (parsed.categories) setCategories(parsed.categories)
           if (parsed.subcategories) setSubcategories(parsed.subcategories)
@@ -171,6 +269,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                 ...r,
                 agency: r.agency || r.unit || 'Lovetoons',
                 unit: r.agency || r.unit || 'Lovetoons',
+                documents: r.documents || [],
+                owner: r.owner === 'Lovetoons Media Ltd' || !r.owner ? 'Pastor Kalu Chelsea (Executive Minister)' : r.owner,
               }))
             )
           }
@@ -181,10 +281,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                 ...app,
                 agency: app.agency || app.unit || 'Lovetoons',
                 unit: app.agency || app.unit || 'Lovetoons',
+                documents: app.documents || [],
               }))
             )
           }
           if (parsed.activities) setMasterActivities(parsed.activities)
+        }
+
+        const storedNotifs = localStorage.getItem(NOTIF_KEY)
+        if (storedNotifs) {
+          try {
+            const parsedNotifs = JSON.parse(storedNotifs)
+            if (Array.isArray(parsedNotifs)) {
+              setMasterNotifications(parsedNotifs)
+            }
+          } catch (e) {
+            console.error('Failed to parse stored notifications', e)
+          }
         }
 
         const storedUserId = localStorage.getItem(USER_KEY)
@@ -205,6 +318,39 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsInitialized(true)
     }
+
+    // Connect to live Neon DB APIs
+    const syncWithBackend = async () => {
+      try {
+        const [assetsRes, rightsRes, approvalsRes, relsRes] = await Promise.all([
+          fetch('/api/assets').then((r) => r.json()).catch(() => null),
+          fetch('/api/rights').then((r) => r.json()).catch(() => null),
+          fetch('/api/approvals').then((r) => r.json()).catch(() => null),
+          fetch('/api/relationships').then((r) => r.json()).catch(() => null),
+        ])
+
+        if (assetsRes?.success && Array.isArray(assetsRes.assets) && assetsRes.assets.length > 0) {
+          const cleanAssets = assetsRes.assets.map((a: any) => ({
+            ...a,
+            status: a.status || 'Pending',
+          }))
+          setMasterAssets(cleanAssets)
+        }
+        if (rightsRes?.success && Array.isArray(rightsRes.records) && rightsRes.records.length > 0) {
+          setMasterRightsRecords(rightsRes.records)
+        }
+        if (approvalsRes?.success && Array.isArray(approvalsRes.approvals) && approvalsRes.approvals.length > 0) {
+          setMasterApprovals(approvalsRes.approvals)
+        }
+        if (relsRes?.success && Array.isArray(relsRes.relationships) && relsRes.relationships.length > 0) {
+          setMasterRelationships(relsRes.relationships)
+        }
+      } catch (err) {
+        console.warn('Backend live sync warning:', err)
+      }
+    }
+
+    syncWithBackend()
   }, [])
 
   // Save to LocalStorage
@@ -222,11 +368,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           activities: masterActivities,
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+        localStorage.setItem(NOTIF_KEY, JSON.stringify(masterNotifications))
       }
     } catch (e) {
       console.error('Failed to persist storage data', e)
     }
-  }, [masterAssets, categories, subcategories, masterRightsRecords, masterRelationships, masterApprovals, masterActivities, isInitialized])
+  }, [masterAssets, categories, subcategories, masterRightsRecords, masterRelationships, masterApprovals, masterActivities, masterNotifications, isInitialized])
 
   // Change User
   const setCurrentUser = useCallback((user: UserProfile) => {
@@ -237,13 +384,55 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     showToast(`Switched active profile to ${user.name} (${user.roleLabel} • ${user.agency})`)
   }, [showToast])
 
-  // Login handler
+  // Login handler with Neon bcrypt verification
   const login = useCallback(
-    (emailOrUser: string | UserProfile, password?: string): boolean => {
+    async (emailOrUser: string | UserProfile, password?: string): Promise<boolean> => {
       let targetUser: UserProfile | undefined
       if (typeof emailOrUser === 'string') {
+        const email = emailOrUser.trim()
+
+        // If password is provided, verify against Neon DB bcrypt API
+        if (password) {
+          try {
+            const res = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password }),
+            })
+            const data = await res.json()
+            if (res.ok && data.success && data.user) {
+              const loggedInUser: UserProfile = {
+                id: data.user.id,
+                name: data.user.name,
+                email: data.user.email,
+                avatar: data.user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+                initials: data.user.initials || data.user.name.slice(0, 2).toUpperCase(),
+                role: data.user.role as any,
+                roleLabel: data.user.roleLabel || data.user.role,
+                agency: (data.user.agency as Agency) || 'Lovetoons',
+                unit: (data.user.unit as Agency) || (data.user.agency as Agency) || 'Lovetoons',
+                skills: ['admin'],
+              }
+
+              setCurrentUserState(loggedInUser)
+              setIsAuthenticated(true)
+              if (typeof window !== 'undefined') {
+                localStorage.setItem(USER_KEY, loggedInUser.id)
+                localStorage.setItem(AUTH_KEY, 'true')
+              }
+              showToast(`Welcome back, ${loggedInUser.name}! Secure authentication verified.`)
+              return true
+            } else {
+              showToast(data.error || 'Authentication failed. Please check credentials.')
+              return false
+            }
+          } catch (err) {
+            console.warn('API login error, checking local profiles:', err)
+          }
+        }
+
         targetUser = availableUsers.find(
-          (u) => u.email.toLowerCase() === emailOrUser.toLowerCase() || u.name.toLowerCase() === emailOrUser.toLowerCase()
+          (u) => u.email.toLowerCase() === email.toLowerCase() || u.name.toLowerCase() === email.toLowerCase()
         )
       } else {
         targetUser = emailOrUser
@@ -284,18 +473,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const isGlobalViewer = isSuperAdmin || isReviewer
   const userAgency: Agency = currentUser.agency || (currentUser.unit as Agency) || 'Lovetoons'
 
-  // Activity logger
+  // Activity & Audit Trail logger
   const addActivity = useCallback(
     (
       title: string,
       subtitle: string,
       iconType: ActivityLog['iconType'] = 'file',
       color = 'bg-blue-100 text-blue-700',
-      agency?: Agency
+      agency?: Agency,
+      meta?: {
+        assetId?: string
+        assetName?: string
+        actionType?: ActivityLog['actionType']
+        details?: string
+      }
     ) => {
       const targetAgency = agency || currentUser.agency || 'Lovetoons'
       const newAct: ActivityLog = {
-        id: `act-${Date.now()}`,
+        id: `act-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         title,
         subtitle,
         time: 'Just now',
@@ -305,11 +500,58 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         iconType,
         color,
         timestamp: Date.now(),
+        assetId: meta?.assetId,
+        assetName: meta?.assetName,
+        actionType: meta?.actionType,
+        details: meta?.details,
       }
-      setMasterActivities((prev) => [newAct, ...prev.slice(0, 29)])
+      setMasterActivities((prev) => [newAct, ...prev.slice(0, 499)])
     },
     [currentUser]
   )
+
+  // Notification methods
+  const addNotification = useCallback(
+    (notif: Omit<NotificationItem, 'id' | 'timestamp' | 'read' | 'time'> & { id?: string }): NotificationItem => {
+      const newNotif: NotificationItem = {
+        ...notif,
+        id: notif.id || `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        timestamp: Date.now(),
+        read: false,
+        time: 'Just now',
+      }
+      setMasterNotifications((prev) => [newNotif, ...prev.slice(0, 49)])
+      return newNotif
+    },
+    []
+  )
+
+  const markNotificationAsRead = useCallback((id: string) => {
+    setMasterNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    )
+  }, [])
+
+  const markAllNotificationsAsRead = useCallback(() => {
+    setMasterNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    showToast('All ministry notifications marked as read.')
+  }, [showToast])
+
+  const toggleNotificationRead = useCallback((id: string) => {
+    setMasterNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n))
+    )
+  }, [])
+
+  const dismissNotification = useCallback((id: string) => {
+    setMasterNotifications((prev) => prev.filter((n) => n.id !== id))
+    showToast('Notification dismissed.')
+  }, [showToast])
+
+  const clearAllNotifications = useCallback(() => {
+    setMasterNotifications([])
+    showToast('All notifications cleared.')
+  }, [showToast])
 
   // -------------------------------------------------------------
   // ROLE SCOPING LOGIC:
@@ -347,13 +589,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return masterActivities.filter((act) => !act.agency || act.agency === userAgency || act.unit === userAgency)
   }, [masterActivities, isGlobalViewer, userAgency])
 
+  const notifications = useMemo(() => {
+    if (isGlobalViewer) return masterNotifications
+    return masterNotifications.filter((n) => !n.agency || n.agency === userAgency)
+  }, [masterNotifications, isGlobalViewer, userAgency])
+
+  const unreadNotificationsCount = useMemo(() => {
+    return notifications.filter((n) => !n.read).length
+  }, [notifications])
+
   // Real-time Platform Stats (Computed from the scoped views)
   const stats: PlatformStats = useMemo(() => {
     const totalAssets = assets.length
-    const approvedAssets = assets.filter((a) => a.status === 'Approved').length
-    const pendingAssets = assets.filter((a) => a.status === 'Pending').length
-    const attentionAssets = assets.filter((a) => a.status === 'Requires Attention').length
-    const inReviewAssets = assets.filter((a) => a.status === 'In Review').length
+    const approvedAssets = assets.filter((a) => a.status === 'In Production' || a.status === 'Approved').length
+    const pendingAssets = assets.filter((a) => a.status === 'Yet to Launch' || a.status === 'Pending').length
+    const attentionAssets = assets.filter((a) => a.status === 'Discontinued' || a.status === 'Requires Attention').length
+    const inReviewAssets = assets.filter((a) => a.status === 'Under Review' || a.status === 'In Review').length
 
     const connectedAssetIds = new Set<string>()
     relationships.forEach((r) => {
@@ -381,10 +632,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Global Platform Stats (Always covers the entire network across all agencies)
   const globalStats: PlatformStats = useMemo(() => {
     const totalAssets = masterAssets.length
-    const approvedAssets = masterAssets.filter((a) => a.status === 'Approved').length
-    const pendingAssets = masterAssets.filter((a) => a.status === 'Pending').length
-    const attentionAssets = masterAssets.filter((a) => a.status === 'Requires Attention').length
-    const inReviewAssets = masterAssets.filter((a) => a.status === 'In Review').length
+    const approvedAssets = masterAssets.filter((a) => a.status === 'In Production' || a.status === 'Approved').length
+    const pendingAssets = masterAssets.filter((a) => a.status === 'Yet to Launch' || a.status === 'Pending').length
+    const attentionAssets = masterAssets.filter((a) => a.status === 'Discontinued' || a.status === 'Requires Attention').length
+    const inReviewAssets = masterAssets.filter((a) => a.status === 'Under Review' || a.status === 'In Review').length
 
     const connectedAssetIds = new Set<string>()
     masterRelationships.forEach((r) => {
@@ -427,19 +678,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         ? data.agency || userAgency
         : userAgency
 
-      const contributors: AssetContributor[] =
-        data.contributors && data.contributors.length > 0
-          ? data.contributors
-          : [
-              {
-                id: `c-${autoId}-1`,
-                name: data.creatorName || currentUser.name,
-                role: data.creatorRole || currentUser.roleLabel,
-                agency: assignedAgency,
-                email: currentUser.email,
-                contributionType: 'Lead Author',
-              },
-            ]
+      const contributors: AssetContributor[] = data.contributors || []
+      const defaultRightsHolder = 'Pastor Kalu Chelsea (Executive Minister)'
+      const assignedRightsHolder = data.rightsHolder?.trim() || defaultRightsHolder
 
       const newAssetItem: AssetData = {
         ...data,
@@ -449,10 +690,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         status: data.status || 'Pending',
         agency: assignedAgency,
         unit: assignedAgency,
-        creatorName: data.creatorName || currentUser.name,
-        creatorRole: data.creatorRole || currentUser.roleLabel,
-        creatorSkill: data.creatorSkill || currentUser.skills[0] || 'admin',
+        creatorName: data.creatorName || (contributors[0]?.name) || 'KMM Creative Team',
+        creatorRole: data.creatorRole || (contributors[0]?.role) || 'Contributing Staff',
+        creatorSkill: data.creatorSkill || 'admin',
         contributors,
+        rightsHolder: assignedRightsHolder,
         tags: data.tags && data.tags.length > 0 ? data.tags : ['New Asset'],
       }
 
@@ -472,43 +714,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         )
       )
 
-      // Automatically create approval request if asset is pending or in review
-      if (newAssetItem.status === 'Pending' || newAssetItem.status === 'In Review') {
-        const newApproval: ApprovalRequest = {
-          id: `APP-${now.getFullYear()}-${String(masterApprovals.length + 1).padStart(3, '0')}`,
-          assetId: newAssetItem.id,
-          assetName: newAssetItem.name,
-          category: newAssetItem.category,
-          subcategory: newAssetItem.subcategory,
-          agency: newAssetItem.agency,
-          unit: newAssetItem.agency,
-          contributors: newAssetItem.contributors,
-          requesterName: newAssetItem.creatorName,
-          requesterRole: newAssetItem.creatorRole,
-          requesterSkill: newAssetItem.creatorSkill,
-          reviewerName: 'Faith Daniel',
-          stage: 'Initial Content & Ministry Doctrine Review',
-          currentStep: 1,
-          totalSteps: 3,
-          status: 'Pending',
-          priority: 'Medium',
-          submittedDate: dateStr,
-          submittedTime: timeStr,
-          history: [
-            {
-              stage: 'Submitted for Review',
-              author: newAssetItem.creatorName,
-              authorRole: newAssetItem.creatorRole,
-              date: `${dateStr} ${timeStr}`,
-              status: 'Submitted',
-              notes: `Asset submitted for ${newAssetItem.agency} review and clearance workflow.`,
-            },
-          ],
-        }
-        setMasterApprovals((prev) => [newApproval, ...prev])
-      }
-
-      // Automatically create companion Rights Record
+      // Automatically create companion unconfigured Rights Record (terms to be filed by representative)
       const newRightsRecord: RightsRecord = {
         id: `RG-${autoId}`,
         assetId: newAssetItem.id,
@@ -518,49 +724,78 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         agency: newAssetItem.agency,
         unit: newAssetItem.agency,
         contributors: newAssetItem.contributors,
-        rightsType: 'Worldwide Media Ministry Clearance',
-        owner: newAssetItem.rightsHolder || 'Kiddies Media Ministries Ltd',
-        validity: `${now.getFullYear()} – ${now.getFullYear() + 10}`,
-        status: newAssetItem.status === 'Approved' ? 'Cleared' : 'Review',
-        territory: 'Worldwide',
-        term: '10 Years (Renewable)',
-        exclusivity: 'Exclusive Ministry Retained',
-        licenceType: 'Proprietary IP Assignment Deed',
-        royaltyTerms: '100% In-House Retained',
-        thumbType: newAssetItem.thumbType,
-        description: `Intellectual property rights and staff contributor deeds logged for ${newAssetItem.name}.`,
-        governanceScore: newAssetItem.status === 'Approved' ? 100 : 85,
-        documents: [
-          {
-            id: `doc-cert-${autoId}`,
-            name: `${newAssetItem.name.replace(/[^a-zA-Z0-9]/g, '_')}_IP_Assignment.pdf`,
-            size: '2.4 MB',
-            date: dateStr,
-            type: 'CERT',
-          },
-        ],
-        governanceChecks: {
-          biblicalAlignment: true,
-          ageAppropriate: true,
-          musicSync: true,
-          copyrightReg: true,
-          voiceReleases: true,
-        },
+        rightsType: '',
+        owner: assignedRightsHolder,
+        validity: '',
+        status: 'Review',
+        territory: '',
+        term: '',
+        exclusivity: '',
+        licenceType: '',
+        royaltyTerms: '',
+        thumbType: newAssetItem.thumbType || 'tv_series',
+        description: `Intellectual property rights and governance registry entry for ${newAssetItem.name}. Awaiting representative filing of rights terms and clearance deeds.`,
+        documents: [],
+        governanceChecks: {},
+        governanceScore: 0,
       }
       setMasterRightsRecords((prev) => [newRightsRecord, ...prev])
 
+      // Asynchronously persist new asset to Neon DB
+      fetch('/api/assets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: autoId,
+          name: newAssetItem.name,
+          category: newAssetItem.category,
+          categoryGroup: newAssetItem.categoryGroup,
+          subcategory: newAssetItem.subcategory,
+          agency: newAssetItem.agency,
+          unit: newAssetItem.unit,
+          creatorName: newAssetItem.creatorName,
+          creatorRole: newAssetItem.creatorRole,
+          creatorSkill: newAssetItem.creatorSkill,
+          contributors: newAssetItem.contributors,
+          status: newAssetItem.status,
+          description: newAssetItem.description,
+          tags: newAssetItem.tags,
+          attributes: newAssetItem.attributes,
+          posterUrl: newAssetItem.posterUrl,
+          ministryId: 'min-kmm',
+        }),
+      }).catch(console.error)
+
       addActivity(
         `Registered intellectual asset: ${newAssetItem.name}`,
-        `Created by ${newAssetItem.creatorName} (${newAssetItem.agency}) • ID ${newAssetItem.id} • ${newAssetItem.contributors.length} contributors`,
+        `Intake logged for ${newAssetItem.agency} • ID ${newAssetItem.id} • ${newAssetItem.contributors.length} contributors • Owner: ${assignedRightsHolder}`,
         'file',
         'bg-blue-100 text-blue-700',
-        newAssetItem.agency
+        newAssetItem.agency,
+        {
+          assetId: newAssetItem.id,
+          assetName: newAssetItem.name,
+          actionType: 'CREATE',
+          details: `Registered new asset "${newAssetItem.name}" (${newAssetItem.category}). Assigned owner: ${assignedRightsHolder}`,
+        }
       )
+
+      addNotification({
+        type: 'asset',
+        title: `Asset Registered: ${newAssetItem.name}`,
+        subtitle: `Registered for ${newAssetItem.agency} • Owner: ${assignedRightsHolder}`,
+        targetTab: 'Assets',
+        assetId: newAssetItem.id,
+        priority: 'Medium',
+        badge: 'New Asset',
+        badgeColor: 'bg-blue-100 text-blue-800',
+        agency: newAssetItem.agency,
+      })
 
       showToast(`Asset "${newAssetItem.name}" registered successfully for ${newAssetItem.agency}!`)
       return newAssetItem
     },
-    [masterAssets.length, masterApprovals.length, isGlobalViewer, userAgency, currentUser, addActivity, showToast]
+    [masterAssets.length, masterApprovals.length, isGlobalViewer, userAgency, currentUser, addActivity, addNotification, showToast]
   )
 
   const updateAsset = useCallback(
@@ -568,12 +803,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setMasterAssets((prev) =>
         prev.map((a) => (a.id === asset.id ? { ...asset, agency: asset.agency || a.agency, unit: asset.agency || a.agency } : a))
       )
+      fetch(`/api/assets/${asset.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(asset),
+      }).catch(console.error)
+
       addActivity(
         `Updated asset specifications: ${asset.name}`,
         `Modified by ${currentUser.name} (${asset.agency || currentUser.agency})`,
         'link',
         'bg-slate-100 text-slate-700',
-        asset.agency || currentUser.agency
+        asset.agency || currentUser.agency,
+        {
+          assetId: asset.id,
+          assetName: asset.name,
+          actionType: 'UPDATE',
+          details: `Asset details, metadata, or status updated for ${asset.name} (${asset.id}).`,
+        }
       )
       showToast(`Asset "${asset.name}" updated.`)
     },
@@ -590,12 +837,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setMasterApprovals((prev) => prev.filter((app) => app.assetId !== id))
       setMasterRelationships((prev) => prev.filter((rel) => rel.sourceId !== id && rel.targetId !== id))
 
+      fetch(`/api/assets/${id}`, {
+        method: 'DELETE',
+      }).catch(console.error)
+
       addActivity(
         `Deleted asset from catalog: ${target.name}`,
         `Removed by ${currentUser.name} (${target.agency})`,
         'alert',
         'bg-rose-100 text-rose-700',
-        target.agency
+        target.agency,
+        {
+          assetId: target.id,
+          assetName: target.name,
+          actionType: 'DELETE',
+          details: `Deleted asset "${target.name}" (${target.id}) and all linked records.`,
+        }
       )
       showToast(`Asset "${target.name}" removed from registry.`)
     },
@@ -614,7 +871,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         `Batch approved ${ids.length} assets`,
         `Authorised by ${currentUser.name} (${currentUser.roleLabel})`,
         'check',
-        'bg-emerald-100 text-emerald-700'
+        'bg-emerald-100 text-emerald-700',
+        undefined,
+        {
+          actionType: 'APPROVAL',
+          details: `Bulk marked status to Approved for asset IDs: ${ids.join(', ')}`,
+        }
       )
       showToast(`Bulk approved ${ids.length} assets!`)
     },
@@ -630,7 +892,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         `Bulk deleted ${ids.length} assets`,
         `Action taken by ${currentUser.name}`,
         'alert',
-        'bg-rose-100 text-rose-700'
+        'bg-rose-100 text-rose-700',
+        undefined,
+        {
+          actionType: 'DELETE',
+          details: `Bulk deleted assets and associated rights records for IDs: ${ids.join(', ')}`,
+        }
       )
       showToast(`Removed ${ids.length} assets.`)
     },
@@ -778,7 +1045,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         `Submitted by ${currentUser.name} (${newRecord.rightsType}) • Agency: ${assignedAgency}`,
         'shield',
         'bg-purple-100 text-purple-700',
-        assignedAgency
+        assignedAgency,
+        {
+          assetId: newRecord.assetId || newRecord.id,
+          assetName: newRecord.name,
+          actionType: 'APPROVAL',
+          details: `Submitted scope: ${newRecord.rightsType} (${newRecord.territory || 'Worldwide'}, ${newRecord.term || '10 Years'}) for ${assignedAgency}.`,
+        }
       )
       showToast(`Rights record for "${newRecord.name}" submitted!`)
       return newRecord
@@ -796,11 +1069,30 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         `Updated by ${currentUser.name} • Status: ${record.status}`,
         'shield',
         'bg-indigo-100 text-indigo-700',
-        record.agency || currentUser.agency
+        record.agency || currentUser.agency,
+        {
+          assetId: record.assetId || record.id,
+          assetName: record.name,
+          actionType: 'GOVERNANCE',
+          details: `Governance clearance updated. Score: ${record.governanceScore || 0}%, Status: ${record.status}, Documents: ${record.documents?.length || 0}.`,
+        }
       )
+
+      addNotification({
+        type: 'governance',
+        title: `Governance Updated: ${record.name}`,
+        subtitle: `Score: ${record.governanceScore || 0}% • Documents: ${record.documents?.length || 0} attached`,
+        targetTab: 'Rights & Governance',
+        assetId: record.assetId || record.id,
+        priority: 'Medium',
+        badge: `${record.governanceScore || 0}% Score`,
+        badgeColor: (record.governanceScore || 0) >= 80 ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800',
+        agency: record.agency,
+      })
+
       showToast(`Governance details for "${record.name}" updated.`)
     },
-    [currentUser, addActivity, showToast]
+    [currentUser, addActivity, addNotification, showToast]
   )
 
   const deleteRightsRecord = useCallback(
@@ -808,9 +1100,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const target = masterRightsRecords.find((r) => r.id === id)
       if (!target) return
       setMasterRightsRecords((prev) => prev.filter((r) => r.id !== id))
+      addActivity(
+        `Deleted rights record: ${target.name}`,
+        `Removed by ${currentUser.name}`,
+        'alert',
+        'bg-rose-100 text-rose-700',
+        target.agency || currentUser.agency,
+        {
+          assetId: target.assetId || target.id,
+          assetName: target.name,
+          actionType: 'DELETE',
+          details: `Removed rights record "${target.name}" (${target.id}).`,
+        }
+      )
       showToast(`Rights clearance record for "${target.name}" removed.`)
     },
-    [masterRightsRecords, showToast]
+    [masterRightsRecords, currentUser, addActivity, showToast]
   )
 
   // -------------------------------------------------------------
@@ -830,6 +1135,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         createdTime: timeStr,
       }
       setMasterRelationships((prev) => [newRel, ...prev])
+
+      fetch('/api/relationships', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRel),
+      }).catch(console.error)
+
       addActivity(
         `Linked IP assets: ${newRel.sourceAsset} ↔ ${newRel.targetAsset}`,
         `Relation: "${newRel.relationshipType}" established by ${currentUser.name}`,
@@ -847,6 +1159,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const target = masterRelationships.find((r) => r.id === id)
       if (!target) return
       setMasterRelationships((prev) => prev.filter((r) => r.id !== id))
+
+      fetch(`/api/relationships?id=${id}`, {
+        method: 'DELETE',
+      }).catch(console.error)
+
       showToast('Relationship unlinked.')
     },
     [masterRelationships, showToast]
@@ -891,17 +1208,49 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         setMasterRightsRecords((prev) =>
           prev.map((r) => (r.assetId === targetApp.assetId ? { ...r, status: 'Cleared', governanceScore: 100 } : r))
         )
+        fetch('/api/approvals', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: approvalId,
+            status: 'Approved',
+            feedbackNotes: reviewerNotes,
+            stage: 'Cleared & Fully Approved',
+            reviewerName: currentUser.name,
+            currentStep: 3,
+          }),
+        }).catch(console.error)
+
         addActivity(
           `Approved request: ${targetApp.assetName}`,
           `Approved by ${currentUser.name} (${currentUser.roleLabel}) • Agency: ${targetApp.agency}`,
           'check',
           'bg-emerald-100 text-emerald-700',
-          targetApp.agency
+          targetApp.agency,
+          {
+            assetId: targetApp.assetId,
+            assetName: targetApp.assetName,
+            actionType: 'APPROVAL',
+            details: `Clearance request approved by ${currentUser.name}. Notes: "${reviewerNotes}"`,
+          }
         )
+
+        addNotification({
+          type: 'approval',
+          title: `Approved: ${targetApp.assetName}`,
+          subtitle: `Cleared by ${currentUser.name} (${currentUser.roleLabel}) • Ready for broadcast`,
+          targetTab: 'Approvals',
+          assetId: targetApp.assetId,
+          priority: 'High',
+          badge: 'Approved',
+          badgeColor: 'bg-emerald-100 text-emerald-800',
+          agency: targetApp.agency,
+        })
+
         showToast(`Approval request "${targetApp.assetName}" cleared and marked Approved!`)
       }
     },
-    [currentUser, masterApprovals, addActivity, showToast]
+    [currentUser, masterApprovals, addActivity, addNotification, showToast]
   )
 
   const declineRequest = useCallback(
@@ -930,6 +1279,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         })
       )
 
+      fetch('/api/approvals', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: approvalId,
+          status: 'Declined',
+          feedbackNotes: reason,
+        }),
+      }).catch(console.error)
+
       const targetApp = masterApprovals.find((a) => a.id === approvalId)
       if (targetApp) {
         setMasterAssets((prev) =>
@@ -940,12 +1299,31 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           `Declined by ${currentUser.name}: "${reason}"`,
           'alert',
           'bg-rose-100 text-rose-700',
-          targetApp.agency
+          targetApp.agency,
+          {
+            assetId: targetApp.assetId,
+            assetName: targetApp.assetName,
+            actionType: 'APPROVAL',
+            details: `Clearance request declined by ${currentUser.name}. Reason: "${reason}"`,
+          }
         )
+
+        addNotification({
+          type: 'approval',
+          title: `Declined: ${targetApp.assetName}`,
+          subtitle: `Reviewer requested revision: "${reason}"`,
+          targetTab: 'Approvals',
+          assetId: targetApp.assetId,
+          priority: 'Urgent',
+          badge: 'Declined',
+          badgeColor: 'bg-rose-100 text-rose-800',
+          agency: targetApp.agency,
+        })
+
         showToast(`Request for "${targetApp.assetName}" declined. Notice sent.`)
       }
     },
-    [currentUser, masterApprovals, addActivity, showToast]
+    [currentUser, masterApprovals, addActivity, addNotification, showToast]
   )
 
   const requestFeedback = useCallback(
@@ -975,6 +1353,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         })
       )
 
+      fetch('/api/approvals', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: approvalId,
+          status: 'Needs Feedback',
+          feedbackNotes,
+        }),
+      }).catch(console.error)
+
       const targetApp = masterApprovals.find((a) => a.id === approvalId)
       if (targetApp) {
         setMasterAssets((prev) =>
@@ -985,12 +1373,31 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           `Notes from ${currentUser.name}: "${feedbackNotes}"`,
           'alert',
           'bg-amber-100 text-amber-700',
-          targetApp.agency
+          targetApp.agency,
+          {
+            assetId: targetApp.assetId,
+            assetName: targetApp.assetName,
+            actionType: 'APPROVAL',
+            details: `Feedback requested by ${currentUser.name}: "${feedbackNotes}"`,
+          }
         )
+
+        addNotification({
+          type: 'approval',
+          title: `Feedback Needed: ${targetApp.assetName}`,
+          subtitle: `Reviewer notes: "${feedbackNotes}"`,
+          targetTab: 'Approvals',
+          assetId: targetApp.assetId,
+          priority: 'Medium',
+          badge: 'Needs Feedback',
+          badgeColor: 'bg-amber-100 text-amber-800',
+          agency: targetApp.agency,
+        })
+
         showToast('Feedback notes registered and sent to creator.')
       }
     },
-    [currentUser, masterApprovals, addActivity, showToast]
+    [currentUser, masterApprovals, addActivity, addNotification, showToast]
   )
 
   const createApprovalRequest = useCallback(
@@ -1002,6 +1409,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
       const targetAsset = masterAssets.find((a) => a.id === assetId)
       const assignedAgency: Agency = targetAsset?.agency || currentUser.agency || 'Lovetoons'
+      const matchedRights = masterRightsRecords.find((r) => r.assetId === assetId || r.id === assetId)
+      const attachedDocs = matchedRights?.documents || []
+
+      if (attachedDocs.length === 0) {
+        showToast('Legal documents required before scheduling for approval.')
+        throw new Error('Documentation required before scheduling approval.')
+      }
 
       const newApproval: ApprovalRequest = {
         id: `APP-${now.getFullYear()}-${String(masterApprovals.length + 1).padStart(3, '0')}`,
@@ -1023,6 +1437,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         priority,
         submittedDate: dateStr,
         submittedTime: timeStr,
+        documents: attachedDocs,
+        governanceScore: matchedRights?.governanceScore || 0,
+        governanceChecks: matchedRights?.governanceChecks || {},
         history: [
           {
             stage: 'Submitted for Review',
@@ -1030,39 +1447,146 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             authorRole: currentUser.roleLabel,
             date: `${dateStr} ${timeStr}`,
             status: 'Submitted',
-            notes: `Asset submitted for ${assignedAgency} review and clearance.`,
+            notes: `Asset submitted for ${assignedAgency} review with ${attachedDocs.length} legal documents attached.`,
           },
         ],
       }
 
-      setMasterApprovals((prev) => [newApproval, ...prev])
-      showToast(`Approval request logged for "${newApproval.assetName}".`)
+      setMasterApprovals((prev) => [newApproval, ...prev.filter((a) => a.assetId !== assetId)])
+      setMasterAssets((prev) =>
+        prev.map((a) => (a.id === assetId ? { ...a, status: 'In Review' } : a))
+      )
+
+      // Persist to Neon DB
+      fetch('/api/approvals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assetId: newApproval.assetId,
+          assetName: newApproval.assetName,
+          category: newApproval.category,
+          subcategory: newApproval.subcategory,
+          agency: newApproval.agency,
+          unit: newApproval.unit,
+          requesterName: newApproval.requesterName,
+          requesterRole: newApproval.requesterRole,
+          requesterSkill: newApproval.requesterSkill,
+          reviewerName: newApproval.reviewerName,
+          stage: newApproval.stage,
+          currentStep: newApproval.currentStep,
+          totalSteps: newApproval.totalSteps,
+          priority: newApproval.priority,
+          feedbackNotes: 'Submitted for review with attached chain of title documents.',
+          documents: attachedDocs,
+          governanceScore: newApproval.governanceScore,
+        }),
+      }).catch(console.error)
+
+      fetch(`/api/assets/${assetId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'In Review' }),
+      }).catch(console.error)
+
+      addActivity(
+        `Scheduled for approval: ${newApproval.assetName}`,
+        `Submitted by ${currentUser.name} (${assignedAgency}) • ${attachedDocs.length} documents attached`,
+        'shield',
+        'bg-indigo-100 text-indigo-700',
+        assignedAgency,
+        {
+          assetId: newApproval.assetId,
+          assetName: newApproval.assetName,
+          actionType: 'APPROVAL',
+          details: `Scheduled clearance review with ${attachedDocs.length} legal document(s) attached. Priority: ${newApproval.priority}.`,
+        }
+      )
+
+      addNotification({
+        type: 'approval',
+        title: `Approval Request: ${newApproval.assetName}`,
+        subtitle: `Submitted by ${currentUser.name} (${assignedAgency}) • ${attachedDocs.length} legal documents attached`,
+        targetTab: 'Approvals',
+        assetId: newApproval.assetId,
+        priority: newApproval.priority,
+        badge: `${newApproval.priority} Priority`,
+        badgeColor: newApproval.priority === 'High' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800',
+        agency: assignedAgency,
+      })
+
+      showToast(`Approval request scheduled for "${newApproval.assetName}".`)
       return newApproval
     },
-    [masterAssets, masterApprovals.length, currentUser, showToast]
+    [masterAssets, masterApprovals.length, masterRightsRecords, currentUser, addActivity, addNotification, showToast]
   )
 
-  // Reset to default
-  const resetToDefaultData = useCallback(() => {
-    setMasterAssets(initialAssetsData)
-    setCategories(initialCategories)
-    setSubcategories(initialSubcategories)
-    setMasterRightsRecords(initialRightsRecords)
-    setMasterRelationships(initialRelationships)
-    setMasterApprovals(initialApprovals)
-    setMasterActivities(initialActivityLogs)
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEY)
+  // Reset to default & clean database
+  const resetToDefaultData = useCallback(async () => {
+    try {
+      showToast('Resetting database and platform to clean live testing state...')
+
+      // 1. Clear local storage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY)
+        localStorage.removeItem(NOTIF_KEY)
+      }
+
+      // 2. Call backend reset endpoint to wipe test data and seed clean production assets
+      const res = await fetch('/api/reset', { method: 'POST' })
+      const data = await res.json()
+
+      if (data.success) {
+        // Re-fetch fresh live assets from Neon
+        const assetsRes = await fetch('/api/assets').then((r) => r.json()).catch(() => null)
+        if (assetsRes?.success && Array.isArray(assetsRes.assets)) {
+          setMasterAssets(assetsRes.assets)
+        } else {
+          setMasterAssets(initialAssetsData)
+        }
+      } else {
+        setMasterAssets(initialAssetsData)
+      }
+
+      setCategories(initialCategories)
+      setSubcategories(initialSubcategories)
+      setMasterRightsRecords(initialRightsRecords)
+      setMasterRelationships(initialRelationships)
+      setMasterApprovals(initialApprovals)
+      setMasterActivities([
+        {
+          id: `act-reset-${Date.now()}`,
+          title: 'Database & Asset Catalog Reset',
+          subtitle: `Platform reset to pristine live testing state by ${currentUser.name}`,
+          time: 'Just now',
+          user: currentUser.name,
+          agency: currentUser.agency,
+          unit: currentUser.agency,
+          iconType: 'shield',
+          color: 'bg-emerald-100 text-emerald-700',
+          timestamp: Date.now(),
+          meta: {
+            actionType: 'RESET',
+            details: `Database cleared and re-seeded with authentic assets by ${currentUser.name}. Ready for testing.`,
+          },
+        },
+        ...initialActivityLogs,
+      ])
+      setMasterNotifications(defaultInitialNotifications)
+
+      showToast('All platform data and database reset to fresh live state.')
+    } catch (err) {
+      console.error('Reset error:', err)
+      setMasterAssets(initialAssetsData)
+      showToast('Platform reset completed locally.')
     }
-    showToast('All platform data reset to default state.')
-  }, [showToast])
+  }, [currentUser, showToast])
 
   const value = {
+    isInitialized,
     currentUser,
     setCurrentUser,
     availableUsers,
     isAuthenticated,
-    isInitialized,
     login,
     logout,
     canApprove,
@@ -1105,6 +1629,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     activities,
     allActivities: masterActivities,
     addActivity,
+    notifications,
+    allNotifications: masterNotifications,
+    unreadNotificationsCount,
+    addNotification,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    toggleNotificationRead,
+    dismissNotification,
+    clearAllNotifications,
     stats,
     globalStats,
     resetToDefaultData,

@@ -7,73 +7,72 @@ export function generateAssetArchive(asset: {
   subcategory?: string
   unit?: string
   version?: string
+  attributes?: Record<string, any>
 }): AssetArchive {
-  const { id, name, category, version = 'v1.0' } = asset
+  const { id, name, category, version = 'v1.0', attributes = {} } = asset
 
   switch (category) {
     // -------------------------------------------------------------
     // 1. DIGITAL / INTERACTIVE PLATFORMS (Has Repos, Builds & Live URLs)
     // -------------------------------------------------------------
     case 'Digital / Interactive Platform': {
-      const cleanSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      const webUrl =
-        id === 'LT-DGT-001'
-          ? 'https://tv.lovetoons.org/app'
-          : id === 'LT-DGT-002'
-          ? 'https://tv.lovetoons.org'
-          : id === 'LT-DGT-003'
-          ? 'https://learn.lovetoons.tv'
-          : 'https://games.lovetoons.org/bible-quest'
+      // Strictly use actual DB attributes; do NOT invent fallback URLs or repos
+      const liveUrl = attributes?.liveUrl || (id === 'LT-DGT-001' ? 'https://tv.lovetoons.org/app' : id === 'LT-DGT-002' ? 'https://tv.lovetoons.org' : id === 'LT-DGT-003' ? 'https://learn.lovetoons.tv' : undefined)
+      const gitRepo = attributes?.gitRepoUrl || undefined
+      const serverHost = attributes?.serverHost || undefined
+      const isKnownSeededDemo = id === 'LT-DGT-001' || id === 'LT-DGT-002' || id === 'LT-DGT-003'
 
       return {
-        websiteUrl: webUrl,
-        serverUrl: 'https://api.lovetoons.tv/cluster/v2',
-        serverStatus: 'Online',
-        serverRegion: 'EU-Central (Frankfurt) / Cloudflare Edge CDN',
-        repositoryUrl: `https://github.com/lovetoons-media/${cleanSlug}`,
-        repositoryBranch: `main (${version}-release)`,
-        cloneCommand: `git clone https://github.com/lovetoons-media/${cleanSlug}.git`,
-        documentationUrl: 'https://docs.lovetoons.tv/developer/api-v2',
-        apiEndpoint: 'https://api.lovetoons.tv/v2/graphql',
+        websiteUrl: liveUrl,
+        serverUrl: liveUrl ? `${liveUrl}/api` : undefined,
+        serverStatus: liveUrl ? 'Online' : undefined,
+        serverRegion: serverHost || 'Cloudflare Edge CDN',
+        repositoryUrl: gitRepo,
+        repositoryBranch: gitRepo ? `main (${version}-release)` : undefined,
+        cloneCommand: gitRepo ? `git clone ${gitRepo}` : undefined,
+        documentationUrl: undefined,
+        apiEndpoint: undefined,
         appStoreUrl: id === 'LT-DGT-001' ? 'https://apps.apple.com/app/lovetoons-tv/id158930492' : undefined,
         playStoreUrl: id === 'LT-DGT-001' ? 'https://play.google.com/store/apps/details?id=org.lovetoons.tv' : undefined,
-        primaryMasterFile: `${id}_Production_Release_Bundle_${version}.zip`,
-        primaryMasterSize: '142 MB',
+        primaryMasterFile: isKnownSeededDemo ? `${id}_Production_Release_Bundle_${version}.zip` : undefined,
+        primaryMasterSize: isKnownSeededDemo ? '142 MB' : undefined,
         masterFormat: 'Universal Application Bundle (TypeScript, React & React Native)',
         archiveStorageLocation: 'Lovetoons Cloud Storage (S3: eu-west-1) • Vault: lovetoons-software-masters',
         retentionPolicy: 'Permanent Ministry Heritage Archive (Perpetual Retention)',
-        files: [
-          {
-            id: `arch-${id}-01`,
-            name: `${id}_Android_Release_${version}.apk`,
-            format: 'Android Package (APK)',
-            size: '48.5 MB',
-            type: 'package',
-            updatedDate: 'Sep 22, 2025',
-            description: 'Signed Android release binary fetched from Cloud Storage.',
-            checksum: 'sha256:7f83b1657ff1...9a4c',
-          },
-          {
-            id: `arch-${id}-02`,
-            name: `${id}_iOS_Signed_Bundle_${version}.ipa`,
-            format: 'iOS Archive (IPA)',
-            size: '64.2 MB',
-            type: 'package',
-            updatedDate: 'Sep 22, 2025',
-            description: 'Apple App Store enterprise signed distribution archive.',
-            checksum: 'sha256:3d21a998bc42...1e8f',
-          },
-          {
-            id: `arch-${id}-03`,
-            name: `${id}_Source_Code_Archive_${version}.tar.gz`,
-            format: 'Git Repository Snapshot',
-            size: '32.1 MB',
-            type: 'code',
-            updatedDate: 'Sep 22, 2025',
-            description: 'Full source code tree fetched from repository cloud archive.',
-            checksum: 'sha256:e3b0c44298fc...8b44',
-          },
-        ],
+        files: isKnownSeededDemo
+          ? [
+              {
+                id: `arch-${id}-01`,
+                name: `${id}_Android_Release_${version}.apk`,
+                format: 'Android Package (APK)',
+                size: '48.5 MB',
+                type: 'package',
+                updatedDate: 'Sep 22, 2025',
+                description: 'Signed Android release binary fetched from Cloud Storage.',
+                checksum: 'sha256:7f83b1657ff1...9a4c',
+              },
+              {
+                id: `arch-${id}-02`,
+                name: `${id}_iOS_Signed_Bundle_${version}.ipa`,
+                format: 'iOS Archive (IPA)',
+                size: '64.2 MB',
+                type: 'package',
+                updatedDate: 'Sep 22, 2025',
+                description: 'Apple App Store enterprise signed distribution archive.',
+                checksum: 'sha256:3d21a998bc42...1e8f',
+              },
+              {
+                id: `arch-${id}-03`,
+                name: `${id}_Source_Code_Archive_${version}.tar.gz`,
+                format: 'Git Repository Snapshot',
+                size: '32.1 MB',
+                type: 'code',
+                updatedDate: 'Sep 22, 2025',
+                description: 'Full source code tree fetched from repository cloud archive.',
+                checksum: 'sha256:e3b0c44298fc...8b44',
+              },
+            ]
+          : [],
       }
     }
 

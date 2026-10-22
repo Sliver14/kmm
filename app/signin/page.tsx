@@ -10,12 +10,9 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   LogIn,
-  KeyRound,
-  ShieldAlert,
   Building2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -44,28 +41,30 @@ function SignInContent() {
     }
   }, [isInitialized, isAuthenticated, returnTab, returnAsset, router])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage(null)
 
     if (!email.trim()) {
-      setErrorMessage('Please enter your ministry email address.')
+      setErrorMessage('Please enter your email address.')
       return
     }
 
     setIsLoading(true)
 
-    // Simulate authenticating for realistic polished feel
-    setTimeout(() => {
-      const success = login(email, password)
+    try {
+      const success = await login(email, password)
       if (success) {
         const destination = returnAsset ? `/assets?asset=${returnAsset}` : `/${returnTab}`
         router.replace(destination)
       } else {
-        setErrorMessage('User profile not found. Please select one of the available demo accounts.')
+        setErrorMessage('Invalid credentials. Please verify your email and password, or select a role below.')
         setIsLoading(false)
       }
-    }, 450)
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Authentication error. Please check your credentials.')
+      setIsLoading(false)
+    }
   }
 
   const handleQuickDemoLogin = (userId: string) => {
@@ -84,15 +83,14 @@ function SignInContent() {
   }
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#021124] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="relative min-h-screen w-full overflow-hidden bg-slate-950 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       {/* Ambient background glows */}
-      <div className="pointer-events-none absolute -top-40 -left-40 size-[550px] rounded-full bg-blue-600/15 blur-[120px]" />
-      <div className="pointer-events-none absolute -bottom-40 -right-40 size-[550px] rounded-full bg-purple-600/15 blur-[120px]" />
-      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[650px] rounded-full bg-cyan-500/10 blur-[150px]" />
+      <div className="pointer-events-none absolute -top-40 -left-40 size-[550px] rounded-full bg-blue-600/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-40 -right-40 size-[550px] rounded-full bg-slate-800/20 blur-[120px]" />
 
-      <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-12 rounded-3xl border border-white/10 bg-slate-900/70 backdrop-blur-2xl shadow-2xl overflow-hidden">
+      <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-12 rounded-3xl border border-slate-800/80 bg-slate-900/90 backdrop-blur-2xl shadow-2xl overflow-hidden">
         {/* Left Brand Panel */}
-        <div className="lg:col-span-5 relative flex flex-col justify-between p-8 sm:p-10 bg-gradient-to-br from-[#041a38] via-[#03152c] to-[#020d1c] border-b lg:border-b-0 lg:border-r border-white/10 text-white">
+        <div className="lg:col-span-5 relative flex flex-col justify-between p-8 sm:p-10 bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-800 text-white">
           <div>
             <div className="flex items-center gap-3">
               <img
@@ -101,62 +99,51 @@ function SignInContent() {
                 className="size-10 object-contain drop-shadow-md"
               />
               <div>
-                <div className="text-lg font-black text-white tracking-tight leading-none">
+                <div className="text-lg font-bold text-white tracking-tight leading-none">
                   Kiddies Media
                 </div>
-                <div className="text-[11px] font-bold text-blue-300 uppercase tracking-widest mt-0.5">
+                <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mt-0.5">
                   Ministries
                 </div>
               </div>
             </div>
 
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-300 border border-blue-400/30">
-              <Sparkles className="size-3 text-yellow-300" />
-              <span>5 Integrated Agencies</span>
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-800 px-3 py-1 text-[11px] font-medium text-slate-300 border border-slate-700/60">
+              <ShieldCheck className="size-3.5 text-blue-400" />
+              <span>Asset & Governance Platform</span>
             </div>
 
-            <h1 className="mt-6 text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+            <h1 className="mt-6 text-2xl sm:text-3xl font-semibold tracking-tight text-white leading-tight">
               Intellectual Asset <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300">
-                Management Portal
-              </span>
+              <span className="text-slate-400 font-normal">Governance System</span>
             </h1>
 
-            <p className="mt-3 text-xs leading-relaxed text-slate-300 font-medium">
-              Centralized platform for master media archival, intellectual property classification, copyright governance, staff contributor tracking, and multi-tier approvals across Kiddies Media Ministries agencies.
+            <p className="mt-3 text-xs leading-relaxed text-slate-300 font-normal">
+              Unified registry for intellectual property, broadcast rights, and operational oversight across Loveworld Nation.
             </p>
 
-            <div className="mt-5 grid grid-cols-2 gap-2 text-[10px] font-semibold text-slate-300">
-              <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
-                • Lovetoons Media
+            <div className="mt-6 space-y-2.5 text-xs text-slate-300 font-medium">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+                <span>125 Registered Ministry Assets</span>
               </div>
-              <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
-                • Publishing Agency
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+                <span>Worldwide Rights & Clearance Governance</span>
               </div>
-              <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
-                • Digital Agency
-              </div>
-              <div className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
-                • Academy Agency
-              </div>
-              <div className="col-span-2 rounded-lg bg-white/5 border border-white/10 px-2.5 py-1.5">
-                • Educational Agency
+              <div className="flex items-center gap-2.5">
+                <Building2 className="size-4 text-blue-400 shrink-0" />
+                <span>Multi-Agency Operational Oversight</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
-            <div className="flex items-start gap-2.5 text-xs text-slate-300">
-              <ShieldCheck className="size-4 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Full governance clearance & territorial rights tracking</span>
+          <div className="mt-8 pt-6 border-t border-slate-800/80 space-y-1">
+            <div className="text-[11px] text-slate-300 font-medium">
+              Office of the Executive Minister
             </div>
-            <div className="flex items-start gap-2.5 text-xs text-slate-300">
-              <CheckCircle2 className="size-4 text-blue-400 shrink-0 mt-0.5" />
-              <span>Staff contributor attribution & IP deeds on file</span>
-            </div>
-
-            <div className="pt-2 text-[11px] italic text-slate-400">
-              &ldquo;Building Godly Content & Media for a Brighter Generation — Kiddies Media Ministries&rdquo;
+            <div className="text-[10px] text-slate-500">
+              Submitted to the Office of the Attorney-General
             </div>
           </div>
         </div>
@@ -166,12 +153,12 @@ function SignInContent() {
           <div>
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-[#09245a]">Sign In to Platform</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Sign In</h2>
                 <p className="mt-1 text-xs text-slate-500">
-                  Enter your credentials or select an agency representative profile below.
+                  Enter your credentials or choose a role below.
                 </p>
               </div>
-              <div className="grid size-10 place-items-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100">
+              <div className="grid size-10 place-items-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
                 <LogIn className="size-5" />
               </div>
             </div>
@@ -187,8 +174,8 @@ function SignInContent() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Ministry Email Address
+                <label className="block text-xs font-medium text-slate-700 mb-1">
+                  Email Address
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -198,15 +185,15 @@ function SignInContent() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="name@kiddiesmedia.org"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-3 text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition"
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-10 pr-3 text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100 transition"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-slate-700">Password</label>
-                  <span className="text-[11px] text-blue-600 font-semibold cursor-pointer hover:underline">
+                  <label className="block text-xs font-medium text-slate-700">Password</label>
+                  <span className="text-[11px] text-slate-500 font-medium">
                     Default: kmm2025
                   </span>
                 </div>
@@ -218,12 +205,12 @@ function SignInContent() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="••••••••••••"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-10 text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition"
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-10 pr-10 text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100 transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
@@ -236,23 +223,23 @@ function SignInContent() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 size-3.5"
+                    className="rounded border-slate-300 text-slate-900 focus:ring-slate-400 size-3.5"
                   />
                   <span>Remember this device</span>
                 </label>
-                <span className="text-[11px] text-slate-400">KMM Platform v2.5</span>
+                <span className="text-[11px] text-slate-400">KMM Platform</span>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 px-4 text-xs font-bold text-white shadow-md shadow-blue-600/30 hover:bg-blue-700 active:scale-98 transition disabled:opacity-70 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 px-4 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:scale-98 transition disabled:opacity-70 cursor-pointer"
               >
                 {isLoading ? (
                   <div className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                 ) : (
                   <>
-                    <span>Sign In to Kiddies Media Ministries</span>
+                    <span>Sign In</span>
                     <ArrowRight className="size-4" />
                   </>
                 )}
@@ -262,10 +249,10 @@ function SignInContent() {
             {/* Quick Demo One-Click Access Across Agencies */}
             <div className="mt-6 pt-5 border-t border-slate-100">
               <div className="flex items-center justify-between mb-2.5">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  Quick Sign-In by Role & Agency
+                <span className="text-xs font-semibold text-slate-700">
+                  Quick Access
                 </span>
-                <span className="text-[10px] text-slate-400">1-Click Fast Switch</span>
+                <span className="text-[11px] text-slate-400">Select role to review</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
@@ -277,35 +264,35 @@ function SignInContent() {
                       type="button"
                       onClick={() => handleQuickDemoLogin(user.id)}
                       className={cn(
-                        'flex items-center gap-2.5 rounded-xl border p-2 text-left transition',
+                        'flex items-center gap-2.5 rounded-lg border p-2 text-left transition cursor-pointer',
                         isSelected
-                          ? 'border-blue-400 bg-blue-50/70 ring-1 ring-blue-400/40'
-                          : 'border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300'
+                          ? 'border-slate-900 bg-slate-50 ring-1 ring-slate-900/10'
+                          : 'border-slate-200 bg-slate-50/60 hover:bg-white hover:border-slate-300 shadow-2xs'
                       )}
                     >
                       <div
                         className={cn(
-                          'grid size-8 shrink-0 place-items-center rounded-lg text-xs font-bold text-white shadow-2xs',
+                          'grid size-8 shrink-0 place-items-center rounded-md text-xs font-semibold text-white shadow-2xs',
                           user.role === 'super_admin'
                             ? 'bg-purple-600'
                             : user.role === 'reviewer'
                               ? 'bg-emerald-600'
-                              : 'bg-blue-600'
+                              : 'bg-slate-900'
                         )}
                       >
                         {user.initials}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-slate-900 truncate">
+                          <span className="text-[11px] font-semibold text-slate-900 truncate">
                             {user.name}
                           </span>
                         </div>
-                        <div className="text-[10px] text-blue-700 font-semibold truncate">
+                        <div className="text-[10px] text-slate-600 font-medium truncate">
                           {user.roleLabel}
                         </div>
                         <div className="text-[9px] text-slate-400 truncate">
-                          Agency: {user.agency}
+                          {user.agency}
                         </div>
                       </div>
                     </button>
@@ -315,9 +302,9 @@ function SignInContent() {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
-            <span>© 2025–2035 Kiddies Media Ministries</span>
-            <span>All Rights Reserved Worldwide</span>
+          <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+            <span>Kiddies Media Ministries</span>
+            <span>Intellectual Asset Portal</span>
           </div>
         </div>
       </div>
@@ -329,7 +316,7 @@ export default function SignInPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#021124] flex items-center justify-center font-bold text-blue-200">
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center font-semibold text-slate-400 text-sm">
           Loading Sign In...
         </div>
       }
