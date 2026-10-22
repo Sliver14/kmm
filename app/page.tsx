@@ -26,6 +26,13 @@ import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { getAssetRiskAssessment, getPortfolioRiskMetrics, PortfolioRiskMetrics } from '@/lib/risk'
 import {
+  getCategoryComplianceProfile,
+  evaluateComplianceReadiness,
+  GovernanceGateDefinition,
+  RequiredDocumentDefinition,
+  CategoryCluster,
+} from '@/lib/compliance'
+import {
   AssetData,
   AssetDynamicAttributes,
   CategoryItem,
@@ -3458,6 +3465,19 @@ function RightsDetailsPage({
   const [isAddRightsModalOpen, setIsAddRightsModalOpen] = useState(false)
   const [newDocTitle, setNewDocTitle] = useState('')
 
+  // Resolve Category-Specific Compliance Standard Profile
+  const complianceProfile = useMemo(() => {
+    return getCategoryComplianceProfile(asset.category, asset.name)
+  }, [asset.category, asset.name])
+
+  const parentAsset = useMemo(() => {
+    return assets.find((a) => a.id === asset.assetId || a.id === asset.id) || (asset as any)
+  }, [assets, asset])
+
+  const complianceReadiness = useMemo(() => {
+    return evaluateComplianceReadiness(parentAsset, asset, asset.documents || [])
+  }, [parentAsset, asset])
+
   // Existing approval request for this rights record's asset
   const existingApproval = useMemo(() => {
     return approvals.find((a) => a.assetId === (asset.assetId || asset.id))
@@ -3465,7 +3485,12 @@ function RightsDetailsPage({
 
   const handleScheduleApproval = () => {
     if (!asset.documents || asset.documents.length === 0) {
-      showToast('Cannot schedule approval: please attach at least one legal clearance deed first.')
+      showToast(`Cannot schedule approval: ${complianceProfile.clusterLabel} requires at least one executed legal clearance deed.`)
+      return
+    }
+
+    if (complianceReadiness.missingMandatoryDocs.length > 0) {
+      showToast(`Category Mandatory Deed Missing: Please attach "${complianceReadiness.missingMandatoryDocs[0].label}" for ${complianceProfile.clusterLabel}.`)
       return
     }
 
@@ -3475,16 +3500,19 @@ function RightsDetailsPage({
       description: `Schedule "${asset.name}" for formal executive clearance review? Legal counsel and reviewer will be alerted, and this request will be permanently logged in the audit trail.`,
       confirmLabel: 'Confirm & Schedule Approval',
       variant: 'primary',
-      badge: 'Audit Logged',
+      badge: `${complianceProfile.clusterLabel} Audit`,
       details: (
         <div className="space-y-1 text-xs">
           <div><span className="font-semibold text-slate-700">Target Asset:</span> {asset.name} <span className="font-mono text-slate-500 ml-1.5">({asset.assetId || asset.id})</span></div>
+          <div><span className="font-semibold text-slate-700">Category Cluster:</span> {complianceProfile.clusterLabel} ({complianceProfile.inherentLiability} Liability)</div>
           <div><span className="font-semibold text-slate-700">Legal Documents Attached:</span> {asset.documents.length} files verified</div>
+          <div><span className="font-semibold text-slate-700">Compliance Score:</span> {complianceReadiness.complianceScore}% ({complianceReadiness.passedGatesCount}/{complianceReadiness.totalGatesCount} gates verified)</div>
           <div><span className="font-semibold text-slate-700">Submitting Officer:</span> {currentUser.name}</div>
         </div>
       ),
       onConfirm: async () => {
-        createApprovalRequest(asset.assetId || asset.id, 'Medium')
+        const priority = complianceProfile.inherentLiability === 'Critical' ? 'Urgent' : complianceProfile.inherentLiability === 'High' ? 'High' : 'Medium'
+        createApprovalRequest(asset.assetId || asset.id, priority)
         setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
         showToast(`Approval request scheduled for ${asset.name}! Reviewer alerted.`)
       },
@@ -3492,11 +3520,10 @@ function RightsDetailsPage({
   }
 
   // Document Attachment Form State (Individual Contributor vs Asset-Level)
-  const assetContributors = useMemo(() => {
+  const assetContributors: AssetContributor[] = useMemo(() => {
     if (asset.contributors && asset.contributors.length > 0) return asset.contributors
-    const parentAsset = assets.find((a) => a.id === asset.assetId || a.id === asset.id)
     return parentAsset?.contributors || []
-  }, [asset, assets])
+  }, [asset, parentAsset])
 
   const [detailsDocScope, setDetailsDocScope] = useState<'individual' | 'asset'>(
     assetContributors.length > 0 ? 'individual' : 'asset'
@@ -3534,17 +3561,16 @@ function RightsDetailsPage({
     docName: '',
   })
 
-  const [checks, setChecks] = useState<Record<string, boolean>>(
-    asset.governanceChecks && Object.keys(asset.governanceChecks).length > 0
-      ? asset.governanceChecks
-      : {
-          biblicalAlignment: false,
-          ageAppropriate: false,
-          musicSync: false,
-          copyrightReg: false,
-          voiceReleases: false,
-        }
-  )
+  const [checks, setChecks] = useState<Record<string, boolean>>(() => {
+    if (asset.governanceChecks && Object.keys(asset.governanceChecks).length > 0) {
+      return asset.governanceChecks
+    }
+    const initial: Record<string, boolean> = {}
+    complianceProfile.gates.forEach((g) => {
+      initial[g.key] = false
+    })
+    return initial
+  })
 
   // Reusable Confirmation Modal State for RightsDetailsPage
   const [confirmConfig, setConfirmConfig] = useState<{
@@ -3563,22 +3589,23 @@ function RightsDetailsPage({
     onConfirm: () => { },
   })
 
-  const toggleCheck = (key: keyof typeof checks) => {
-    const isCurrentlyChecked = !!checks[key]
-    const updated = { ...checks, [key]: !isCurrentlyChecked }
-    const passedCount = Object.values(updated).filter(Boolean).length
-    const calculatedScore = Math.round((passedCount / Object.keys(updated).length) * 100)
+  const toggleCheck = (gate: GovernanceGateDefinition) => {
+    const isCurrentlyChecked = !!checks[gate.key]
+    const updated = { ...checks, [gate.key]: !isCurrentlyChecked }
+    const passedCount = complianceProfile.gates.filter((g) => !!updated[g.key]).length
+    const calculatedScore = Math.round((passedCount / Math.max(1, complianceProfile.gates.length)) * 100)
 
     setConfirmConfig({
       isOpen: true,
       title: isCurrentlyChecked ? 'Confirm Check Invalidation' : 'Confirm Governance Clearance',
-      description: `Are you sure you want to mark "${String(key)}" as ${!isCurrentlyChecked ? 'VERIFIED' : 'UNVERIFIED'} for "${asset.name}"? This governance check will be logged in the permanent audit trail.`,
+      description: `Are you sure you want to mark "${gate.title}" as ${!isCurrentlyChecked ? 'VERIFIED' : 'UNVERIFIED'} for "${asset.name}"? This governance check will be logged in the permanent audit trail.`,
       confirmLabel: !isCurrentlyChecked ? 'Confirm Clearance & Log' : 'Confirm Invalidation',
       variant: !isCurrentlyChecked ? 'success' : 'warning',
-      badge: 'Audit Trail Enforced',
+      badge: `${gate.pillar} Pillar Gate`,
       details: (
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold text-slate-700">Governance Gate:</span> {String(key)}</div>
+          <div><span className="font-semibold text-slate-700">Governance Gate:</span> {gate.title}</div>
+          <div><span className="font-semibold text-slate-700">Category Cluster:</span> {complianceProfile.clusterLabel}</div>
           <div><span className="font-semibold text-slate-700">Compliance Score:</span> {calculatedScore}% verified</div>
           <div><span className="font-semibold text-slate-700">Authorised By:</span> {currentUser.name} ({currentUser.roleLabel})</div>
         </div>
@@ -3591,7 +3618,7 @@ function RightsDetailsPage({
           governanceScore: calculatedScore,
         })
         setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-        showToast(`Governance check updated: ${String(key)} (${calculatedScore}% Score)`)
+        showToast(`Governance check updated: ${gate.title} (${calculatedScore}% Score)`)
       },
     })
   }
@@ -4189,42 +4216,72 @@ function RightsDetailsPage({
             </div>
           )}
         <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
             <div>
-              <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Ministry Governance & Content Clearance Checklist</h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Toggle clearance controls to update real-time governance compliance scoring.</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Ministry Governance & Content Clearance Checklist</h3>
+                <span className="rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 dark:border dark:border-blue-800/40 px-2.5 py-0.5 text-[10px] font-bold">
+                  {complianceProfile.clusterLabel}
+                </span>
+                <span className={cn(
+                  'rounded-md px-2 py-0.5 text-[10px] font-bold',
+                  complianceProfile.inherentLiability === 'Critical' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' :
+                  complianceProfile.inherentLiability === 'High' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                )}>
+                  {complianceProfile.inherentLiability} Liability Profile
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                Standard: <span className="font-semibold text-slate-700 dark:text-slate-300">{complianceProfile.standardsReference}</span> — {complianceProfile.description}
+              </p>
             </div>
-            <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-3 py-1 text-xs font-bold">
-              Score: {asset.governanceScore ?? 0}%
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-3 py-1 text-xs font-bold">
+                Score: {complianceReadiness.complianceScore}% ({complianceReadiness.passedGatesCount}/{complianceReadiness.totalGatesCount} Cleared)
+              </span>
+            </div>
           </div>
 
+          {/* Dynamic Category Gates */}
           <div className="space-y-2.5 text-xs">
-            {[
-              ['biblicalAlignment', 'Biblical & Spiritual Doctrine Alignment Validated', 'Content conforms with ministry faith and scripture doctrine.'],
-              ['ageAppropriate', 'Age-Appropriate Rating & Child Safety Standards Cleared', 'Kiddies media safety and psychological review passed.'],
-              ['musicSync', 'Music & Soundtrack Synchronization License Filed', 'Composer deeds, cue sheets and publishing agreements signed.'],
-              ['copyrightReg', 'Trademark & Master Copyright Certificate Filed', 'Official statutory IP filing deed and brand mark registered.'],
-              ['voiceReleases', 'Voice Actor & Performer Release Deeds Executed', 'All voice cast, vocalists and talent releases archived.'],
-            ].map(([k, label, desc]) => (
-              <div key={k} className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-white/10 p-3.5 bg-slate-50/60 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-800/80 transition">
-                <div>
-                  <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{label}</div>
-                  <div className="text-[10px] text-slate-400 dark:text-slate-400 mt-0.5">{desc}</div>
+            {complianceProfile.gates.map((gate) => {
+              const isChecked = !!checks[gate.key]
+              return (
+                <div key={gate.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 dark:border-white/10 p-3.5 bg-slate-50/60 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-800/80 transition">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={cn(
+                        'rounded px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider',
+                        gate.pillar === 'Doctrinal' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300' :
+                        gate.pillar === 'ChildSafety' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' :
+                        gate.pillar === 'Legal' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300' :
+                        'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
+                      )}>
+                        {gate.pillar} Pillar
+                      </span>
+                      {gate.mandatory && (
+                        <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                          * Mandatory
+                        </span>
+                      )}
+                      <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{gate.title}</div>
+                    </div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">{gate.desc}</div>
+                  </div>
+                  <button
+                    onClick={() => toggleCheck(gate)}
+                    className={cn(
+                      'rounded-lg px-3.5 py-1.5 font-bold text-xs transition shadow-2xs shrink-0 cursor-pointer self-end sm:self-auto',
+                      isChecked
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                        : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                    )}
+                  >
+                    {isChecked ? 'Cleared ✓' : 'Pending'}
+                  </button>
                 </div>
-                <button
-                  onClick={() => toggleCheck(k as any)}
-                  className={cn(
-                    'rounded-lg px-3.5 py-1.5 font-bold text-xs transition shadow-2xs shrink-0 cursor-pointer',
-                    (checks as any)[k]
-                      ? 'bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
-                      : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                  )}
-                >
-                  {(checks as any)[k] ? 'Cleared ✓' : 'Pending'}
-                </button>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
@@ -4241,6 +4298,99 @@ function RightsDetailsPage({
               </span>
             </div>
           </div>
+
+          {/* Category Mandatory Deeds Requirements Strip */}
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <FileCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
+                <span>Mandatory Legal Clearances for {complianceProfile.clusterLabel}:</span>
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                {complianceReadiness.missingMandatoryDocs.length === 0 ? (
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">All Category Deeds Verified ✓</span>
+                ) : (
+                  <span className="text-amber-600 dark:text-amber-400 font-bold">{complianceReadiness.missingMandatoryDocs.length} Mandatory Deed(s) Missing</span>
+                )}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {complianceProfile.requiredDocuments.map((reqDoc, idx) => {
+                const hasDoc = (asset.documents || []).some(
+                  (d) =>
+                    d.type === reqDoc.type ||
+                    d.name.toLowerCase().includes(reqDoc.label.toLowerCase()) ||
+                    d.name.toLowerCase().includes(reqDoc.type.toLowerCase())
+                )
+                return (
+                  <div
+                    key={idx}
+                    className={cn(
+                      'rounded-lg border p-2 text-xs flex items-center justify-between gap-2',
+                      hasDoc
+                        ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-800/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300'
+                        : reqDoc.mandatory
+                          ? 'border-amber-200 bg-amber-50/70 dark:border-amber-800/40 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300'
+                          : 'border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                    )}
+                  >
+                    <div className="truncate">
+                      <div className="font-semibold truncate">{reqDoc.label}</div>
+                      <div className="text-[10px] opacity-80 truncate">{reqDoc.desc}</div>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-bold">
+                      {hasDoc ? 'Attached ✓' : reqDoc.mandatory ? 'Required *' : 'Optional'}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Contributor Talent Releases Strip */}
+          {assetContributors.length > 0 && (
+            <div className="rounded-xl border border-purple-100 bg-purple-50/40 dark:border-purple-900/30 dark:bg-purple-950/20 p-3 space-y-1.5 text-xs">
+              <div className="flex items-center justify-between font-bold text-purple-950 dark:text-purple-300 text-[11px]">
+                <span className="flex items-center gap-1.5">
+                  <User className="size-3 text-purple-600 dark:text-purple-400" />
+                  <span>Individual Contributor Release Auditing ({assetContributors.length} Credited):</span>
+                </span>
+                <span>
+                  {complianceReadiness.missingContributorReleases.length === 0 ? (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">All Talent Released ✓</span>
+                  ) : (
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">
+                      {complianceReadiness.missingContributorReleases.length} Release(s) Pending
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {assetContributors.map((c: AssetContributor, i: number) => {
+                  const hasRelease = (asset.documents || []).some(
+                    (d) =>
+                      (d.type === 'TALENT_RELEASE' || d.type === 'DEED') &&
+                      (d.assigneeName?.toLowerCase() === c.name.toLowerCase() ||
+                        d.name.toLowerCase().includes(c.name.toLowerCase()))
+                  )
+                  return (
+                    <span
+                      key={i}
+                      className={cn(
+                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold border',
+                        hasRelease
+                          ? 'border-emerald-200 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/40'
+                          : 'border-amber-200 bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/40'
+                      )}
+                    >
+                      <span>{c.name} ({c.role}):</span>
+                      <b>{hasRelease ? 'Released ✓' : 'Pending Deed'}</b>
+                    </span>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleAttachDocument} className="rounded-xl border border-blue-100 bg-blue-50/40 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-3 text-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100/70 dark:border-white/10 pb-2.5">
@@ -4310,12 +4460,12 @@ function RightsDetailsPage({
                         onChange={(e) => {
                           const val = e.target.value
                           setDetailsDocAssignee(val)
-                          const found = assetContributors.find((c) => c.name === val)
+                          const found = assetContributors.find((c: AssetContributor) => c.name === val)
                           if (found) setDetailsDocRole(found.role)
                         }}
                         className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-purple-400"
                       >
-                        {assetContributors.map((c, idx) => (
+                        {assetContributors.map((c: AssetContributor, idx: number) => (
                           <option key={idx} value={c.name}>
                             {c.name} — {c.role}
                           </option>
