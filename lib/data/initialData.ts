@@ -14,6 +14,7 @@ import {
 } from '@/types'
 import { generateAssetArchive } from './assetArchiveData'
 import { attorneyGeneralAssetsData } from './scheduleAssets'
+import { sortDiscontinuedToBottom } from '@/lib/risk'
 
 export const initialUsers: UserProfile[] = [
   {
@@ -2233,10 +2234,12 @@ const rawAssetsData: AssetData[] = [
   },
 ]
 
-export const initialAssetsData: AssetData[] = attorneyGeneralAssetsData.map((a) => ({
-  ...a,
-  archive: a.archive || generateAssetArchive(a),
-}))
+export const initialAssetsData: AssetData[] = sortDiscontinuedToBottom(
+  attorneyGeneralAssetsData.map((a) => ({
+    ...a,
+    archive: a.archive || generateAssetArchive(a),
+  }))
+)
 
 export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.map((a) => {
   const isAudio = a.category?.toLowerCase().includes('audio') || a.category?.toLowerCase().includes('music') || a.categoryGroup?.toLowerCase().includes('audio')

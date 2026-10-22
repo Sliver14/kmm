@@ -25,6 +25,7 @@ import {
   initialApprovals,
   initialActivityLogs,
 } from '@/lib/data/initialData'
+import { sortDiscontinuedToBottom } from '@/lib/risk'
 
 export interface PlatformStats {
   totalAssets: number
@@ -600,8 +601,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Agency Reps -> View details for JUST their agency
   // -------------------------------------------------------------
   const assets = useMemo(() => {
-    if (isGlobalViewer) return masterAssets
-    return masterAssets.filter((a) => (a.agency || a.unit) === userAgency)
+    const list = isGlobalViewer ? masterAssets : masterAssets.filter((a) => (a.agency || a.unit) === userAgency)
+    return sortDiscontinuedToBottom(list)
   }, [masterAssets, isGlobalViewer, userAgency])
 
   const rightsRecords = useMemo(() => {

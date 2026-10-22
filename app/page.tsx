@@ -24,7 +24,13 @@ import { ApprovalsWorkflow } from '@/components/ApprovalsWorkflow'
 import { AssetDetailsView } from '@/components/AssetDetailsView'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { getAssetRiskAssessment, getPortfolioRiskMetrics, PortfolioRiskMetrics } from '@/lib/risk'
+import {
+  getAssetRiskAssessment,
+  getPortfolioRiskMetrics,
+  PortfolioRiskMetrics,
+  sortDiscontinuedToBottom,
+  isAssetDiscontinued,
+} from '@/lib/risk'
 import {
   getCategoryComplianceProfile,
   evaluateComplianceReadiness,
@@ -1286,8 +1292,10 @@ function Dashboard({
 
   const filtered = useMemo(
     () =>
-      assets.filter((a) =>
-        `${a.name} ${a.id} ${a.category} ${a.subcategory}`.toLowerCase().includes(query.toLowerCase())
+      sortDiscontinuedToBottom(
+        assets.filter((a) =>
+          `${a.name} ${a.id} ${a.category} ${a.subcategory}`.toLowerCase().includes(query.toLowerCase())
+        )
       ),
     [assets, query]
   )
@@ -1835,9 +1843,9 @@ function AssetsPage({
     return list
   }, [assets, categories])
 
-  // Filtered Assets list
+  // Filtered Assets list (Discontinued assets are sorted to the bottom)
   const filteredAssets = useMemo(() => {
-    return assets.filter((item) => {
+    const list = assets.filter((item) => {
       if (selectedCategory !== 'All Categories' && item.category !== selectedCategory) {
         return false
       }
@@ -1868,6 +1876,8 @@ function AssetsPage({
       }
       return true
     })
+
+    return sortDiscontinuedToBottom(list)
   }, [assets, selectedCategory, selectedSubcategory, selectedRisk, selectedAgency, searchQuery, rightsRecords, approvals])
 
   const handleAddAssetSubmit = (e: React.FormEvent) => {
@@ -2893,7 +2903,7 @@ function RightsPage({
   }
 
   const filteredRecords = useMemo(() => {
-    return rightsRecords.filter((rec) => {
+    const list = rightsRecords.filter((rec) => {
       if (selectedCategory !== 'All Categories' && rec.category !== selectedCategory) return false
       if (selectedRisk !== 'All Risks') {
         const parentAsset = assets.find((a) => a.id === rec.assetId || a.name === rec.name)
@@ -2912,6 +2922,17 @@ function RightsPage({
         if (!match) return false
       }
       return true
+    })
+
+    // Sort: Discontinued assets are placed at the bottom of the list
+    return list.slice().sort((a, b) => {
+      const parentA = assets.find((x) => x.id === a.assetId || x.name === a.name)
+      const parentB = assets.find((x) => x.id === b.assetId || x.name === b.name)
+      const aDis = (parentA && isAssetDiscontinued(parentA)) || isAssetDiscontinued(a as any)
+      const bDis = (parentB && isAssetDiscontinued(parentB)) || isAssetDiscontinued(b as any)
+      if (aDis && !bDis) return 1
+      if (!aDis && bDis) return -1
+      return 0
     })
   }, [rightsRecords, selectedCategory, selectedRisk, searchQuery, assets, approvals])
 
@@ -4009,12 +4030,12 @@ function RightsDetailsPage({
         const hasDoc = !!addRightsForm.docName.trim()
         const newDoc: RightsDocument | null = hasDoc
           ? {
-              id: `doc-${Date.now()}`,
-              name: addRightsForm.docName.trim(),
-              size: '2.5 MB',
-              date: 'Just now',
-              type: 'LICENSE',
-            }
+            id: `doc-${Date.now()}`,
+            name: addRightsForm.docName.trim(),
+            size: '2.5 MB',
+            date: 'Just now',
+            type: 'LICENSE',
+          }
           : null
 
         addRightsRecord({
@@ -4226,7 +4247,7 @@ function RightsDetailsPage({
               </div>
 
               <h1 className="text-xl sm:text-2xl font-black text-[#09245a] dark:text-white pt-1">{asset.name}</h1>
-              
+
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                 <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
@@ -4311,10 +4332,10 @@ function RightsDetailsPage({
                 {isAudioCategory
                   ? '🎵 Audio & Music Ministry Governance: Songwriter attribution, 3-tier creation provenance & KMM Staff Covenant'
                   : isVideoCategory
-                  ? '🎬 Video & Animation Production Governance: Broadcast distribution, production studio mandate & soundtrack clearance'
-                  : isPublishingCategory
-                  ? '📚 Publications & Visual Art Governance: Print/graphics distribution, cover art provenance & publishing licensing'
-                  : '🛡️ Intellectual Asset Governance & Rights Scope'}
+                    ? '🎬 Video & Animation Production Governance: Broadcast distribution, production studio mandate & soundtrack clearance'
+                    : isPublishingCategory
+                      ? '📚 Publications & Visual Art Governance: Print/graphics distribution, cover art provenance & publishing licensing'
+                      : '🛡️ Intellectual Asset Governance & Rights Scope'}
               </span>
             </div>
             <button
@@ -4428,8 +4449,8 @@ function RightsDetailsPage({
                 isAudioCategory
                   ? "border-emerald-200/90 bg-gradient-to-br from-emerald-50/50 via-white to-emerald-50/30 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:via-slate-900 dark:to-emerald-950/20"
                   : isVideoCategory
-                  ? "border-indigo-200/90 bg-gradient-to-br from-indigo-50/50 via-white to-indigo-50/30 dark:border-indigo-900/50 dark:from-indigo-950/30 dark:via-slate-900 dark:to-indigo-950/20"
-                  : "border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900"
+                    ? "border-indigo-200/90 bg-gradient-to-br from-indigo-50/50 via-white to-indigo-50/30 dark:border-indigo-900/50 dark:from-indigo-950/30 dark:via-slate-900 dark:to-indigo-950/20"
+                    : "border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900"
               )}
             >
               <div className="flex items-center justify-between">
@@ -4484,7 +4505,7 @@ function RightsDetailsPage({
                 <div className="flex items-center gap-2.5">
                   <ScrollText className="size-4 text-amber-600 shrink-0" />
                   <span className="text-[11px]">
-                    <b>Ministry Staff Content Clause:</b> Any content produced by any staff member belongs exclusively to KMM.
+                    <b>Ministry Staff Content Clause:</b> All content produced by any staff member belongs exclusively to KMM.
                   </span>
                 </div>
                 <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 underline shrink-0 ml-3">
@@ -4514,8 +4535,8 @@ function RightsDetailsPage({
                     (asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom'
                       ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300"
                       : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted'
-                      ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:border-sky-800 dark:text-sky-300"
-                      : "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800 dark:text-purple-300"
+                        ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:border-sky-800 dark:text-sky-300"
+                        : "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800 dark:text-purple-300"
                   )}>
                     {(asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom' ? '✦ Fully Custom' : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted' ? '⚡ AI Assisted' : '🤖 Fully AI'}
                   </span>
@@ -4613,8 +4634,8 @@ function RightsDetailsPage({
                   {(!asset.documents || asset.documents.length === 0)
                     ? 'Legal Documentation Required Before Clearance Review'
                     : existingApproval
-                    ? `Executive Clearance Review Scheduled (${existingApproval.priority} Priority • Status: ${existingApproval.status})`
-                    : 'Clearance Documents Ready for Executive Review'}
+                      ? `Executive Clearance Review Scheduled (${existingApproval.priority} Priority • Status: ${existingApproval.status})`
+                      : 'Clearance Documents Ready for Executive Review'}
                 </h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   {asset.documents?.length || 0} legal deeds verified • Category Compliance Score: <b>{complianceReadiness.complianceScore}%</b> ({complianceReadiness.passedGatesCount}/{complianceReadiness.totalGatesCount} gates verified)
@@ -4663,7 +4684,7 @@ function RightsDetailsPage({
                   <span className={cn(
                     'rounded-md px-2 py-0.5 text-[10px] font-bold',
                     complianceProfile.inherentLiability === 'Critical' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' :
-                    complianceProfile.inherentLiability === 'High' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      complianceProfile.inherentLiability === 'High' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                   )}>
                     {complianceProfile.inherentLiability} Liability Profile
                   </span>
@@ -4694,12 +4715,12 @@ function RightsDetailsPage({
                       gateStatus === 'CLEARED'
                         ? 'border-emerald-200/90 bg-emerald-50/40 dark:border-emerald-800/40 dark:bg-emerald-950/20'
                         : gateStatus === 'FLAGGED'
-                        ? 'border-rose-200/90 bg-rose-50/40 dark:border-rose-800/40 dark:bg-rose-950/20'
-                        : gateStatus === 'IN_REVIEW'
-                        ? 'border-blue-200/90 bg-blue-50/40 dark:border-blue-800/40 dark:bg-blue-950/20'
-                        : gateStatus === 'EXEMPT'
-                        ? 'border-slate-200/80 bg-slate-100/60 dark:border-white/10 dark:bg-slate-800/40'
-                        : 'border-slate-200/80 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50'
+                          ? 'border-rose-200/90 bg-rose-50/40 dark:border-rose-800/40 dark:bg-rose-950/20'
+                          : gateStatus === 'IN_REVIEW'
+                            ? 'border-blue-200/90 bg-blue-50/40 dark:border-blue-800/40 dark:bg-blue-950/20'
+                            : gateStatus === 'EXEMPT'
+                              ? 'border-slate-200/80 bg-slate-100/60 dark:border-white/10 dark:bg-slate-800/40'
+                              : 'border-slate-200/80 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50'
                     )}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -4709,9 +4730,9 @@ function RightsDetailsPage({
                             className={cn(
                               'rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider',
                               gate.pillar === 'Doctrinal' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300' :
-                              gate.pillar === 'ChildSafety' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' :
-                              gate.pillar === 'Legal' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300' :
-                              'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
+                                gate.pillar === 'ChildSafety' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' :
+                                  gate.pillar === 'Legal' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300' :
+                                    'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
                             )}
                           >
                             {gate.pillar} Pillar
@@ -4736,12 +4757,12 @@ function RightsDetailsPage({
                             gateStatus === 'CLEARED'
                               ? 'border-emerald-300 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700'
                               : gateStatus === 'IN_REVIEW'
-                              ? 'border-blue-300 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700'
-                              : gateStatus === 'FLAGGED'
-                              ? 'border-rose-300 bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-700'
-                              : gateStatus === 'EXEMPT'
-                              ? 'border-slate-300 bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                              : 'border-amber-300 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-700'
+                                ? 'border-blue-300 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700'
+                                : gateStatus === 'FLAGGED'
+                                  ? 'border-rose-300 bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-700'
+                                  : gateStatus === 'EXEMPT'
+                                    ? 'border-slate-300 bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                                    : 'border-amber-300 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-700'
                           )}
                         >
                           <option value="CLEARED">Cleared ✓</option>
@@ -5646,9 +5667,9 @@ function RightsDetailsPage({
                   <span className={cn(
                     'rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider',
                     selectedGateForModal.pillar === 'Doctrinal' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300' :
-                    selectedGateForModal.pillar === 'ChildSafety' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' :
-                    selectedGateForModal.pillar === 'Legal' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300' :
-                    'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
+                      selectedGateForModal.pillar === 'ChildSafety' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' :
+                        selectedGateForModal.pillar === 'Legal' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300' :
+                          'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
                   )}>
                     {selectedGateForModal.pillar} Pillar Gate
                   </span>
@@ -5685,12 +5706,12 @@ function RightsDetailsPage({
                     gateModalForm.status === 'CLEARED'
                       ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
                       : gateModalForm.status === 'IN_REVIEW'
-                      ? 'border-blue-300 bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300'
-                      : gateModalForm.status === 'FLAGGED'
-                      ? 'border-rose-300 bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300'
-                      : gateModalForm.status === 'EXEMPT'
-                      ? 'border-slate-300 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                      : 'border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
+                        ? 'border-blue-300 bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300'
+                        : gateModalForm.status === 'FLAGGED'
+                          ? 'border-rose-300 bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300'
+                          : gateModalForm.status === 'EXEMPT'
+                            ? 'border-slate-300 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                            : 'border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
                   )}
                 >
                   <option value="CLEARED">Cleared / Verified ✓</option>

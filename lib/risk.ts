@@ -424,3 +424,29 @@ export function getPortfolioRiskMetrics(
     clearedCount: cleared,
   }
 }
+
+/**
+ * Checks whether an asset is discontinued based on status, officialStatus, or tags.
+ */
+export function isAssetDiscontinued(asset?: { status?: string; officialStatus?: string; tags?: string[] } | null): boolean {
+  if (!asset) return false
+  return (
+    asset.status === 'Discontinued' ||
+    (asset.officialStatus || '').toLowerCase().includes('discontinued') ||
+    (asset.tags || []).some((t) => t.toLowerCase().includes('discontinued'))
+  )
+}
+
+/**
+ * Sorts an array of assets or asset-like objects placing all discontinued items at the bottom of the list.
+ * Preserves the relative order of active assets and discontinued assets (stable sort).
+ */
+export function sortDiscontinuedToBottom<T extends { status?: string; officialStatus?: string; tags?: string[] }>(list: T[]): T[] {
+  return list.slice().sort((a, b) => {
+    const aDis = isAssetDiscontinued(a)
+    const bDis = isAssetDiscontinued(b)
+    if (aDis && !bDis) return 1
+    if (!aDis && bDis) return -1
+    return 0
+  })
+}
