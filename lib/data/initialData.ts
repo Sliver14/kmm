@@ -2250,7 +2250,7 @@ export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.ma
   rightsType: 'Worldwide Media Ministry Clearance',
   owner: 'Lovetoons / KMM Network',
   validity: '2025 – 2035',
-  status: a.status === 'In Production' ? 'Cleared' : (a.status === 'Yet to Launch' ? 'Pending' : 'Review'),
+  status: a.status === 'Under Review' ? 'Review' : 'Pending',
   territory: 'Worldwide',
   term: '10 Years',
   exclusivity: '100% Exclusive Ministry Ownership',
@@ -2258,8 +2258,9 @@ export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.ma
   royaltyTerms: '100% In-House Retained',
   thumbType: (a.thumbType || 'tv_series'),
   description: a.description,
-  governanceScore: a.status === 'In Production' ? 100 : (a.status === 'Yet to Launch' ? 50 : 30),
+  governanceScore: 0,
   documents: [],
+  governanceChecks: {},
 }))
 
 export const initialRelationships: RelationshipItem[] = [

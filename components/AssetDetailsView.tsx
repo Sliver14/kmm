@@ -410,9 +410,9 @@ export function AssetDetailsView({
       description: `Establish a "${relType}" link between "${asset.name}" and "${targetAsset.name}"?`,
       details: (
         <div className="space-y-1 text-xs">
-          <div><span className="font-semibold text-slate-700">Source:</span> {asset.name}</div>
+          <div><span className="font-semibold text-slate-700">Source:</span> {asset.name} <span className="font-mono text-slate-500 ml-1.5">({asset.id})</span></div>
           <div><span className="font-semibold text-slate-700">Relationship:</span> {relType}</div>
-          <div><span className="font-semibold text-slate-700">Target:</span> {targetAsset.name}</div>
+          <div><span className="font-semibold text-slate-700">Target:</span> {targetAsset.name} <span className="font-mono text-slate-500 ml-1.5">({targetAsset.id})</span></div>
         </div>
       ),
       confirmLabel: 'Confirm Connection',
@@ -743,7 +743,7 @@ export function AssetDetailsView({
       description: `Schedule "${asset.name}" for formal executive clearance review with priority "${schedulePriority}"? Legal counsel and reviewer will be alerted, and this request will be permanently logged in the audit trail.`,
       details: (
         <div className="space-y-1 text-xs">
-          <div><span className="font-semibold text-slate-700">Target Asset:</span> {asset.name} ({asset.id})</div>
+          <div><span className="font-semibold text-slate-700">Target Asset:</span> {asset.name} <span className="font-mono text-slate-500 ml-1.5">({asset.id})</span></div>
           <div><span className="font-semibold text-slate-700">Clearance Priority:</span> {schedulePriority}</div>
           <div><span className="font-semibold text-slate-700">Legal Documents Attached:</span> {documents.length} files</div>
           <div><span className="font-semibold text-slate-700">Submitting Rep:</span> {currentUser.name}</div>
@@ -972,8 +972,8 @@ export function AssetDetailsView({
             </div>
 
             {/* Title & Metadata */}
-            <div className="space-y-2 flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
+            <div className="space-y-2.5 flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
                   <CategoryIcon category={asset.category} />
                   <span>{asset.category}</span>
@@ -981,16 +981,16 @@ export function AssetDetailsView({
                 <span className="rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
                   Agency: {asset.agency || asset.unit}
                 </span>
-                <span className="font-mono text-[10px] text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">
+                <span className="font-mono text-[10px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-0.5 rounded-md">
                   {asset.id}
                 </span>
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">
+              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900 pt-1">
                 {asset.name}
               </h1>
 
-              <p className="text-xs sm:text-sm text-slate-600 line-clamp-2 max-w-3xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 line-clamp-2 max-w-3xl leading-relaxed mt-1">
                 {asset.description || 'Global faith-based intellectual property asset produced under Kiddies Media Ministries.'}
               </p>
             </div>
@@ -2172,8 +2172,13 @@ export function AssetDetailsView({
                                 {otherAssetObj.category}
                               </span>
                             )}
+                            {otherAssetId && (
+                              <span className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/80 px-1.5 py-0.5 rounded">
+                                {otherAssetId}
+                              </span>
+                            )}
                           </div>
-                          <div className="font-semibold text-slate-900 dark:text-white truncate text-xs mt-1">
+                          <div className="font-semibold text-slate-900 dark:text-white truncate text-xs mt-1.5">
                             {otherAssetName}
                           </div>
                           <div className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">

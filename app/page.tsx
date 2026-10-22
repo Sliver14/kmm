@@ -1243,7 +1243,7 @@ function Dashboard({
 }: {
   setActiveNav?: (nav: string, assetId?: string | null) => void
 }) {
-  const { assets, allAssets, stats, globalStats, categories, activities, currentUser, isGlobalViewer, userAgency } = useLovetoonsData()
+  const { assets, allAssets, stats, globalStats, categories, activities, currentUser, isGlobalViewer, userAgency, rightsRecords, approvals } = useLovetoonsData()
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(
@@ -1254,7 +1254,7 @@ function Dashboard({
     [assets, query]
   )
 
-  const riskMetrics = useMemo(() => getPortfolioRiskMetrics(assets), [assets])
+  const riskMetrics = useMemo(() => getPortfolioRiskMetrics(assets, rightsRecords, approvals), [assets, rightsRecords, approvals])
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -1268,24 +1268,24 @@ function Dashboard({
         />
         <Stat
           icon={ShieldCheck}
-          label="Cleared & Low Risk"
+          label="Low Risk IP"
           value={riskMetrics.lowCount}
           color="bg-emerald-600"
-          trend={`${riskMetrics.lowPct}% Compliant`}
+          trend={`${riskMetrics.lowPct}% Baseline Secure`}
         />
         <Stat
           icon={Clock3}
-          label="Governance Under Review"
+          label="Moderate Exposure"
           value={riskMetrics.mediumCount}
           color="bg-amber-600"
-          trend={`${riskMetrics.mediumPct}% In Review`}
+          trend={`${riskMetrics.mediumPct}% Review / Pre-Launch`}
         />
         <Stat
           icon={AlertCircle}
-          label="High Risk (Dormant IP)"
+          label="High & Critical Exposure"
           value={riskMetrics.criticalCount + riskMetrics.highCount}
           color="bg-rose-600"
-          trend={`${riskMetrics.criticalPct + riskMetrics.highPct}% Archival Req.`}
+          trend={`${riskMetrics.criticalPct + riskMetrics.highPct}% Documentation Required`}
         />
       </div>
 
@@ -1300,10 +1300,10 @@ function Dashboard({
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Portfolio Risk & Governance Exposure</h3>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-700/60 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                  {riskMetrics.lowPct}% Compliant
+                  {riskMetrics.lowPct}% Low Risk
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Live ministerial title clearance & legal exposure matrix</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Independent intellectual asset liability & title exposure matrix</p>
             </div>
           </div>
           {setActiveNav && (
@@ -1322,11 +1322,13 @@ function Dashboard({
           <div className="flex items-center justify-between text-xs">
             <span className="font-medium text-slate-600 dark:text-slate-400">Exposure Profile Distribution</span>
             <span className="font-semibold text-slate-900 dark:text-slate-100">
-              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{riskMetrics.lowPct}% Cleared</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{riskMetrics.lowPct}% Low Risk</span>
               <span className="text-slate-400 dark:text-slate-600 mx-1.5">·</span>
-              <span className="text-amber-600 dark:text-amber-400 font-semibold">{riskMetrics.mediumPct}% In Review</span>
+              <span className="text-blue-600 dark:text-blue-400 font-semibold">{riskMetrics.mediumPct}% Moderate</span>
               <span className="text-slate-400 dark:text-slate-600 mx-1.5">·</span>
-              <span className="text-rose-600 dark:text-rose-400 font-semibold">{riskMetrics.highPct + riskMetrics.criticalPct}% Dormant IP</span>
+              <span className="text-amber-600 dark:text-amber-400 font-semibold">{riskMetrics.highPct}% High</span>
+              <span className="text-slate-400 dark:text-slate-600 mx-1.5">·</span>
+              <span className="text-rose-600 dark:text-rose-400 font-semibold">{riskMetrics.criticalPct}% Critical</span>
             </span>
           </div>
 
@@ -1335,17 +1337,22 @@ function Dashboard({
             <div
               style={{ width: `${riskMetrics.lowPct}%` }}
               className="h-full bg-emerald-500 transition-all hover:opacity-90"
-              title={`Low Risk / Cleared: ${riskMetrics.lowCount} assets (${riskMetrics.lowPct}%)`}
+              title={`Low Risk: ${riskMetrics.lowCount} assets (${riskMetrics.lowPct}%)`}
             />
             <div
               style={{ width: `${riskMetrics.mediumPct}%` }}
-              className="h-full bg-amber-400 transition-all hover:opacity-90"
-              title={`Moderate Risk / Under Review: ${riskMetrics.mediumCount} assets (${riskMetrics.mediumPct}%)`}
+              className="h-full bg-blue-500 transition-all hover:opacity-90"
+              title={`Moderate Risk: ${riskMetrics.mediumCount} assets (${riskMetrics.mediumPct}%)`}
             />
             <div
-              style={{ width: `${riskMetrics.highPct + riskMetrics.criticalPct}%` }}
+              style={{ width: `${riskMetrics.highPct}%` }}
+              className="h-full bg-amber-500 transition-all hover:opacity-90"
+              title={`High Exposure: ${riskMetrics.highCount} assets (${riskMetrics.highPct}%)`}
+            />
+            <div
+              style={{ width: `${riskMetrics.criticalPct}%` }}
               className="h-full bg-rose-500 transition-all hover:opacity-90"
-              title={`Critical & High / Discontinued IP: ${riskMetrics.highCount + riskMetrics.criticalCount} assets (${riskMetrics.highPct + riskMetrics.criticalPct}%)`}
+              title={`Critical Exposure: ${riskMetrics.criticalCount} assets (${riskMetrics.criticalPct}%)`}
             />
           </div>
 
@@ -1353,45 +1360,45 @@ function Dashboard({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
             <div className="p-3.5 rounded-xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/30 transition-all hover:border-emerald-200 dark:hover:border-emerald-500/40">
               <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-                <span>Low Risk (Cleared)</span>
+                <span>Low Risk</span>
                 <span className="size-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-xs shadow-emerald-500/50" />
               </div>
               <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mt-1.5 tracking-tight">{riskMetrics.lowCount}</div>
-              <div className="text-[11px] text-emerald-700/90 dark:text-emerald-300/80 mt-0.5 font-medium">Active broadcast · 100% owned</div>
+              <div className="text-[11px] text-emerald-700/90 dark:text-emerald-300/80 mt-0.5 font-medium">In-house liturgy & clean archives</div>
             </div>
 
             <div className="p-3.5 rounded-xl border border-blue-100 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/30 transition-all hover:border-blue-200 dark:hover:border-blue-500/40">
               <div className="flex items-center justify-between text-[11px] font-semibold text-blue-800 dark:text-blue-300">
-                <span>Medium (In Review)</span>
+                <span>Moderate Risk</span>
                 <span className="size-2 rounded-full bg-blue-500 dark:bg-blue-400 shadow-xs shadow-blue-500/50" />
               </div>
-              <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 mt-1.5 tracking-tight">{riskMetrics.underReviewCount}</div>
-              <div className="text-[11px] text-blue-700/90 dark:text-blue-300/80 mt-0.5 font-medium">Governance deed pending</div>
+              <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 mt-1.5 tracking-tight">{riskMetrics.mediumCount}</div>
+              <div className="text-[11px] text-blue-700/90 dark:text-blue-300/80 mt-0.5 font-medium">Books, podcasts, audio & pre-launch</div>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-indigo-100 dark:border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-950/30 transition-all hover:border-indigo-200 dark:hover:border-indigo-500/40">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-indigo-800 dark:text-indigo-300">
-                <span>Medium (Pre-Launch)</span>
-                <span className="size-2 rounded-full bg-indigo-500 dark:bg-indigo-400 shadow-xs shadow-indigo-500/50" />
+            <div className="p-3.5 rounded-xl border border-amber-100 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/30 transition-all hover:border-amber-200 dark:hover:border-amber-500/40">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                <span>High Exposure</span>
+                <span className="size-2 rounded-full bg-amber-500 dark:bg-amber-400 shadow-xs shadow-amber-500/50" />
               </div>
-              <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-100 mt-1.5 tracking-tight">{riskMetrics.potentialCount}</div>
-              <div className="text-[11px] text-indigo-700/90 dark:text-indigo-300/80 mt-0.5 font-medium">Prior art & trademark check</div>
+              <div className="text-2xl font-bold text-amber-900 dark:text-amber-100 mt-1.5 tracking-tight">{riskMetrics.highCount}</div>
+              <div className="text-[11px] text-amber-700/90 dark:text-amber-300/80 mt-0.5 font-medium">Broadcast IP missing talent releases</div>
             </div>
 
             <div className="p-3.5 rounded-xl border border-rose-100 dark:border-rose-500/20 bg-rose-50/50 dark:bg-rose-950/30 transition-all hover:border-rose-200 dark:hover:border-rose-500/40">
               <div className="flex items-center justify-between text-[11px] font-semibold text-rose-800 dark:text-rose-300">
-                <span>High / Critical (Dormant)</span>
+                <span>Critical Exposure</span>
                 <span className="size-2 rounded-full bg-rose-500 dark:bg-rose-400 shadow-xs shadow-rose-500/50" />
               </div>
-              <div className="text-2xl font-bold text-rose-900 dark:text-rose-100 mt-1.5 tracking-tight">{riskMetrics.criticalCount + riskMetrics.highCount}</div>
-              <div className="text-[11px] text-rose-700/90 dark:text-rose-300/80 mt-0.5 font-medium">Discontinued IP · Needs archive</div>
+              <div className="text-2xl font-bold text-rose-900 dark:text-rose-100 mt-1.5 tracking-tight">{riskMetrics.criticalCount}</div>
+              <div className="text-[11px] text-rose-700/90 dark:text-rose-300/80 mt-0.5 font-medium">Commercial products / flagship syndication</div>
             </div>
           </div>
 
           <div className="flex items-start sm:items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
             <CircleHelp className="size-3.5 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5 sm:mt-0" />
             <span>
-              <strong className="text-slate-700 dark:text-slate-300">Schedule Legal Guidance:</strong> Discontinued programmes remain listed because their underlying intellectual assets continue to exist. Formal deprecation requires digital master archival.
+              <strong className="text-slate-700 dark:text-slate-300">Schedule Legal Guidance:</strong> Intellectual asset risk is evaluated independently per asset based on documentation completeness, public liability surface, and distribution reach. Discontinued assets carry low active liability, while active broadcast and commercial assets require attached chain of title deeds.
             </span>
           </div>
         </div>
@@ -1436,10 +1443,10 @@ function Dashboard({
           <div className="flex items-center justify-between mb-1">
             <h2 className="font-semibold text-slate-900 text-sm">Portfolio Compliance Breakdown</h2>
             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
-              {riskMetrics.lowPct}% Cleared
+              {riskMetrics.lowPct}% Low Risk
             </span>
           </div>
-          <p className="text-xs text-slate-500 mb-3">Risk & chain of title distribution</p>
+          <p className="text-xs text-slate-500 mb-3">Independent risk & title distribution</p>
           <div className="flex items-center justify-center gap-5 py-2">
             <Donut
               low={riskMetrics.lowCount}
@@ -1450,21 +1457,21 @@ function Dashboard({
               <div className="flex items-center justify-between gap-3">
                 <span className="flex items-center gap-1.5 text-slate-600">
                   <span className="size-2 rounded-full bg-emerald-500" />
-                  Cleared / Low Risk
+                  Low Risk IP
                 </span>
                 <b className="text-slate-900 font-semibold">{riskMetrics.lowCount}</b>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <span className="flex items-center gap-1.5 text-slate-600">
                   <span className="size-2 rounded-full bg-amber-400" />
-                  Under Review
+                  Moderate Risk
                 </span>
                 <b className="text-slate-900 font-semibold">{riskMetrics.mediumCount}</b>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <span className="flex items-center gap-1.5 text-slate-600">
                   <span className="size-2 rounded-full bg-rose-500" />
-                  Dormant / High Risk
+                  High & Critical
                 </span>
                 <b className="text-slate-900 font-semibold">{riskMetrics.criticalCount + riskMetrics.highCount}</b>
               </div>
@@ -1520,12 +1527,12 @@ function Dashboard({
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <AssetThumbnail type={item.thumbType} name={item.name} posterUrl={item.posterUrl} />
-                      <div>
+                      <div className="space-y-1">
                         <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition flex items-center gap-1 text-xs">
                           <span>{item.name}</span>
                           <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 text-blue-600 transition shrink-0" />
                         </div>
-                        <div className="text-[10px] text-slate-400 font-mono">{item.id}</div>
+                        <div className="text-[10px] text-slate-400 font-mono mt-1">{item.id}</div>
                       </div>
                     </div>
                   </td>
@@ -1567,7 +1574,7 @@ function Dashboard({
                   </td>
                   <td className="p-3">
                     {(() => {
-                      const assessment = getAssetRiskAssessment(item)
+                      const assessment = getAssetRiskAssessment(item, rightsRecords, approvals)
                       return (
                         <div className="flex flex-col gap-1 items-start">
                           <span
@@ -1616,7 +1623,7 @@ function AssetsPage({
   setActiveNav: (nav: string) => void
   initialAssetId?: string | null
 }) {
-  const { assets, allAssets, addAsset, bulkApproveAssets, bulkDeleteAssets, categories, subcategories, currentUser, showToast, isGlobalViewer, userAgency, availableUsers } = useLovetoonsData()
+  const { assets, allAssets, addAsset, bulkApproveAssets, bulkDeleteAssets, categories, subcategories, currentUser, showToast, isGlobalViewer, userAgency, availableUsers, rightsRecords, approvals } = useLovetoonsData()
 
   const [selectedPill, setSelectedPill] = useState<string>('All Assets')
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -2087,11 +2094,11 @@ function AssetsPage({
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={asset.posterUrl} />
-                          <div className="min-w-0">
+                          <div className="min-w-0 space-y-1">
                             <div className="font-semibold text-slate-900 hover:text-blue-600 transition truncate max-w-xs text-xs">
                               {asset.name}
                             </div>
-                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
+                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono mt-1">
                               <span>{asset.id}</span>
                               {asset.type && (
                                 <>
@@ -2179,7 +2186,7 @@ function AssetsPage({
                         <div className="flex flex-col gap-1 items-start">
                           <StatusPill status={asset.status} />
                           {(() => {
-                            const assessment = getAssetRiskAssessment(asset)
+                            const assessment = getAssetRiskAssessment(asset, rightsRecords, approvals)
                             return (
                               <span
                                 className={cn(
@@ -2891,9 +2898,9 @@ function RightsPage({
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <AssetThumbnail type={rec.thumbType} name={rec.name} />
-                    <div>
+                    <div className="space-y-1">
                       <div className="font-semibold text-slate-900 dark:text-white hover:text-slate-700 dark:hover:text-blue-400 transition">{rec.name}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">{rec.id}</div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-1">{rec.id}</div>
                     </div>
                   </div>
                 </td>
@@ -3000,7 +3007,7 @@ function RightsPage({
                 >
                   {assets.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.name} ({a.id} — {a.category})
+                      {a.name}  —  {a.id}  ({a.category})
                     </option>
                   ))}
                 </select>
@@ -3136,7 +3143,7 @@ function RightsPage({
                   </h3>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Attach an individual talent release, deed, or certificate to <strong className="text-slate-800 dark:text-slate-200">{individualDocRecord.name}</strong> ({individualDocRecord.id})
+                  Attach an individual talent release, deed, or certificate to <strong className="text-slate-800 dark:text-slate-200">{individualDocRecord.name}</strong> <span className="font-mono text-slate-500 dark:text-slate-400">({individualDocRecord.id})</span>
                 </p>
               </div>
               <button
@@ -3407,7 +3414,7 @@ function RightsDetailsPage({
     exclusivity: asset.exclusivity || 'Exclusive Ministry Rights',
     licenceType: asset.licenceType || 'Proprietary Broadcast License',
     royaltyTerms: asset.royaltyTerms || '100% In-House Retained',
-    governanceScore: asset.governanceScore || 100,
+    governanceScore: asset.governanceScore ?? 0,
     status: asset.status,
     description: asset.description || 'Master chain of title and IP clearance certificate on file.',
   })
@@ -3714,7 +3721,7 @@ function RightsDetailsPage({
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={(asset as any).posterUrl} />
-            <div>
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="rounded bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:border dark:border-purple-800/40 dark:text-purple-300 px-2.5 py-0.5 text-[10px] font-bold">{asset.category}</span>
                 <span className="rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-white/10 px-2 py-0.5 text-[10px] font-bold">ID: {asset.id}</span>
@@ -3725,8 +3732,8 @@ function RightsDetailsPage({
                   ★ {asset.status}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black text-[#09245a] dark:text-white mt-1.5">{asset.name}</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">{asset.rightsType}</p>
+              <h1 className="text-xl sm:text-2xl font-black text-[#09245a] dark:text-white pt-1">{asset.name}</h1>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{asset.rightsType}</p>
             </div>
           </div>
 
@@ -3765,7 +3772,7 @@ function RightsDetailsPage({
         </div>
         <div className="rounded-xl border border-teal-100 bg-teal-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
           <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Governance Score</div>
-          <div className="text-xs font-bold text-blue-700 dark:text-blue-400 mt-0.5">{asset.governanceScore || 100}% Compliant</div>
+          <div className="text-xs font-bold text-blue-700 dark:text-blue-400 mt-0.5">{asset.governanceScore ?? 0}% Compliant</div>
         </div>
       </div>
 
@@ -3839,12 +3846,12 @@ function RightsDetailsPage({
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs font-bold">
                   <span className="text-slate-600 dark:text-slate-400">Compliance Rate</span>
-                  <span className="text-blue-700 dark:text-blue-400">{asset.governanceScore || 100}%</span>
+                  <span className="text-blue-700 dark:text-blue-400">{asset.governanceScore ?? 0}%</span>
                 </div>
                 <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <div
                     className="h-full bg-gradient-to-r from-blue-600 to-emerald-500 rounded-full transition-all"
-                    style={{ width: `${asset.governanceScore || 100}%` }}
+                    style={{ width: `${asset.governanceScore ?? 0}%` }}
                   />
                 </div>
               </div>
@@ -3852,7 +3859,7 @@ function RightsDetailsPage({
               <div className="border-t border-slate-100 dark:border-white/10 pt-3 space-y-2 text-xs">
                 <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                   <span>Attached Documents</span>
-                  <b className="text-slate-900 dark:text-white">{asset.documents?.length || 1} File(s)</b>
+                  <b className="text-slate-900 dark:text-white">{asset.documents?.length || 0} File(s)</b>
                 </div>
                 <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                   <span>Current Clearance Status</span>
@@ -3880,7 +3887,7 @@ function RightsDetailsPage({
               <p className="text-[11px] text-slate-500 dark:text-slate-400">Toggle clearance controls to update real-time governance compliance scoring.</p>
             </div>
             <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-3 py-1 text-xs font-bold">
-              Score: {asset.governanceScore || 100}%
+              Score: {asset.governanceScore ?? 0}%
             </span>
           </div>
 
@@ -4675,9 +4682,9 @@ function RelationshipsPage() {
                               className="size-full object-cover"
                             />
                           </div>
-                          <div>
-                            <div className="font-bold text-[#09245a] dark:text-white">{rel.sourceAsset}</div>
-                            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{rel.sourceId}</div>
+                          <div className="space-y-1">
+                            <div className="font-bold text-[#09245a] dark:text-white leading-snug">{rel.sourceAsset}</div>
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-1">{rel.sourceId}</div>
                           </div>
                         </div>
                       </td>
@@ -4698,9 +4705,9 @@ function RelationshipsPage() {
                               className="size-full object-cover"
                             />
                           </div>
-                          <div>
-                            <div className="font-bold text-slate-900 dark:text-white">{rel.targetAsset}</div>
-                            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{rel.targetId}</div>
+                          <div className="space-y-1">
+                            <div className="font-bold text-slate-900 dark:text-white leading-snug">{rel.targetAsset}</div>
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-1">{rel.targetId}</div>
                           </div>
                         </div>
                       </td>
@@ -4765,7 +4772,7 @@ function RelationshipsPage() {
                 >
                   {assets.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.name} ({a.category} • {a.id})
+                      {a.name}  —  {a.id}  ({a.category})
                     </option>
                   ))}
                 </select>
@@ -4797,7 +4804,7 @@ function RelationshipsPage() {
                     .filter((a) => a.id !== sourceId)
                     .map((a) => (
                       <option key={a.id} value={a.id}>
-                        {a.name} ({a.category} • {a.id})
+                        {a.name}  —  {a.id}  ({a.category})
                       </option>
                     ))}
                 </select>
@@ -5059,19 +5066,19 @@ function ReportsPage({
 }: {
   setActiveNav?: (nav: string, assetId?: string | null) => void
 }) {
-  const { stats, assets, categories, showToast } = useLovetoonsData()
+  const { stats, assets, categories, showToast, rightsRecords, approvals } = useLovetoonsData()
   const [selectedRiskFilter, setSelectedRiskFilter] = useState<string>('All')
   const [riskSearchQuery, setRiskSearchQuery] = useState('')
   const [activeReportTab, setActiveReportTab] = useState<'risk' | 'distribution'>('risk')
 
-  const riskMetrics = useMemo(() => getPortfolioRiskMetrics(assets), [assets])
+  const riskMetrics = useMemo(() => getPortfolioRiskMetrics(assets, rightsRecords, approvals), [assets, rightsRecords, approvals])
 
   const assetsWithRisk = useMemo(() => {
     return assets.map((asset) => {
-      const risk = getAssetRiskAssessment(asset)
+      const risk = getAssetRiskAssessment(asset, rightsRecords, approvals)
       return { asset, risk }
     })
-  }, [assets])
+  }, [assets, rightsRecords, approvals])
 
   const filteredRiskAssets = useMemo(() => {
     return assetsWithRisk.filter(({ asset, risk }) => {
@@ -5254,52 +5261,52 @@ function ReportsPage({
             {riskMetrics.averageScore} <span className="text-sm font-normal text-slate-500">/ 100</span>
           </div>
           <div className="text-[11px] text-emerald-600 font-medium mt-1">
-            {riskMetrics.lowPct}% Cleared across active broadcast
+            {riskMetrics.lowPct}% Low Risk across portfolio
           </div>
         </div>
 
         <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-            <span>Critical & High Residual Exposure</span>
+            <span>Critical Exposure</span>
             <span className="rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-semibold text-rose-700">
-              Action Required
+              Immediate Action
             </span>
           </div>
           <div className="text-2xl font-semibold tracking-tight text-rose-600 mt-2">
-            {riskMetrics.criticalCount + riskMetrics.highCount} <span className="text-sm font-normal text-slate-500">Assets</span>
+            {riskMetrics.criticalCount} <span className="text-sm font-normal text-slate-500">Assets</span>
           </div>
           <div className="text-[11px] text-slate-500 font-medium mt-1">
-            29 Discontinued formats requiring archival title
+            Commercial & flagship IP requiring legal clearance
           </div>
         </div>
 
         <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-            <span>Governance In Review & Pre-Launch</span>
-            <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-              In Progress
+            <span>High & Moderate Exposure</span>
+            <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+              Review Required
             </span>
           </div>
-          <div className="text-2xl font-semibold tracking-tight text-blue-600 mt-2">
-            {riskMetrics.underReviewCount + riskMetrics.potentialCount} <span className="text-sm font-normal text-slate-500">Assets</span>
+          <div className="text-2xl font-semibold tracking-tight text-amber-600 mt-2">
+            {riskMetrics.highCount + riskMetrics.mediumCount} <span className="text-sm font-normal text-slate-500">Assets</span>
           </div>
           <div className="text-[11px] text-slate-500 font-medium mt-1">
-            5 Under Review · 2 Pre-market titles
+            {riskMetrics.highCount} High · {riskMetrics.mediumCount} Moderate
           </div>
         </div>
 
         <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-            <span>100% Cleared Ministry Ownership</span>
+            <span>Low Risk IP</span>
             <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-              Verified
+              Baseline Safe
             </span>
           </div>
           <div className="text-2xl font-semibold tracking-tight text-emerald-600 mt-2">
             {riskMetrics.lowCount} <span className="text-sm font-normal text-slate-500">Assets</span>
           </div>
           <div className="text-[11px] text-emerald-700 font-medium mt-1">
-            Zero royalty encumbrance across active catalogue
+            In-house scripture liturgy & low-liability archives
           </div>
         </div>
       </div>
@@ -5347,27 +5354,31 @@ function ReportsPage({
               <div>
                 <span className="font-semibold text-slate-900">Portfolio Exposure Summary: </span>
                 <span className="text-slate-600">
-                  {riskMetrics.lowCount} Cleared (Low) · {riskMetrics.mediumCount} Moderate (Review/Pre-Launch) · {riskMetrics.criticalCount + riskMetrics.highCount} Residual (Discontinued IP)
+                  {riskMetrics.lowCount} Low Risk · {riskMetrics.mediumCount} Moderate · {riskMetrics.highCount} High · {riskMetrics.criticalCount} Critical
                 </span>
               </div>
               <div className="flex items-center gap-3 text-[11px] font-medium">
                 <span className="flex items-center gap-1.5 text-emerald-700">
                   <span className="size-2 rounded-full bg-emerald-500" /> Low ({riskMetrics.lowPct}%)
                 </span>
+                <span className="flex items-center gap-1.5 text-blue-700">
+                  <span className="size-2 rounded-full bg-blue-500" /> Medium ({riskMetrics.mediumPct}%)
+                </span>
                 <span className="flex items-center gap-1.5 text-amber-700">
-                  <span className="size-2 rounded-full bg-amber-400" /> Medium ({riskMetrics.mediumPct}%)
+                  <span className="size-2 rounded-full bg-amber-500" /> High ({riskMetrics.highPct}%)
                 </span>
                 <span className="flex items-center gap-1.5 text-rose-700">
-                  <span className="size-2 rounded-full bg-rose-500" /> Critical/High ({riskMetrics.highPct + riskMetrics.criticalPct}%)
+                  <span className="size-2 rounded-full bg-rose-500" /> Critical ({riskMetrics.criticalPct}%)
                 </span>
               </div>
             </div>
 
             {/* Stacked Progress Bar */}
             <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden flex shadow-inner mt-3">
-              <div style={{ width: `${riskMetrics.lowPct}%` }} className="h-full bg-emerald-500" />
-              <div style={{ width: `${riskMetrics.mediumPct}%` }} className="h-full bg-amber-400" />
-              <div style={{ width: `${riskMetrics.highPct + riskMetrics.criticalPct}%` }} className="h-full bg-rose-500" />
+              <div style={{ width: `${riskMetrics.lowPct}%` }} className="h-full bg-emerald-500" title={`Low Risk: ${riskMetrics.lowCount}`} />
+              <div style={{ width: `${riskMetrics.mediumPct}%` }} className="h-full bg-blue-500" title={`Medium Risk: ${riskMetrics.mediumCount}`} />
+              <div style={{ width: `${riskMetrics.highPct}%` }} className="h-full bg-amber-500" title={`High Exposure: ${riskMetrics.highCount}`} />
+              <div style={{ width: `${riskMetrics.criticalPct}%` }} className="h-full bg-rose-500" title={`Critical Exposure: ${riskMetrics.criticalCount}`} />
             </div>
           </div>
 
@@ -5376,9 +5387,10 @@ function ReportsPage({
             <div className="flex flex-wrap items-center gap-1.5">
               {[
                 { id: 'All', label: 'All Risk Profiles', count: assets.length },
-                { id: 'Critical & High', label: 'Critical & High Exposure', count: riskMetrics.criticalCount + riskMetrics.highCount, badgeColor: 'bg-rose-100 text-rose-800' },
-                { id: 'Medium', label: 'Medium (In Review / Pre-Launch)', count: riskMetrics.mediumCount, badgeColor: 'bg-blue-100 text-blue-800' },
-                { id: 'Low', label: 'Low Risk (Cleared)', count: riskMetrics.lowCount, badgeColor: 'bg-emerald-100 text-emerald-800' },
+                { id: 'Critical', label: 'Critical Exposure', count: riskMetrics.criticalCount, badgeColor: 'bg-rose-100 text-rose-800' },
+                { id: 'High', label: 'High Exposure', count: riskMetrics.highCount, badgeColor: 'bg-amber-100 text-amber-800' },
+                { id: 'Medium', label: 'Moderate', count: riskMetrics.mediumCount, badgeColor: 'bg-blue-100 text-blue-800' },
+                { id: 'Low', label: 'Low Risk', count: riskMetrics.lowCount, badgeColor: 'bg-emerald-100 text-emerald-800' },
               ].map((tab) => {
                 const isActive = selectedRiskFilter === tab.id
                 return (
@@ -5446,19 +5458,19 @@ function ReportsPage({
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={asset.posterUrl} />
-                            <div>
-                              <div className="flex items-center gap-1.5">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
                                 {asset.scheduleNumber && (
-                                  <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.2 text-[9px] font-mono font-bold text-slate-700">
+                                  <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[9px] font-mono font-bold text-slate-700">
                                     {asset.scheduleNumber}
                                   </span>
                                 )}
                                 <span className="font-mono text-[10px] text-slate-400">{asset.id}</span>
                               </div>
-                              <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition flex items-center gap-1 text-xs mt-0.5">
+                              <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition flex items-center gap-1 text-xs pt-0.5">
                                 <span>{asset.name}</span>
                               </div>
-                              <span className="text-[10px] text-slate-500">{asset.category}</span>
+                              <span className="text-[10px] text-slate-500 block">{asset.category}</span>
                             </div>
                           </div>
                         </td>
@@ -5902,8 +5914,8 @@ function AuditTrailPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
                         {/* IP Asset Context */}
                         <td className="px-4 py-3">
                           {log.assetId ? (
-                            <div className="space-y-0.5">
-                              <div className="font-bold text-[#09245a] flex items-center gap-1.5">
+                            <div className="space-y-1">
+                              <div className="font-bold text-[#09245a] flex items-center gap-1.5 leading-snug">
                                 <span>{log.assetName || log.assetId}</span>
                                 {setActiveNav && (
                                   <button
@@ -5914,7 +5926,7 @@ function AuditTrailPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
                                       }
                                       setActiveNav('Assets')
                                     }}
-                                    className="text-indigo-600 hover:text-indigo-800 hover:underline text-[10px] font-bold flex items-center gap-0.5 ml-1"
+                                    className="text-indigo-600 hover:text-indigo-800 hover:underline text-[10px] font-bold flex items-center gap-0.5 ml-1.5"
                                     title="Open Asset View"
                                   >
                                     <span>View IP</span>
@@ -5922,9 +5934,11 @@ function AuditTrailPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
                                   </button>
                                 )}
                               </div>
-                              <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                                {log.assetId}
-                              </span>
+                              <div className="pt-0.5">
+                                <span className="inline-block font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                                  {log.assetId}
+                                </span>
+                              </div>
                             </div>
                           ) : (
                             <span className="text-slate-400 text-xs italic">Ministry General</span>
@@ -5993,7 +6007,18 @@ function AuditTrailPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
                                     Linked Asset
                                   </span>
                                   <span className="font-bold text-slate-800">
-                                    {log.assetName || log.assetId || 'General Ministry Operation'}
+                                    {log.assetName ? (
+                                      <span>
+                                        {log.assetName}
+                                        {log.assetId && (
+                                          <span className="font-mono text-xs font-normal text-slate-500 ml-2">
+                                            ({log.assetId})
+                                          </span>
+                                        )}
+                                      </span>
+                                    ) : (
+                                      log.assetId || 'General Ministry Operation'
+                                    )}
                                   </span>
                                 </div>
                               </div>

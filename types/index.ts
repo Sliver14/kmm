@@ -394,11 +394,13 @@ export type RiskTier = 'Low' | 'Medium' | 'High' | 'Critical'
 
 export interface AssetRiskAssessment {
   level: RiskTier
-  score: number // 0-100 scale
-  category: 'Operational' | 'Chain of Title' | 'Pre-Launch' | 'Cleared'
+  score: number // 0-100 scale (0 = zero risk / verified, 100 = critical exposure)
+  category: 'Operational' | 'Chain of Title' | 'Pre-Launch' | 'Cleared' | 'Commercial & Product' | 'Archival & Dormancy' | string
   primaryVector: string
   remediationAction: string
   riskBadgeColor: string
   riskTextColor: string
   exposureSummary: string
+  docCount?: number
+  governanceScore?: number
 }

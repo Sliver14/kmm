@@ -214,8 +214,8 @@ export function ApprovalsWorkflow() {
     const declined = eligibleApprovals.filter((a) => a.status === 'Declined').length
 
     // Avg governance score
-    const scores = eligibleApprovals.map((a) => a.governanceScore || 85)
-    const avgScore = scores.length ? Math.round(scores.reduce((acc, s) => acc + s, 0) / scores.length) : 100
+    const scores = eligibleApprovals.map((a) => a.governanceScore ?? 0)
+    const avgScore = scores.length ? Math.round(scores.reduce((acc, s) => acc + s, 0) / scores.length) : 0
 
     return { total, pending, urgent, feedback, approved, declined, avgScore }
   }, [eligibleApprovals])
@@ -259,7 +259,7 @@ export function ApprovalsWorkflow() {
           return (weight[b.priority] || 0) - (weight[a.priority] || 0)
         }
         if (sortBy === 'governance') {
-          return (b.governanceScore || 85) - (a.governanceScore || 85)
+          return (b.governanceScore ?? 0) - (a.governanceScore ?? 0)
         }
         if (sortBy === 'oldest') {
           return a.id.localeCompare(b.id)
@@ -800,11 +800,11 @@ export function ApprovalsWorkflow() {
                           />
                         </td>
                         <td className="px-4 py-3">
-                          <div className="font-semibold text-slate-900 text-xs flex items-center gap-2">
+                          <div className="font-semibold text-slate-900 text-xs flex items-center gap-2.5">
                             <span>{app.assetName}</span>
-                            <span className="font-mono text-[10px] text-slate-400">({app.id})</span>
+                            <span className="font-mono text-[10px] text-slate-400 font-normal">({app.id})</span>
                           </div>
-                          <div className="text-[11px] text-slate-500 line-clamp-1">{app.stage}</div>
+                          <div className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{app.stage}</div>
                         </td>
                         <td className="px-4 py-3">
                           <span className="rounded bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
@@ -832,7 +832,7 @@ export function ApprovalsWorkflow() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5 font-semibold text-emerald-700">
                             <ShieldCheck className="size-3.5" />
-                            <span>{app.governanceScore || 85}%</span>
+                            <span>{app.governanceScore ?? 0}%</span>
                           </div>
                         </td>
                         <td className="px-4 py-3">
@@ -988,14 +988,14 @@ export function ApprovalsWorkflow() {
 
                     {/* Metadata & Title Block */}
                     <div className="space-y-1.5 min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2.5">
                         <h3
                           onClick={() => toggleExpand(app.id)}
-                          className="font-semibold text-slate-900 text-base tracking-tight truncate max-w-md cursor-pointer hover:text-slate-700 transition"
+                          className="font-semibold text-slate-900 text-base tracking-tight truncate max-w-md cursor-pointer hover:text-slate-700 transition mr-1.5"
                         >
                           {app.assetName}
                         </h3>
-                        <span className="font-mono text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                        <span className="font-mono text-[10px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md">
                           {app.id}
                         </span>
                         <span className="rounded-md bg-purple-50 border border-purple-200 px-2 py-0.5 text-[10px] font-semibold text-purple-700">
@@ -1060,7 +1060,7 @@ export function ApprovalsWorkflow() {
                       {/* Governance Score Badge */}
                       <div className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 shadow-2xs">
                         <ShieldCheck className="size-4 text-emerald-600" />
-                        <span>{app.governanceScore || 85}% Score</span>
+                        <span>{app.governanceScore ?? 0}% Score</span>
                       </div>
 
                       {/* Multi-Step Pipeline Indicator */}
@@ -1236,7 +1236,7 @@ export function ApprovalsWorkflow() {
                     <b className="text-slate-900">Document ID:</b> {selectedDocPreview.doc.id}
                   </p>
                   <p>
-                    <b className="text-slate-900">Target Asset:</b> {selectedDocPreview.approval.assetName} ({selectedDocPreview.approval.category})
+                    <b className="text-slate-900">Target Asset:</b> {selectedDocPreview.approval.assetName} <span className="text-slate-500 font-normal ml-1.5">({selectedDocPreview.approval.category} • {selectedDocPreview.approval.id})</span>
                   </p>
                   <p>
                     <b className="text-slate-900">Producing Agency:</b> {selectedDocPreview.approval.agency || selectedDocPreview.approval.unit}
@@ -1324,7 +1324,10 @@ export function ApprovalsWorkflow() {
                       : 'Decline Asset Clearance'}
                   </h3>
                   <p className="text-[11px] text-slate-500 font-medium">
-                    {selectedApproval.assetName} • {selectedApproval.agency || selectedApproval.unit}
+                    {selectedApproval.assetName}
+                    <span className="font-mono text-slate-400 ml-1.5">({selectedApproval.id})</span>
+                    <span className="mx-1.5">•</span>
+                    {selectedApproval.agency || selectedApproval.unit}
                   </p>
                 </div>
               </div>

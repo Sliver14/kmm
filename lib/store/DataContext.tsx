@@ -265,13 +265,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           if (parsed.subcategories) setSubcategories(parsed.subcategories)
           if (parsed.rightsRecords) {
             setMasterRightsRecords(
-              parsed.rightsRecords.map((r: any) => ({
-                ...r,
-                agency: r.agency || r.unit || 'Lovetoons',
-                unit: r.agency || r.unit || 'Lovetoons',
-                documents: r.documents || [],
-                owner: r.owner === 'Lovetoons Media Ltd' || !r.owner ? 'Pastor Kalu Chelsea (Executive Minister)' : r.owner,
-              }))
+              parsed.rightsRecords.map((r: any) => {
+                const docs = Array.isArray(r.documents) ? r.documents : []
+                const hasDocs = docs.length > 0
+                return {
+                  ...r,
+                  agency: r.agency || r.unit || 'Lovetoons',
+                  unit: r.agency || r.unit || 'Lovetoons',
+                  documents: docs,
+                  status: hasDocs ? r.status : (r.status === 'Cleared' ? 'Pending' : r.status || 'Pending'),
+                  governanceScore: hasDocs ? (r.governanceScore ?? 0) : 0,
+                  owner: r.owner === 'Lovetoons Media Ltd' || !r.owner ? 'Pastor Kalu Chelsea (Executive Minister)' : r.owner,
+                }
+              })
             )
           }
           if (parsed.relationships) setMasterRelationships(parsed.relationships)
@@ -1001,7 +1007,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         id: autoId,
         agency: assignedAgency,
         unit: assignedAgency,
-        governanceScore: record.governanceScore || 90,
+        governanceScore: record.governanceScore ?? (record.documents?.length ? 50 : 0),
       }
       setMasterRightsRecords((prev) => [newRecord, ...prev])
 
