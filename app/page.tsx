@@ -1653,8 +1653,9 @@ function AssetsPage({
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All Categories')
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('All Subcategories')
-  const [selectedStatus, setSelectedStatus] = useState<string>('All Statuses')
+  const [selectedRisk, setSelectedRisk] = useState<string>('All Risks')
   const [selectedAgency, setSelectedAgency] = useState<string>('All Agencies')
+  const riskMetrics = useMemo(() => getPortfolioRiskMetrics(assets, rightsRecords, approvals), [assets, rightsRecords, approvals])
   const [newContributorName, setNewContributorName] = useState('')
   const [newContributorRole, setNewContributorRole] = useState('Lead 3D Animator')
   const [newContributorAgency, setNewContributorAgency] = useState<Agency>(currentUser.agency || 'Lovetoons')
@@ -1829,8 +1830,11 @@ function AssetsPage({
       if (selectedSubcategory !== 'All Subcategories' && item.subcategory !== selectedSubcategory) {
         return false
       }
-      if (selectedStatus !== 'All Statuses' && item.status !== selectedStatus) {
-        return false
+      if (selectedRisk !== 'All Risks') {
+        const assessment = getAssetRiskAssessment(item, rightsRecords, approvals)
+        if (assessment.level !== selectedRisk) {
+          return false
+        }
       }
       if (selectedAgency !== 'All Agencies' && (item.agency || item.unit) !== selectedAgency) {
         return false
@@ -1850,7 +1854,7 @@ function AssetsPage({
       }
       return true
     })
-  }, [assets, selectedCategory, selectedSubcategory, selectedStatus, selectedAgency, searchQuery])
+  }, [assets, selectedCategory, selectedSubcategory, selectedRisk, selectedAgency, searchQuery, rightsRecords, approvals])
 
   const handleAddAssetSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -1980,18 +1984,19 @@ function AssetsPage({
             <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-slate-400" />
           </div>
 
-          {/* Status Filter */}
+          {/* Risk Level Filter */}
           <div className="relative">
             <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition"
+              id="asset-risk-filter-select"
+              value={selectedRisk}
+              onChange={(e) => setSelectedRisk(e.target.value)}
+              className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition cursor-pointer"
             >
-              <option value="All Statuses">All Statuses</option>
-              <option value="Approved">Approved</option>
-              <option value="Pending">Pending</option>
-              <option value="Requires Attention">Requires Attention</option>
-              <option value="In Review">In Review</option>
+              <option value="All Risks">All Risk Profiles ({assets.length})</option>
+              <option value="Low">Low Risk ({riskMetrics.lowCount})</option>
+              <option value="Medium">Moderate Risk ({riskMetrics.mediumCount})</option>
+              <option value="High">High Risk ({riskMetrics.highCount})</option>
+              <option value="Critical">Critical Risk ({riskMetrics.criticalCount})</option>
             </select>
             <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-slate-400" />
           </div>
@@ -2683,12 +2688,14 @@ function RightsPage({
   setActiveNav?: (nav: string) => void
   initialAssetId?: string | null
 }) {
-  const { rightsRecords, addRightsRecord, updateRightsRecord, assets, showToast, currentUser } = useLovetoonsData()
+  const { rightsRecords, addRightsRecord, updateRightsRecord, assets, showToast, currentUser, approvals } = useLovetoonsData()
 
   const [selectedCategory, setSelectedCategory] = useState('All Categories')
-  const [selectedStatus, setSelectedStatus] = useState('All Statuses')
+  const [selectedRisk, setSelectedRisk] = useState('All Risks')
   const [searchQuery, setSearchQuery] = useState('')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
+  const rightsRiskMetrics = useMemo(() => getPortfolioRiskMetrics(assets, rightsRecords, approvals), [assets, rightsRecords, approvals])
 
   // Individual Document Upload Modal State (Specific record / individual contributor)
   const [individualDocRecord, setIndividualDocRecord] = useState<RightsRecord | null>(null)
@@ -2837,7 +2844,13 @@ function RightsPage({
   const filteredRecords = useMemo(() => {
     return rightsRecords.filter((rec) => {
       if (selectedCategory !== 'All Categories' && rec.category !== selectedCategory) return false
-      if (selectedStatus !== 'All Statuses' && rec.status !== selectedStatus) return false
+      if (selectedRisk !== 'All Risks') {
+        const parentAsset = assets.find((a) => a.id === rec.assetId || a.name === rec.name)
+        if (parentAsset) {
+          const assessment = getAssetRiskAssessment(parentAsset, rightsRecords, approvals)
+          if (assessment.level !== selectedRisk) return false
+        }
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase()
         const match =
@@ -2849,7 +2862,7 @@ function RightsPage({
       }
       return true
     })
-  }, [rightsRecords, selectedCategory, selectedStatus, searchQuery])
+  }, [rightsRecords, selectedCategory, selectedRisk, searchQuery, assets, approvals])
 
   if (selectedAssetForRightsDetails) {
     return (
@@ -2876,14 +2889,15 @@ function RightsPage({
         </div>
 
         <select
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-          className="h-8.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 px-3 text-xs font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+          value={selectedRisk}
+          onChange={(e) => setSelectedRisk(e.target.value)}
+          className="h-8.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 px-3 text-xs font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition cursor-pointer"
         >
-          <option value="All Statuses">All Statuses</option>
-          <option value="Cleared">Cleared</option>
-          <option value="Review">Under Review</option>
-          <option value="Pending">Pending</option>
+          <option value="All Risks">All Risk Profiles ({rightsRecords.length})</option>
+          <option value="Low">Low Risk ({rightsRiskMetrics.lowCount})</option>
+          <option value="Medium">Moderate Risk ({rightsRiskMetrics.mediumCount})</option>
+          <option value="High">High Risk ({rightsRiskMetrics.highCount})</option>
+          <option value="Critical">Critical Risk ({rightsRiskMetrics.criticalCount})</option>
         </select>
 
         <button
@@ -2944,7 +2958,25 @@ function RightsPage({
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <StatusPill status={rec.status as any} />
+                  <div className="flex flex-col gap-1 items-start">
+                    <StatusPill status={rec.status as any} />
+                    {(() => {
+                      const parentAsset = assets.find((a) => a.id === rec.assetId || a.name === rec.name)
+                      if (!parentAsset) return null
+                      const assessment = getAssetRiskAssessment(parentAsset, rightsRecords, approvals)
+                      return (
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.2 rounded border shadow-2xs',
+                            assessment.riskBadgeColor
+                          )}
+                          title={`Risk Score: ${assessment.score}/100 • Compliance: ${100 - assessment.score}%`}
+                        >
+                          <span>{assessment.level} Risk</span>
+                        </span>
+                      )
+                    })()}
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1.5">
