@@ -175,16 +175,32 @@ function Sidebar({
   const { stats, currentUser, logout } = useLovetoonsData()
 
   const visibleNav = useMemo(() => {
+    const isSuperAdmin = currentUser.role === 'super_admin'
+    const isAgencyAdmin = currentUser.role === 'agency_admin' || (currentUser.role as any) === 'unit_admin'
+
     return nav.filter(([label]) => {
-      if (label === 'Approvals' && currentUser.role === 'unit_admin') {
+      // Approvals portal is strictly for Super Admin and Content Reviewers
+      if (label === 'Approvals' && isAgencyAdmin) {
+        return false
+      }
+      // System security audit log is restricted to Super Admin
+      if (label === 'Audit Trail' && !isSuperAdmin) {
+        return false
+      }
+      // Executive portfolio risk reports is restricted to Super Admin and Reviewers
+      if (label === 'Reports' && isAgencyAdmin) {
+        return false
+      }
+      // Ministry taxonomy configuration is restricted to Super Admin
+      if (label === 'Settings' && !isSuperAdmin) {
         return false
       }
       return true
     })
   }, [currentUser.role])
 
-  // Categorize nav for clean section headers like AgentOps reference
-  const coreNavLabels = ['Dashboard', 'Assets', 'Approvals']
+  // Categorize nav for clean section headers
+  const coreNavLabels = ['Dashboard', 'Assets', 'Relationships', 'Approvals']
 
   return (
     <aside
@@ -438,6 +454,7 @@ function NotificationModal({
     dismissNotification,
     clearAllNotifications,
     stats,
+    currentUser,
   } = useLovetoonsData()
 
   const [notificationFilter, setNotificationFilter] = useState<'all' | 'unread' | 'approvals' | 'governance' | 'activities'>('all')
@@ -738,16 +755,29 @@ function NotificationModal({
 
         {/* Drawer Footer */}
         <div className="relative z-10 border-t border-slate-200 px-5 py-3.5 bg-white flex items-center justify-between gap-3 shrink-0">
-          <button
-            onClick={() => {
-              onClose()
-              if (setActiveNav) setActiveNav('Approvals')
-            }}
-            className="flex items-center gap-2 text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 transition-colors cursor-pointer"
-          >
-            <ClipboardCheck className="size-4 text-slate-600" />
-            <span>Approvals Portal ({stats.pendingApprovalsCount})</span>
-          </button>
+          {(currentUser.role === 'super_admin' || currentUser.role === 'reviewer') ? (
+            <button
+              onClick={() => {
+                onClose()
+                if (setActiveNav) setActiveNav('Approvals')
+              }}
+              className="flex items-center gap-2 text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 transition-colors cursor-pointer"
+            >
+              <ClipboardCheck className="size-4 text-slate-600" />
+              <span>Approvals Portal ({stats.pendingApprovalsCount})</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                onClose()
+                if (setActiveNav) setActiveNav('Assets')
+              }}
+              className="flex items-center gap-2 text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 transition-colors cursor-pointer"
+            >
+              <Boxes className="size-4 text-slate-600" />
+              <span>Assets Catalog</span>
+            </button>
+          )}
 
           <button
             onClick={onClose}
@@ -780,8 +810,8 @@ function Header({
   isCollapsed?: boolean
   setIsCollapsed?: (v: boolean | ((prev: boolean) => boolean)) => void
 }) {
-  const { currentUser, setCurrentUser, availableUsers, resetToDefaultData, logout } = useLovetoonsData()
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false)
+  const { currentUser, logout } = useLovetoonsData()
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
   const [searchFilter, setSearchFilter] = useState('')
 
   return (
@@ -872,19 +902,23 @@ function Header({
           )}
         </div>
 
-        {/* ROLE SWITCHER DROPDOWN */}
+        {/* LOGGED IN USER PROFILE DROPDOWN */}
         <div className="relative">
           <button
-            onClick={() => setRoleDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
+            onClick={() => setProfileDropdownOpen((prev) => !prev)}
+            className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-2.5 py-1.5 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
+            aria-label="Current user profile"
           >
-            <div className="grid size-6.5 place-items-center rounded-md bg-slate-900 text-[10px] font-bold text-white shadow-xs">
+            <div className={cn(
+              'grid size-6.5 place-items-center rounded-md text-[10px] font-bold text-white shadow-xs',
+              currentUser.role === 'super_admin' ? 'bg-purple-600' : currentUser.role === 'reviewer' ? 'bg-emerald-600' : 'bg-blue-600'
+            )}>
               {currentUser.initials}
             </div>
             <div className="hidden text-left sm:block">
-              <div className="text-xs font-semibold leading-tight text-slate-900 flex items-center gap-1.5">
+              <div className="text-xs font-semibold leading-tight text-slate-900 dark:text-white flex items-center gap-1.5">
                 <span className="truncate max-w-[120px]">{currentUser.name}</span>
-                <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.2 text-[9px] font-medium text-slate-600">
+                <span className="rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-1.5 py-0.2 text-[9px] font-medium text-slate-600 dark:text-slate-300">
                   {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role === 'reviewer' ? 'Reviewer' : 'Agency Rep'}
                 </span>
               </div>
@@ -892,76 +926,66 @@ function Header({
             <ChevronDown className="size-3 text-slate-400" />
           </button>
 
-          {roleDropdownOpen && (
-            <div className="absolute right-0 top-full mt-1.5 z-40 w-72 sm:w-80 rounded-xl border border-slate-200/90 bg-white p-2.5 shadow-xl animate-in fade-in">
-              <div className="border-b border-slate-100 pb-2 px-1">
-                <div className="text-xs font-semibold text-slate-900">Active Role & Profile Switcher</div>
-                <p className="text-[11px] text-slate-500">Switch user profile to test role permissions</p>
+          {profileDropdownOpen && (
+            <div className="absolute right-0 top-full mt-1.5 z-40 w-72 sm:w-80 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900 p-4 shadow-xl dark:shadow-2xl animate-in fade-in">
+              {/* User Profile Header Card */}
+              <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-white/10">
+                <div className={cn(
+                  'grid size-11 shrink-0 place-items-center rounded-xl font-bold text-sm text-white shadow-sm',
+                  currentUser.role === 'super_admin'
+                    ? 'bg-purple-600'
+                    : currentUser.role === 'reviewer'
+                      ? 'bg-emerald-600'
+                      : 'bg-blue-600'
+                )}>
+                  {currentUser.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-slate-900 dark:text-white text-sm truncate">{currentUser.name}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 truncate">{currentUser.email}</div>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+                      <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Active Session
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-2 space-y-1.5 max-h-72 overflow-y-auto pr-1">
-                {availableUsers.map((user) => {
-                  const isSelected = user.id === currentUser.id
-                  return (
-                    <button
-                      key={user.id}
-                      onClick={() => {
-                        setCurrentUser(user)
-                        setRoleDropdownOpen(false)
-                      }}
-                      className={cn(
-                        'w-full flex items-start gap-2.5 rounded-xl p-2 text-left transition border cursor-pointer',
-                        isSelected
-                          ? 'bg-blue-50/80 border-blue-200 shadow-2xs'
-                          : 'border-transparent hover:bg-slate-50'
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          'grid size-8 shrink-0 place-items-center rounded-lg font-bold text-xs text-white shadow-xs',
-                          user.role === 'super_admin'
-                            ? 'bg-purple-600'
-                            : user.role === 'reviewer'
-                              ? 'bg-emerald-600'
-                              : 'bg-blue-600'
-                        )}
-                      >
-                        {user.initials}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-slate-900 text-xs truncate">{user.name}</span>
-                          {isSelected && <Check className="size-3.5 text-blue-600 shrink-0" />}
-                        </div>
-                        <div className="text-[11px] font-semibold text-blue-700">{user.roleLabel}</div>
-                        <div className="text-[10px] text-slate-400 truncate">Agency: {user.agency || user.unit}</div>
-                      </div>
-                    </button>
-                  )
-                })}
+              {/* Role & Agency Info */}
+              <div className="py-3 space-y-2 text-xs border-b border-slate-100 dark:border-white/10">
+                <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] font-medium">Assigned Role</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{currentUser.roleLabel}</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] font-medium">Ministry Agency</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{currentUser.agency || currentUser.unit}</span>
+                </div>
+                {currentUser.skills && currentUser.skills.length > 0 && (
+                  <div className="pt-1">
+                    <span className="text-[10px] font-semibold uppercase text-slate-400 dark:text-slate-400 tracking-wider block mb-1">
+                      Professional Skills
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {currentUser.skills.map((s) => (
+                        <span key={s} className="rounded-md bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-700 dark:text-slate-300 capitalize">
+                          {s.replace('_', ' ')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="mt-2.5 border-t border-slate-100 pt-2 flex items-center justify-between text-[11px]">
+              {/* Sign Out Action */}
+              <div className="pt-3">
                 <button
                   onClick={() => {
-                    resetToDefaultData()
-                    setRoleDropdownOpen(false)
-                  }}
-                  className="flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-800 p-1 cursor-pointer"
-                >
-                  <RefreshCw className="size-3" />
-                  <span>Reset Demo Data</span>
-                </button>
-                <span className="text-slate-400 font-mono text-[10px]">KMM Platform</span>
-              </div>
-
-              <div className="mt-2 pt-2 border-t border-slate-100">
-                <button
-                  onClick={() => {
-                    setRoleDropdownOpen(false)
+                    setProfileDropdownOpen(false)
                     logout()
                   }}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 py-2 px-3 text-xs font-bold text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition cursor-pointer"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 py-2.5 px-3 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 hover:text-rose-700 transition cursor-pointer"
                 >
                   <LogOut className="size-3.5" />
                   <span>Sign Out / Log Out</span>
@@ -6225,20 +6249,10 @@ function SettingsPage() {
                 </button>
               </>
             ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  const superAdminUser = availableUsers.find((u) => u.role === 'super_admin')
-                  if (superAdminUser) {
-                    setCurrentUser(superAdminUser)
-                    showToast('Switched to Super Admin profile to unlock category creation.')
-                  }
-                }}
-                className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-purple-700 transition cursor-pointer"
-              >
-                <ShieldCheck className="size-3.5" />
-                <span>Switch to Super Admin to Edit</span>
-              </button>
+              <div className="flex items-center gap-1.5 rounded-lg bg-slate-100 border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-500">
+                <Lock className="size-3.5" />
+                <span>Super Admin Permissions Required</span>
+              </div>
             )}
           </div>
         </div>
@@ -7142,15 +7156,33 @@ export function MainApp({
 
   // Role Guard: Hide / Redirect restricted roles smoothly
   useEffect(() => {
-    if (active === 'Approvals' && currentUser.role === 'unit_admin') {
+    const isSuperAdmin = currentUser.role === 'super_admin'
+    const isAgencyAdmin = currentUser.role === 'agency_admin' || (currentUser.role as any) === 'unit_admin'
+
+    if (active === 'Approvals' && isAgencyAdmin) {
+      setActive('Dashboard')
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/dashboard')
+      }
+    } else if (active === 'Settings' && !isSuperAdmin) {
+      setActive('Dashboard')
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/dashboard')
+      }
+    } else if (active === 'Audit Trail' && !isSuperAdmin) {
+      setActive('Dashboard')
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '/dashboard')
+      }
+    } else if (active === 'Reports' && isAgencyAdmin) {
       setActive('Dashboard')
       if (typeof window !== 'undefined') {
         window.history.pushState(null, '', '/dashboard')
       }
     } else if (active === 'Categories & Subcategories') {
-      setActive('Settings')
+      setActive(isSuperAdmin ? 'Settings' : 'Dashboard')
       if (typeof window !== 'undefined') {
-        window.history.pushState(null, '', '/settings')
+        window.history.pushState(null, '', isSuperAdmin ? '/settings' : '/dashboard')
       }
     }
   }, [currentUser.role, active])

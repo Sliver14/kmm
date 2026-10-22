@@ -93,8 +93,6 @@ export function ApprovalsWorkflow() {
     requestFeedback,
     canApprove,
     currentUser,
-    setCurrentUser,
-    availableUsers,
     showToast,
     rightsRecords,
     updateRightsRecord,
@@ -176,11 +174,6 @@ export function ApprovalsWorkflow() {
     doc: RightsDocument
     approval: ApprovalRequest
   } | null>(null)
-
-  // Quick switch reviewer helper
-  const reviewerUser = availableUsers.find((u) => u.role === 'reviewer') || availableUsers[1]
-  const superAdminUser = availableUsers.find((u) => u.role === 'super_admin') || availableUsers[0]
-  const unitAdminUser = availableUsers.find((u) => u.role === 'unit_admin') || availableUsers[2]
 
   // Distinct agencies
   const agencies = useMemo(() => {
@@ -318,34 +311,8 @@ export function ApprovalsWorkflow() {
             You are currently signed in as <b className="text-slate-900">{currentUser.name}</b> ({currentUser.roleLabel} — {currentUser.unit}). Intellectual asset review, doctrinal validation, and legal clearances are restricted to authorized Content Reviewers.
           </p>
 
-          <div className="mt-6 p-4 rounded-2xl bg-white border border-amber-100 shadow-2xs max-w-md mx-auto">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2.5">
-              Switch to an authorized review role for testing:
-            </span>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
-              <button
-                id="switch-faith-btn"
-                onClick={() => {
-                  setCurrentUser(reviewerUser)
-                  showToast('Switched to Reviewer role: Faith Daniel')
-                }}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:from-emerald-700 hover:to-teal-700 transition cursor-pointer"
-              >
-                <CheckCircle2 className="size-4" />
-                <span>Faith Daniel (Reviewer)</span>
-              </button>
-              <button
-                id="switch-sylver-btn"
-                onClick={() => {
-                  setCurrentUser(superAdminUser)
-                  showToast('Switched to Super Admin role: Sylver Oyinaga')
-                }}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:from-purple-700 hover:to-indigo-700 transition cursor-pointer"
-              >
-                <ShieldCheck className="size-4" />
-                <span>Sylver Oyinaga (Admin)</span>
-              </button>
-            </div>
+          <div className="mt-6 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs max-w-md mx-auto text-xs text-slate-500">
+            <span>To request clearance on your agency assets, please submit clearance documents through the Assets catalog or Rights & Governance tab.</span>
           </div>
         </div>
       </div>
