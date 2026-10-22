@@ -3886,7 +3886,7 @@ function RightsDetailsPage({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => setSubTab('Legal Documents')}
+              onClick={() => setSubTab('Governance & Clearance')}
               className="flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer"
             >
               <Plus className="size-3.5" />
@@ -3983,18 +3983,32 @@ function RightsDetailsPage({
       {/* Sub Tabs */}
       <div className="border-b border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900/90 px-3 rounded-xl shadow-2xs">
         <div className="flex items-center gap-2">
-          {['Overview & Rights', 'Governance Checklist', 'Legal Documents', 'Audit History'].map((st) => (
+          {['Overview & Rights', 'Governance & Clearance', 'Audit History'].map((st) => (
             <button
               key={st}
+              id={`rights-subtab-${st.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
               onClick={() => setSubTab(st)}
               className={cn(
-                'px-4 py-3.5 text-xs font-bold border-b-2 -mb-[1px] transition cursor-pointer',
-                subTab === st
+                'px-4 py-3.5 text-xs font-bold border-b-2 -mb-[1px] transition cursor-pointer flex items-center gap-2',
+                subTab === st || (st === 'Governance & Clearance' && (subTab === 'Governance Checklist' || subTab === 'Legal Documents'))
                   ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
                   : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               )}
             >
-              {st}
+              <span>{st}</span>
+              {st === 'Governance & Clearance' && (
+                <span className={cn(
+                  'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                  (asset.documents?.length || 0) > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                )}>
+                  {asset.governanceScore ?? 0}%
+                </span>
+              )}
+              {st === 'Audit History' && (
+                <span className="rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.2 text-[10px]">
+                  {activities.filter(a => a.subtitle?.includes(asset.name) || a.title?.includes(asset.name)).length || 3}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -4096,8 +4110,84 @@ function RightsDetailsPage({
         </div>
       )}
 
-      {/* 2. Governance Checklist Sub-Tab */}
-      {subTab === 'Governance Checklist' && (
+      {/* 2. Governance & Clearance Sub-Tab */}
+      {(subTab === 'Governance & Clearance' || subTab === 'Governance Checklist' || subTab === 'Legal Documents') && (
+        <div className="space-y-6">
+          {/* Approval Scheduling & Documents Readiness Gate */}
+          {(!asset.documents || asset.documents.length === 0) ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/70 dark:border-amber-500/20 dark:bg-amber-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+              <div className="flex items-start gap-3">
+                <div className="size-9 rounded-lg bg-amber-500 text-white grid place-items-center shrink-0 shadow-2xs">
+                  <ShieldAlert className="size-4.5" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-amber-950 dark:text-amber-200 text-sm">
+                    Executive Clearance Review Gate: Documentation Required
+                  </h4>
+                  <p className="text-xs text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-relaxed">
+                    This asset will <b>not enter the reviewer approvals queue</b> until executed legal chain of title, script clearances, or talent releases are uploaded below.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <div
+                  className="flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-500 px-3 py-1.5 text-xs font-medium cursor-not-allowed"
+                  title="Upload at least one legal clearance document before scheduling approval"
+                >
+                  <Lock className="size-3.5" />
+                  <span>Approval Locked (0 Deeds)</span>
+                </div>
+              </div>
+            </div>
+          ) : !existingApproval ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+              <div className="flex items-start gap-3">
+                <div className="size-9 rounded-lg bg-emerald-600 text-white grid place-items-center shrink-0 shadow-2xs">
+                  <FileCheck className="size-4.5" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-emerald-950 dark:text-emerald-200 text-sm">
+                    Clearance Documents Verified & Ready for Executive Sign-off
+                  </h4>
+                  <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
+                    {asset.documents.length} legal deeds uploaded and verified. Ready to schedule formal executive clearance review.
+                  </p>
+                </div>
+              </div>
+              <button
+                id="rights-schedule-approval-tab-btn"
+                onClick={handleScheduleApproval}
+                className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
+              >
+                <Send className="size-3.5" />
+                <span>Schedule for Approval Request</span>
+              </button>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-blue-200 bg-blue-50/70 dark:border-blue-500/20 dark:bg-blue-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+              <div className="flex items-start gap-3">
+                <div className="size-9 rounded-lg bg-blue-600 text-white grid place-items-center shrink-0 shadow-2xs">
+                  <Clock className="size-4.5" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-blue-950 dark:text-blue-200 text-sm">
+                    Active Approval Request Scheduled ({existingApproval.priority} Priority)
+                  </h4>
+                  <p className="text-xs text-blue-800/90 dark:text-blue-300/90 mt-0.5 leading-relaxed">
+                    Scheduled by {existingApproval.requesterName || 'Legal Representative'} on {existingApproval.submittedDate}. Status: <b>{existingApproval.status}</b>.
+                  </p>
+                </div>
+              </div>
+              {setActiveNav && (
+                <button
+                  onClick={() => setActiveNav('Approvals')}
+                  className="flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
+                >
+                  <span>View in Approvals Queue →</span>
+                </button>
+              )}
+            </div>
+          )}
         <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
             <div>
@@ -4137,10 +4227,8 @@ function RightsDetailsPage({
             ))}
           </div>
         </div>
-      )}
 
-      {/* 3. Legal Documents Sub-Tab */}
-      {subTab === 'Legal Documents' && (
+        {/* Legal Documents & Deeds Hub */}
         <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-white/10 pb-3">
             <div>
@@ -4407,6 +4495,7 @@ function RightsDetailsPage({
               </div>
             )}
           </div>
+        </div>
         </div>
       )}
 
