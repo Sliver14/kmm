@@ -3623,7 +3623,10 @@ function RightsDetailsPage({
   const [detailsDocNotes, setDetailsDocNotes] = useState('')
   const [detailsIsCustomAssignee, setDetailsIsCustomAssignee] = useState(assetContributors.length === 0)
 
-  const isAudioCategory = asset.category?.toLowerCase().includes('audio') || asset.category?.toLowerCase().includes('music')
+  const categoryStr = (asset.category || '').toLowerCase()
+  const isAudioCategory = categoryStr.includes('audio') || categoryStr.includes('music') || categoryStr.includes('song') || categoryStr.includes('soundtrack')
+  const isVideoCategory = categoryStr.includes('video') || categoryStr.includes('tv') || categoryStr.includes('film') || categoryStr.includes('animation') || categoryStr.includes('broadcast') || categoryStr.includes('series') || categoryStr.includes('programme')
+  const isPublishingCategory = categoryStr.includes('book') || categoryStr.includes('publishing') || categoryStr.includes('comics') || categoryStr.includes('print') || categoryStr.includes('graphic')
   const defaultAssetProvenance: ContentProvenance = asset.contentProvenance || (isAudioCategory ? 'Fully Custom' : 'AI Assisted')
 
   // Staff Covenant Pop-up Notification Modal State
@@ -4244,144 +4247,11 @@ function RightsDetailsPage({
           <div className="flex flex-wrap items-center gap-2.5 self-end sm:self-auto">
             <button
               onClick={openScopeModal}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-blue-50 hover:text-blue-600 transition cursor-pointer"
-            >
-              <Pencil className="size-3.5" />
-              <span>Update Scope Dimensions</span>
-            </button>
-            <button
-              onClick={openScopeModal}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition cursor-pointer"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition cursor-pointer active:scale-98"
             >
               <FileUp className="size-4" />
-              <span>+ Attach Certificate / Scope</span>
+              <span>Update Scope & Attach Certificate</span>
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Approval Scheduling & Documents Readiness Gate */}
-      {(!asset.documents || asset.documents.length === 0) ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/70 dark:border-amber-500/20 dark:bg-amber-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-          <div className="flex items-start gap-3">
-            <div className="size-9 rounded-lg bg-amber-500 text-white grid place-items-center shrink-0 shadow-2xs">
-              <ShieldAlert className="size-4.5" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-amber-950 dark:text-amber-200 text-sm">
-                Legal Documentation Required Before Approval Scheduling
-              </h4>
-              <p className="text-xs text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-relaxed">
-                This asset will <b>not enter the reviewer approvals queue</b> until executed legal chain of title, script clearances, or talent releases are uploaded.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => setSubTab('Governance & Clearance')}
-              className="flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer"
-            >
-              <Plus className="size-3.5" />
-              <span>Attach Legal Deeds</span>
-            </button>
-            <div
-              className="flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-500 px-3 py-1.5 text-xs font-medium cursor-not-allowed"
-              title="Upload at least one legal clearance document before scheduling approval"
-            >
-              <Lock className="size-3.5" />
-              <span>Schedule Approval</span>
-            </div>
-          </div>
-        </div>
-      ) : !existingApproval ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-          <div className="flex items-start gap-3">
-            <div className="size-9 rounded-lg bg-emerald-600 text-white grid place-items-center shrink-0 shadow-2xs">
-              <FileCheck className="size-4.5" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-emerald-950 dark:text-emerald-200 text-sm">
-                Clearance Documents Ready for Executive Review
-              </h4>
-              <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
-                {asset.documents.length} legal deeds uploaded and verified. Ready to schedule formal executive review.
-              </p>
-            </div>
-          </div>
-          <button
-            id="rights-schedule-approval-btn"
-            onClick={handleScheduleApproval}
-            className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
-          >
-            <Send className="size-3.5" />
-            <span>Schedule for Approval Request</span>
-          </button>
-        </div>
-      ) : (
-        <div className="rounded-xl border border-blue-200 bg-blue-50/70 dark:border-blue-500/20 dark:bg-blue-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-          <div className="flex items-start gap-3">
-            <div className="size-9 rounded-lg bg-blue-600 text-white grid place-items-center shrink-0 shadow-2xs">
-              <Clock className="size-4.5" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-blue-950 dark:text-blue-200 text-sm">
-                Active Approval Request Scheduled ({existingApproval.priority} Priority)
-              </h4>
-              <p className="text-xs text-blue-800/90 dark:text-blue-300/90 mt-0.5 leading-relaxed">
-                Scheduled by {existingApproval.requesterName || 'Legal Representative'} on {existingApproval.submittedDate}. Status: <b>{existingApproval.status}</b>.
-              </p>
-            </div>
-          </div>
-          {setActiveNav && (
-            <button
-              onClick={() => setActiveNav('Approvals')}
-              className="flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
-            >
-              <span>View in Approvals Queue →</span>
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* 4 Status KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
-        <div className="rounded-xl border border-blue-100 bg-blue-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Legal Ownership & Title</div>
-          <div className="text-xs font-bold text-blue-900 dark:text-blue-300 mt-0.5 truncate" title={asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}>
-            {asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}
-          </div>
-          <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
-            Sole Title Vested (Cert #{asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ'})
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-purple-100 bg-purple-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Trademark & Licensing</div>
-          <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-            {asset.trademarkStatus || 'Registered'} Trademark
-          </div>
-          <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate" title={asset.distributionLicense || 'Exclusive Ministry Global Distribution'}>
-            {asset.distributionLicense || 'Exclusive Ministry Global Distribution'}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-amber-100 bg-amber-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Territory Clearance</div>
-          <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">
-            {asset.territory || 'Worldwide / Global'}
-          </div>
-          <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
-            {asset.territoryClearanceStatus || 'Cleared Global'}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-teal-100 bg-teal-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Creation Provenance</div>
-          <div className="text-xs font-bold text-blue-700 dark:text-blue-400 mt-0.5">
-            {asset.contentProvenance || defaultAssetProvenance}
-          </div>
-          <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-            {asset.governanceScore ?? 92}% Compliant
           </div>
         </div>
       </div>
@@ -4389,409 +4259,397 @@ function RightsDetailsPage({
       {/* Sub Tabs */}
       <div className="border-b border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900/90 px-3 rounded-xl shadow-2xs">
         <div className="flex items-center gap-2 overflow-x-auto">
-          {['Overview & Rights', 'Governance & Clearance', 'Filing Certificates & Legal Contracts', 'Audit History'].map((st) => (
-            <button
-              key={st}
-              id={`rights-subtab-${st.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
-              onClick={() => setSubTab(st)}
-              className={cn(
-                'px-4 py-3.5 text-xs font-bold border-b-2 -mb-[1px] transition cursor-pointer flex items-center gap-2 whitespace-nowrap',
-                subTab === st || (st === 'Governance & Clearance' && subTab === 'Governance Checklist') || (st === 'Filing Certificates & Legal Contracts' && subTab === 'Legal Documents')
-                  ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-              )}
-            >
-              <span>{st}</span>
-              {st === 'Governance & Clearance' && (
-                <span className={cn(
-                  'rounded-full px-2 py-0.5 text-[10px] font-bold',
-                  (complianceReadiness?.complianceScore || 0) >= 80 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                )}>
-                  {complianceReadiness?.complianceScore || 0}%
-                </span>
-              )}
-              {st === 'Filing Certificates & Legal Contracts' && (
-                <span className={cn(
-                  'rounded-full px-2 py-0.5 text-[10px] font-bold',
-                  (asset.documents?.length || 0) > 0 ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                )}>
-                  {asset.documents?.length || 0} File(s)
-                </span>
-              )}
-              {st === 'Audit History' && (
-                <span className="rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.2 text-[10px]">
-                  {activities.filter(a => a.subtitle?.includes(asset.name) || a.title?.includes(asset.name)).length || 3}
-                </span>
-              )}
-            </button>
-          ))}
+          {[
+            { id: 'Rights & Clearance Scope', label: 'Rights & Clearance Scope', icon: ShieldCheck },
+            { id: 'Filing Certificates & Legal Contracts', label: 'Filing Certificates & Legal Contracts', icon: ScrollText, badge: `${asset.documents?.length || 0} File(s)` },
+            { id: 'Category Clearance Checklist', label: 'Ministry Clearance Checklist', icon: ClipboardCheck, badge: `${complianceReadiness?.complianceScore || 0}%` },
+            { id: 'Audit History', label: 'Audit Trail', icon: Clock, badge: activities.filter(a => a.subtitle?.includes(asset.name) || a.title?.includes(asset.name)).length || undefined },
+          ].map((tab) => {
+            const Icon = tab.icon
+            const isActive =
+              subTab === tab.id ||
+              (tab.id === 'Rights & Clearance Scope' && (subTab === 'Overview & Rights' || subTab === 'Rights & Clearance Scope')) ||
+              (tab.id === 'Filing Certificates & Legal Contracts' && (subTab === 'Legal Documents' || subTab === 'Filing Certificates & Legal Contracts')) ||
+              (tab.id === 'Category Clearance Checklist' && (subTab === 'Governance & Clearance' || subTab === 'Governance Checklist' || subTab === 'Category Clearance Checklist'))
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setSubTab(tab.id)}
+                className={cn(
+                  'px-4 py-3.5 text-xs font-bold border-b-2 -mb-[1px] transition cursor-pointer flex items-center gap-2 whitespace-nowrap',
+                  isActive
+                    ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                )}
+              >
+                <Icon className="size-3.5" />
+                <span>{tab.label}</span>
+                {tab.badge !== undefined && (
+                  <span className={cn(
+                    'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                    isActive ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                  )}>
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* 1. Overview & Rights Sub-Tab */}
-      {subTab === 'Overview & Rights' && (
-        <div className="grid gap-5 xl:grid-cols-[1fr_320px] items-start">
-          <div className="space-y-5">
-            <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3">
-                <div>
-                  <h2 className="text-base font-bold text-[#09245a] dark:text-white">
-                    Rights & Governance Scope Breakdown
-                  </h2>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Official intellectual asset legal dimensions: universal executive ownership, distribution & production licensing, territorial bounds, and AI content provenance.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={openScopeModal}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white px-3.5 py-2 text-xs font-bold shadow-md shadow-blue-600/20 transition cursor-pointer shrink-0"
-                >
-                  <FileUp className="size-3.5" />
-                  <span>+ Update Scope & Attach Certificate</span>
-                </button>
+      {/* 1. Rights & Clearance Scope Sub-Tab (DYNAMIC BY CATEGORY) */}
+      {(subTab === 'Rights & Clearance Scope' || subTab === 'Overview & Rights') && (
+        <div className="space-y-4">
+          {/* Dynamic Category Context Banner */}
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="rounded-lg bg-blue-600 text-white font-bold px-2.5 py-1 text-[11px] shadow-2xs">
+                {asset.category}
+              </span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                {isAudioCategory
+                  ? '🎵 Audio & Music Ministry Governance: Songwriter attribution, 3-tier creation provenance & KMM Staff Covenant'
+                  : isVideoCategory
+                  ? '🎬 Video & Animation Production Governance: Broadcast distribution, production studio mandate & soundtrack clearance'
+                  : isPublishingCategory
+                  ? '📚 Publications & Visual Art Governance: Print/graphics distribution, cover art provenance & publishing licensing'
+                  : '🛡️ Intellectual Asset Governance & Rights Scope'}
+              </span>
+            </div>
+            <button
+              onClick={openScopeModal}
+              className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0 cursor-pointer"
+            >
+              <Pencil className="size-3.5" />
+              <span>Edit 5 Pillars</span>
+            </button>
+          </div>
+
+          {/* 5 Core Pillars Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+            {/* PILLAR 1: Universal Legal Ownership & Certificate */}
+            <div
+              onClick={openScopeModal}
+              className="rounded-2xl border border-blue-200/90 bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 dark:border-blue-900/50 dark:from-blue-950/30 dark:via-slate-900 dark:to-blue-950/20 p-5 space-y-3 hover:border-blue-400 dark:hover:border-blue-700 transition cursor-pointer shadow-xs group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 text-[10px] font-black uppercase tracking-wider">
+                  <Crown className="size-3 text-amber-500" />
+                  <span>1. Asset Legal Ownership</span>
+                </span>
+                <Pencil className="size-3.5 text-slate-400 group-hover:text-blue-600 transition" />
               </div>
-
-              {/* 5 Streamlined Core Dimensions */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-                {/* 1. Legal Asset Owner & Certificate */}
-                <div
-                  onClick={openScopeModal}
-                  className="rounded-xl border border-blue-200/80 bg-blue-50/50 dark:border-blue-800/40 dark:bg-blue-950/20 p-4 space-y-1.5 hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer group shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase flex items-center gap-1">
-                      <ShieldCheck className="size-3 text-blue-600" />
-                      <span>1. Asset Legal Ownership</span>
-                    </span>
-                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
-                  </div>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm leading-snug">
-                    {asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}
-                  </div>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-300 flex items-center gap-1.5 pt-0.5">
-                    <span className="font-semibold text-blue-700 dark:text-blue-400">Attached Certificate:</span>
-                    <span className="font-mono text-[10px] bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800/50">
-                      {asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ'}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium">
-                    ✓ 100% Sole Ministry Title Vested
-                  </div>
+              <div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Owner of All Assets:</div>
+                <div className="font-black text-slate-900 dark:text-white text-base leading-snug mt-0.5">
+                  {asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}
                 </div>
+              </div>
+              <div className="pt-2 border-t border-blue-100/80 dark:border-white/10 flex items-center justify-between text-[11px]">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Title Certificate:</span>
+                <span className="font-mono font-bold text-blue-700 dark:text-blue-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">
+                  {asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ'}
+                </span>
+              </div>
+              <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
+                <BadgeCheck className="size-3.5 text-emerald-600" />
+                <span>100% Sole Ministry Title Vested in Perpetuity</span>
+              </div>
+            </div>
 
-                {/* 2. Trademark & Distribution Licensing */}
-                <div
-                  onClick={openScopeModal}
-                  className="rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1.5 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                      <BadgeCheck className="size-3 text-purple-600" />
-                      <span>2. Trademark & Distribution</span>
-                    </span>
-                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
-                  </div>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">
+            {/* PILLAR 2: Trademark Protection & Distribution Licensing */}
+            <div
+              onClick={openScopeModal}
+              className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-5 space-y-3 hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer shadow-xs group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-100 text-purple-800 dark:bg-purple-950/70 dark:text-purple-300 text-[10px] font-black uppercase tracking-wider">
+                  <BadgeCheck className="size-3 text-purple-600" />
+                  <span>2. Trademark & Licensing</span>
+                </span>
+                <Pencil className="size-3.5 text-slate-400 group-hover:text-blue-600 transition" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">
                     {asset.trademarkStatus || 'Registered'} Trademark
-                  </div>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-300 truncate" title={asset.distributionLicense || 'Exclusive Ministry Global Distribution'}>
-                    {asset.distributionLicense || 'Exclusive Ministry Global Distribution'}
-                  </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                    Distribution clearance active across global broadcast & digital networks
-                  </div>
-                </div>
-
-                {/* 3. Authorized Production Licensees */}
-                <div
-                  onClick={openScopeModal}
-                  className="rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1.5 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                      <Clapperboard className="size-3 text-indigo-600" />
-                      <span>3. Production Licensees</span>
-                    </span>
-                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
-                  </div>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm leading-snug truncate" title={asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media'}>
-                    {asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media'}
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Entities with verified license to produce content & products with this asset
-                  </div>
-                  <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">
-                    Authorized Production Mandate
-                  </div>
-                </div>
-
-                {/* 4. Territory License & Clearance */}
-                <div
-                  onClick={openScopeModal}
-                  className="rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1.5 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                      <Globe2 className="size-3 text-amber-600" />
-                      <span>4. Territory License & Clearance</span>
-                    </span>
-                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
-                  </div>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">
-                    {asset.territory || 'Worldwide / Global'}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-bold">
-                      {asset.territoryClearanceStatus || 'Cleared Global'}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                    Full territorial clearance for satellite, digital streaming & localized publishing
-                  </div>
-                </div>
-
-                {/* 5. Creation Provenance & Audio Songwriter */}
-                <div
-                  onClick={openScopeModal}
-                  className="rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-2 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group sm:col-span-2 lg:col-span-2 shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                      <Sparkles className="size-3 text-cyan-600" />
-                      <span>5. Content Provenance & Audio Governance</span>
-                    </span>
-                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={cn(
-                      'rounded-lg px-2.5 py-1 text-xs font-bold border flex items-center gap-1',
-                      (asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom'
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800/60 dark:text-emerald-300'
-                        : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted'
-                          ? 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:border-sky-800/60 dark:text-sky-300'
-                          : 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800/60 dark:text-purple-300'
-                    )}>
-                      {(asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom' ? '✦ Fully Custom' : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted' ? '⚡ AI Assisted' : '🤖 Fully AI'}
-                      <span className="font-normal opacity-80">(Video, Audio, Graphics)</span>
-                    </span>
-
-                    {/* Audio Songwriter Attribution */}
-                    <span className="rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Music className="size-3 text-blue-600" />
-                      <span>Songwriter: <b>{asset.songWriter || (isAudioCategory ? 'KMM Music Ministry (Staff Composer)' : 'In-House Creative Staff')}</b></span>
-                      <span className="text-[10px] text-blue-600 dark:text-blue-400">({asset.songWriterProvenance || 'Fully Custom'})</span>
-                    </span>
-                  </div>
-
-                  {/* KMM Staff Ownership Clause Banner Box */}
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setIsStaffCovenantPopupOpen(true)
-                    }}
-                    className="flex items-center justify-between rounded-lg bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 p-2.5 text-xs text-amber-900 dark:text-amber-200 hover:bg-amber-100/90 transition cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ScrollText className="size-4 text-amber-600 shrink-0" />
-                      <span className="font-semibold text-[11px]">
-                        <b>Ministry Notice:</b> Any content produced by any staff member belongs exclusively to KMM.
-                      </span>
-                    </div>
-                    <span className="shrink-0 text-[10px] font-bold text-amber-800 dark:text-amber-300 underline ml-2">
-                      View Staff Covenant →
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Attached Scope Filing Certificates Strip */}
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                    <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
-                    <span>Attached Scope Filing Certificates & Deeds:</span>
                   </span>
-                  <button
-                    onClick={() => setSubTab('Filing Certificates & Legal Contracts')}
-                    className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                  >
-                    View all in Filing Repository →
-                  </button>
+                  <span className="rounded bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 px-1.5 py-0.2 text-[9px] font-bold">
+                    ® Protected
+                  </span>
                 </div>
+                <div className="text-[11px] text-slate-600 dark:text-slate-300 mt-1" title={asset.distributionLicense || 'Exclusive Ministry Global Distribution'}>
+                  <b>Distribution:</b> {asset.distributionLicense || 'Exclusive Ministry Global Distribution'}
+                </div>
+              </div>
+              <div className="pt-2 border-t border-slate-100 dark:border-white/10 space-y-1">
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Licensed to Produce:</div>
+                <div className="text-[11px] font-semibold text-indigo-700 dark:text-indigo-400 leading-snug">
+                  {asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media'}
+                </div>
+              </div>
+            </div>
 
-                {asset.documents && asset.documents.filter(d => d.type === 'CERT' || d.type === 'LICENSE' || d.targetScope === 'asset').length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {asset.documents.filter(d => d.type === 'CERT' || d.type === 'LICENSE' || d.targetScope === 'asset').map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900">
-                        <div className="flex items-center gap-2 truncate">
-                          <FileCheck className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                          <div className="truncate">
-                            <div className="font-semibold text-slate-900 dark:text-white truncate">{doc.name}</div>
-                            <div className="text-[10px] text-slate-500">{doc.size} • {doc.date}</div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => showToast(`Starting download for ${doc.name}...`)}
-                          className="shrink-0 text-[11px] font-bold text-blue-600 hover:underline cursor-pointer"
-                        >
-                          Download
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between p-2.5 rounded-lg border border-amber-200 bg-amber-50/60 dark:border-amber-900/40 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300">
-                    <span>No official filing certificate attached for this rights scope yet.</span>
-                    <button
-                      onClick={openScopeModal}
-                      className="font-bold text-[11px] text-amber-700 dark:text-amber-400 hover:underline cursor-pointer shrink-0 ml-2"
-                    >
-                      + Attach Certificate Now
-                    </button>
-                  </div>
-                )}
+            {/* PILLAR 3: Territory License & Clearance */}
+            <div
+              onClick={openScopeModal}
+              className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-5 space-y-3 hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer shadow-xs group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 text-[10px] font-black uppercase tracking-wider">
+                  <Globe2 className="size-3 text-amber-600" />
+                  <span>3. Territory Clearance</span>
+                </span>
+                <Pencil className="size-3.5 text-slate-400 group-hover:text-blue-600 transition" />
+              </div>
+              <div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Licensed Territory:</div>
+                <div className="font-bold text-slate-900 dark:text-white text-base leading-snug mt-0.5">
+                  {asset.territory || 'Worldwide / Global'}
+                </div>
+              </div>
+              <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px]">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Clearance Status:</span>
+                <span className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 font-bold px-2 py-0.5 text-[10px]">
+                  {asset.territoryClearanceStatus || 'Cleared Global'}
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                Full clearance for satellite, streaming & international distribution
+              </div>
+            </div>
+
+            {/* PILLAR 4: DYNAMIC CATEGORY PILLAR (Audio vs Video vs Publishing) */}
+            <div
+              onClick={openScopeModal}
+              className={cn(
+                "rounded-2xl border p-5 space-y-3 transition cursor-pointer shadow-xs group md:col-span-2 lg:col-span-2",
+                isAudioCategory
+                  ? "border-emerald-200/90 bg-gradient-to-br from-emerald-50/50 via-white to-emerald-50/30 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:via-slate-900 dark:to-emerald-950/20"
+                  : isVideoCategory
+                  ? "border-indigo-200/90 bg-gradient-to-br from-indigo-50/50 via-white to-indigo-50/30 dark:border-indigo-900/50 dark:from-indigo-950/30 dark:via-slate-900 dark:to-indigo-950/20"
+                  : "border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900"
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span className={cn(
+                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider",
+                  isAudioCategory ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300" : "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/70 dark:text-indigo-300"
+                )}>
+                  {isAudioCategory ? <Music className="size-3 text-emerald-600" /> : <Clapperboard className="size-3 text-indigo-600" />}
+                  <span>4. {isAudioCategory ? 'Audio - Songwriter & Composition Governance' : isVideoCategory ? 'Video Broadcast & Production Rights' : 'Publication & Visual Art Rights'}</span>
+                </span>
+                <Pencil className="size-3.5 text-slate-400 group-hover:text-blue-600 transition" />
               </div>
 
-              <div className="rounded-xl bg-blue-50/60 p-4 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-800/40 text-xs">
-                <div className="font-bold text-blue-950 dark:text-blue-200 mb-1">Legal Summary & Chain of Title Notes</div>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {asset.description || 'No legal summary or chain of title notes filed yet. Click \'+ Update Scope & Attach Certificate\' to record legal terms.'}
-                </p>
+              {/* Dynamic details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    {isAudioCategory ? 'Songwriter / Composer:' : isVideoCategory ? 'Theme Song & Score Clearance:' : 'Lead Illustrator / Author:'}
+                  </div>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">
+                    {asset.songWriter || (isAudioCategory ? 'KMM Music Ministry (Staff Composer)' : 'In-House Creative Staff')}
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className="text-[10px] text-slate-500">Creation Method:</span>
+                    <span className="font-bold text-[10px] text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">
+                      {asset.songWriterProvenance || 'Fully Custom'}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    {isAudioCategory ? 'Audio Master Rights:' : isVideoCategory ? 'Production Licensee:' : 'Publishing Entity:'}
+                  </div>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">
+                    {isAudioCategory ? '100% Ministry Owned Masters' : isVideoCategory ? (asset.productionLicensees?.split(',')[0] || 'Lovetoons Animation Studio') : 'KMM Publishing'}
+                  </div>
+                  <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold mt-1">
+                    ✓ All master stems & files deposited in KMM Vault
+                  </div>
+                </div>
+              </div>
+
+              {/* Staff Covenant Reminder Banner */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsStaffCovenantPopupOpen(true)
+                }}
+                className="flex items-center justify-between rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 p-3 text-xs text-amber-900 dark:text-amber-200 hover:bg-amber-100/90 transition cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ScrollText className="size-4 text-amber-600 shrink-0" />
+                  <span className="text-[11px]">
+                    <b>Ministry Staff Content Clause:</b> Any content produced by any staff member belongs exclusively to KMM.
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 underline shrink-0 ml-3">
+                  Read Staff Covenant →
+                </span>
+              </div>
+            </div>
+
+            {/* PILLAR 5: Universal AI Content Provenance Matrix */}
+            <div
+              onClick={openScopeModal}
+              className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-5 space-y-3 hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer shadow-xs group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-100 text-cyan-800 dark:bg-cyan-950/70 dark:text-cyan-300 text-[10px] font-black uppercase tracking-wider">
+                  <Sparkles className="size-3 text-cyan-600" />
+                  <span>5. AI Content & Provenance</span>
+                </span>
+                <Pencil className="size-3.5 text-slate-400 group-hover:text-blue-600 transition" />
+              </div>
+
+              <div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Overall Classification:</div>
+                <div className="mt-1">
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border",
+                    (asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom'
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300"
+                      : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted'
+                      ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:border-sky-800 dark:text-sky-300"
+                      : "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800 dark:text-purple-300"
+                  )}>
+                    {(asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom' ? '✦ Fully Custom' : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted' ? '⚡ AI Assisted' : '🤖 Fully AI'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 3-Tier Matrix breakdown across Video, Audio, Graphics */}
+              <div className="pt-2 border-t border-slate-100 dark:border-white/10 grid grid-cols-3 gap-1.5 text-center text-[10px]">
+                <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5">
+                  <div className="font-medium text-slate-400">Video</div>
+                  <div className="font-bold text-slate-800 dark:text-slate-200 truncate mt-0.5">
+                    {isVideoCategory ? (asset.contentProvenance || 'Custom') : 'Custom'}
+                  </div>
+                </div>
+                <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5">
+                  <div className="font-medium text-slate-400">Audio</div>
+                  <div className="font-bold text-slate-800 dark:text-slate-200 truncate mt-0.5">
+                    {asset.songWriterProvenance || (isAudioCategory ? 'Custom' : 'Assisted')}
+                  </div>
+                </div>
+                <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5">
+                  <div className="font-medium text-slate-400">Graphics</div>
+                  <div className="font-bold text-slate-800 dark:text-slate-200 truncate mt-0.5">
+                    {asset.contentProvenance || 'Custom'}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <aside className="space-y-4">
-            <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-3.5">
-              <h3 className="text-xs font-bold text-[#09245a] dark:text-white">Governance Compliance Score</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-600 dark:text-slate-400">Compliance Rate</span>
-                  <span className="text-blue-700 dark:text-blue-400">{asset.governanceScore ?? 0}%</span>
-                </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-600 to-emerald-500 rounded-full transition-all"
-                    style={{ width: `${asset.governanceScore ?? 0}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="border-t border-slate-100 dark:border-white/10 pt-3 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                  <span>Attached Documents</span>
-                  <b className="text-slate-900 dark:text-white">{asset.documents?.length || 0} File(s)</b>
-                </div>
-                <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                  <span>Current Clearance Status</span>
-                  <b className="text-emerald-700 dark:text-emerald-400">{asset.status}</b>
-                </div>
-              </div>
-
+          {/* Attached Scope Filing Certificates Strip */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-5 space-y-3 text-xs shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-[#09245a] dark:text-white text-sm flex items-center gap-2">
+                <ShieldCheck className="size-4.5 text-blue-600 dark:text-blue-400" />
+                <span>Attached Legal Documents & Filing Certificates</span>
+              </span>
               <button
-                onClick={openScopeModal}
-                className="w-full rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60 p-2.5 text-xs font-bold transition cursor-pointer"
+                onClick={() => setSubTab('Filing Certificates & Legal Contracts')}
+                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
               >
-                Configure Scope & Attach Certificate
-              </button>
-              <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="w-full rounded-xl bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 p-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition cursor-pointer"
-              >
-                Modify Governance Controls
+                Open Full Filing Repository ({asset.documents?.length || 0}) →
               </button>
             </div>
-          </aside>
+
+            {asset.documents && asset.documents.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {asset.documents.slice(0, 6).map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between gap-2.5 p-3 rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 hover:bg-slate-100/70 transition">
+                    <div className="flex items-center gap-2.5 truncate">
+                      <FileCheck className="size-4.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <div className="truncate">
+                        <div className="font-bold text-slate-900 dark:text-white truncate">{doc.name}</div>
+                        <div className="text-[10px] text-slate-500">{doc.type ? doc.type.replace('_', ' ') : 'DOC'} • {doc.size}</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => showToast(`Starting download for ${doc.name}...`)}
+                      className="shrink-0 text-[11px] font-bold text-blue-600 hover:underline cursor-pointer"
+                    >
+                      Download
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 dark:border-amber-900/40 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 flex items-center justify-between">
+                <span>No official filing certificate attached yet. Title is vested under Esteemed Executive Minister (Pastor Chelsea Kalu).</span>
+                <button
+                  onClick={openScopeModal}
+                  className="font-bold text-xs text-amber-700 dark:text-amber-400 hover:underline cursor-pointer shrink-0 ml-2"
+                >
+                  + Attach Certificate Now
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* 2. Governance & Clearance Sub-Tab */}
-      {(subTab === 'Governance & Clearance' || subTab === 'Governance Checklist') && (
-        <div className="space-y-6">
-          {/* Approval Scheduling & Documents Readiness Gate */}
-          {(!asset.documents || asset.documents.length === 0) ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/70 dark:border-amber-500/20 dark:bg-amber-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-              <div className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-amber-500 text-white grid place-items-center shrink-0 shadow-2xs">
-                  <ShieldAlert className="size-4.5" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-amber-950 dark:text-amber-200 text-sm">
-                    Executive Clearance Review Gate: Documentation Required
-                  </h4>
-                  <p className="text-xs text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-relaxed">
-                    This asset will <b>not enter the reviewer approvals queue</b> until executed legal chain of title, script clearances, or talent releases are uploaded in the Filing Certificates repository.
-                  </p>
-                </div>
+      {(subTab === 'Governance & Clearance' || subTab === 'Governance Checklist' || subTab === 'Category Clearance Checklist') && (
+        <div className="space-y-5">
+          {/* Compact Clearance Readiness Bar */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "size-8 rounded-lg grid place-items-center text-white shrink-0 shadow-2xs",
+                (!asset.documents || asset.documents.length === 0) ? "bg-amber-500" : existingApproval ? "bg-blue-600" : "bg-emerald-600"
+              )}>
+                {(!asset.documents || asset.documents.length === 0) ? <ShieldAlert className="size-4" /> : existingApproval ? <Clock className="size-4" /> : <FileCheck className="size-4" />}
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs">
+                  {(!asset.documents || asset.documents.length === 0)
+                    ? 'Legal Documentation Required Before Clearance Review'
+                    : existingApproval
+                    ? `Executive Clearance Review Scheduled (${existingApproval.priority} Priority • Status: ${existingApproval.status})`
+                    : 'Clearance Documents Ready for Executive Review'}
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  {asset.documents?.length || 0} legal deeds verified • Category Compliance Score: <b>{complianceReadiness.complianceScore}%</b> ({complianceReadiness.passedGatesCount}/{complianceReadiness.totalGatesCount} gates verified)
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {(!asset.documents || asset.documents.length === 0) ? (
                 <button
                   onClick={() => setSubTab('Filing Certificates & Legal Contracts')}
-                  className="flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer"
+                  className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer"
                 >
-                  <Plus className="size-3.5" />
-                  <span>Attach Legal Deeds</span>
+                  + Attach Deeds in Filing Tab
                 </button>
-                <div
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-500 px-3 py-1.5 text-xs font-medium cursor-not-allowed"
-                  title="Upload at least one legal clearance document before scheduling approval"
-                >
-                  <Lock className="size-3.5" />
-                  <span>Approval Locked (0 Deeds)</span>
-                </div>
-              </div>
-            </div>
-          ) : !existingApproval ? (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-              <div className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-emerald-600 text-white grid place-items-center shrink-0 shadow-2xs">
-                  <FileCheck className="size-4.5" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-emerald-950 dark:text-emerald-200 text-sm">
-                    Clearance Documents Verified & Ready for Executive Sign-off
-                  </h4>
-                  <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
-                    {asset.documents.length} legal deeds uploaded and verified. Ready to schedule formal executive clearance review.
-                  </p>
-                </div>
-              </div>
-              <button
-                id="rights-schedule-approval-tab-btn"
-                onClick={handleScheduleApproval}
-                className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
-              >
-                <Send className="size-3.5" />
-                <span>Schedule for Approval Request</span>
-              </button>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-blue-200 bg-blue-50/70 dark:border-blue-500/20 dark:bg-blue-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-              <div className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-blue-600 text-white grid place-items-center shrink-0 shadow-2xs">
-                  <Clock className="size-4.5" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-blue-950 dark:text-blue-200 text-sm">
-                    Active Approval Request Scheduled ({existingApproval.priority} Priority)
-                  </h4>
-                  <p className="text-xs text-blue-800/90 dark:text-blue-300/90 mt-0.5 leading-relaxed">
-                    Scheduled by {existingApproval.requesterName || 'Legal Representative'} on {existingApproval.submittedDate}. Status: <b>{existingApproval.status}</b>.
-                  </p>
-                </div>
-              </div>
-              {setActiveNav && (
+              ) : !existingApproval ? (
                 <button
-                  onClick={() => setActiveNav('Approvals')}
-                  className="flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
+                  id="rights-schedule-approval-tab-btn"
+                  onClick={handleScheduleApproval}
+                  className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 text-xs font-bold shadow-2xs transition cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>View in Approvals Queue →</span>
+                  <Send className="size-3.5" />
+                  <span>Schedule for Approval</span>
                 </button>
+              ) : (
+                setActiveNav && (
+                  <button
+                    onClick={() => setActiveNav('Approvals')}
+                    className="rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 px-3 py-1.5 text-xs font-semibold transition cursor-pointer"
+                  >
+                    View in Approvals Queue →
+                  </button>
+                )
               )}
             </div>
-          )}
+          </div>
 
           {/* Ministry Governance & Content Clearance Checklist Hub */}
           <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
