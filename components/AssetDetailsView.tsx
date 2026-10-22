@@ -1076,7 +1076,7 @@ export function AssetDetailsView({
       </div>
 
       {/* 3. SIMPLIFIED 3-TAB PILL BAR */}
-      <div className="border border-slate-200/80 bg-slate-100/70 p-1 rounded-xl">
+      <div className="border border-slate-200/80 bg-slate-100/70 dark:border-white/10 dark:bg-slate-900/90 p-1 rounded-xl">
         <div className="grid grid-cols-3 gap-1">
           {/* Tab 1: Overview & Media */}
           <button
@@ -1085,8 +1085,8 @@ export function AssetDetailsView({
             className={cn(
               'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs transition cursor-pointer',
               activeTab === 'overview'
-                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 font-medium'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60 dark:bg-slate-800 dark:text-white dark:border-white/15'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 font-medium'
             )}
           >
             <Play className="size-3.5" />
@@ -1100,8 +1100,8 @@ export function AssetDetailsView({
             className={cn(
               'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs transition cursor-pointer',
               activeTab === 'rights'
-                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 font-medium'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60 dark:bg-slate-800 dark:text-white dark:border-white/15'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 font-medium'
             )}
           >
             <ShieldCheck className="size-3.5" />
@@ -1109,7 +1109,9 @@ export function AssetDetailsView({
             <span
               className={cn(
                 'rounded-md px-1.5 py-0.2 text-[9px] font-semibold',
-                activeTab === 'rights' ? 'bg-slate-100 text-slate-700' : 'bg-white text-slate-600 border border-slate-200/60'
+                activeTab === 'rights'
+                  ? 'bg-slate-100 text-slate-700 dark:bg-slate-700/80 dark:text-slate-200'
+                  : 'bg-white text-slate-600 border border-slate-200/60 dark:bg-slate-800 dark:text-slate-400 dark:border-white/10'
               )}
             >
               {documents.length > 0 ? `${documents.length} Docs` : 'Pending Rep Docs'}
@@ -1123,8 +1125,8 @@ export function AssetDetailsView({
             className={cn(
               'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs transition cursor-pointer',
               activeTab === 'connections'
-                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 font-medium'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60 dark:bg-slate-800 dark:text-white dark:border-white/15'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 font-medium'
             )}
           >
             <Link2 className="size-3.5" />
@@ -1132,7 +1134,9 @@ export function AssetDetailsView({
             <span
               className={cn(
                 'rounded-md px-1.5 py-0.2 text-[9px] font-semibold',
-                activeTab === 'connections' ? 'bg-slate-100 text-slate-700' : 'bg-white text-slate-600 border border-slate-200/60'
+                activeTab === 'connections'
+                  ? 'bg-slate-100 text-slate-700 dark:bg-slate-700/80 dark:text-slate-200'
+                  : 'bg-white text-slate-600 border border-slate-200/60 dark:bg-slate-800 dark:text-slate-400 dark:border-white/10'
               )}
             >
               {assetRelationships.length}
@@ -1659,16 +1663,16 @@ export function AssetDetailsView({
         <div className="space-y-6">
           {/* Approval Scheduling & Documents Readiness Gate */}
           {documents.length === 0 ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+            <div className="rounded-xl border border-amber-200 bg-amber-50/70 dark:border-amber-500/20 dark:bg-amber-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
               <div className="flex items-start gap-3">
                 <div className="size-9 rounded-lg bg-amber-500 text-white grid place-items-center shrink-0 shadow-2xs">
                   <ShieldAlert className="size-4.5" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-amber-950 text-sm">
+                  <h4 className="font-semibold text-amber-950 dark:text-amber-200 text-sm">
                     Legal Documentation Required Before Approval Scheduling
                   </h4>
-                  <p className="text-xs text-amber-800/90 mt-0.5 leading-relaxed">
+                  <p className="text-xs text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-relaxed">
                     This asset will <b>not pop into the reviewer approvals queue</b> until executed legal chain of title, script clearances, or talent releases are uploaded.
                   </p>
                 </div>
@@ -1683,7 +1687,7 @@ export function AssetDetailsView({
                   <span>Upload Representative Doc</span>
                 </button>
                 <div
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 text-xs font-medium cursor-not-allowed"
+                  className="flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-500 px-3 py-1.5 text-xs font-medium cursor-not-allowed"
                   title="Upload at least one legal clearance document before scheduling approval"
                 >
                   <Lock className="size-3.5" />
@@ -1692,16 +1696,16 @@ export function AssetDetailsView({
               </div>
             </div>
           ) : !existingApproval ? (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
               <div className="flex items-start gap-3">
                 <div className="size-9 rounded-lg bg-emerald-600 text-white grid place-items-center shrink-0 shadow-2xs">
                   <FileCheck className="size-4.5" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-emerald-950 text-sm">
+                  <h4 className="font-semibold text-emerald-950 dark:text-emerald-200 text-sm">
                     {documents.length} Legal Document(s) Attached — Ready to Schedule Approval
                   </h4>
-                  <p className="text-xs text-emerald-800/90 mt-0.5 leading-relaxed">
+                  <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
                     Chain of title and clearances on file. You can now schedule this asset so it pops into the Reviewer approvals queue for official sign-off.
                   </p>
                 </div>
@@ -1716,29 +1720,29 @@ export function AssetDetailsView({
               </button>
             </div>
           ) : (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-900/90 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
               <div className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-slate-900 text-white grid place-items-center shrink-0 shadow-2xs">
+                <div className="size-9 rounded-lg bg-slate-900 dark:bg-blue-600 text-white grid place-items-center shrink-0 shadow-2xs">
                   <Clock className="size-4.5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-slate-900 text-sm">
+                    <h4 className="font-semibold text-slate-900 dark:text-white text-sm">
                       Approval Request Scheduled ({existingApproval.status})
                     </h4>
-                    <span className="rounded-md bg-slate-200/80 text-slate-800 text-[10px] font-semibold px-2 py-0.5">
+                    <span className="rounded-md bg-slate-200/80 text-slate-800 dark:bg-slate-800 dark:text-slate-200 text-[10px] font-semibold px-2 py-0.5">
                       {existingApproval.priority} Priority
                     </span>
                   </div>
-                  <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-                    Under review by <b>{existingApproval.reviewerName}</b> • Stage: {existingApproval.stage} (Step {existingApproval.currentStep} of {existingApproval.totalSteps})
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    Under review by <b className="text-slate-900 dark:text-white">{existingApproval.reviewerName}</b> • Stage: {existingApproval.stage} (Step {existingApproval.currentStep} of {existingApproval.totalSteps})
                   </p>
                 </div>
               </div>
               {setActiveNav && (
                 <button
                   onClick={() => setActiveNav('approvals')}
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 text-xs font-medium shadow-2xs transition shrink-0 cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-3.5 py-1.5 text-xs font-medium shadow-2xs transition shrink-0 cursor-pointer"
                 >
                   <span>Open in Approvals Queue</span>
                   <ArrowRight className="size-3.5" />
@@ -1748,14 +1752,14 @@ export function AssetDetailsView({
           )}
 
           {/* Rights Status Summary Cards */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
               <div>
-                <h3 className="text-sm sm:text-base font-semibold text-slate-900 flex items-center gap-2">
-                  <ShieldCheck className="size-4.5 text-slate-700" />
+                <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                  <ShieldCheck className="size-4.5 text-slate-700 dark:text-slate-300" />
                   <span>Legal Rights & Governance Registry</span>
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Global intellectual property protection, licensing mandates, and representative governance tracking.
                 </p>
               </div>
@@ -1764,15 +1768,15 @@ export function AssetDetailsView({
                 <button
                   type="button"
                   onClick={() => openRightsModal()}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
                 >
-                  <FileText className="size-3.5 text-slate-500" />
+                  <FileText className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span>Configure Rights & Terms</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsUploadDocModalOpen(true)}
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-800 shadow-2xs transition cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-800 shadow-2xs transition cursor-pointer"
                 >
                   <Plus className="size-3.5" />
                   <span>Attach Document</span>
@@ -1783,17 +1787,17 @@ export function AssetDetailsView({
             {/* Structured Scope Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
               {/* Rights Scope */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3.5 flex flex-col justify-between">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-3.5 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
                       Rights Scope
                     </span>
                     {linkedRights?.rightsType ? (
                       <button
                         type="button"
                         onClick={() => openRightsModal('scope')}
-                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 flex items-center gap-0.5 cursor-pointer"
+                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-0.5 cursor-pointer"
                       >
                         <Pencil className="size-2.5" />
                         <span>Edit</span>
@@ -1802,19 +1806,19 @@ export function AssetDetailsView({
                   </div>
                   {linkedRights?.rightsType ? (
                     <>
-                      <div className="font-semibold text-slate-900 text-xs sm:text-sm mt-1">
+                      <div className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm mt-1">
                         {linkedRights.rightsType}
                       </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                         {linkedRights.exclusivity || 'Standard Scope'}
                       </div>
                     </>
                   ) : (
                     <div className="mt-1 space-y-1">
-                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-2 py-0.5 inline-block">
+                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 dark:text-amber-300 dark:bg-amber-950/40 dark:border-amber-800/50 rounded-md px-2 py-0.5 inline-block">
                         Scope Not Defined Yet
                       </div>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] text-slate-400 dark:text-slate-400">
                         Awaiting legal scope definition by representative.
                       </p>
                     </div>
@@ -1825,7 +1829,7 @@ export function AssetDetailsView({
                   <button
                     type="button"
                     onClick={() => openRightsModal('scope')}
-                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
+                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
                   >
                     <Plus className="size-3" />
                     <span>Define Rights Scope</span>
@@ -1834,17 +1838,17 @@ export function AssetDetailsView({
               </div>
 
               {/* Territory & Term */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3.5 flex flex-col justify-between">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-3.5 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
                       Territory & Term
                     </span>
                     {linkedRights?.territory || linkedRights?.validity ? (
                       <button
                         type="button"
                         onClick={() => openRightsModal('territory')}
-                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 flex items-center gap-0.5 cursor-pointer"
+                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-0.5 cursor-pointer"
                       >
                         <Pencil className="size-2.5" />
                         <span>Edit</span>
@@ -1853,20 +1857,20 @@ export function AssetDetailsView({
                   </div>
                   {linkedRights?.territory || linkedRights?.validity ? (
                     <>
-                      <div className="font-semibold text-slate-900 text-xs sm:text-sm flex items-center gap-1 mt-1">
-                        <Globe2 className="size-3.5 text-slate-600" />
+                      <div className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-1 mt-1">
+                        <Globe2 className="size-3.5 text-slate-600 dark:text-slate-400" />
                         <span>{linkedRights?.territory || 'Unspecified Territory'}</span>
                       </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                         Term: {linkedRights?.validity || linkedRights?.term || 'Open Term'}
                       </div>
                     </>
                   ) : (
                     <div className="mt-1 space-y-1">
-                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-2 py-0.5 inline-block">
+                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 dark:text-amber-300 dark:bg-amber-950/40 dark:border-amber-800/50 rounded-md px-2 py-0.5 inline-block">
                         Territory & Term Not Filed
                       </div>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] text-slate-400 dark:text-slate-400">
                         No territorial bounds or term period recorded.
                       </p>
                     </div>
@@ -1877,7 +1881,7 @@ export function AssetDetailsView({
                   <button
                     type="button"
                     onClick={() => openRightsModal('territory')}
-                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
+                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
                   >
                     <Plus className="size-3" />
                     <span>Set Territory & Term</span>
@@ -1886,17 +1890,17 @@ export function AssetDetailsView({
               </div>
 
               {/* Licensing Terms */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3.5 flex flex-col justify-between">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-3.5 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
                       Licensing Terms
                     </span>
                     {linkedRights?.licenceType || linkedRights?.royaltyTerms ? (
                       <button
                         type="button"
                         onClick={() => openRightsModal('licensing')}
-                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 flex items-center gap-0.5 cursor-pointer"
+                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-0.5 cursor-pointer"
                       >
                         <Pencil className="size-2.5" />
                         <span>Edit</span>
@@ -1905,19 +1909,19 @@ export function AssetDetailsView({
                   </div>
                   {linkedRights?.licenceType || linkedRights?.royaltyTerms ? (
                     <>
-                      <div className="font-semibold text-slate-900 text-xs sm:text-sm mt-1">
+                      <div className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm mt-1">
                         {linkedRights.licenceType || 'Proprietary License'}
                       </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                         {linkedRights.royaltyTerms || 'Standard Terms'}
                       </div>
                     </>
                   ) : (
                     <div className="mt-1 space-y-1">
-                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-2 py-0.5 inline-block">
+                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 dark:text-amber-300 dark:bg-amber-950/40 dark:border-amber-800/50 rounded-md px-2 py-0.5 inline-block">
                         Licensing Terms Not Filed
                       </div>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] text-slate-400 dark:text-slate-400">
                         No licensing deed or terms added by representative.
                       </p>
                     </div>
@@ -1928,7 +1932,7 @@ export function AssetDetailsView({
                   <button
                     type="button"
                     onClick={() => openRightsModal('licensing')}
-                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
+                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
                   >
                     <Plus className="size-3" />
                     <span>Set Licensing Terms</span>
@@ -1936,41 +1940,42 @@ export function AssetDetailsView({
                 )}
               </div>
 
+              {/* Representative Score */}
               <div className={cn(
                 'rounded-lg border p-3.5 space-y-1',
                 calculatedGovernanceScore === 100
-                  ? 'border-emerald-200 bg-emerald-50/70'
-                  : 'border-slate-200 bg-slate-50/60'
+                  ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-950/30'
+                  : 'border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50'
               )}>
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
                   Representative Score
                 </span>
                 <div className={cn(
                   'font-semibold text-sm flex items-center gap-1',
-                  calculatedGovernanceScore === 100 ? 'text-emerald-800' : 'text-slate-900'
+                  calculatedGovernanceScore === 100 ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-900 dark:text-white'
                 )}>
-                  <CheckCircle2 className="size-4 text-emerald-600" />
+                  <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
                   <span>{calculatedGovernanceScore}% Verified</span>
                 </div>
-                <div className="text-[11px] text-slate-500">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">
                   {completedChecksCount} of 5 Verifications Checked
                 </div>
               </div>
             </div>
 
             {/* Representative Legal Documents Section */}
-            <div className="rounded-xl border border-slate-200/80 bg-white p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
                 <div>
-                  <h4 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-                    <FileText className="size-4 text-slate-700" />
+                  <h4 className="font-semibold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                    <FileText className="size-4 text-slate-700 dark:text-slate-300" />
                     <span>Representative Legal Documents & Chain of Title</span>
                   </h4>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Uploaded contracts, releases, synchronization licenses, and doctrinal seals.
                   </p>
                 </div>
-                <span className="rounded-md bg-slate-100 text-slate-700 px-2 py-0.5 text-[10px] font-medium">
+                <span className="rounded-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-2 py-0.5 text-[10px] font-medium">
                   {documents.length} Files
                 </span>
               </div>
@@ -1980,14 +1985,14 @@ export function AssetDetailsView({
                   {documents.map((doc) => (
                     <div
                       key={doc.id}
-                      className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 flex items-start gap-2.5 hover:bg-white hover:border-slate-300 transition shadow-2xs"
+                      className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 flex items-start gap-2.5 hover:bg-white hover:border-slate-300 dark:border-white/10 dark:bg-slate-800/50 dark:hover:bg-slate-800 dark:hover:border-white/20 transition shadow-2xs"
                     >
-                      <div className="size-8 rounded-md bg-slate-900 text-white grid place-items-center shrink-0 font-medium text-xs">
+                      <div className="size-8 rounded-md bg-slate-900 dark:bg-blue-600 text-white grid place-items-center shrink-0 font-medium text-xs">
                         <FileCheck className="size-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-slate-900 text-xs truncate">{doc.name}</div>
-                        <div className="text-[10px] text-slate-500 mt-0.5">
+                        <div className="font-semibold text-slate-900 dark:text-white text-xs truncate">{doc.name}</div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                           {doc.type} • {doc.size || '2.4 MB'} • Added {doc.date}
                         </div>
                       </div>
@@ -1995,15 +2000,15 @@ export function AssetDetailsView({
                   ))}
                 </div>
               ) : (
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-5 text-center space-y-2">
-                  <FileText className="size-7 text-slate-400 mx-auto" />
-                  <div className="font-semibold text-slate-800 text-xs">No Legal Documents Attached Yet</div>
-                  <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 dark:border-white/10 dark:bg-slate-800/30 p-5 text-center space-y-2">
+                  <FileText className="size-7 text-slate-400 dark:text-slate-500 mx-auto" />
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">No Legal Documents Attached Yet</div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                     Ministry representatives can upload executed talent agreements, music licenses, and broadcast clearance certificates.
                   </p>
                   <button
                     onClick={() => setIsUploadDocModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 shadow-2xs transition cursor-pointer mt-1"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 shadow-2xs transition cursor-pointer mt-1"
                   >
                     <Plus className="size-3" />
                     <span>Upload First Document</span>
@@ -2013,17 +2018,17 @@ export function AssetDetailsView({
             </div>
 
             {/* Representative Interactive Governance Checklist */}
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4.5 space-y-3 text-xs">
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 dark:border-white/10 dark:bg-slate-800/30 p-4.5 space-y-3 text-xs">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-semibold text-slate-900 text-xs uppercase tracking-wider block">
+                  <span className="font-semibold text-slate-900 dark:text-white text-xs uppercase tracking-wider block">
                     Representative Doctrinal & Governance Verification Matrix
                   </span>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Click each item to toggle verified compliance. Changes persist to the central Neon database.
                   </p>
                 </div>
-                <span className="rounded-md bg-slate-200/80 text-slate-800 px-2 py-0.5 text-[10px] font-semibold">
+                <span className="rounded-md bg-slate-200/80 text-slate-800 dark:bg-slate-800 dark:text-slate-200 px-2 py-0.5 text-[10px] font-semibold">
                   {completedChecksCount}/5 Verified
                 </span>
               </div>
@@ -2037,20 +2042,20 @@ export function AssetDetailsView({
                     className={cn(
                       'flex items-start gap-2.5 rounded-lg p-2.5 border text-left transition cursor-pointer',
                       isChecked
-                        ? 'bg-emerald-50/70 border-emerald-200 shadow-2xs text-emerald-950'
-                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                        ? 'bg-emerald-50/70 border-emerald-200 shadow-2xs text-emerald-950 dark:bg-emerald-950/30 dark:border-emerald-500/30 dark:text-emerald-200'
+                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-300 dark:hover:border-white/20 dark:hover:bg-slate-800'
                     )}
                   >
                     <div className="shrink-0 mt-0.5">
                       {isChecked ? (
-                        <CheckCircle2 className="size-3.5 text-emerald-600" />
+                        <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                       ) : (
-                        <Square className="size-3.5 text-slate-300" />
+                        <Square className="size-3.5 text-slate-300 dark:text-slate-600" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <span className="font-semibold text-[11px] block">{title}</span>
-                      <span className="text-[10px] text-slate-500 mt-0.5 block">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 block">
                         {isChecked ? 'Verified ✓' : 'Click to Verify (Representative Action)'}
                       </span>
                     </div>
@@ -2061,13 +2066,13 @@ export function AssetDetailsView({
           </div>
 
           {/* Approval Trail & Clearance Audits */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
-                <h3 className="font-semibold text-slate-900 text-sm">Approval Pipeline & Clearance Audit</h3>
-                <p className="text-[11px] text-slate-500">Sign-off trail and reviewer endorsements for broadcast</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Approval Pipeline & Clearance Audit</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Sign-off trail and reviewer endorsements for broadcast</p>
               </div>
-              <span className="rounded-md bg-emerald-50 border border-emerald-200/80 text-emerald-800 px-2.5 py-0.5 text-xs font-medium">
+              <span className="rounded-md bg-emerald-50 border border-emerald-200/80 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-500/30 dark:text-emerald-300 px-2.5 py-0.5 text-xs font-medium">
                 {asset.status === 'Approved' ? '✓ Fully Approved' : 'In Clearance'}
               </span>
             </div>
@@ -2077,19 +2082,19 @@ export function AssetDetailsView({
                 {assetApprovals.map((app) => (
                   <div
                     key={app.id}
-                    className="rounded-2xl border border-slate-200 p-4 bg-slate-50/80 space-y-2"
+                    className="rounded-2xl border border-slate-200 p-4 bg-slate-50/80 dark:border-white/10 dark:bg-slate-800/50 space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-black text-[#09245a] text-sm">{app.stage}</span>
-                      <span className="rounded-full bg-emerald-100 text-emerald-800 px-2.5 py-0.5 text-[10px] font-bold">
+                      <span className="font-black text-[#09245a] dark:text-white text-sm">{app.stage}</span>
+                      <span className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border dark:border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold">
                         {app.status}
                       </span>
                     </div>
-                    <div className="text-slate-600 text-xs">
-                      Reviewer: <b className="text-slate-900">{app.reviewerName}</b> • Submitted by: {app.requesterName} ({app.submittedDate})
+                    <div className="text-slate-600 dark:text-slate-400 text-xs">
+                      Reviewer: <b className="text-slate-900 dark:text-white">{app.reviewerName}</b> • Submitted by: {app.requesterName} ({app.submittedDate})
                     </div>
                     {app.feedbackNotes && (
-                      <div className="rounded-xl bg-white p-3 border border-slate-200 text-slate-700 italic">
+                      <div className="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 italic">
                         "{app.feedbackNotes}"
                       </div>
                     )}
@@ -2097,12 +2102,12 @@ export function AssetDetailsView({
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-xs space-y-1">
-                <div className="font-bold text-emerald-900 flex items-center gap-1.5">
-                  <CheckCircle2 className="size-4 text-emerald-700" />
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 dark:border-emerald-500/20 dark:bg-emerald-950/30 p-4 text-xs space-y-1">
+                <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                  <CheckCircle2 className="size-4 text-emerald-700 dark:text-emerald-400" />
                   Standard Ministry Clearance Active
                 </div>
-                <div className="text-emerald-700 text-[11px]">
+                <div className="text-emerald-700 dark:text-emerald-300 text-[11px]">
                   Approved by Lead Content Reviewer Faith Daniel for worldwide broadcast and syndication.
                 </div>
               </div>
@@ -2115,18 +2120,18 @@ export function AssetDetailsView({
       {activeTab === 'connections' && (
         <div className="space-y-6">
           {/* Connected Relationships Section */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
               <div>
-                <h3 className="font-semibold text-slate-900 text-sm">Connected Intellectual Property</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Connected Intellectual Property</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Cross-media linkages: soundtrack masters, companion books, merchandise, and franchise spin-offs.
                 </p>
               </div>
               <button
                 id="add-relationship-btn"
                 onClick={() => setIsAddRelModalOpen(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-800 shadow-2xs transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 shadow-2xs transition cursor-pointer"
               >
                 <Plus className="size-3.5" />
                 <span>Connect New Asset</span>
@@ -2151,43 +2156,43 @@ export function AssetDetailsView({
                   return (
                     <div
                       key={rel.id}
-                      className="flex flex-col justify-between rounded-lg border border-slate-200 p-3.5 bg-slate-50/60 hover:bg-white hover:border-slate-300 transition shadow-2xs space-y-2.5"
+                      className="flex flex-col justify-between rounded-lg border border-slate-200 p-3.5 bg-slate-50/60 hover:bg-white hover:border-slate-300 dark:border-white/10 dark:bg-slate-800/50 dark:hover:bg-slate-800 dark:hover:border-white/20 transition shadow-2xs space-y-2.5"
                     >
                       <div className="flex items-start gap-3 min-w-0">
-                        <div className="size-8 rounded-lg bg-slate-900 text-white grid place-items-center shrink-0">
+                        <div className="size-8 rounded-lg bg-slate-900 dark:bg-blue-600 text-white grid place-items-center shrink-0">
                           <Link2 className="size-4" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="rounded-md bg-slate-100 border border-slate-200 text-slate-700 px-1.5 py-0.5 font-medium text-[9px] uppercase">
+                            <span className="rounded-md bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-700/80 dark:border-white/10 dark:text-slate-200 px-1.5 py-0.5 font-medium text-[9px] uppercase">
                               {rel.relationshipType}
                             </span>
                             {otherAssetObj && (
-                              <span className="rounded bg-slate-200/80 px-1.5 py-0.5 text-[9px] font-medium text-slate-600">
+                              <span className="rounded bg-slate-200/80 px-1.5 py-0.5 text-[9px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                                 {otherAssetObj.category}
                               </span>
                             )}
                           </div>
-                          <div className="font-semibold text-slate-900 truncate text-xs mt-1">
+                          <div className="font-semibold text-slate-900 dark:text-white truncate text-xs mt-1">
                             {otherAssetName}
                           </div>
-                          <div className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">
                             {rel.details}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/10">
                         {otherAssetObj && onSelectAsset ? (
                           <button
                             onClick={() => onSelectAsset(otherAssetObj)}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
+                            className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
                           >
                             <span>Inspect Asset</span>
                             <ArrowUpRight className="size-3" />
                           </button>
                         ) : (
-                          <span className="text-[10px] text-slate-400 font-mono">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
                             {otherAssetId || 'Linked External IP'}
                           </span>
                         )}
@@ -2197,7 +2202,7 @@ export function AssetDetailsView({
                             deleteRelationship(rel.id)
                             showToast('Disconnected IP relationship')
                           }}
-                          className="size-7 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 grid place-items-center transition cursor-pointer"
+                          className="size-7 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 grid place-items-center transition cursor-pointer"
                           title="Remove connection"
                         >
                           <Trash2 className="size-3.5" />
@@ -2208,15 +2213,15 @@ export function AssetDetailsView({
                 })}
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-slate-200 p-7 text-center space-y-2.5">
-                <Link2 className="size-7 text-slate-300 mx-auto" />
-                <div className="font-semibold text-slate-700 text-xs">No Connected Assets Yet</div>
-                <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+              <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/10 dark:bg-slate-800/30 p-7 text-center space-y-2.5">
+                <Link2 className="size-7 text-slate-300 dark:text-slate-500 mx-auto" />
+                <div className="font-semibold text-slate-700 dark:text-slate-200 text-xs">No Connected Assets Yet</div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                   Link related comic books, soundtrack audio masters, video game packages, and character merchandise to build the complete franchise IP graph.
                 </p>
                 <button
                   onClick={() => setIsAddRelModalOpen(true)}
-                  className="rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-800 shadow-2xs transition cursor-pointer inline-flex items-center gap-1.5"
+                  className="rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 shadow-2xs transition cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <Plus className="size-3.5" />
                   <span>Connect First Asset</span>
@@ -2226,13 +2231,13 @@ export function AssetDetailsView({
           </div>
 
           {/* Activity Trail / Asset History */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-                <Activity className="size-4 text-slate-700" />
+          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
+            <div className="border-b border-slate-100 dark:border-white/10 pb-3">
+              <h3 className="font-semibold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                <Activity className="size-4 text-slate-700 dark:text-slate-300" />
                 <span>Audit Log & Asset Lifecycle History</span>
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Chronological record of status changes, reviews, clearances, and version bumps.
               </p>
             </div>
@@ -2242,28 +2247,28 @@ export function AssetDetailsView({
                 {assetActivities.map((act) => (
                   <div
                     key={act.id}
-                    className="flex items-start gap-3 rounded-lg border border-slate-100 p-3 bg-slate-50/50"
+                    className="flex items-start gap-3 rounded-lg border border-slate-100 dark:border-white/5 p-3 bg-slate-50/50 dark:bg-slate-800/40"
                   >
-                    <div className="size-1.5 rounded-full bg-slate-900 mt-1.5 shrink-0" />
+                    <div className="size-1.5 rounded-full bg-slate-900 dark:bg-blue-400 mt-1.5 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-slate-900">{act.title}</div>
-                      <div className="text-[11px] text-slate-500">{act.subtitle}</div>
+                      <div className="font-semibold text-slate-900 dark:text-white">{act.title}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">{act.subtitle}</div>
                     </div>
-                    <span className="text-[10px] text-slate-400 shrink-0 font-medium">{act.time}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 font-medium">{act.time}</span>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="space-y-2.5 text-xs">
-                <div className="flex items-start gap-3 rounded-lg border border-slate-100 p-3 bg-slate-50/50">
-                  <div className="size-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0" />
+                <div className="flex items-start gap-3 rounded-lg border border-slate-100 dark:border-white/5 p-3 bg-slate-50/50 dark:bg-slate-800/40">
+                  <div className="size-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 mt-1.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900">Asset Registered into Central KMM Portal</div>
-                    <div className="text-[11px] text-slate-500">
+                    <div className="font-semibold text-slate-900 dark:text-white">Asset Registered into Central KMM Portal</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
                       Initial intake catalogued for {asset.agency || 'KMM Network'} ({asset.createdDate})
                     </div>
                   </div>
-                  <span className="text-[10px] text-slate-400 shrink-0 font-medium">{asset.createdTime}</span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 font-medium">{asset.createdTime}</span>
                 </div>
               </div>
             )}
@@ -2274,20 +2279,20 @@ export function AssetDetailsView({
       {/* REPRESENTATIVE DOCUMENT UPLOAD MODAL */}
       {isUploadDocModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <div className="size-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 grid place-items-center">
+                <div className="size-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/40 dark:border-indigo-800/50 dark:text-indigo-300 grid place-items-center">
                   <UploadCloud className="size-4" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[#09245a] text-sm">Upload Representative Document</h3>
-                  <p className="text-[11px] text-slate-500">Attach legal agreements or clearances for {asset.name}</p>
+                  <h3 className="font-black text-[#09245a] dark:text-white text-sm">Upload Representative Document</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Attach legal agreements or clearances for {asset.name}</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsUploadDocModalOpen(false)}
-                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 grid place-items-center cursor-pointer"
+                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 grid place-items-center cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -2295,23 +2300,23 @@ export function AssetDetailsView({
 
             <form onSubmit={handleSaveRepresentativeDoc} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Document Title:</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Document Title:</label>
                 <input
                   type="text"
                   required
                   value={docName}
                   onChange={(e) => setDocName(e.target.value)}
                   placeholder="e.g. Talent Release Agreement, Master Sync License..."
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-medium outline-none focus:border-indigo-400 transition"
+                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs font-medium outline-none focus:border-indigo-400 transition"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Document Classification:</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Document Classification:</label>
                 <select
                   value={docType}
                   onChange={(e) => setDocType(e.target.value as any)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-400 cursor-pointer"
+                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-400 cursor-pointer"
                 >
                   <option value="PDF">PDF Contract / Agreement</option>
                   <option value="DOCX">DOCX Script / Clearances</option>
@@ -2321,21 +2326,21 @@ export function AssetDetailsView({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Clearance Notes (Optional):</label>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Clearance Notes (Optional):</label>
                 <textarea
                   rows={3}
                   value={docNotes}
                   onChange={(e) => setDocNotes(e.target.value)}
                   placeholder="e.g. Executed with voice actors and lead songwriter. Full perpetual worldwide license."
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs outline-none focus:border-indigo-400 transition"
+                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs outline-none focus:border-indigo-400 transition"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsUploadDocModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -2355,20 +2360,20 @@ export function AssetDetailsView({
       {/* ADD RELATIONSHIP MODAL */}
       {isAddRelModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <div className="size-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 grid place-items-center">
+                <div className="size-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/40 dark:border-indigo-800/50 dark:text-indigo-300 grid place-items-center">
                   <Link2 className="size-4" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[#09245a] text-sm">Connect Related Asset</h3>
-                  <p className="text-[11px] text-slate-500">Link other IP across agencies to {asset.name}</p>
+                  <h3 className="font-black text-[#09245a] dark:text-white text-sm">Connect Related Asset</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Link other IP across agencies to {asset.name}</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsAddRelModalOpen(false)}
-                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 grid place-items-center cursor-pointer"
+                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 grid place-items-center cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -2376,14 +2381,14 @@ export function AssetDetailsView({
 
             <form onSubmit={handleAddRelationshipOnAsset} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1.5">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Select Target Asset to Connect:
                 </label>
                 <select
                   id="target-asset-select"
                   value={targetAssetId}
                   onChange={(e) => setTargetAssetId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-400 cursor-pointer"
+                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-400 cursor-pointer"
                 >
                   <option value="">-- Choose an Asset from Registry --</option>
                   {assets
@@ -2397,14 +2402,14 @@ export function AssetDetailsView({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1.5">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Relationship Type:
                 </label>
                 <select
                   id="rel-type-select"
                   value={relType}
                   onChange={(e) => setRelType(e.target.value as any)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-400 cursor-pointer"
+                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-400 cursor-pointer"
                 >
                   <option value="Used In">Used In (e.g. Stem/Track in Episode)</option>
                   <option value="Adapted From">Adapted From (e.g. Book to Animation)</option>
@@ -2417,7 +2422,7 @@ export function AssetDetailsView({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1.5">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Connection Notes (Optional):
                 </label>
                 <textarea
@@ -2426,15 +2431,15 @@ export function AssetDetailsView({
                   value={relDetails}
                   onChange={(e) => setRelDetails(e.target.value)}
                   placeholder="e.g. Official orchestral soundtrack stems synchronized in opening credits..."
-                  className="w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-indigo-400 transition"
+                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-3 text-xs outline-none focus:border-indigo-400 transition"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddRelModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -2785,16 +2790,16 @@ export function AssetDetailsView({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl text-xs space-y-4 cursor-default animate-in zoom-in-95 max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl text-xs space-y-4 cursor-default animate-in zoom-in-95 max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="size-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 grid place-items-center">
+                <div className="size-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/40 dark:border-indigo-800/50 dark:text-indigo-300 grid place-items-center">
                   <ShieldCheck className="size-4" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[#09245a] text-sm">Configure Rights & Legal Clearances</h3>
-                  <p className="text-[11px] text-slate-500">
+                  <h3 className="font-black text-[#09245a] dark:text-white text-sm">Configure Rights & Legal Clearances</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     File legal terms, territory, and attach deeds for {asset.name}
                   </p>
                 </div>
@@ -2802,7 +2807,7 @@ export function AssetDetailsView({
               <button
                 type="button"
                 onClick={() => setIsEditRightsModalOpen(false)}
-                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 grid place-items-center cursor-pointer"
+                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 grid place-items-center cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -2811,19 +2816,19 @@ export function AssetDetailsView({
             <form onSubmit={handleSaveRightsTerms} className="space-y-4 text-xs">
               {/* Section 1: Scope & Exclusivity */}
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block mb-2">
                   1. Rights Scope & Exclusivity
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Rights Scope</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Rights Scope</label>
                     <input
                       list="rights-scope-options"
                       type="text"
                       placeholder="e.g. Worldwide Master Copyright"
                       value={rightsScopeInput}
                       onChange={(e) => setRightsScopeInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
                     />
                     <datalist id="rights-scope-options">
                       <option value="Worldwide Master Copyright" />
@@ -2835,11 +2840,11 @@ export function AssetDetailsView({
                     </datalist>
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Exclusivity Mandate</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Exclusivity Mandate</label>
                     <select
                       value={exclusivityInput}
                       onChange={(e) => setExclusivityInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 cursor-pointer bg-white"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 cursor-pointer"
                     >
                       <option value="">-- Select Exclusivity --</option>
                       <option value="100% Exclusive Ministry Ownership">100% Exclusive Ministry Ownership</option>
@@ -2854,19 +2859,19 @@ export function AssetDetailsView({
 
               {/* Section 2: Territory & Term */}
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block mb-2">
                   2. Territory & Validity Term
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Geographical Territory</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Geographical Territory</label>
                     <input
                       list="territory-options"
                       type="text"
                       placeholder="e.g. Worldwide, Sub-Saharan Africa..."
                       value={territoryInput}
                       onChange={(e) => setTerritoryInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
                     />
                     <datalist id="territory-options">
                       <option value="Worldwide" />
@@ -2878,13 +2883,13 @@ export function AssetDetailsView({
                     </datalist>
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Validity / Term Limit</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Validity / Term Limit</label>
                     <input
                       type="text"
                       placeholder="e.g. Perpetual or 2026–2036"
                       value={validityInput}
                       onChange={(e) => setValidityInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -2892,19 +2897,19 @@ export function AssetDetailsView({
 
               {/* Section 3: Licensing & Commercial Terms */}
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block mb-2">
                   3. Licensing Agreement & Commercial Terms
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Licence Classification</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Licence Classification</label>
                     <input
                       list="licence-options"
                       type="text"
                       placeholder="e.g. Proprietary Ministry License"
                       value={licenceTypeInput}
                       onChange={(e) => setLicenceTypeInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
                     />
                     <datalist id="licence-options">
                       <option value="Proprietary Ministry License" />
@@ -2915,20 +2920,20 @@ export function AssetDetailsView({
                     </datalist>
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Commercial / Royalty Terms</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Commercial / Royalty Terms</label>
                     <input
                       type="text"
                       placeholder="e.g. Non-transferable Broadcast Rights"
                       value={royaltyTermsInput}
                       onChange={(e) => setRoyaltyTermsInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Section 4: Relevant Document Attachment (Where Necessary) */}
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -2937,7 +2942,7 @@ export function AssetDetailsView({
                       onChange={(e) => setAttachDocWithRights(e.target.checked)}
                       className="size-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                     />
-                    <span className="font-bold text-slate-800 text-xs">
+                    <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
                       Attach Relevant Legal Document / Deed with this filing
                     </span>
                   </label>
@@ -2945,25 +2950,25 @@ export function AssetDetailsView({
                 </div>
 
                 {attachDocWithRights && (
-                  <div className="space-y-3 pt-2 border-t border-slate-200/80 animate-in fade-in">
+                  <div className="space-y-3 pt-2 border-t border-slate-200/80 dark:border-white/10 animate-in fade-in">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1">Document Title *</label>
+                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Document Title *</label>
                         <input
                           type="text"
                           required={attachDocWithRights}
                           placeholder="e.g. Deed of Master Assignment"
                           value={rightsDocTitle}
                           onChange={(e) => setRightsDocTitle(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
+                          className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
                         />
                       </div>
                       <div>
-                        <label className="block font-bold text-slate-700 mb-1">Classification</label>
+                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Classification</label>
                         <select
                           value={rightsDocClassification}
                           onChange={(e) => setRightsDocClassification(e.target.value as any)}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 cursor-pointer"
+                          className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 cursor-pointer"
                         >
                           <option value="PDF">PDF Contract / Agreement</option>
                           <option value="DOCX">DOCX Script / Clearances</option>
@@ -2974,13 +2979,13 @@ export function AssetDetailsView({
                     </div>
 
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">Filing Notes (Optional)</label>
+                      <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Filing Notes (Optional)</label>
                       <input
                         type="text"
                         placeholder="e.g. Executed and notarized deed attached."
                         value={rightsDocNotes}
                         onChange={(e) => setRightsDocNotes(e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-indigo-500"
+                        className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs outline-none focus:border-indigo-500"
                       />
                     </div>
                   </div>
@@ -2988,11 +2993,11 @@ export function AssetDetailsView({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsEditRightsModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>

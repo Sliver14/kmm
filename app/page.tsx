@@ -2835,21 +2835,21 @@ function RightsPage({
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* FILTER BAR & ACTION */}
-      <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-xs flex flex-wrap items-center gap-2.5 text-xs">
+      <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-3.5 shadow-xs flex flex-wrap items-center gap-2.5 text-xs">
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search rights records, license types, or owners..."
-            className="h-8.5 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+            className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white pl-9 pr-3 text-xs text-slate-800 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
           />
         </div>
 
         <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
-          className="h-8.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+          className="h-8.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 px-3 text-xs font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
         >
           <option value="All Statuses">All Statuses</option>
           <option value="Cleared">Cleared</option>
@@ -2859,7 +2859,7 @@ function RightsPage({
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
+          className="flex items-center gap-2 rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
         >
           <Plus className="size-3.5" strokeWidth={2.5} />
           <span>Add Rights Record</span>
@@ -2867,10 +2867,10 @@ function RightsPage({
       </div>
 
       {/* RECORDS TABLE */}
-      <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-xs">
+      <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 shadow-xs">
         <table className="w-full min-w-[760px] text-left text-xs">
           <thead>
-            <tr className="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
+            <tr className="bg-slate-50/75 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400 dark:border-white/10 font-semibold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
               <th className="px-4 py-3">Asset / Title</th>
               <th className="px-4 py-3">Category</th>
               <th className="px-4 py-3">Rights Scope</th>
@@ -2881,32 +2881,32 @@ function RightsPage({
               <th className="px-4 py-3 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-white/5">
             {filteredRecords.map((rec) => (
               <tr
                 key={rec.id}
                 onClick={() => handleSelectRightsAsset(rec)}
-                className="hover:bg-slate-50/70 cursor-pointer transition"
+                className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 cursor-pointer transition"
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <AssetThumbnail type={rec.thumbType} name={rec.name} />
                     <div>
-                      <div className="font-semibold text-slate-900 hover:text-slate-700 transition">{rec.name}</div>
+                      <div className="font-semibold text-slate-900 dark:text-white hover:text-slate-700 dark:hover:text-blue-400 transition">{rec.name}</div>
                       <div className="text-[10px] text-slate-400 font-mono">{rec.id}</div>
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3 font-medium text-slate-700">{rec.category}</td>
+                <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{rec.category}</td>
                 <td className="px-4 py-3">
-                  <span className="rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                  <span className="rounded-md bg-slate-100 border border-slate-200 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 px-2 py-0.5 text-[11px] font-medium text-slate-700">
                     {rec.rightsType}
                   </span>
                 </td>
-                <td className="px-4 py-3 font-medium text-slate-700">{rec.owner}</td>
-                <td className="px-4 py-3 font-medium text-slate-600">{rec.validity}</td>
+                <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{rec.owner}</td>
+                <td className="px-4 py-3 font-medium text-slate-600 dark:text-slate-400">{rec.validity}</td>
                 <td className="px-4 py-3">
-                  <span className="rounded bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                  <span className="rounded bg-slate-100 border border-slate-200/80 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 px-2 py-0.5 text-[10px] font-medium text-slate-600">
                     {rec.documents?.length || 1} File(s)
                   </span>
                 </td>
@@ -2937,7 +2937,7 @@ function RightsPage({
                         setDocFileSize('1.8 MB')
                         setDocNotes('')
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition cursor-pointer"
                       title={`Attach legal document specifically for ${rec.name}`}
                     >
                       <FileUp className="size-3 text-slate-500" />
@@ -2946,7 +2946,7 @@ function RightsPage({
                     <button
                       type="button"
                       onClick={() => handleSelectRightsAsset(rec)}
-                      className="grid size-7 place-items-center rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                      className="grid size-7 place-items-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
                       title="View governance details"
                     >
                       <ChevronRight className="size-4" />
@@ -2967,13 +2967,13 @@ function RightsPage({
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2 font-semibold text-slate-900 text-sm">
-                <ShieldCheck className="size-4 text-slate-700" />
+          <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white text-sm">
+                <ShieldCheck className="size-4 text-slate-700 dark:text-slate-300" />
                 <span>Add Rights & Governance Record</span>
               </div>
-              <button onClick={() => setIsAddModalOpen(false)} className="grid size-8 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+              <button onClick={() => setIsAddModalOpen(false)} className="grid size-8 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition cursor-pointer">
                 <X className="size-4" />
               </button>
             </div>
@@ -2981,7 +2981,7 @@ function RightsPage({
             <form onSubmit={handleAddRightsSubmit} className="mt-4 space-y-3.5">
               {/* Asset Selector */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Select Asset *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Asset *</label>
                 <select
                   value={newRightsForm.assetId}
                   onChange={(e) => {
@@ -2996,7 +2996,7 @@ function RightsPage({
                       }))
                     }
                   }}
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                 >
                   {assets.map((a) => (
                     <option key={a.id} value={a.id}>
@@ -3007,45 +3007,45 @@ function RightsPage({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Rights Scope / Type *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rights Scope / Type *</label>
                 <input
                   value={newRightsForm.rightsType}
                   onChange={(e) => setNewRightsForm((prev) => ({ ...prev, rightsType: e.target.value }))}
                   placeholder="e.g. Worldwide Broadcast & Streaming Rights"
-                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Owner / Holder</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Owner / Holder</label>
                   <input
                     value={newRightsForm.owner}
                     onChange={(e) => setNewRightsForm((prev) => ({ ...prev, owner: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Validity Period</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Validity Period</label>
                   <input
                     value={newRightsForm.validity}
                     onChange={(e) => setNewRightsForm((prev) => ({ ...prev, validity: e.target.value }))}
                     placeholder="2025 – 2035"
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
               {/* Upload Document Attachment */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-2">
-                <label className="block font-bold text-slate-800 text-xs">Attach Rights Document / Certificate</label>
+              <div className="rounded-xl border border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2">
+                <label className="block font-bold text-slate-800 dark:text-slate-200 text-xs">Attach Rights Document / Certificate</label>
                 <div className="flex items-center gap-2">
                   <input
                     placeholder="Document Title (e.g. Master_Copyright_Release.pdf)"
                     value={newRightsForm.newDocName}
                     onChange={(e) => setNewRightsForm((prev) => ({ ...prev, newDocName: e.target.value }))}
-                    className="h-8 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none"
+                    className="h-8 flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                   <button
                     type="button"
@@ -3073,10 +3073,10 @@ function RightsPage({
 
                 <div className="space-y-1 pt-1">
                   {newRightsForm.documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between rounded-lg bg-white p-2 border border-slate-200 text-[11px]">
+                    <div key={doc.id} className="flex items-center justify-between rounded-lg bg-white dark:bg-slate-900 p-2 border border-slate-200 dark:border-white/10 text-[11px]">
                       <div className="flex items-center gap-2">
                         <FileText className="size-3.5 text-blue-600" />
-                        <span className="font-semibold text-slate-800">{doc.name}</span>
+                        <span className="font-semibold text-slate-800 dark:text-white">{doc.name}</span>
                         <span className="text-slate-400">({doc.size})</span>
                       </div>
                       <button
@@ -3087,7 +3087,7 @@ function RightsPage({
                             documents: prev.documents.filter((d) => d.id !== doc.id),
                           }))
                         }
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 cursor-pointer"
                       >
                         <Trash2 className="size-3" />
                       </button>
@@ -3096,17 +3096,17 @@ function RightsPage({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 px-4 py-2 font-medium text-xs text-white hover:bg-slate-800 shadow-xs transition active:scale-98 cursor-pointer"
+                  className="rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 font-medium text-xs text-white shadow-xs transition active:scale-98 cursor-pointer"
                 >
                   Save Rights Record
                 </button>
@@ -3124,25 +3124,25 @@ function RightsPage({
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="grid size-7 place-items-center rounded-lg bg-blue-50 text-blue-700">
+                  <span className="grid size-7 place-items-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:border dark:border-blue-800/50 dark:text-blue-300">
                     <FileUp className="size-4" />
                   </span>
-                  <h3 className="font-semibold text-slate-900 text-sm">
+                  <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
                     Attach Legal Document
                   </h3>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Attach an individual talent release, deed, or certificate to <strong className="text-slate-800">{individualDocRecord.name}</strong> ({individualDocRecord.id})
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Attach an individual talent release, deed, or certificate to <strong className="text-slate-800 dark:text-slate-200">{individualDocRecord.name}</strong> ({individualDocRecord.id})
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIndividualDocRecord(null)}
-                className="grid size-8 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                className="grid size-8 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -3151,7 +3151,7 @@ function RightsPage({
             <form onSubmit={handleAddIndividualDocSubmit} className="mt-4 space-y-4">
               {/* Document Scope: Individual Contributor vs Asset-Level */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1.5">Document Scope *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Document Scope *</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -3168,8 +3168,8 @@ function RightsPage({
                     className={cn(
                       'flex items-center justify-center gap-2 rounded-lg border p-2.5 text-xs font-semibold transition cursor-pointer',
                       docTargetScope === 'individual'
-                        ? 'border-blue-600 bg-blue-50/60 text-blue-700 shadow-2xs'
-                        : 'border-slate-200 bg-slate-50/50 text-slate-600 hover:bg-slate-50'
+                        ? 'border-blue-600 bg-blue-50/60 text-blue-700 dark:bg-blue-950/40 dark:border-blue-500 dark:text-blue-300 shadow-2xs'
+                        : 'border-slate-200 bg-slate-50/50 text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800/40 dark:text-slate-400 dark:hover:bg-slate-800'
                     )}
                   >
                     <User className="size-3.5" />
@@ -3188,8 +3188,8 @@ function RightsPage({
                     className={cn(
                       'flex items-center justify-center gap-2 rounded-lg border p-2.5 text-xs font-semibold transition cursor-pointer',
                       docTargetScope === 'asset'
-                        ? 'border-blue-600 bg-blue-50/60 text-blue-700 shadow-2xs'
-                        : 'border-slate-200 bg-slate-50/50 text-slate-600 hover:bg-slate-50'
+                        ? 'border-blue-600 bg-blue-50/60 text-blue-700 dark:bg-blue-950/40 dark:border-blue-500 dark:text-blue-300 shadow-2xs'
+                        : 'border-slate-200 bg-slate-50/50 text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800/40 dark:text-slate-400 dark:hover:bg-slate-800'
                     )}
                   >
                     <Boxes className="size-3.5" />
@@ -3200,10 +3200,10 @@ function RightsPage({
 
               {/* Individual Assignee details */}
               {docTargetScope === 'individual' && (
-                <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 p-3 space-y-3">
+                <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-3 space-y-3">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block font-semibold text-slate-700">Select Contributor / Individual *</label>
+                      <label className="block font-semibold text-slate-700 dark:text-slate-300">Select Contributor / Individual *</label>
                       <button
                         type="button"
                         onClick={() => {
@@ -3218,7 +3218,7 @@ function RightsPage({
                             setDocTitle(`Talent_Release_${individualDocContributors[0].name.replace(/[^a-zA-Z0-9]/g, '_')}_Signed.pdf`)
                           }
                         }}
-                        className="text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
+                        className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
                       >
                         {isCustomAssignee ? 'Pick from contributors' : '+ Custom / External Talent'}
                       </button>
@@ -3236,7 +3236,7 @@ function RightsPage({
                             setDocTitle(`Talent_Release_${val.replace(/[^a-zA-Z0-9]/g, '_')}_Signed.pdf`)
                           }
                         }}
-                        className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400"
+                        className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-slate-400"
                       >
                         {individualDocContributors.map((c) => (
                           <option key={c.id || c.name} value={c.name}>
@@ -3255,14 +3255,14 @@ function RightsPage({
                             }
                           }}
                           placeholder="Individual Name (e.g. John Doe)"
-                          className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400"
+                          className="h-9 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-slate-400"
                           required
                         />
                         <input
                           value={docAssigneeRole}
                           onChange={(e) => setDocAssigneeRole(e.target.value)}
                           placeholder="Role (e.g. Voice Actor, Musician)"
-                          className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400"
+                          className="h-9 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-slate-400"
                         />
                       </div>
                     )}
@@ -3273,11 +3273,11 @@ function RightsPage({
               {/* Document Category / Type */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Document Category *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Document Category *</label>
                   <select
                     value={docType}
                     onChange={(e) => setDocType(e.target.value)}
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-slate-400"
                   >
                     <option value="TALENT_RELEASE">Talent Release Deed</option>
                     <option value="DEED">Work-for-Hire & Assignment Deed</option>
@@ -3288,31 +3288,31 @@ function RightsPage({
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">File Size</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">File Size</label>
                   <input
                     value={docFileSize}
                     onChange={(e) => setDocFileSize(e.target.value)}
                     placeholder="e.g. 1.8 MB"
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-slate-400"
                   />
                 </div>
               </div>
 
               {/* Document Title / File Name */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Document File Name *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Document File Name *</label>
                 <input
                   value={docTitle}
                   onChange={(e) => setDocTitle(e.target.value)}
                   placeholder="e.g. Talent_Release_Faith_Daniel_Signed.pdf"
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400 font-mono text-[11px]"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-slate-400 font-mono text-[11px]"
                   required
                 />
               </div>
 
               {/* File picker */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Select Local File (Optional)</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Local File (Optional)</label>
                 <input
                   type="file"
                   onChange={(e) => {
@@ -3323,33 +3323,33 @@ function RightsPage({
                       setDocFileSize(`${sizeInMb} MB`)
                     }
                   }}
-                  className="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
+                  className="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-200 hover:file:bg-slate-200 dark:hover:file:bg-slate-700 cursor-pointer"
                 />
               </div>
 
               {/* Optional Notes */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Filing Notes / Registration Reference</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Filing Notes / Registration Reference</label>
                 <input
                   value={docNotes}
                   onChange={(e) => setDocNotes(e.target.value)}
                   placeholder="e.g. Signed in presence of counsel; deposited with media registry."
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-slate-400"
                 />
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIndividualDocRecord(null)}
-                  className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-xs text-white hover:bg-slate-800 shadow-xs transition active:scale-98 cursor-pointer"
+                  className="rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 font-semibold text-xs text-white shadow-xs transition active:scale-98 cursor-pointer"
                 >
                   Attach Document
                 </button>
@@ -3677,18 +3677,18 @@ function RightsDetailsPage({
         <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-blue-600 transition"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-blue-600 transition"
           >
             <ChevronLeft className="size-4" />
             <span>Back to Rights & Governance</span>
           </button>
-          <div className="h-4 w-[1px] bg-slate-200 mx-1" />
-          <button onClick={onBack} className="flex items-center gap-1 font-semibold text-blue-600 hover:underline">
+          <div className="h-4 w-[1px] bg-slate-200 dark:bg-white/10 mx-1" />
+          <button onClick={onBack} className="flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 hover:underline">
             <ShieldCheck className="size-3.5" />
             <span>Rights & Governance</span>
           </button>
-          <ChevronRight className="size-3 text-slate-400" />
-          <span className="font-bold text-slate-900">{asset.name}</span>
+          <ChevronRight className="size-3 text-slate-400 dark:text-slate-500" />
+          <span className="font-bold text-slate-900 dark:text-white">{asset.name}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -3700,9 +3700,9 @@ function RightsDetailsPage({
                 }
                 setActiveNav('Assets')
               }}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-2xs"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-2xs"
             >
-              <Boxes className="size-3.5 text-blue-600" />
+              <Boxes className="size-3.5 text-blue-600 dark:text-blue-400" />
               <span>View Core Asset ↗</span>
             </button>
           )}
@@ -3710,37 +3710,37 @@ function RightsDetailsPage({
       </div>
 
       {/* Hero Header Card */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs">
+      <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={(asset as any).posterUrl} />
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded bg-purple-100 px-2.5 py-0.5 text-[10px] font-bold text-purple-700">{asset.category}</span>
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">ID: {asset.id}</span>
+                <span className="rounded bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:border dark:border-purple-800/40 dark:text-purple-300 px-2.5 py-0.5 text-[10px] font-bold">{asset.category}</span>
+                <span className="rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-white/10 px-2 py-0.5 text-[10px] font-bold">ID: {asset.id}</span>
                 <span className={cn(
                   'rounded px-2.5 py-0.5 text-[10px] font-bold',
-                  asset.status === 'Cleared' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  asset.status === 'Cleared' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border dark:border-emerald-800/40' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 dark:border dark:border-amber-800/40'
                 )}>
                   ★ {asset.status}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black text-[#09245a] mt-1.5">{asset.name}</h1>
-              <p className="text-xs text-slate-600 mt-0.5">{asset.rightsType}</p>
+              <h1 className="text-xl sm:text-2xl font-black text-[#09245a] dark:text-white mt-1.5">{asset.name}</h1>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">{asset.rightsType}</p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 self-end sm:self-auto">
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-blue-50 hover:text-blue-600 transition"
+              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-blue-50 hover:text-blue-600 transition"
             >
               <Pencil className="size-3.5" />
               <span>Edit Governance Details</span>
             </button>
             <button
               onClick={() => setIsAddRightsModalOpen(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/25 hover:bg-blue-700 transition"
+              className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition"
             >
               <Plus className="size-4" />
               <span>+ Add Rights Scope</span>
@@ -3751,34 +3751,36 @@ function RightsDetailsPage({
 
       {/* 4 Status KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
-        <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600">Chain of Title</div>
-          <div className="text-xs font-bold text-emerald-600 mt-0.5">Documented & Filed ✓</div>
+        <div className="rounded-xl border border-blue-100 bg-blue-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Chain of Title</div>
+          <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">Documented & Filed ✓</div>
         </div>
-        <div className="rounded-xl border border-purple-100 bg-purple-50/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600">Rights Clearance</div>
-          <div className="text-xs font-bold text-emerald-600 mt-0.5">{asset.status} ✓</div>
+        <div className="rounded-xl border border-purple-100 bg-purple-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Rights Clearance</div>
+          <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{asset.status} ✓</div>
         </div>
-        <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600">Territory & Term</div>
-          <div className="text-xs font-bold text-slate-900 mt-0.5">{asset.territory || 'Worldwide'} • {asset.term || '10 Yrs'}</div>
+        <div className="rounded-xl border border-amber-100 bg-amber-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Territory & Term</div>
+          <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{asset.territory || 'Worldwide'} • {asset.term || '10 Yrs'}</div>
         </div>
-        <div className="rounded-xl border border-teal-100 bg-teal-50/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600">Governance Score</div>
-          <div className="text-xs font-bold text-blue-700 mt-0.5">{asset.governanceScore || 100}% Compliant</div>
+        <div className="rounded-xl border border-teal-100 bg-teal-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Governance Score</div>
+          <div className="text-xs font-bold text-blue-700 dark:text-blue-400 mt-0.5">{asset.governanceScore || 100}% Compliant</div>
         </div>
       </div>
 
       {/* Sub Tabs */}
-      <div className="border-b border-slate-200 bg-white px-3 rounded-xl shadow-2xs">
+      <div className="border-b border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900/90 px-3 rounded-xl shadow-2xs">
         <div className="flex items-center gap-2">
           {['Overview & Rights', 'Governance Checklist', 'Legal Documents', 'Audit History'].map((st) => (
             <button
               key={st}
               onClick={() => setSubTab(st)}
               className={cn(
-                'px-4 py-3.5 text-xs font-bold border-b-2 -mb-[1px] transition',
-                subTab === st ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-900'
+                'px-4 py-3.5 text-xs font-bold border-b-2 -mb-[1px] transition cursor-pointer',
+                subTab === st
+                  ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                  : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               )}
             >
               {st}
@@ -3791,40 +3793,40 @@ function RightsDetailsPage({
       {subTab === 'Overview & Rights' && (
         <div className="grid gap-5 xl:grid-cols-[1fr_320px] items-start">
           <div className="space-y-5">
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-              <h2 className="text-base font-bold text-[#09245a] border-b border-slate-100 pb-3">
+            <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+              <h2 className="text-base font-bold text-[#09245a] dark:text-white border-b border-slate-100 dark:border-white/10 pb-3">
                 Rights & Governance Scope Breakdown
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Primary Rights Scope</span>
-                  <div className="font-bold text-slate-900 text-sm">{asset.rightsType}</div>
-                  <div className="text-[11px] text-slate-500">{asset.exclusivity || 'Exclusive Ministry Rights'}</div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Primary Rights Scope</span>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">{asset.rightsType}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{asset.exclusivity || 'Exclusive Ministry Rights'}</div>
                 </div>
 
-                <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Territory Clearance</span>
-                  <div className="font-bold text-slate-900 text-sm">{asset.territory || 'Worldwide'}</div>
-                  <div className="text-[11px] text-slate-500">Term: {asset.term || '10 Years'} ({asset.validity})</div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Territory Clearance</span>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">{asset.territory || 'Worldwide'}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Term: {asset.term || '10 Years'} ({asset.validity})</div>
                 </div>
 
-                <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Registered Rights Holder</span>
-                  <div className="font-bold text-slate-900 text-sm">{asset.owner}</div>
-                  <div className="text-[11px] text-slate-500">Parent Agency: {asset.agency || 'Lovetoons'}</div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Registered Rights Holder</span>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">{asset.owner}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Parent Agency: {asset.agency || 'Lovetoons'}</div>
                 </div>
 
-                <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Licensing & Royalty Terms</span>
-                  <div className="font-bold text-slate-900 text-sm">{asset.licenceType || 'Proprietary Broadcast'}</div>
-                  <div className="text-[11px] text-slate-500">{asset.royaltyTerms || '100% In-House Retained'}</div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Licensing & Royalty Terms</span>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">{asset.licenceType || 'Proprietary Broadcast'}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{asset.royaltyTerms || '100% In-House Retained'}</div>
                 </div>
               </div>
 
-              <div className="rounded-xl bg-blue-50/60 p-4 border border-blue-100 text-xs">
-                <div className="font-bold text-blue-950 mb-1">Legal Summary & Chain of Title Notes</div>
-                <p className="text-slate-600 leading-relaxed">
+              <div className="rounded-xl bg-blue-50/60 p-4 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-800/40 text-xs">
+                <div className="font-bold text-blue-950 dark:text-blue-200 mb-1">Legal Summary & Chain of Title Notes</div>
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                   {asset.description || 'Full worldwide copyright, theatrical, broadcast and OTT streaming clearance on file with LoveWorld/Lovetoons intellectual property administration.'}
                 </p>
               </div>
@@ -3832,14 +3834,14 @@ function RightsDetailsPage({
           </div>
 
           <aside className="space-y-4">
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-3.5">
-              <h3 className="text-xs font-bold text-[#09245a]">Governance Compliance Score</h3>
+            <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-3.5">
+              <h3 className="text-xs font-bold text-[#09245a] dark:text-white">Governance Compliance Score</h3>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-600">Compliance Rate</span>
-                  <span className="text-blue-700">{asset.governanceScore || 100}%</span>
+                  <span className="text-slate-600 dark:text-slate-400">Compliance Rate</span>
+                  <span className="text-blue-700 dark:text-blue-400">{asset.governanceScore || 100}%</span>
                 </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <div
                     className="h-full bg-gradient-to-r from-blue-600 to-emerald-500 rounded-full transition-all"
                     style={{ width: `${asset.governanceScore || 100}%` }}
@@ -3847,20 +3849,20 @@ function RightsDetailsPage({
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-3 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-slate-600">
+              <div className="border-t border-slate-100 dark:border-white/10 pt-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                   <span>Attached Documents</span>
-                  <b className="text-slate-900">{asset.documents?.length || 1} File(s)</b>
+                  <b className="text-slate-900 dark:text-white">{asset.documents?.length || 1} File(s)</b>
                 </div>
-                <div className="flex items-center justify-between text-slate-600">
+                <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                   <span>Current Clearance Status</span>
-                  <b className="text-emerald-700">{asset.status}</b>
+                  <b className="text-emerald-700 dark:text-emerald-400">{asset.status}</b>
                 </div>
               </div>
 
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="w-full rounded-xl bg-slate-100 p-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
+                className="w-full rounded-xl bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 p-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition cursor-pointer"
               >
                 Modify Governance Controls
               </button>
@@ -3871,13 +3873,13 @@ function RightsDetailsPage({
 
       {/* 2. Governance Checklist Sub-Tab */}
       {subTab === 'Governance Checklist' && (
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
             <div>
-              <h3 className="font-bold text-[#09245a] text-sm">Ministry Governance & Content Clearance Checklist</h3>
-              <p className="text-[11px] text-slate-500">Toggle clearance controls to update real-time governance compliance scoring.</p>
+              <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Ministry Governance & Content Clearance Checklist</h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Toggle clearance controls to update real-time governance compliance scoring.</p>
             </div>
-            <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-blue-700">
+            <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-3 py-1 text-xs font-bold">
               Score: {asset.governanceScore || 100}%
             </span>
           </div>
@@ -3890,16 +3892,18 @@ function RightsDetailsPage({
               ['copyrightReg', 'Trademark & Master Copyright Certificate Filed', 'Official statutory IP filing deed and brand mark registered.'],
               ['voiceReleases', 'Voice Actor & Performer Release Deeds Executed', 'All voice cast, vocalists and talent releases archived.'],
             ].map(([k, label, desc]) => (
-              <div key={k} className="flex items-center justify-between rounded-xl border border-slate-100 p-3.5 bg-slate-50/60 hover:bg-slate-50 transition">
+              <div key={k} className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-white/10 p-3.5 bg-slate-50/60 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-800/80 transition">
                 <div>
-                  <div className="font-semibold text-slate-800 text-xs">{label}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">{desc}</div>
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{label}</div>
+                  <div className="text-[10px] text-slate-400 dark:text-slate-400 mt-0.5">{desc}</div>
                 </div>
                 <button
                   onClick={() => toggleCheck(k as any)}
                   className={cn(
-                    'rounded-lg px-3.5 py-1.5 font-bold text-xs transition shadow-2xs shrink-0',
-                    (checks as any)[k] ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                    'rounded-lg px-3.5 py-1.5 font-bold text-xs transition shadow-2xs shrink-0 cursor-pointer',
+                    (checks as any)[k]
+                      ? 'bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                      : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                   )}
                 >
                   {(checks as any)[k] ? 'Cleared ✓' : 'Pending'}
@@ -3912,28 +3916,28 @@ function RightsDetailsPage({
 
       {/* 3. Legal Documents Sub-Tab */}
       {subTab === 'Legal Documents' && (
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-white/10 pb-3">
             <div>
-              <h3 className="font-bold text-[#09245a] text-sm">Filing Certificates & Legal Contracts</h3>
-              <p className="text-[11px] text-slate-500">Official certificates of registration, talent releases, work-for-hire deeds, and broadcast agreements.</p>
+              <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Filing Certificates & Legal Contracts</h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Official certificates of registration, talent releases, work-for-hire deeds, and broadcast agreements.</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-[11px] font-bold text-blue-700">
+              <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-2.5 py-0.5 text-[11px] font-bold">
                 {asset.documents?.length || 0} Total Document(s)
               </span>
             </div>
           </div>
 
-          <form onSubmit={handleAttachDocument} className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 space-y-3 text-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100/70 pb-2.5">
-              <div className="font-bold text-[#09245a] flex items-center gap-1.5">
-                <FileUp className="size-4 text-blue-600" />
+          <form onSubmit={handleAttachDocument} className="rounded-xl border border-blue-100 bg-blue-50/40 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-3 text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100/70 dark:border-white/10 pb-2.5">
+              <div className="font-bold text-[#09245a] dark:text-white flex items-center gap-1.5">
+                <FileUp className="size-4 text-blue-600 dark:text-blue-400" />
                 <span>Attach Legal Document to Record</span>
               </div>
 
               {/* Target Scope Toggle */}
-              <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs">
+              <div className="inline-flex rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-0.5 shadow-2xs">
                 <button
                   type="button"
                   onClick={() => {
@@ -3941,8 +3945,10 @@ function RightsDetailsPage({
                     setDetailsDocType('TALENT_RELEASE')
                   }}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition',
-                    detailsDocScope === 'individual' ? 'bg-purple-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                    'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition cursor-pointer',
+                    detailsDocScope === 'individual'
+                      ? 'bg-purple-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   )}
                 >
                   <User className="size-3" />
@@ -3955,8 +3961,10 @@ function RightsDetailsPage({
                     setDetailsDocType('CERT')
                   }}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition',
-                    detailsDocScope === 'asset' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                    'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition cursor-pointer',
+                    detailsDocScope === 'asset'
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   )}
                 >
                   <ShieldCheck className="size-3" />
@@ -3967,14 +3975,14 @@ function RightsDetailsPage({
 
             {/* Individual Contributor Selector (only shown if scope === 'individual') */}
             {detailsDocScope === 'individual' && (
-              <div className="rounded-lg border border-purple-100 bg-white p-3 space-y-2.5">
+              <div className="rounded-lg border border-purple-100 bg-white dark:border-purple-900/40 dark:bg-slate-900/90 p-3 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold text-purple-900">Designated Contributor / Talent</label>
+                  <label className="text-[11px] font-bold text-purple-900 dark:text-purple-300">Designated Contributor / Talent</label>
                   {assetContributors.length > 0 && (
                     <button
                       type="button"
                       onClick={() => setDetailsIsCustomAssignee(!detailsIsCustomAssignee)}
-                      className="text-[10px] font-semibold text-purple-600 hover:underline"
+                      className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
                     >
                       {detailsIsCustomAssignee ? 'Pick from asset credits' : '+ Custom talent name'}
                     </button>
@@ -3992,7 +4000,7 @@ function RightsDetailsPage({
                           const found = assetContributors.find((c) => c.name === val)
                           if (found) setDetailsDocRole(found.role)
                         }}
-                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-purple-400"
+                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-purple-400"
                       >
                         {assetContributors.map((c, idx) => (
                           <option key={idx} value={c.name}>
@@ -4006,7 +4014,7 @@ function RightsDetailsPage({
                         value={detailsDocRole}
                         onChange={(e) => setDetailsDocRole(e.target.value)}
                         placeholder="Talent role (e.g. Lead Voice Actor, Illustrator)"
-                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
+                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
                       />
                     </div>
                   </div>
@@ -4017,7 +4025,7 @@ function RightsDetailsPage({
                         value={detailsDocAssignee}
                         onChange={(e) => setDetailsDocAssignee(e.target.value)}
                         placeholder="Talent or Contributor full name..."
-                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
+                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
                         required
                       />
                     </div>
@@ -4026,7 +4034,7 @@ function RightsDetailsPage({
                         value={detailsDocRole}
                         onChange={(e) => setDetailsDocRole(e.target.value)}
                         placeholder="Role (e.g. Performer, Music Producer, Animator)..."
-                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
+                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
                       />
                     </div>
                   </div>
@@ -4037,11 +4045,11 @@ function RightsDetailsPage({
             {/* Document Details: Type, File Picker, Title & Notes */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div>
-                <label className="block text-[10px] font-bold text-slate-600 mb-1">Document Category</label>
+                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">Document Category</label>
                 <select
                   value={detailsDocType}
                   onChange={(e) => setDetailsDocType(e.target.value as any)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-400"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-400"
                 >
                   <option value="TALENT_RELEASE">Talent Release Deed (Performer/Voice)</option>
                   <option value="DEED">Work-for-Hire Assignment Deed</option>
@@ -4052,7 +4060,7 @@ function RightsDetailsPage({
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-[10px] font-bold text-slate-600 mb-1">Document File or Title</label>
+                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">Document File or Title</label>
                 <div className="flex items-center gap-2">
                   <input
                     value={newDocTitle}
@@ -4062,10 +4070,10 @@ function RightsDetailsPage({
                         ? `Talent_Release_${(detailsDocAssignee || 'Contributor').replace(/\s+/g, '_')}_Signed.pdf`
                         : `Clearance_Deed_${asset.name.replace(/\s+/g, '_')}.pdf`
                     }
-                    className="h-8.5 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-8.5 flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
                   />
-                  <label className="inline-flex items-center gap-1.5 h-8.5 cursor-pointer rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 shrink-0">
-                    <UploadCloud className="size-3.5 text-blue-600" />
+                  <label className="inline-flex items-center gap-1.5 h-8.5 cursor-pointer rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 shrink-0">
+                    <UploadCloud className="size-3.5 text-blue-600 dark:text-blue-400" />
                     <span>Browse</span>
                     <input
                       type="file"
@@ -4089,11 +4097,11 @@ function RightsDetailsPage({
                 value={detailsDocNotes}
                 onChange={(e) => setDetailsDocNotes(e.target.value)}
                 placeholder="Optional governance notes / clauses cleared (e.g. Worldwide, in perpetuity, verified ID on record)..."
-                className="h-8.5 w-full sm:flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                className="h-8.5 w-full sm:flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
               />
               <button
                 type="submit"
-                className="h-8.5 w-full sm:w-auto rounded-lg bg-blue-600 px-4 font-bold text-white hover:bg-blue-700 transition shadow-2xs shrink-0"
+                className="h-8.5 w-full sm:w-auto rounded-lg bg-blue-600 px-4 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 transition shadow-2xs shrink-0 cursor-pointer"
               >
                 + Attach Document
               </button>
@@ -4103,11 +4111,11 @@ function RightsDetailsPage({
           <div className="space-y-2.5 text-xs">
             {asset.documents && asset.documents.length > 0 ? (
               asset.documents.map((d) => (
-                <div key={d.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 p-3.5 hover:bg-slate-50 transition">
+                <div key={d.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-white/10 p-3.5 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition">
                   <div className="flex items-start gap-3">
                     <div className={cn(
                       "grid size-9 shrink-0 place-items-center rounded-lg font-bold text-[10px]",
-                      d.targetScope === 'individual' || d.assigneeName ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"
+                      d.targetScope === 'individual' || d.assigneeName ? "bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300" : "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
                     )}>
                       {d.targetScope === 'individual' || d.type === 'TALENT_RELEASE' ? (
                         <User className="size-4" />
@@ -4123,28 +4131,28 @@ function RightsDetailsPage({
                     </div>
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="font-bold text-slate-900">{d.name}</span>
+                        <span className="font-bold text-slate-900 dark:text-white">{d.name}</span>
                         <span className={cn(
                           "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                          d.type === 'TALENT_RELEASE' ? "bg-purple-100 text-purple-800" :
-                            d.type === 'DEED' ? "bg-emerald-100 text-emerald-800" :
-                              d.type === 'CERT' ? "bg-blue-100 text-blue-800" : "bg-slate-100 text-slate-700"
+                          d.type === 'TALENT_RELEASE' ? "bg-purple-100 text-purple-800 dark:bg-purple-950/50 dark:text-purple-300 dark:border dark:border-purple-800/40" :
+                            d.type === 'DEED' ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border dark:border-emerald-800/40" :
+                              d.type === 'CERT' ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 dark:border dark:border-blue-800/40" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-white/10"
                         )}>
                           {d.type ? d.type.replace('_', ' ') : 'PDF'}
                         </span>
                         {d.assigneeName && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 px-2 py-0.5 text-[10px] font-semibold text-purple-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 dark:bg-purple-950/40 dark:border-purple-800/40 dark:text-purple-300 px-2 py-0.5 text-[10px] font-semibold">
                             <User className="size-2.5" />
                             <span>Individual: {d.assigneeName} {d.assigneeRole ? `(${d.assigneeRole})` : ''}</span>
                           </span>
                         )}
                         {d.targetScope === 'asset' && !d.assigneeName && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold">
                             Asset-Level Master
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-400">
                         {d.size} • Uploaded on {d.date}
                         {d.notes ? ` • Note: ${d.notes}` : ''}
                       </div>
@@ -4153,14 +4161,14 @@ function RightsDetailsPage({
                   <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
                     <button
                       onClick={() => showToast(`Starting download for ${d.name}...`)}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs text-xs"
+                      className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs text-xs cursor-pointer"
                     >
                       Download
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteDocument(d.id, d.name)}
-                      className="rounded-lg border border-red-200 bg-white p-1.5 font-bold text-red-600 hover:bg-red-50 transition shadow-2xs"
+                      className="rounded-lg border border-red-200 bg-white dark:border-red-500/30 dark:bg-rose-950/30 dark:text-red-400 dark:hover:bg-rose-950/60 p-1.5 font-bold text-red-600 hover:bg-red-50 transition shadow-2xs cursor-pointer"
                       title="Delete document"
                     >
                       <Trash2 className="size-3.5" />
@@ -4169,7 +4177,7 @@ function RightsDetailsPage({
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center text-slate-400 bg-slate-50 rounded-xl">
+              <div className="p-6 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 dark:border dark:border-white/5 rounded-xl">
                 No legal documents attached yet. Use the upload box above to add talent release deeds or filing certificates.
               </div>
             )}
@@ -4179,28 +4187,28 @@ function RightsDetailsPage({
 
       {/* 4. Audit History Sub-Tab */}
       {subTab === 'Audit History' && (
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="font-bold text-[#09245a] text-sm">Governance Audit Log & Activity Trail</h3>
-            <p className="text-[11px] text-slate-500">Immutable record of modifications, reviews, status changes, and administrator edits.</p>
+        <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="border-b border-slate-100 dark:border-white/10 pb-3">
+            <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Governance Audit Log & Activity Trail</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Immutable record of modifications, reviews, status changes, and administrator edits.</p>
           </div>
 
           <div className="space-y-3 text-xs">
             {recordActivities.length > 0 ? (
               recordActivities.map((act) => (
-                <div key={act.id} className="flex items-start gap-3 rounded-xl border border-slate-100 p-3.5 bg-slate-50/50">
+                <div key={act.id} className="flex items-start gap-3 rounded-xl border border-slate-100 dark:border-white/10 p-3.5 bg-slate-50/50 dark:bg-slate-800/50">
                   <div className={cn('grid size-7 place-items-center rounded-lg text-xs shrink-0', act.color)}>
                     <Shield className="size-3.5" />
                   </div>
                   <div className="flex-1">
-                    <div className="font-bold text-slate-900">{act.title}</div>
-                    <div className="text-[11px] text-slate-500">{act.subtitle}</div>
-                    <div className="text-[10px] text-slate-400 mt-1">{act.time} • by {act.user} ({act.unit || 'Platform Admin'})</div>
+                    <div className="font-bold text-slate-900 dark:text-white">{act.title}</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">{act.subtitle}</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{act.time} • by {act.user} ({act.unit || 'Platform Admin'})</div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center text-slate-400 bg-slate-50 rounded-xl">
+              <div className="p-6 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 dark:border dark:border-white/5 rounded-xl">
                 No previous changes logged for this record. Any edits made will appear here automatically.
               </div>
             )}
@@ -4216,15 +4224,15 @@ function RightsDetailsPage({
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2 font-bold text-[#09245a] text-sm">
-                <Pencil className="size-4 text-blue-600" />
+          <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <div className="flex items-center gap-2 font-bold text-[#09245a] dark:text-white text-sm">
+                <Pencil className="size-4 text-blue-600 dark:text-blue-400" />
                 <span>Edit Governance & Rights Details</span>
               </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"
+                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -4232,30 +4240,30 @@ function RightsDetailsPage({
 
             <form onSubmit={handleEditSubmit} className="mt-4 space-y-3.5">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Rights Scope / Title</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rights Scope / Title</label>
                 <input
                   value={editForm.rightsType}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, rightsType: e.target.value }))}
-                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Rights Holder / Owner</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rights Holder / Owner</label>
                   <input
                     value={editForm.owner}
                     onChange={(e) => setEditForm((prev) => ({ ...prev, owner: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Clearance Status</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Clearance Status</label>
                   <select
                     value={editForm.status}
                     onChange={(e) => setEditForm((prev) => ({ ...prev, status: e.target.value as any }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   >
                     <option value="Cleared">Cleared</option>
                     <option value="Review">Under Review</option>
@@ -4267,72 +4275,72 @@ function RightsDetailsPage({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Territory</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Territory</label>
                   <input
                     value={editForm.territory}
                     onChange={(e) => setEditForm((prev) => ({ ...prev, territory: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Term / Validity</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Term / Validity</label>
                   <input
                     value={editForm.validity}
                     onChange={(e) => setEditForm((prev) => ({ ...prev, validity: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Exclusivity</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Exclusivity</label>
                   <input
                     value={editForm.exclusivity}
                     onChange={(e) => setEditForm((prev) => ({ ...prev, exclusivity: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Licence Type</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Licence Type</label>
                   <input
                     value={editForm.licenceType}
                     onChange={(e) => setEditForm((prev) => ({ ...prev, licenceType: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Royalty Terms</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Royalty Terms</label>
                 <input
                   value={editForm.royaltyTerms}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, royaltyTerms: e.target.value }))}
-                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Legal Description & Notes</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Legal Description & Notes</label>
                 <textarea
                   value={editForm.description}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
                   rows={2}
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-xs outline-none focus:border-blue-400"
+                  className="w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 shadow-sm"
+                  className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm transition cursor-pointer"
                 >
                   Save & Log Audit Trail
                 </button>
@@ -4350,15 +4358,15 @@ function RightsDetailsPage({
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2 font-bold text-[#09245a] text-sm">
-                <Plus className="size-4 text-blue-600" />
+          <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <div className="flex items-center gap-2 font-bold text-[#09245a] dark:text-white text-sm">
+                <Plus className="size-4 text-blue-600 dark:text-blue-400" />
                 <span>Submit Rights Scope for {asset.name}</span>
               </div>
               <button
                 onClick={() => setIsAddRightsModalOpen(false)}
-                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"
+                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -4366,88 +4374,88 @@ function RightsDetailsPage({
 
             <form onSubmit={handleAddRightsSubmit} className="mt-4 space-y-3.5">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">New Rights Scope / Type *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">New Rights Scope / Type *</label>
                 <input
                   value={addRightsForm.rightsType}
                   onChange={(e) => setAddRightsForm((prev) => ({ ...prev, rightsType: e.target.value }))}
                   placeholder="e.g. Worldwide Merchandising & Digital Licensing"
-                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Territory</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Territory</label>
                   <input
                     value={addRightsForm.territory}
                     onChange={(e) => setAddRightsForm((prev) => ({ ...prev, territory: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Term Duration</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Term Duration</label>
                   <input
                     value={addRightsForm.term}
                     onChange={(e) => setAddRightsForm((prev) => ({ ...prev, term: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Exclusivity</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Exclusivity</label>
                   <input
                     value={addRightsForm.exclusivity}
                     onChange={(e) => setAddRightsForm((prev) => ({ ...prev, exclusivity: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Licence Type</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Licence Type</label>
                   <input
                     value={addRightsForm.licenceType}
                     onChange={(e) => setAddRightsForm((prev) => ({ ...prev, licenceType: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Royalty Split / Financial Terms</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Royalty Split / Financial Terms</label>
                 <input
                   value={addRightsForm.royaltyTerms}
                   onChange={(e) => setAddRightsForm((prev) => ({ ...prev, royaltyTerms: e.target.value }))}
-                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Supporting Document File</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Supporting Document File</label>
                 <input
                   value={addRightsForm.docName}
                   onChange={(e) => setAddRightsForm((prev) => ({ ...prev, docName: e.target.value }))}
                   placeholder="e.g. Licensing_Agreement_Draft.pdf"
-                  className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
                 />
               </div>
 
-              <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-[11px] text-amber-800">
+              <div className="rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-800/50 text-[11px] text-amber-800 dark:text-amber-300 p-3">
                 <b>Note for Review Workflow:</b> Submitting this rights clearance automatically adds an entry to the Approvals Queue for Lead Reviewers and Super Admins to verify.
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddRightsModalOpen(false)}
-                  className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 shadow-sm"
+                  className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm transition cursor-pointer"
                 >
                   Submit for Clearance Review
                 </button>
@@ -4571,28 +4579,28 @@ function RelationshipsPage() {
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="text-2xl font-semibold tracking-tight text-slate-900">{relationships.length}</div>
-          <div className="text-xs text-slate-500 font-medium mt-0.5">Active IP Relationships</div>
+        <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs">
+          <div className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{relationships.length}</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Active IP Relationships</div>
         </div>
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="text-2xl font-semibold tracking-tight text-slate-900">{assets.length}</div>
-          <div className="text-xs text-slate-500 font-medium mt-0.5">Total Linked Assets</div>
+        <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs">
+          <div className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{assets.length}</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Total Linked Assets</div>
         </div>
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="text-2xl font-semibold tracking-tight text-emerald-600">100%</div>
-          <div className="text-xs text-slate-500 font-medium mt-0.5">Governance Integrity</div>
+        <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs">
+          <div className="text-2xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400">100%</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Governance Integrity</div>
         </div>
       </div>
 
       {/* Relationships Table & Filter Box */}
-      <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-        <div className="p-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 shadow-xs overflow-hidden">
+        <div className="p-4 border-b border-slate-200/80 dark:border-white/10 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="font-semibold text-slate-900 text-sm">
+            <h2 className="font-semibold text-slate-900 dark:text-white text-sm">
               All Connected Asset Links ({filtered.length})
             </h2>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
               Cross-asset dependencies, soundtrack links, and character mascot usages
             </p>
           </div>
@@ -4604,14 +4612,14 @@ function RelationshipsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search connected assets or details..."
-                className="h-8.5 w-full rounded-lg border border-slate-200 bg-slate-50/70 pl-8 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300 transition"
+                className="h-8.5 w-full rounded-lg border border-slate-200 bg-slate-50/70 dark:border-white/10 dark:bg-slate-950 dark:text-white pl-8 pr-3 text-xs outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-slate-400 focus:bg-white dark:focus:bg-slate-950 focus:ring-1 focus:ring-slate-300 dark:focus:ring-white/10 transition"
               />
             </div>
 
             <select
               value={selectedRelType}
               onChange={(e) => setSelectedRelType(e.target.value)}
-              className="h-8.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+              className="h-8.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 px-3 text-xs font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
             >
               <option value="All Types">All Relationship Types</option>
               {relTypeOptions.map((t) => (
@@ -4623,7 +4631,7 @@ function RelationshipsPage() {
 
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
+              className="flex items-center gap-2 rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
             >
               <Plus className="size-3.5" strokeWidth={2.5} />
               <span>Add Relationship</span>
@@ -4635,7 +4643,7 @@ function RelationshipsPage() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left text-xs">
             <thead>
-              <tr className="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
+              <tr className="bg-slate-50/75 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200/80 dark:border-white/10 text-[11px] uppercase tracking-wider">
                 <th className="p-3">Source Asset</th>
                 <th className="p-3">Relationship Type</th>
                 <th className="p-3">Target Asset</th>
@@ -4644,10 +4652,10 @@ function RelationshipsPage() {
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-slate-400">
+                  <td colSpan={6} className="py-10 text-center text-slate-400 dark:text-slate-500">
                     No relationships found matching filters.
                   </td>
                 </tr>
@@ -4657,10 +4665,10 @@ function RelationshipsPage() {
                   const tgtAsset = assets.find((a) => a.id === rel.targetId || a.id === rel.targetAssetId)
 
                   return (
-                    <tr key={rel.id} className="hover:bg-slate-50/60 transition">
+                    <tr key={rel.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/50 transition">
                       <td className="p-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="size-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+                          <div className="size-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800">
                             <img
                               src={srcAsset?.posterUrl || '/tv_series_poster.jpg'}
                               alt={rel.sourceAsset}
@@ -4668,22 +4676,22 @@ function RelationshipsPage() {
                             />
                           </div>
                           <div>
-                            <div className="font-bold text-[#09245a]">{rel.sourceAsset}</div>
-                            <div className="text-[10px] text-slate-400 font-mono">{rel.sourceId}</div>
+                            <div className="font-bold text-[#09245a] dark:text-white">{rel.sourceAsset}</div>
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{rel.sourceId}</div>
                           </div>
                         </div>
                       </td>
 
                       <td className="p-3">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 border border-blue-200 px-2.5 py-1 text-[10px] font-bold text-blue-700">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 border border-blue-200 dark:bg-blue-950/40 dark:border-blue-800/40 text-blue-700 dark:text-blue-300 px-2.5 py-1 text-[10px] font-bold">
                           <span>{rel.relationshipType}</span>
-                          <ArrowRight className="size-3 text-blue-500" />
+                          <ArrowRight className="size-3 text-blue-500 dark:text-blue-400" />
                         </span>
                       </td>
 
                       <td className="p-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="size-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+                          <div className="size-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800">
                             <img
                               src={tgtAsset?.posterUrl || '/tv_series_showcase.jpg'}
                               alt={rel.targetAsset}
@@ -4691,17 +4699,17 @@ function RelationshipsPage() {
                             />
                           </div>
                           <div>
-                            <div className="font-bold text-slate-900">{rel.targetAsset}</div>
-                            <div className="text-[10px] text-slate-400 font-mono">{rel.targetId}</div>
+                            <div className="font-bold text-slate-900 dark:text-white">{rel.targetAsset}</div>
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{rel.targetId}</div>
                           </div>
                         </div>
                       </td>
 
-                      <td className="p-3 text-slate-600 text-[11px] max-w-xs leading-tight">
+                      <td className="p-3 text-slate-600 dark:text-slate-300 text-[11px] max-w-xs leading-tight">
                         {rel.details}
                       </td>
 
-                      <td className="p-3 text-[10px] text-slate-400 font-medium whitespace-nowrap">
+                      <td className="p-3 text-[10px] text-slate-400 dark:text-slate-500 font-medium whitespace-nowrap">
                         {rel.createdDate}
                       </td>
 
@@ -4711,7 +4719,7 @@ function RelationshipsPage() {
                             deleteRelationship(rel.id)
                             showToast('Relationship removed')
                           }}
-                          className="rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                          className="rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-500 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition cursor-pointer"
                           title="Delete Relationship"
                         >
                           <Trash2 className="size-4" />
@@ -4734,26 +4742,26 @@ function RelationshipsPage() {
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-xs cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <div className="grid size-7 place-items-center rounded-lg bg-blue-600 text-white font-bold">
                   <Link2 className="size-4" />
                 </div>
-                <h3 className="font-bold text-[#09245a] text-sm">Add IP Relationship Link</h3>
+                <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Add IP Relationship Link</h3>
               </div>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-white cursor-pointer">
                 <X className="size-4" />
               </button>
             </div>
 
             <form onSubmit={handleAddSubmit} className="mt-4 space-y-3">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Source Asset *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Source Asset *</label>
                 <select
                   value={sourceId}
                   onChange={(e) => setSourceId(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                 >
                   {assets.map((a) => (
                     <option key={a.id} value={a.id}>
@@ -4764,11 +4772,11 @@ function RelationshipsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Relationship Type *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Relationship Type *</label>
                 <select
                   value={relType}
                   onChange={(e) => setRelType(e.target.value as any)}
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                 >
                   {relTypeOptions.map((t) => (
                     <option key={t} value={t}>
@@ -4779,11 +4787,11 @@ function RelationshipsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Target Asset *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Asset *</label>
                 <select
                   value={targetId}
                   onChange={(e) => setTargetId(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                 >
                   {assets
                     .filter((a) => a.id !== sourceId)
@@ -4796,27 +4804,27 @@ function RelationshipsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Link Scope & Description</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Link Scope & Description</label>
                 <textarea
                   value={relDetails}
                   onChange={(e) => setRelDetails(e.target.value)}
                   placeholder="e.g. Character mascot artwork and logo printed on school bag merchandise..."
                   rows={3}
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-xs outline-none focus:border-blue-400"
+                  className="w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 p-2.5 text-xs outline-none focus:border-blue-400"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 px-3.5 py-2 font-medium text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 px-4 py-2 font-medium text-xs text-white hover:bg-slate-800 shadow-xs transition active:scale-98 cursor-pointer"
+                  className="rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 font-medium text-xs text-white hover:bg-slate-800 shadow-xs transition active:scale-98 cursor-pointer"
                 >
                   Create Relationship
                 </button>
