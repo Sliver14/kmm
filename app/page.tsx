@@ -14,7 +14,7 @@ import {
   Calendar, Clock, User, Folder, PlayCircle, FileCode, RotateCcw, FileCheck, Files, Copy,
   Shield, Lock, ShieldAlert, CheckSquare, MessageSquare, Send, ArrowRight, ShieldQuestion,
   UserCheck, Sliders, RefreshCw, FileUp, FolderArchive, LogOut, PanelLeftClose, PanelLeftOpen,
-  CheckCheck, ScrollText
+  CheckCheck, ScrollText, Crown, Clapperboard, Building2, BadgeCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLovetoonsData } from '@/lib/store/DataContext'
@@ -56,6 +56,7 @@ import {
   GovernanceGateStatus,
   GovernanceCheckValue,
   GovernanceChecksMap,
+  ContentProvenance,
 } from '@/types'
 
 export const tabToPath: Record<string, string> = {
@@ -2818,8 +2819,16 @@ function RightsPage({
     subcategory: string
     rightsType: string
     owner: string
+    ownerCertificateRef: string
     validity: string
     territory: string
+    territoryClearanceStatus: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted'
+    trademarkStatus: 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered'
+    distributionLicense: string
+    productionLicensees: string
+    contentProvenance: ContentProvenance
+    songWriter: string
+    songWriterProvenance: ContentProvenance
     exclusivity: string
     licenceType: string
     royaltyTerms: string
@@ -2830,13 +2839,21 @@ function RightsPage({
     name: assets[0]?.name || '',
     category: assets[0]?.category || 'TV Programme',
     subcategory: assets[0]?.subcategory || 'Broadcast Series',
-    rightsType: '',
-    owner: '',
-    validity: '',
-    territory: '',
-    exclusivity: '',
-    licenceType: '',
-    royaltyTerms: '',
+    rightsType: 'Full Ministry Ownership & Worldwide Distribution',
+    owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+    ownerCertificateRef: 'CERT-EXEC-MIN-2026-HQ',
+    validity: 'Perpetual Ministry Copyright',
+    territory: 'Worldwide / Global',
+    territoryClearanceStatus: 'Cleared Global',
+    trademarkStatus: 'Registered',
+    distributionLicense: 'Exclusive Ministry Global Distribution',
+    productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    contentProvenance: 'Fully Custom',
+    songWriter: '',
+    songWriterProvenance: 'Fully Custom',
+    exclusivity: 'Exclusive',
+    licenceType: 'Ministry Owned',
+    royaltyTerms: '100% Ministry Owned',
     documents: [],
     newDocName: '',
   })
@@ -2852,11 +2869,19 @@ function RightsPage({
       subcategory: newRightsForm.subcategory,
       unit: currentUser.unit,
       rightsType: newRightsForm.rightsType,
-      owner: newRightsForm.owner,
+      owner: newRightsForm.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+      ownerCertificateRef: newRightsForm.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+      trademarkStatus: newRightsForm.trademarkStatus || 'Registered',
+      distributionLicense: newRightsForm.distributionLicense || 'Exclusive Ministry Global Distribution',
+      productionLicensees: newRightsForm.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+      territoryClearanceStatus: newRightsForm.territoryClearanceStatus || 'Cleared Global',
+      contentProvenance: newRightsForm.contentProvenance || 'Fully Custom',
+      songWriter: newRightsForm.songWriter,
+      songWriterProvenance: newRightsForm.songWriterProvenance,
       validity: newRightsForm.validity,
       status: newRightsForm.documents.length > 0 ? 'Review' : 'Pending',
       territory: newRightsForm.territory,
-      term: '',
+      term: 'Perpetual',
       exclusivity: newRightsForm.exclusivity,
       licenceType: newRightsForm.licenceType,
       royaltyTerms: newRightsForm.royaltyTerms,
@@ -2882,8 +2907,8 @@ function RightsPage({
         const match =
           rec.name.toLowerCase().includes(q) ||
           rec.id.toLowerCase().includes(q) ||
-          rec.rightsType.toLowerCase().includes(q) ||
-          rec.owner.toLowerCase().includes(q)
+          (rec.rightsType ? rec.rightsType.toLowerCase().includes(q) : false) ||
+          (rec.owner ? rec.owner.toLowerCase().includes(q) : false)
         if (!match) return false
       }
       return true
@@ -2942,9 +2967,10 @@ function RightsPage({
             <tr className="bg-slate-50/75 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400 dark:border-white/10 font-semibold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
               <th className="px-4 py-3">Asset / Title</th>
               <th className="px-4 py-3">Category</th>
-              <th className="px-4 py-3">Rights Scope</th>
-              <th className="px-4 py-3">Owner / Holder</th>
-              <th className="px-4 py-3">Validity</th>
+              <th className="px-4 py-3">Creation Provenance</th>
+              <th className="px-4 py-3">Owner & Certificate</th>
+              <th className="px-4 py-3">Trademark & License</th>
+              <th className="px-4 py-3">Territory</th>
               <th className="px-4 py-3">Docs</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3 text-right">Action</th>
@@ -2968,15 +2994,71 @@ function RightsPage({
                 </td>
                 <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{rec.category}</td>
                 <td className="px-4 py-3">
-                  <span className="rounded-md bg-slate-100 border border-slate-200 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                    {rec.rightsType || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Pending Scope</span>}
-                  </span>
+                  {(() => {
+                    const prov = rec.contentProvenance || 'Fully Custom'
+                    const isCustom = prov === 'Fully Custom'
+                    const isAssist = prov === 'AI Assisted'
+                    return (
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border",
+                          isCustom && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/60",
+                          isAssist && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800/60",
+                          !isCustom && !isAssist && "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/60"
+                        )}>
+                          <span>{isCustom ? '✦ Custom' : isAssist ? '⚡ AI Assist' : '🤖 Fully AI'}</span>
+                        </span>
+                        {rec.songWriter && (
+                          <span className="text-[9px] text-slate-500 dark:text-slate-400 truncate max-w-[130px]" title={`Writer: ${rec.songWriter} (${rec.songWriterProvenance || 'Custom'})`}>
+                            ♫ {rec.songWriter}
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </td>
-                <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">
-                  {rec.owner || <span className="text-slate-400 italic">Unregistered</span>}
+                <td className="px-4 py-3">
+                  <div className="space-y-0.5">
+                    <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1 text-[11px] truncate max-w-[170px]" title={rec.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}>
+                      <Crown className="size-3 text-amber-500 shrink-0" />
+                      <span className="truncate">{rec.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 font-mono text-[9px] text-emerald-700 dark:text-emerald-400 font-medium">
+                      <BadgeCheck className="size-2.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="truncate">{rec.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ'}</span>
+                    </div>
+                  </div>
                 </td>
-                <td className="px-4 py-3 font-medium text-slate-600 dark:text-slate-400">
-                  {rec.validity || <span className="text-slate-400 italic">—</span>}
+                <td className="px-4 py-3">
+                  <div className="space-y-0.5">
+                    <span className={cn(
+                      "inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold border",
+                      (rec.trademarkStatus || 'Registered') === 'Registered'
+                        ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800/50"
+                        : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50"
+                    )}>
+                      ® {rec.trademarkStatus || 'Registered'}
+                    </span>
+                    <div className="text-[10px] text-slate-600 dark:text-slate-300 truncate max-w-[160px]" title={rec.distributionLicense || 'Exclusive Ministry Global Distribution'}>
+                      {rec.distributionLicense || 'Exclusive Ministry Global Distribution'}
+                    </div>
+                    {rec.productionLicensees && (
+                      <div className="text-[9px] text-slate-400 truncate max-w-[160px]" title={`Licensees: ${rec.productionLicensees}`}>
+                        Prod: {rec.productionLicensees}
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="space-y-0.5">
+                    <div className="font-medium text-slate-700 dark:text-slate-300 text-[11px] flex items-center gap-1">
+                      <Globe2 className="size-3 text-blue-500 shrink-0" />
+                      <span>{rec.territory || 'Worldwide'}</span>
+                    </div>
+                    <div className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      {rec.territoryClearanceStatus || 'Cleared Global'}
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <span className="rounded bg-slate-100 border border-slate-200/80 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 px-2 py-0.5 text-[10px] font-medium text-slate-600">
@@ -3541,29 +3623,36 @@ function RightsDetailsPage({
   const [detailsDocNotes, setDetailsDocNotes] = useState('')
   const [detailsIsCustomAssignee, setDetailsIsCustomAssignee] = useState(assetContributors.length === 0)
 
-  // Edit Governance Form State
+  const isAudioCategory = asset.category?.toLowerCase().includes('audio') || asset.category?.toLowerCase().includes('music')
+  const defaultAssetProvenance: ContentProvenance = asset.contentProvenance || (isAudioCategory ? 'Fully Custom' : 'AI Assisted')
+
+  // Staff Covenant Pop-up Notification Modal State
+  const [isStaffCovenantPopupOpen, setIsStaffCovenantPopupOpen] = useState(false)
+
+  // Edit Governance Form State (Unified with 5 Streamlined Pillars)
   const [editForm, setEditForm] = useState({
-    rightsType: asset.rightsType || '',
-    owner: asset.owner || '',
-    validity: asset.validity || '',
-    territory: asset.territory || '',
-    term: asset.term || '',
-    exclusivity: asset.exclusivity || '',
-    licenceType: asset.licenceType || '',
-    royaltyTerms: asset.royaltyTerms || '',
-    governanceScore: asset.governanceScore ?? 0,
-    status: asset.status || 'Pending',
+    owner: asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+    ownerCertificateRef: asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+    trademarkStatus: (asset.trademarkStatus || 'Registered') as 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered',
+    distributionLicense: asset.distributionLicense || 'Exclusive Ministry Global Distribution',
+    productionLicensees: asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    territory: asset.territory || 'Worldwide / Global',
+    territoryClearanceStatus: (asset.territoryClearanceStatus || 'Cleared Global') as 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted',
+    contentProvenance: defaultAssetProvenance,
+    songWriter: asset.songWriter || (isAudioCategory ? 'KMM Music Ministry (Staff Composer)' : ''),
+    songWriterProvenance: (asset.songWriterProvenance || 'Fully Custom') as ContentProvenance,
+    governanceScore: asset.governanceScore ?? 92,
+    status: asset.status || 'Cleared',
     description: asset.description || '',
   })
 
   // Submit Clearance / New Rights Record Form State
   const [addRightsForm, setAddRightsForm] = useState({
-    rightsType: '',
-    territory: '',
-    term: '',
-    exclusivity: '',
-    licenceType: '',
-    royaltyTerms: '',
+    rightsType: 'Universal Ministry Rights Scope',
+    territory: 'Worldwide / Global',
+    distributionLicense: 'Exclusive Ministry Global Distribution',
+    productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    contentProvenance: 'Fully Custom' as ContentProvenance,
     docName: '',
   })
 
@@ -3573,22 +3662,24 @@ function RightsDetailsPage({
     }
     const initial: GovernanceChecksMap = {}
     complianceProfile.gates.forEach((g) => {
-      initial[g.key] = { status: 'PENDING' }
+      initial[g.key] = { status: 'CLEARED' }
     })
     return initial
   })
 
-  // Scope Configuration & Certificate Modal State
+  // Scope Configuration & Certificate Modal State (Streamlined to 5 Pillars)
   const [isScopeModalOpen, setIsScopeModalOpen] = useState(false)
   const [scopeForm, setScopeForm] = useState({
-    rightsType: asset.rightsType || '',
-    territory: asset.territory || '',
-    term: asset.term || '',
-    validity: asset.validity || '',
-    exclusivity: asset.exclusivity || '',
-    licenceType: asset.licenceType || '',
-    royaltyTerms: asset.royaltyTerms || '',
-    owner: asset.owner || '',
+    owner: asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+    ownerCertificateRef: asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+    trademarkStatus: (asset.trademarkStatus || 'Registered') as 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered',
+    distributionLicense: asset.distributionLicense || 'Exclusive Ministry Global Distribution',
+    productionLicensees: asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    territory: asset.territory || 'Worldwide / Global',
+    territoryClearanceStatus: (asset.territoryClearanceStatus || 'Cleared Global') as 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted',
+    contentProvenance: defaultAssetProvenance,
+    songWriter: asset.songWriter || (isAudioCategory ? 'KMM Music Ministry (Staff Composer)' : ''),
+    songWriterProvenance: (asset.songWriterProvenance || 'Fully Custom') as ContentProvenance,
     description: asset.description || '',
     attachDoc: false,
     docTitle: '',
@@ -3600,14 +3691,16 @@ function RightsDetailsPage({
 
   const openScopeModal = () => {
     setScopeForm({
-      rightsType: asset.rightsType || 'Worldwide Broadcast & Digital Distribution',
-      territory: asset.territory || 'Global / Worldwide',
-      term: asset.term || 'In Perpetuity',
-      validity: asset.validity || 'Active / Perpetual',
-      exclusivity: asset.exclusivity || 'Exclusive Ministry Rights',
-      licenceType: asset.licenceType || '100% Ministry Owned',
-      royaltyTerms: asset.royaltyTerms || 'Zero Royalty Encumbrance',
-      owner: asset.owner || 'Pastor Chelsea Kalu / LoveWorld Kiddies Ministries',
+      owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+      ownerCertificateRef: asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+      trademarkStatus: (asset.trademarkStatus || 'Registered') as any,
+      distributionLicense: asset.distributionLicense || 'Exclusive Ministry Global Distribution',
+      productionLicensees: asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+      territory: asset.territory || 'Worldwide / Global',
+      territoryClearanceStatus: (asset.territoryClearanceStatus || 'Cleared Global') as any,
+      contentProvenance: asset.contentProvenance || defaultAssetProvenance,
+      songWriter: asset.songWriter || (isAudioCategory ? 'KMM Music Ministry (Staff Composer)' : ''),
+      songWriterProvenance: (asset.songWriterProvenance || 'Fully Custom') as any,
       description: asset.description || '',
       attachDoc: false,
       docTitle: '',
@@ -3622,21 +3715,27 @@ function RightsDetailsPage({
   const handleScopeModalSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const willAttach = scopeForm.attachDoc && !!scopeForm.docTitle.trim()
-    const targetDocName = scopeForm.docTitle.trim() || `Clearance_Certificate_${asset.name.replace(/\s+/g, '_')}.pdf`
+    const targetDocName = scopeForm.docTitle.trim() || `Clearance_Certificate_${asset.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
 
     setConfirmConfig({
       isOpen: true,
-      title: 'Confirm Rights Scope & Certificate Filing',
-      description: `Update the legal scope and filing details for "${asset.name}"? This action will update the chain of title and log all modifications in the audit trail.`,
+      title: 'Confirm Rights Scope & Title Filing',
+      description: `Update the legal scope and ministerial filing details for "${asset.name}"? Title is vested in Esteemed Executive Minister (Pastor Chelsea Kalu).`,
       confirmLabel: 'Confirm & Save Scope',
       variant: 'primary',
       badge: 'Scope Configuration',
       details: (
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold text-slate-700">Rights Scope:</span> {scopeForm.rightsType}</div>
-          <div><span className="font-semibold text-slate-700">Territory:</span> {scopeForm.territory}</div>
-          <div><span className="font-semibold text-slate-700">Term:</span> {scopeForm.term}</div>
-          <div><span className="font-semibold text-slate-700">Rights Holder:</span> {scopeForm.owner}</div>
+          <div><span className="font-semibold text-slate-700">Legal Owner:</span> Esteemed Executive Minister (Pastor Chelsea Kalu)</div>
+          <div><span className="font-semibold text-slate-700">Certificate Ref:</span> {scopeForm.ownerCertificateRef}</div>
+          <div><span className="font-semibold text-slate-700">Trademark Status:</span> {scopeForm.trademarkStatus}</div>
+          <div><span className="font-semibold text-slate-700">Distribution License:</span> {scopeForm.distributionLicense}</div>
+          <div><span className="font-semibold text-slate-700">Production Licensees:</span> {scopeForm.productionLicensees}</div>
+          <div><span className="font-semibold text-slate-700">Territory:</span> {scopeForm.territory} ({scopeForm.territoryClearanceStatus})</div>
+          <div><span className="font-semibold text-slate-700">Content Provenance:</span> {scopeForm.contentProvenance}</div>
+          {scopeForm.songWriter && (
+            <div><span className="font-semibold text-slate-700">Songwriter:</span> {scopeForm.songWriter} ({scopeForm.songWriterProvenance})</div>
+          )}
           {willAttach && (
             <div><span className="font-semibold text-emerald-700">Attached Certificate:</span> {targetDocName} ({scopeForm.docType})</div>
           )}
@@ -3660,14 +3759,16 @@ function RightsDetailsPage({
 
         updateRightsRecord({
           ...asset,
-          rightsType: scopeForm.rightsType,
+          owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+          ownerCertificateRef: scopeForm.ownerCertificateRef,
+          trademarkStatus: scopeForm.trademarkStatus,
+          distributionLicense: scopeForm.distributionLicense,
+          productionLicensees: scopeForm.productionLicensees,
           territory: scopeForm.territory,
-          term: scopeForm.term,
-          validity: scopeForm.validity,
-          exclusivity: scopeForm.exclusivity,
-          licenceType: scopeForm.licenceType,
-          royaltyTerms: scopeForm.royaltyTerms,
-          owner: scopeForm.owner,
+          territoryClearanceStatus: scopeForm.territoryClearanceStatus,
+          contentProvenance: scopeForm.contentProvenance,
+          songWriter: scopeForm.songWriter,
+          songWriterProvenance: scopeForm.songWriterProvenance,
           description: scopeForm.description,
           documents: updatedDocs,
         })
@@ -3852,23 +3953,26 @@ function RightsDetailsPage({
       badge: 'Audit Logged',
       details: (
         <div className="text-xs space-y-1">
-          <div><span className="font-semibold text-slate-700">Scope:</span> {editForm.rightsType}</div>
-          <div><span className="font-semibold text-slate-700">Territory:</span> {editForm.territory}</div>
-          <div><span className="font-semibold text-slate-700">Term / Validity:</span> {editForm.validity}</div>
-          <div><span className="font-semibold text-slate-700">Status:</span> {editForm.status}</div>
+          <div><span className="font-semibold text-slate-700">Owner:</span> {editForm.owner}</div>
+          <div><span className="font-semibold text-slate-700">Certificate:</span> {editForm.ownerCertificateRef}</div>
+          <div><span className="font-semibold text-slate-700">Trademark:</span> {editForm.trademarkStatus}</div>
+          <div><span className="font-semibold text-slate-700">Territory:</span> {editForm.territory} ({editForm.territoryClearanceStatus})</div>
+          <div><span className="font-semibold text-slate-700">Provenance:</span> {editForm.contentProvenance}</div>
         </div>
       ),
       onConfirm: () => {
         updateRightsRecord({
           ...asset,
-          rightsType: editForm.rightsType,
           owner: editForm.owner,
-          validity: editForm.validity,
+          ownerCertificateRef: editForm.ownerCertificateRef,
+          trademarkStatus: editForm.trademarkStatus,
+          distributionLicense: editForm.distributionLicense,
+          productionLicensees: editForm.productionLicensees,
           territory: editForm.territory,
-          term: editForm.term,
-          exclusivity: editForm.exclusivity,
-          licenceType: editForm.licenceType,
-          royaltyTerms: editForm.royaltyTerms,
+          territoryClearanceStatus: editForm.territoryClearanceStatus,
+          contentProvenance: editForm.contentProvenance,
+          songWriter: editForm.songWriter,
+          songWriterProvenance: editForm.songWriterProvenance,
           governanceScore: editForm.governanceScore,
           status: editForm.status,
           description: editForm.description,
@@ -3893,8 +3997,9 @@ function RightsDetailsPage({
         <div className="text-xs space-y-1">
           <div><span className="font-semibold text-slate-700">Rights Type:</span> {addRightsForm.rightsType}</div>
           <div><span className="font-semibold text-slate-700">Territory:</span> {addRightsForm.territory}</div>
-          <div><span className="font-semibold text-slate-700">Term:</span> {addRightsForm.term}</div>
-          <div><span className="font-semibold text-slate-700">Document:</span> {addRightsForm.docName}</div>
+          <div><span className="font-semibold text-slate-700">Distribution License:</span> {addRightsForm.distributionLicense}</div>
+          <div><span className="font-semibold text-slate-700">Provenance:</span> {addRightsForm.contentProvenance}</div>
+          <div><span className="font-semibold text-slate-700">Document:</span> {addRightsForm.docName || 'None'}</div>
         </div>
       ),
       onConfirm: () => {
@@ -3916,14 +4021,20 @@ function RightsDetailsPage({
           subcategory: asset.subcategory,
           unit: asset.unit || currentUser.unit,
           rightsType: addRightsForm.rightsType,
-          owner: asset.owner || '',
-          validity: '',
+          owner: asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+          ownerCertificateRef: asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+          trademarkStatus: asset.trademarkStatus || 'Registered',
+          distributionLicense: addRightsForm.distributionLicense,
+          productionLicensees: addRightsForm.productionLicensees,
+          territoryClearanceStatus: asset.territoryClearanceStatus || 'Cleared Global',
+          contentProvenance: addRightsForm.contentProvenance,
+          validity: 'Perpetual Ministry Copyright',
           status: 'Review',
           territory: addRightsForm.territory,
-          term: addRightsForm.term,
-          exclusivity: addRightsForm.exclusivity,
-          licenceType: addRightsForm.licenceType,
-          royaltyTerms: addRightsForm.royaltyTerms,
+          term: 'Perpetual',
+          exclusivity: 'Exclusive',
+          licenceType: 'Ministry Owned',
+          royaltyTerms: '100% Ministry Owned',
           thumbType: asset.thumbType,
           governanceScore: hasDoc ? 20 : 0,
           documents: newDoc ? [newDoc] : [],
@@ -4076,8 +4187,8 @@ function RightsDetailsPage({
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={(asset as any).posterUrl} />
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:border dark:border-purple-800/40 dark:text-purple-300 px-2.5 py-0.5 text-[10px] font-bold">{asset.category}</span>
                 <span className="rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-white/10 px-2 py-0.5 text-[10px] font-bold">ID: {asset.id}</span>
                 <span className={cn(
@@ -4086,28 +4197,64 @@ function RightsDetailsPage({
                 )}>
                   ★ {asset.status}
                 </span>
+
+                {/* 3-Tier Content Provenance Badge */}
+                <span className={cn(
+                  'rounded px-2.5 py-0.5 text-[10px] font-bold border flex items-center gap-1',
+                  (asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800/50 dark:text-emerald-300'
+                    : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted'
+                      ? 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:border-sky-800/50 dark:text-sky-300'
+                      : 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:border-purple-800/50 dark:text-purple-300'
+                )}>
+                  {(asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom' ? '✦ Fully Custom' : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted' ? '⚡ AI Assisted' : '🤖 Fully AI'}
+                </span>
+
+                {/* Pop-up Notification Modal Trigger for KMM Staff Ownership */}
+                <button
+                  type="button"
+                  onClick={() => setIsStaffCovenantPopupOpen(true)}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 text-[10px] font-bold border border-amber-200 dark:border-amber-800/60 transition cursor-pointer shadow-2xs"
+                  title="View KMM Staff Content Ownership Covenant"
+                >
+                  <ScrollText className="size-3 text-amber-600" />
+                  <span>KMM Staff Content Notice ⓘ</span>
+                </button>
               </div>
+
               <h1 className="text-xl sm:text-2xl font-black text-[#09245a] dark:text-white pt-1">{asset.name}</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                {asset.rightsType || <span className="text-amber-600 dark:text-amber-400 italic font-medium">Unconfigured Rights Scope (Pending Filing)</span>}
-              </p>
+              
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+                  <span>Owner: <b className="text-[#09245a] dark:text-white">{asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}</b></span>
+                </span>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <span>
+                  Certificate Ref: <span className="font-mono font-semibold text-blue-700 dark:text-blue-400">{asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ'}</span>
+                </span>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <span className="text-slate-500">
+                  {asset.trademarkStatus || 'Registered'} Trademark • {asset.distributionLicense || 'Exclusive Ministry Global Distribution'}
+                </span>
+              </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 self-end sm:self-auto">
             <button
-              onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-blue-50 hover:text-blue-600 transition"
+              onClick={openScopeModal}
+              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-blue-50 hover:text-blue-600 transition cursor-pointer"
             >
               <Pencil className="size-3.5" />
-              <span>Edit Governance Details</span>
+              <span>Update Scope Dimensions</span>
             </button>
             <button
-              onClick={() => setIsAddRightsModalOpen(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition"
+              onClick={openScopeModal}
+              className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition cursor-pointer"
             >
-              <Plus className="size-4" />
-              <span>+ Add Rights Scope</span>
+              <FileUp className="size-4" />
+              <span>+ Attach Certificate / Scope</span>
             </button>
           </div>
         </div>
@@ -4199,29 +4346,43 @@ function RightsDetailsPage({
       {/* 4 Status KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
         <div className="rounded-xl border border-blue-100 bg-blue-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Chain of Title</div>
-          <div className={cn(
-            "text-xs font-bold mt-0.5",
-            (asset.documents?.length || 0) > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
-          )}>
-            {(asset.documents?.length || 0) > 0 ? `Documented & Filed ✓ (${asset.documents?.length} Files)` : 'Pending Documentation (0 Files Attached)'}
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Legal Ownership & Title</div>
+          <div className="text-xs font-bold text-blue-900 dark:text-blue-300 mt-0.5 truncate" title={asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}>
+            {asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}
+          </div>
+          <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
+            Sole Title Vested (Cert #{asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ'})
           </div>
         </div>
+
         <div className="rounded-xl border border-purple-100 bg-purple-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Rights Clearance</div>
-          <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">{asset.status}</div>
-        </div>
-        <div className="rounded-xl border border-amber-100 bg-amber-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Territory & Term</div>
-          <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">
-            {asset.territory || asset.term
-              ? `${asset.territory || 'Unspecified'}${asset.term ? ` • ${asset.term}` : ''}`
-              : <span className="text-amber-600 dark:text-amber-400">Territory & Term Not Filed</span>}
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Trademark & Licensing</div>
+          <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+            {asset.trademarkStatus || 'Registered'} Trademark
+          </div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate" title={asset.distributionLicense || 'Exclusive Ministry Global Distribution'}>
+            {asset.distributionLicense || 'Exclusive Ministry Global Distribution'}
           </div>
         </div>
+
+        <div className="rounded-xl border border-amber-100 bg-amber-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Territory Clearance</div>
+          <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">
+            {asset.territory || 'Worldwide / Global'}
+          </div>
+          <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
+            {asset.territoryClearanceStatus || 'Cleared Global'}
+          </div>
+        </div>
+
         <div className="rounded-xl border border-teal-100 bg-teal-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
-          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Governance Score</div>
-          <div className="text-xs font-bold text-blue-700 dark:text-blue-400 mt-0.5">{asset.governanceScore ?? 0}% Compliant</div>
+          <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Creation Provenance</div>
+          <div className="text-xs font-bold text-blue-700 dark:text-blue-400 mt-0.5">
+            {asset.contentProvenance || defaultAssetProvenance}
+          </div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+            {asset.governanceScore ?? 92}% Compliant
+          </div>
         </div>
       </div>
 
@@ -4278,7 +4439,7 @@ function RightsDetailsPage({
                     Rights & Governance Scope Breakdown
                   </h2>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Active legal ownership parameters, territorial bounds, licensing rights, and filing certificates.
+                    Official intellectual asset legal dimensions: universal executive ownership, distribution & production licensing, territorial bounds, and AI content provenance.
                   </p>
                 </div>
                 <button
@@ -4291,66 +4452,156 @@ function RightsDetailsPage({
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              {/* 5 Streamlined Core Dimensions */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                {/* 1. Legal Asset Owner & Certificate */}
                 <div
                   onClick={openScopeModal}
-                  className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group"
+                  className="rounded-xl border border-blue-200/80 bg-blue-50/50 dark:border-blue-800/40 dark:bg-blue-950/20 p-4 space-y-1.5 hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer group shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Primary Rights Scope</span>
+                    <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 uppercase flex items-center gap-1">
+                      <ShieldCheck className="size-3 text-blue-600" />
+                      <span>1. Asset Legal Ownership</span>
+                    </span>
                     <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
                   </div>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">
-                    {asset.rightsType || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Not Configured (Pending Scope Filing)</span>}
+                  <div className="font-bold text-slate-900 dark:text-white text-sm leading-snug">
+                    {asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}
                   </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {asset.exclusivity || <span className="text-slate-400 italic">No exclusivity terms filed</span>}
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300 flex items-center gap-1.5 pt-0.5">
+                    <span className="font-semibold text-blue-700 dark:text-blue-400">Attached Certificate:</span>
+                    <span className="font-mono text-[10px] bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800/50">
+                      {asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium">
+                    ✓ 100% Sole Ministry Title Vested
                   </div>
                 </div>
 
+                {/* 2. Trademark & Distribution Licensing */}
                 <div
                   onClick={openScopeModal}
-                  className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group"
+                  className="rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1.5 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Territory Clearance</span>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
+                      <BadgeCheck className="size-3 text-purple-600" />
+                      <span>2. Trademark & Distribution</span>
+                    </span>
                     <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
                   </div>
                   <div className="font-bold text-slate-900 dark:text-white text-sm">
-                    {asset.territory || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Territory Not Filed</span>}
+                    {asset.trademarkStatus || 'Registered'} Trademark
                   </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Term: {asset.term || <span className="text-slate-400 italic">Unspecified</span>} {asset.validity ? `(${asset.validity})` : ''}
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300 truncate" title={asset.distributionLicense || 'Exclusive Ministry Global Distribution'}>
+                    {asset.distributionLicense || 'Exclusive Ministry Global Distribution'}
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Distribution clearance active across global broadcast & digital networks
                   </div>
                 </div>
 
+                {/* 3. Authorized Production Licensees */}
                 <div
                   onClick={openScopeModal}
-                  className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group"
+                  className="rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1.5 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group shadow-2xs"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Registered Rights Holder</span>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
+                      <Clapperboard className="size-3 text-indigo-600" />
+                      <span>3. Production Licensees</span>
+                    </span>
                     <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
                   </div>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">
-                    {asset.owner || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Unregistered (No Holder Assigned)</span>}
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Parent Agency: {asset.agency || 'Lovetoons'}</div>
-                </div>
-
-                <div
-                  onClick={openScopeModal}
-                  className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Licensing & Royalty Terms</span>
-                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
-                  </div>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">
-                    {asset.licenceType || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Unspecified License</span>}
+                  <div className="font-bold text-slate-900 dark:text-white text-sm leading-snug truncate" title={asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media'}>
+                    {asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media'}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {asset.royaltyTerms || <span className="text-slate-400 italic">No royalty terms configured</span>}
+                    Entities with verified license to produce content & products with this asset
+                  </div>
+                  <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">
+                    Authorized Production Mandate
+                  </div>
+                </div>
+
+                {/* 4. Territory License & Clearance */}
+                <div
+                  onClick={openScopeModal}
+                  className="rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1.5 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
+                      <Globe2 className="size-3 text-amber-600" />
+                      <span>4. Territory License & Clearance</span>
+                    </span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
+                  </div>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">
+                    {asset.territory || 'Worldwide / Global'}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-bold">
+                      {asset.territoryClearanceStatus || 'Cleared Global'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Full territorial clearance for satellite, digital streaming & localized publishing
+                  </div>
+                </div>
+
+                {/* 5. Creation Provenance & Audio Songwriter */}
+                <div
+                  onClick={openScopeModal}
+                  className="rounded-xl border border-slate-200/90 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-2 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group sm:col-span-2 lg:col-span-2 shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
+                      <Sparkles className="size-3 text-cyan-600" />
+                      <span>5. Content Provenance & Audio Governance</span>
+                    </span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={cn(
+                      'rounded-lg px-2.5 py-1 text-xs font-bold border flex items-center gap-1',
+                      (asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800/60 dark:text-emerald-300'
+                        : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted'
+                          ? 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:border-sky-800/60 dark:text-sky-300'
+                          : 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:border-purple-800/60 dark:text-purple-300'
+                    )}>
+                      {(asset.contentProvenance || defaultAssetProvenance) === 'Fully Custom' ? '✦ Fully Custom' : (asset.contentProvenance || defaultAssetProvenance) === 'AI Assisted' ? '⚡ AI Assisted' : '🤖 Fully AI'}
+                      <span className="font-normal opacity-80">(Video, Audio, Graphics)</span>
+                    </span>
+
+                    {/* Audio Songwriter Attribution */}
+                    <span className="rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Music className="size-3 text-blue-600" />
+                      <span>Songwriter: <b>{asset.songWriter || (isAudioCategory ? 'KMM Music Ministry (Staff Composer)' : 'In-House Creative Staff')}</b></span>
+                      <span className="text-[10px] text-blue-600 dark:text-blue-400">({asset.songWriterProvenance || 'Fully Custom'})</span>
+                    </span>
+                  </div>
+
+                  {/* KMM Staff Ownership Clause Banner Box */}
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsStaffCovenantPopupOpen(true)
+                    }}
+                    className="flex items-center justify-between rounded-lg bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 p-2.5 text-xs text-amber-900 dark:text-amber-200 hover:bg-amber-100/90 transition cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ScrollText className="size-4 text-amber-600 shrink-0" />
+                      <span className="font-semibold text-[11px]">
+                        <b>Ministry Notice:</b> Any content produced by any staff member belongs exclusively to KMM.
+                      </span>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-bold text-amber-800 dark:text-amber-300 underline ml-2">
+                      View Staff Covenant →
+                    </span>
                   </div>
                 </div>
               </div>
@@ -5083,256 +5334,7 @@ function RightsDetailsPage({
         </div>
       )}
 
-      {/* EDIT GOVERNANCE MODAL */}
-      {isEditModalOpen && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setIsEditModalOpen(false)
-          }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
-        >
-          <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
-              <div className="flex items-center gap-2 font-bold text-[#09245a] dark:text-white text-sm">
-                <Pencil className="size-4 text-blue-600 dark:text-blue-400" />
-                <span>Edit Governance & Rights Details</span>
-              </div>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleEditSubmit} className="mt-4 space-y-3.5">
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rights Scope / Title</label>
-                <input
-                  value={editForm.rightsType}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, rightsType: e.target.value }))}
-                  placeholder="e.g. Worldwide Broadcast & Streaming (or leave unassigned)"
-                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rights Holder / Owner</label>
-                  <input
-                    value={editForm.owner}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, owner: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Clearance Status</label>
-                  <select
-                    value={editForm.status}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, status: e.target.value as any }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  >
-                    <option value="Cleared">Cleared</option>
-                    <option value="Review">Under Review</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Expired">Expired</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Territory</label>
-                  <input
-                    value={editForm.territory}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, territory: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Term / Validity</label>
-                  <input
-                    value={editForm.validity}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, validity: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Exclusivity</label>
-                  <input
-                    value={editForm.exclusivity}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, exclusivity: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Licence Type</label>
-                  <input
-                    value={editForm.licenceType}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, licenceType: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Royalty Terms</label>
-                <input
-                  value={editForm.royaltyTerms}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, royaltyTerms: e.target.value }))}
-                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Legal Description & Notes</label>
-                <textarea
-                  value={editForm.description}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
-                  rows={2}
-                  className="w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm transition cursor-pointer"
-                >
-                  Save & Log Audit Trail
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* SUBMIT RIGHTS CLEARANCE / ADD RIGHTS SCOPE MODAL */}
-      {isAddRightsModalOpen && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setIsAddRightsModalOpen(false)
-          }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
-        >
-          <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
-              <div className="flex items-center gap-2 font-bold text-[#09245a] dark:text-white text-sm">
-                <Plus className="size-4 text-blue-600 dark:text-blue-400" />
-                <span>Submit Rights Scope for {asset.name}</span>
-              </div>
-              <button
-                onClick={() => setIsAddRightsModalOpen(false)}
-                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddRightsSubmit} className="mt-4 space-y-3.5">
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">New Rights Scope / Type *</label>
-                <input
-                  value={addRightsForm.rightsType}
-                  onChange={(e) => setAddRightsForm((prev) => ({ ...prev, rightsType: e.target.value }))}
-                  placeholder="e.g. Worldwide Merchandising & Digital Licensing"
-                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Territory</label>
-                  <input
-                    value={addRightsForm.territory}
-                    onChange={(e) => setAddRightsForm((prev) => ({ ...prev, territory: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Term Duration</label>
-                  <input
-                    value={addRightsForm.term}
-                    onChange={(e) => setAddRightsForm((prev) => ({ ...prev, term: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Exclusivity</label>
-                  <input
-                    value={addRightsForm.exclusivity}
-                    onChange={(e) => setAddRightsForm((prev) => ({ ...prev, exclusivity: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Licence Type</label>
-                  <input
-                    value={addRightsForm.licenceType}
-                    onChange={(e) => setAddRightsForm((prev) => ({ ...prev, licenceType: e.target.value }))}
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Royalty Split / Financial Terms</label>
-                <input
-                  value={addRightsForm.royaltyTerms}
-                  onChange={(e) => setAddRightsForm((prev) => ({ ...prev, royaltyTerms: e.target.value }))}
-                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Supporting Document File</label>
-                <input
-                  value={addRightsForm.docName}
-                  onChange={(e) => setAddRightsForm((prev) => ({ ...prev, docName: e.target.value }))}
-                  placeholder="e.g. Licensing_Agreement_Draft.pdf"
-                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                />
-              </div>
-
-              <div className="rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-800/50 text-[11px] text-amber-800 dark:text-amber-300 p-3">
-                <b>Note for Review Workflow:</b> Submitting this rights clearance automatically adds an entry to the Approvals Queue for Lead Reviewers and Super Admins to verify.
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setIsAddRightsModalOpen(false)}
-                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm transition cursor-pointer"
-                >
-                  Submit for Clearance Review
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 1. INDIVIDUAL CONCISE MODAL: RIGHTS & GOVERNANCE SCOPE & CERTIFICATE */}
+      {/* 1. STREAMLINED 5-PILLAR RIGHTS & GOVERNANCE SCOPE MODAL */}
       {isScopeModalOpen && (
         <div
           onClick={(e) => {
@@ -5348,7 +5350,7 @@ function RightsDetailsPage({
                   <span>Rights & Governance Scope Configuration</span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Update legal scope dimensions and attach official filing certificates for <b>{asset.name}</b>.
+                  Universal executive ownership, licensing, production licensees, territorial clearance, and AI creation provenance for <b>{asset.name}</b>.
                 </p>
               </div>
               <button
@@ -5361,111 +5363,210 @@ function RightsDetailsPage({
             </div>
 
             <form onSubmit={handleScopeModalSubmit} className="space-y-4">
-              {/* Section 1: Scope Specifications */}
-              <div className="space-y-3">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                  1. Legal Scope & Licensing Terms
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Primary Rights Scope *</label>
-                    <input
-                      value={scopeForm.rightsType}
-                      onChange={(e) => setScopeForm((prev) => ({ ...prev, rightsType: e.target.value }))}
-                      placeholder="e.g. Worldwide Broadcast & Digital Distribution"
-                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                      required
-                    />
+              {/* Pillar 1: Owner of all assets is Esteemed Executive Minister (Pastor Chelsea Kalu) - certificate */}
+              <div className="rounded-xl border border-blue-200/80 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/20 p-3.5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-950 dark:text-blue-200 uppercase tracking-wider">
+                    <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+                    <span>Pillar 1: Legal Asset Ownership & Title Certificate</span>
                   </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Exclusivity</label>
-                    <select
-                      value={scopeForm.exclusivity}
-                      onChange={(e) => setScopeForm((prev) => ({ ...prev, exclusivity: e.target.value }))}
-                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
-                    >
-                      <option value="Exclusive Ministry Rights">Exclusive Ministry Rights</option>
-                      <option value="Non-Exclusive Ministry License">Non-Exclusive Ministry License</option>
-                      <option value="Sole Distributor Rights">Sole Distributor Rights</option>
-                      <option value="Co-Exclusive Partnership">Co-Exclusive Partnership</option>
-                      <option value="Unrestricted Public Domain">Unrestricted Public Domain</option>
-                    </select>
-                  </div>
+                  <span className="rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 px-2.5 py-0.5 text-[9px] font-black uppercase">
+                    Universal Vesting
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-lg bg-white dark:bg-slate-950 border border-blue-100 dark:border-blue-900/40 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Territory Clearance *</label>
-                    <input
-                      value={scopeForm.territory}
-                      onChange={(e) => setScopeForm((prev) => ({ ...prev, territory: e.target.value }))}
-                      placeholder="e.g. Worldwide / Global, Sub-Saharan Africa"
-                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                      required
-                    />
+                    <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">Sole Registered Owner</div>
+                    <div className="font-black text-slate-900 dark:text-white text-sm">
+                      Esteemed Executive Minister (Pastor Chelsea Kalu)
+                    </div>
                   </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Term / Duration *</label>
-                    <input
-                      value={scopeForm.term}
-                      onChange={(e) => setScopeForm((prev) => ({ ...prev, term: e.target.value }))}
-                      placeholder="e.g. In Perpetuity, 5 Years with Auto-Renewal"
-                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Registered Rights Holder / Owner</label>
-                    <input
-                      value={scopeForm.owner}
-                      onChange={(e) => setScopeForm((prev) => ({ ...prev, owner: e.target.value }))}
-                      placeholder="e.g. Pastor Chelsea Kalu / LoveWorld Kiddies Ministries"
-                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Licence Type</label>
-                    <select
-                      value={scopeForm.licenceType}
-                      onChange={(e) => setScopeForm((prev) => ({ ...prev, licenceType: e.target.value }))}
-                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
-                    >
-                      <option value="100% Ministry Owned">100% Ministry Owned</option>
-                      <option value="Work-for-Hire Assignment">Work-for-Hire Assignment</option>
-                      <option value="Master License Agreement">Master License Agreement</option>
-                      <option value="Royalty-Free Perpetual">Royalty-Free Perpetual</option>
-                      <option value="Commercial Syndication">Commercial Syndication</option>
-                    </select>
+                  <div className="sm:text-right">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
+                      ✓ Title Vested
+                    </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Royalty & Financial Terms</label>
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Title Certificate Filing Ref #
+                  </label>
                   <input
-                    value={scopeForm.royaltyTerms}
-                    onChange={(e) => setScopeForm((prev) => ({ ...prev, royaltyTerms: e.target.value }))}
-                    placeholder="e.g. Zero Royalty Encumbrance — 100% Retained by Ministry"
-                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Legal Summary & Chain of Title Notes</label>
-                  <textarea
-                    value={scopeForm.description}
-                    onChange={(e) => setScopeForm((prev) => ({ ...prev, description: e.target.value }))}
-                    placeholder="Legal history, chain of title, script sign-offs, and administrative records..."
-                    rows={2}
-                    className="w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400"
+                    value={scopeForm.ownerCertificateRef}
+                    onChange={(e) => setScopeForm((prev) => ({ ...prev, ownerCertificateRef: e.target.value }))}
+                    placeholder="e.g. CERT-EXEC-MIN-2026-HQ"
+                    className="h-8.5 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 font-mono"
                   />
                 </div>
               </div>
 
-              {/* Section 2: Attach Official Certificate or Filing Document */}
-              <div className="rounded-xl border border-blue-100 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/20 p-4 space-y-3">
+              {/* Pillar 2: Trade marked and licensed (distribution) */}
+              <div className="rounded-xl border border-purple-100 dark:border-purple-900/40 bg-purple-50/30 dark:bg-purple-950/15 p-3.5 space-y-3">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-950 dark:text-purple-200 uppercase tracking-wider">
+                  <BadgeCheck className="size-4 text-purple-600 dark:text-purple-400" />
+                  <span>Pillar 2: Trademark Registration & Distribution License</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Trademark Registration Status *</label>
+                    <select
+                      value={scopeForm.trademarkStatus}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, trademarkStatus: e.target.value as any }))}
+                      className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                    >
+                      <option value="Registered">Registered Trademark</option>
+                      <option value="Pending Filing">Pending Filing</option>
+                      <option value="In Progress">In Progress / Under Examination</option>
+                      <option value="Unregistered">Unregistered</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Distribution License Mandate *</label>
+                    <select
+                      value={scopeForm.distributionLicense}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, distributionLicense: e.target.value }))}
+                      className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                    >
+                      <option value="Exclusive Ministry Global Distribution">Exclusive Ministry Global Distribution</option>
+                      <option value="Non-Exclusive Digital Syndication">Non-Exclusive Digital Syndication</option>
+                      <option value="Global Broadcast Syndication License">Global Broadcast Syndication License</option>
+                      <option value="Licensed Partner Distribution">Licensed Partner Distribution</option>
+                      <option value="Educational / Church Network Clearance">Educational / Church Network Clearance</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pillar 3: Those with license to produce with those asset */}
+              <div className="rounded-xl border border-indigo-100 dark:border-indigo-900/40 bg-indigo-50/30 dark:bg-indigo-950/15 p-3.5 space-y-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-indigo-950 dark:text-indigo-200 uppercase tracking-wider">
+                  <Clapperboard className="size-4 text-indigo-600 dark:text-indigo-400" />
+                  <span>Pillar 3: Authorized Production Licensees</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Approved operational units, animation studios, or publishing partners licensed to produce deliverables with this asset:
+                </p>
+                <input
+                  value={scopeForm.productionLicensees}
+                  onChange={(e) => setScopeForm((prev) => ({ ...prev, productionLicensees: e.target.value }))}
+                  placeholder="e.g. Lovetoons Animation Studio, KMM Publishing, LoveWorld Media"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                />
+              </div>
+
+              {/* Pillar 4: Territory license and clearance */}
+              <div className="rounded-xl border border-amber-100 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/15 p-3.5 space-y-3">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-950 dark:text-amber-200 uppercase tracking-wider">
+                  <Globe2 className="size-4 text-amber-600 dark:text-amber-400" />
+                  <span>Pillar 4: Territory License & Clearance</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Cleared Territory *</label>
+                    <input
+                      value={scopeForm.territory}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, territory: e.target.value }))}
+                      placeholder="e.g. Worldwide / Global, Sub-Saharan Africa"
+                      className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Clearance Status *</label>
+                    <select
+                      value={scopeForm.territoryClearanceStatus}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, territoryClearanceStatus: e.target.value as any }))}
+                      className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                    >
+                      <option value="Cleared Global">Cleared Global</option>
+                      <option value="Cleared Regional">Cleared Regional</option>
+                      <option value="Pending Clearance">Pending Clearance</option>
+                      <option value="Restricted">Restricted</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pillar 5: Audio song writer & AI Creation Provenance (across video, audio, graphics) */}
+              <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-3.5 space-y-3">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  <Sparkles className="size-4 text-cyan-600 dark:text-cyan-400" />
+                  <span>Pillar 5: Content Creation Provenance & Audio Songwriter</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Creation Provenance (Video, Audio, Graphics) *
+                    </label>
+                    <select
+                      value={scopeForm.contentProvenance}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, contentProvenance: e.target.value as any }))}
+                      className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 font-semibold"
+                    >
+                      <option value="Fully Custom">✦ Fully Custom (100% In-House Creative)</option>
+                      <option value="AI Assisted">⚡ AI Assisted (Human Directed + AI Generation)</option>
+                      <option value="Fully AI">🤖 Fully AI (Synthesized via Autonomous AI)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Audio Songwriter / Composer
+                    </label>
+                    <input
+                      value={scopeForm.songWriter}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, songWriter: e.target.value }))}
+                      placeholder="e.g. KMM Music Ministry (Staff Composer)"
+                      className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Songwriter Provenance Tier
+                    </label>
+                    <select
+                      value={scopeForm.songWriterProvenance}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, songWriterProvenance: e.target.value as any }))}
+                      className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                    >
+                      <option value="Fully Custom">Fully Custom Composed</option>
+                      <option value="AI Assisted">AI Assisted Composition / Stems</option>
+                      <option value="Fully AI">Fully AI Generated Musical Score</option>
+                    </select>
+                  </div>
+
+                  {/* KMM Staff Covenant Notice in Modal */}
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setIsStaffCovenantPopupOpen(true)}
+                      className="w-full flex items-center justify-between p-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-left hover:bg-amber-100/80 transition cursor-pointer"
+                    >
+                      <div className="flex items-center gap-1.5 truncate">
+                        <ScrollText className="size-3.5 text-amber-600 shrink-0" />
+                        <span className="text-[10px] font-semibold truncate">
+                          Staff Clause: All staff content belongs to KMM
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-bold text-amber-700 dark:text-amber-300 shrink-0 underline ml-1">
+                        View Notice →
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attach Scope Certificate or Filing Document */}
+              <div className="rounded-xl border border-blue-100 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/20 p-3.5 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <input
@@ -5492,7 +5593,7 @@ function RightsDetailsPage({
                         <input
                           value={scopeForm.docTitle}
                           onChange={(e) => setScopeForm((prev) => ({ ...prev, docTitle: e.target.value }))}
-                          placeholder={`Certificate_${asset.name.replace(/\s+/g, '_')}_Official.pdf`}
+                          placeholder={`Certificate_${asset.name.replace(/[^a-zA-Z0-9]/g, '_')}_Official.pdf`}
                           className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
                           required={scopeForm.attachDoc}
                         />
@@ -5565,6 +5666,109 @@ function RightsDetailsPage({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* KMM STAFF OWNERSHIP & CONTENT COVENANT POP-UP NOTIFICATION MODAL */}
+      {isStaffCovenantPopupOpen && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsStaffCovenantPopupOpen(false)
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm animate-in fade-in cursor-pointer"
+        >
+          <div className="w-full max-w-lg rounded-2xl border border-amber-200/80 dark:border-amber-700/50 bg-white dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default space-y-4">
+            <div className="flex items-start justify-between border-b border-slate-100 dark:border-white/10 pb-3.5">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 grid place-items-center shrink-0 border border-amber-200 dark:border-amber-700/40">
+                  <ShieldCheck className="size-5.5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-[#09245a] dark:text-white text-base">
+                      KMM Staff Intellectual Property Covenant
+                    </h3>
+                    <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 px-2 py-0.5 text-[9px] font-black uppercase">
+                      Official Policy
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Ministerial Intellectual Asset Governance Notice
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsStaffCovenantPopupOpen(false)}
+                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Main Covenant Callout */}
+            <div className="rounded-xl border border-amber-300 bg-amber-50/80 dark:border-amber-800/60 dark:bg-amber-950/30 p-4 space-y-2 text-xs">
+              <div className="font-black text-amber-950 dark:text-amber-200 text-sm flex items-center gap-1.5">
+                <span>⚠️ Universal Staff Ownership Clause</span>
+              </div>
+              <p className="text-amber-900 dark:text-amber-300 leading-relaxed font-semibold">
+                Any content, song compositions, audio stems, lyrics, scripts, animations, character designs, 3D assets, illustrations, or code produced by any staff member belongs unconditionally and exclusively to KMM (Kiddies Media Ministries).
+              </p>
+            </div>
+
+            {/* Governance Details */}
+            <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
+              <div className="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-100 bg-slate-50 dark:border-white/5 dark:bg-slate-800/40">
+                <Crown className="size-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold text-slate-900 dark:text-white text-[11px]">Sole Executive Stewardship</div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    All intellectual assets are vested under the direct authority of the <b>Esteemed Executive Minister (Pastor Chelsea Kalu)</b> with full global copyright and distribution authority.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-100 bg-slate-50 dark:border-white/5 dark:bg-slate-800/40">
+                <FileCheck className="size-4 text-blue-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold text-slate-900 dark:text-white text-[11px]">Work-For-Hire Doctrine</div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Individual creatives, staff songwriters, animators, and developers retain zero personal copyright, retained royalties, or third-party encumbrances.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-100 bg-slate-50 dark:border-white/5 dark:bg-slate-800/40">
+                <Sparkles className="size-4 text-purple-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold text-slate-900 dark:text-white text-[11px]">AI & Custom Provenance Tracking</div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Every asset is classified across 3 tiers (Fully Custom, AI Assisted, Fully AI) to ensure clear legal provenance across video, audio, and graphics.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => {
+                  showToast('Downloading KMM Staff Intellectual Property Covenant Policy PDF...')
+                }}
+                className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                Download Policy PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsStaffCovenantPopupOpen(false)}
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/25 transition cursor-pointer"
+              >
+                Understood & Acknowledged ✓
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -184,6 +184,8 @@ export interface AssetArchive {
   files: ArchiveFileItem[]
 }
 
+export type ContentProvenance = 'Fully Custom' | 'AI Assisted' | 'Fully AI'
+
 export interface AssetData {
   id: string
   name: string
@@ -203,6 +205,14 @@ export interface AssetData {
   thumbType?: AssetThumbType
   posterUrl?: string
   rightsHolder: string
+  ownerCertificateRef?: string
+  trademarkStatus?: 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered'
+  distributionLicense?: string
+  productionLicensees?: string
+  territoryClearanceStatus?: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted'
+  songWriter?: string
+  songWriterProvenance?: ContentProvenance
+  contentProvenance?: ContentProvenance
   description: string
   tags: string[]
   attributes?: AssetDynamicAttributes
@@ -273,20 +283,40 @@ export interface RightsRecord {
   agency?: Agency
   unit?: Agency // Backward-compatibility
   contributors?: AssetContributor[]
-  rightsType: string
-  owner: string
-  validity: string
   status: 'Cleared' | 'Review' | 'Pending' | 'Expired'
-  territory?: string
-  term?: string
-  exclusivity?: string
-  licenceType?: string
-  royaltyTerms?: string
   thumbType: AssetThumbType
   description?: string
   governanceScore?: number
   documents?: RightsDocument[]
   governanceChecks?: GovernanceChecksMap
+
+  // 1. Owner & Certificate
+  owner: string // Esteemed Executive Minister (Pastor Chelsea Kalu)
+  ownerCertificateRef?: string
+
+  // 2. Trademark & Distribution License
+  trademarkStatus?: 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered'
+  distributionLicense?: string
+
+  // 3. Authorized Production Licensees
+  productionLicensees?: string
+
+  // 4. Territory License & Clearance
+  territory?: string
+  territoryClearanceStatus?: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted'
+
+  // 5. Creation Provenance & Audio Songwriter
+  contentProvenance?: ContentProvenance
+  songWriter?: string
+  songWriterProvenance?: ContentProvenance
+
+  // Optional backward-compatibility fields
+  rightsType?: string
+  validity?: string
+  term?: string
+  exclusivity?: string
+  licenceType?: string
+  royaltyTerms?: string
 }
 
 export interface RelationshipItem {

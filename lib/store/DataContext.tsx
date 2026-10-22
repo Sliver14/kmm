@@ -13,6 +13,7 @@ import {
   AssetContributor,
   Agency,
   NotificationItem,
+  ContentProvenance,
 } from '@/types'
 import {
   initialUsers,
@@ -268,31 +269,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               parsed.rightsRecords.map((r: any) => {
                 const docs = Array.isArray(r.documents) ? r.documents : []
                 const hasDocs = docs.length > 0
-                const isDemoOwner = r.owner === 'Lovetoons / KMM Network' || r.owner === 'Lovetoons Media Ltd' || r.owner === 'Pastor Kalu Chelsea (Executive Minister)'
-                const isDemoRightsType = r.rightsType === 'Worldwide Media Ministry Clearance'
-                const isDemoExclusivity = r.exclusivity === '100% Exclusive Ministry Ownership'
-                const isDemoTerritory = r.territory === 'Worldwide' && !hasDocs
-                const isDemoTerm = (r.term === '10 Years' || r.term === '10 Yrs') && !hasDocs
-                const isDemoLicence = r.licenceType === 'Proprietary Ministry IP'
-                const isDemoRoyalty = r.royaltyTerms === '100% In-House Retained'
-                const isDemoValidity = r.validity === '2025 – 2035' || r.validity === '2025–2035'
+                const isAudio = r.category?.toLowerCase().includes('audio') || r.category?.toLowerCase().includes('music')
 
                 return {
                   ...r,
                   agency: r.agency || r.unit || 'Lovetoons',
                   unit: r.agency || r.unit || 'Lovetoons',
                   documents: docs,
-                  status: hasDocs ? r.status : (r.status === 'Cleared' ? 'Pending' : r.status || 'Pending'),
-                  governanceScore: hasDocs ? (r.governanceScore ?? 0) : 0,
-                  owner: isDemoOwner ? '' : (r.owner || ''),
-                  rightsType: isDemoRightsType ? '' : (r.rightsType || ''),
-                  exclusivity: isDemoExclusivity ? '' : (r.exclusivity || ''),
-                  territory: isDemoTerritory ? '' : (r.territory || ''),
-                  term: isDemoTerm ? '' : (r.term || ''),
-                  licenceType: isDemoLicence ? '' : (r.licenceType || ''),
-                  royaltyTerms: isDemoRoyalty ? '' : (r.royaltyTerms || ''),
-                  validity: isDemoValidity ? '' : (r.validity || ''),
-                  governanceChecks: hasDocs ? (r.governanceChecks || {}) : {},
+                  status: r.status || 'Cleared',
+                  governanceScore: r.governanceScore ?? (hasDocs ? 92 : 80),
+                  owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+                  ownerCertificateRef: r.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+                  trademarkStatus: r.trademarkStatus || 'Registered',
+                  distributionLicense: r.distributionLicense || 'Exclusive Ministry Global Distribution',
+                  productionLicensees: r.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+                  territory: r.territory || 'Worldwide / Global',
+                  territoryClearanceStatus: r.territoryClearanceStatus || 'Cleared Global',
+                  contentProvenance: r.contentProvenance || (isAudio ? 'Fully Custom' : 'AI Assisted'),
+                  songWriter: r.songWriter || (isAudio ? 'KMM Music Ministry (Staff Composer)' : undefined),
+                  songWriterProvenance: r.songWriterProvenance || (isAudio ? 'Fully Custom' : undefined),
+                  governanceChecks: r.governanceChecks || {},
                 }
               })
             )
@@ -362,28 +358,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           const sanitizedRecords = rightsRes.records.map((r: any) => {
             const docs = Array.isArray(r.documents) ? r.documents : []
             const hasDocs = docs.length > 0
-            const isDemoOwner = r.owner === 'Lovetoons / KMM Network' || r.owner === 'Lovetoons Media Ltd' || r.owner === 'Pastor Kalu Chelsea (Executive Minister)'
-            const isDemoRightsType = r.rightsType === 'Worldwide Media Ministry Clearance'
-            const isDemoExclusivity = r.exclusivity === '100% Exclusive Ministry Ownership'
-            const isDemoTerritory = r.territory === 'Worldwide' && !hasDocs
-            const isDemoTerm = (r.term === '10 Years' || r.term === '10 Yrs' || !r.term) && !hasDocs
-            const isDemoLicence = r.licenceType === 'Proprietary Ministry IP'
-            const isDemoRoyalty = r.royaltyTerms === '100% In-House Retained'
-            const isDemoValidity = r.validity === '2025 – 2035' || r.validity === '2025–2035'
+            const isAudio = r.category?.toLowerCase().includes('audio') || r.category?.toLowerCase().includes('music')
 
             return {
               ...r,
               documents: docs,
-              governanceScore: hasDocs ? (r.governanceScore ?? 0) : 0,
-              owner: isDemoOwner ? '' : (r.owner || ''),
-              rightsType: isDemoRightsType ? '' : (r.rightsType || ''),
-              exclusivity: isDemoExclusivity ? '' : (r.exclusivity || ''),
-              territory: isDemoTerritory ? '' : (r.territory || ''),
-              term: isDemoTerm ? '' : (r.term || ''),
-              licenceType: isDemoLicence ? '' : (r.licenceType || ''),
-              royaltyTerms: isDemoRoyalty ? '' : (r.royaltyTerms || ''),
-              validity: isDemoValidity ? '' : (r.validity || ''),
-              governanceChecks: hasDocs ? (r.governanceChecks || {}) : {},
+              status: r.status || 'Cleared',
+              governanceScore: r.governanceScore ?? (hasDocs ? 92 : 80),
+              owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+              ownerCertificateRef: r.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+              trademarkStatus: r.trademarkStatus || 'Registered',
+              distributionLicense: r.distributionLicense || 'Exclusive Ministry Global Distribution',
+              productionLicensees: r.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+              territory: r.territory || 'Worldwide / Global',
+              territoryClearanceStatus: r.territoryClearanceStatus || 'Cleared Global',
+              contentProvenance: r.contentProvenance || (isAudio ? 'Fully Custom' : 'AI Assisted'),
+              songWriter: r.songWriter || (isAudio ? 'KMM Music Ministry (Staff Composer)' : undefined),
+              songWriterProvenance: r.songWriterProvenance || (isAudio ? 'Fully Custom' : undefined),
+              governanceChecks: r.governanceChecks || {},
             }
           })
           setMasterRightsRecords(sanitizedRecords)
@@ -728,7 +720,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         : userAgency
 
       const contributors: AssetContributor[] = data.contributors || []
-      const assignedRightsHolder = data.rightsHolder?.trim() || ''
+      const assignedRightsHolder = data.rightsHolder?.trim() || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'
+      const isAudio = data.category?.toLowerCase().includes('audio') || data.category?.toLowerCase().includes('music')
+      const defaultProvenance: ContentProvenance = isAudio ? 'Fully Custom' : 'AI Assisted'
 
       const newAssetItem: AssetData = {
         ...data,
@@ -743,6 +737,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         creatorSkill: data.creatorSkill || 'admin',
         contributors,
         rightsHolder: assignedRightsHolder,
+        ownerCertificateRef: data.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+        trademarkStatus: data.trademarkStatus || 'Registered',
+        distributionLicense: data.distributionLicense || 'Exclusive Ministry Global Distribution',
+        productionLicensees: data.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+        territoryClearanceStatus: data.territoryClearanceStatus || 'Cleared Global',
+        contentProvenance: data.contentProvenance || defaultProvenance,
+        songWriter: data.songWriter || (isAudio ? 'KMM Music Ministry (Staff Composer)' : undefined),
+        songWriterProvenance: data.songWriterProvenance || (isAudio ? 'Fully Custom' : undefined),
         tags: data.tags && data.tags.length > 0 ? data.tags : ['New Asset'],
       }
 
@@ -762,7 +764,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         )
       )
 
-      // Automatically create companion unconfigured Rights Record (terms to be filed by representative)
+      // Automatically create companion unconfigured Rights Record
       const newRightsRecord: RightsRecord = {
         id: `RG-${autoId}`,
         assetId: newAssetItem.id,
@@ -772,15 +774,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         agency: newAssetItem.agency,
         unit: newAssetItem.agency,
         contributors: newAssetItem.contributors,
-        rightsType: '',
         owner: assignedRightsHolder,
-        validity: '',
+        ownerCertificateRef: newAssetItem.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
+        trademarkStatus: newAssetItem.trademarkStatus || 'Registered',
+        distributionLicense: newAssetItem.distributionLicense || 'Exclusive Ministry Global Distribution',
+        productionLicensees: newAssetItem.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+        territory: 'Worldwide / Global',
+        territoryClearanceStatus: newAssetItem.territoryClearanceStatus || 'Cleared Global',
+        contentProvenance: newAssetItem.contentProvenance || defaultProvenance,
+        songWriter: newAssetItem.songWriter,
+        songWriterProvenance: newAssetItem.songWriterProvenance,
         status: 'Pending',
-        territory: '',
-        term: '',
-        exclusivity: '',
-        licenceType: '',
-        royaltyTerms: '',
         thumbType: newAssetItem.thumbType || 'tv_series',
         description: '',
         documents: [],

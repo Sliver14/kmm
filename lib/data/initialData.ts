@@ -10,6 +10,7 @@ import {
   AssetContributor,
   Agency,
   AssetStatus,
+  ContentProvenance,
 } from '@/types'
 import { generateAssetArchive } from './assetArchiveData'
 import { attorneyGeneralAssetsData } from './scheduleAssets'
@@ -2237,31 +2238,58 @@ export const initialAssetsData: AssetData[] = attorneyGeneralAssetsData.map((a) 
   archive: a.archive || generateAssetArchive(a),
 }))
 
-export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.map((a) => ({
-  id: 'RG-' + a.id,
-  assetId: a.id,
-  name: a.name,
-  category: a.category,
-  categoryGroup: a.categoryGroup,
-  subcategory: a.subcategory,
-  agency: a.agency,
-  unit: a.agency,
-  contributors: [],
-  rightsType: '',
-  owner: '',
-  validity: '',
-  status: a.status === 'Under Review' ? 'Review' : 'Pending',
-  territory: '',
-  term: '',
-  exclusivity: '',
-  licenceType: '',
-  royaltyTerms: '',
-  thumbType: (a.thumbType || 'tv_series'),
-  description: '',
-  governanceScore: 0,
-  documents: [],
-  governanceChecks: {},
-}))
+export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.map((a) => {
+  const isAudio = a.category?.toLowerCase().includes('audio') || a.category?.toLowerCase().includes('music') || a.categoryGroup?.toLowerCase().includes('audio')
+  const isVideo = a.category?.toLowerCase().includes('tv') || a.category?.toLowerCase().includes('animation') || a.category?.toLowerCase().includes('programme')
+  const provenance: ContentProvenance = isVideo ? 'AI Assisted' : isAudio ? 'Fully Custom' : 'AI Assisted'
+
+  return {
+    id: 'RG-' + a.id,
+    assetId: a.id,
+    name: a.name,
+    category: a.category,
+    categoryGroup: a.categoryGroup,
+    subcategory: a.subcategory,
+    agency: a.agency,
+    unit: a.agency,
+    contributors: a.contributors || [],
+    owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+    ownerCertificateRef: 'CERT-EXEC-MIN-2026-HQ',
+    trademarkStatus: 'Registered',
+    distributionLicense: 'Exclusive Ministry Global Distribution',
+    productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    territory: 'Worldwide / Global',
+    territoryClearanceStatus: 'Cleared Global',
+    contentProvenance: provenance,
+    songWriter: isAudio ? 'KMM In-House Music Ministry' : undefined,
+    songWriterProvenance: isAudio ? 'Fully Custom' : undefined,
+    status: a.status === 'Under Review' ? 'Review' : 'Pending',
+    thumbType: (a.thumbType || 'tv_series'),
+    description: a.description || '',
+    governanceScore: 92,
+    documents: [
+      {
+        id: `cert-${a.id}-title`,
+        name: `Certificate_of_Ownership_${a.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+        size: '1.4 MB',
+        date: 'Jan 15, 2026',
+        type: 'CERT',
+        targetScope: 'asset',
+        notes: 'Official Title Certificate vested in Esteemed Executive Minister (Pastor Chelsea Kalu)',
+      },
+      {
+        id: `lic-${a.id}-dist`,
+        name: `Distribution_License_Deed_${a.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+        size: '2.1 MB',
+        date: 'Jan 20, 2026',
+        type: 'LICENSE',
+        targetScope: 'asset',
+        notes: 'Exclusive Ministry Global Distribution Deed & clearance terms',
+      },
+    ],
+    governanceChecks: {},
+  }
+})
 
 export const initialRelationships: RelationshipItem[] = [
   {
