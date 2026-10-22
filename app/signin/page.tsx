@@ -25,7 +25,7 @@ function SignInContent() {
 
   const { isAuthenticated, isInitialized, login, availableUsers } = useLovetoonsData()
 
-  const [email, setEmail] = useState('sylver@kiddiesmedia.org')
+  const [email, setEmail] = useState('chelsea.kalu@kiddiesmedia.org')
   const [password, setPassword] = useState('kmm2025')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)

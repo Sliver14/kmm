@@ -17,10 +17,10 @@ import { attorneyGeneralAssetsData } from './scheduleAssets'
 export const initialUsers: UserProfile[] = [
   {
     id: 'usr-1',
-    name: 'Sylver Oyinaga',
-    email: 'sylver@kiddiesmedia.org',
+    name: 'Pastor Chelsea Kalu',
+    email: 'chelsea.kalu@kiddiesmedia.org',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    initials: 'SO',
+    initials: 'PCK',
     role: 'super_admin',
     roleLabel: 'Super Admin (KMM Network)',
     agency: 'Lovetoons',
@@ -337,10 +337,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-AP-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -402,10 +402,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-AP-002-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -466,10 +466,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-AN-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -531,10 +531,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-TS-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -598,10 +598,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-TV-002-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -662,10 +662,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-TV-003-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -725,10 +725,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-EP-003-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -784,7 +784,7 @@ const rawAssetsData: AssetData[] = [
                 "contributionType": "Technical Specialist"
           }
     ],
-    creatorName: 'Sylver Oyinaga',
+    creatorName: 'Pastor Chelsea Kalu',
     
     creatorSkill: 'legal_counsel',
     status: 'Approved',
@@ -839,7 +839,7 @@ const rawAssetsData: AssetData[] = [
                 "contributionType": "Technical Specialist"
           }
     ],
-    creatorName: 'Sylver Oyinaga',
+    creatorName: 'Pastor Chelsea Kalu',
     
     creatorSkill: 'video_editor',
     status: 'Approved',
@@ -892,10 +892,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-FLM-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -955,10 +955,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-FLM-002-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -991,7 +991,7 @@ const rawAssetsData: AssetData[] = [
     contributors: [
           {
                 "id": "c-LT-CP-001-1",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Lead 3D Animator & Director",
                 "agency": "Lovetoons",
                 "email": "david.k@kiddiesmedia.org",
@@ -1015,14 +1015,14 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CP-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
-    creatorName: 'Sylver Oyinaga',
+    creatorName: 'Pastor Chelsea Kalu',
     
     creatorSkill: 'designer',
     status: 'Approved',
@@ -1054,7 +1054,7 @@ const rawAssetsData: AssetData[] = [
     contributors: [
           {
                 "id": "c-LT-CP-002-1",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Lead 3D Animator & Director",
                 "agency": "Lovetoons",
                 "email": "david.k@kiddiesmedia.org",
@@ -1078,14 +1078,14 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CP-002-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
-    creatorName: 'Sylver Oyinaga',
+    creatorName: 'Pastor Chelsea Kalu',
     
     creatorSkill: 'designer',
     status: 'In Review',
@@ -1117,7 +1117,7 @@ const rawAssetsData: AssetData[] = [
     contributors: [
           {
                 "id": "c-LT-CP-003-1",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Lead 3D Animator & Director",
                 "agency": "Lovetoons",
                 "email": "david.k@kiddiesmedia.org",
@@ -1141,14 +1141,14 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CP-003-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
-    creatorName: 'Sylver Oyinaga',
+    creatorName: 'Pastor Chelsea Kalu',
     
     creatorSkill: 'designer',
     status: 'Approved',
@@ -1454,10 +1454,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-DGT-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Data Privacy & COPPA Officer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1517,10 +1517,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-DGT-002-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Data Privacy & COPPA Officer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1575,10 +1575,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-DGT-003-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Data Privacy & COPPA Officer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1633,10 +1633,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-GM-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Data Privacy & COPPA Officer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1752,7 +1752,7 @@ const rawAssetsData: AssetData[] = [
                 "contributionType": "Technical Specialist"
           }
     ],
-    creatorName: 'Sylver Oyinaga',
+    creatorName: 'Pastor Chelsea Kalu',
     
     creatorSkill: 'admin',
     status: 'Approved',
@@ -1855,10 +1855,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CH-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1919,10 +1919,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CH-002-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1977,10 +1977,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CH-003-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -2123,7 +2123,7 @@ const rawAssetsData: AssetData[] = [
     contributors: [
           {
                 "id": "c-LT-BR-001-1",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Lead 3D Animator & Director",
                 "agency": "Lovetoons",
                 "email": "david.k@kiddiesmedia.org",
@@ -2147,14 +2147,14 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-BR-001-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
-    creatorName: 'Sylver Oyinaga',
+    creatorName: 'Pastor Chelsea Kalu',
     
     creatorSkill: 'designer',
     status: 'Approved',
@@ -2209,10 +2209,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-BR-002-4",
-                "name": "Sylver Oyinaga",
+                "name": "Pastor Chelsea Kalu",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "sylver@kiddiesmedia.org",
+                "email": "chelsea.kalu@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -2468,9 +2468,9 @@ export const initialActivityLogs: ActivityLog[] = [
   {
     id: 'act-4',
     title: 'Merchandise clearance submitted: Zobo Drink (Special Edition)',
-    subtitle: 'Submitted by Sylver Oyinaga for reviewer quality & trademark audit',
+    subtitle: 'Submitted by Pastor Chelsea Kalu for reviewer quality & trademark audit',
     time: '1 day ago',
-    user: 'Sylver Oyinaga',
+    user: 'Pastor Chelsea Kalu',
     agency: 'Lovetoons',
     unit: 'Lovetoons',
     iconType: 'alert',

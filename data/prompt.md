@@ -1494,7 +1494,7 @@ Example:
 Today
 
 10:42 AM
-Sylver Oyinaga updated the asset description.
+Pastor Chelsea Kalu updated the asset description.
 
 9:15 AM
 James Dada uploaded Contract_v2.pdf.
@@ -1507,7 +1507,7 @@ Faith Daniel approved Rights Clearance.
 Sep 20
 
 10:24 AM
-Asset created by Sylver Oyinaga.
+Asset created by Pastor Chelsea Kalu.
 ```
 
 Each event should link to the relevant entity/document where appropriate.
