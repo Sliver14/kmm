@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
               validity, exclusivity, status, governance_score, documents, governance_checks
             ) VALUES (
               ${`RG-${a.id}`}, 'min-kmm', ${a.id}, ${a.name},
-              'Worldwide Media Ministry Clearance', 'Worldwide', '2025–2035',
-              '100% Exclusive Ministry Ownership', ${rightsStatus}, ${score},
+              '', '', '',
+              '', 'Pending', 0,
               '[]'::jsonb,
               '{}'::jsonb
             )

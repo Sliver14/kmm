@@ -311,7 +311,7 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
     createdTime: '09:00 AM',
     thumbType,
     posterUrl,
-    rightsHolder: 'Lovetoons / KMM Network',
+    rightsHolder: '',
     description: `${entry.name} - ${entry.docCategory}. Status: ${status}. Official intellectual asset Schedule Item #${entry.sn} catalogued under Lovetoons / Kiddies Media Ministries.`,
     tags: Array.from(
       new Set(

@@ -1317,10 +1317,10 @@ function Dashboard({
       <section className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/80 p-5 shadow-xs transition-all backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-white/5">
           <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 shadow-2xs">
+            {/* <div className="grid size-9 place-items-center rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 shadow-2xs">
               <ShieldCheck className="size-4.5" />
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Portfolio Risk & Governance Exposure</h3>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-700/60 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
@@ -1328,7 +1328,7 @@ function Dashboard({
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">Independent intellectual asset liability & title exposure matrix</p>
-            </div>
+            </div> */}
           </div>
           {setActiveNav && (
             <button
@@ -1792,7 +1792,7 @@ function AssetsPage({
     agency: currentUser.agency || 'Lovetoons',
     unit: currentUser.agency || 'Lovetoons',
     contributors: [],
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: '',
     description: '',
     tags: '',
     posterUrl: '',
@@ -1872,7 +1872,7 @@ function AssetsPage({
       contributors: newAssetForm.contributors,
       status: 'Pending',
       posterUrl: newAssetForm.posterUrl.trim() ? newAssetForm.posterUrl.trim() : undefined,
-      rightsHolder: newAssetForm.rightsHolder.trim() || 'Pastor Kalu Chelsea (Executive Minister)',
+      rightsHolder: newAssetForm.rightsHolder.trim(),
       description: newAssetForm.description.trim(),
       tags: tagList.length > 0 ? tagList : [newAssetForm.category],
     })
@@ -1886,7 +1886,7 @@ function AssetsPage({
       agency: currentUser.agency || 'Lovetoons',
       unit: currentUser.agency || 'Lovetoons',
       contributors: [],
-      rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+      rightsHolder: '',
       description: '',
       tags: '',
       posterUrl: '',
@@ -2196,14 +2196,21 @@ function AssetsPage({
                       <td className="px-4 py-3">
                         <div
                           className="font-semibold text-slate-800 text-[11px] truncate max-w-[170px]"
-                          title={asset.rightsHolder || 'Pastor Kalu Chelsea (Executive Minister)'}
+                          title={asset.rightsHolder || 'Unassigned'}
                         >
-                          {asset.rightsHolder || 'Pastor Kalu Chelsea (Executive Minister)'}
+                          {asset.rightsHolder || <span className="text-slate-400 italic font-normal">Unassigned</span>}
                         </div>
-                        <div className="text-[10px] text-emerald-700 font-medium flex items-center gap-1 mt-0.5">
-                          <span className="size-1.5 rounded-full bg-emerald-500 inline-block" />
-                          <span>Sole Ownership</span>
-                        </div>
+                        {asset.rightsHolder ? (
+                          <div className="text-[10px] text-emerald-700 font-medium flex items-center gap-1 mt-0.5">
+                            <span className="size-1.5 rounded-full bg-emerald-500 inline-block" />
+                            <span>Sole Ownership</span>
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-amber-600 font-medium flex items-center gap-1 mt-0.5">
+                            <span className="size-1.5 rounded-full bg-amber-500 inline-block" />
+                            <span>Pending Assignment</span>
+                          </div>
+                        )}
                       </td>
 
                       <td className="px-4 py-3">
@@ -2381,13 +2388,12 @@ function AssetsPage({
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Asset Owner / Rights Holder *</label>
+                    <label className="block font-semibold text-slate-700 mb-1">Asset Owner / Rights Holder</label>
                     <input
                       value={newAssetForm.rightsHolder}
                       onChange={(e) => setNewAssetForm((prev) => ({ ...prev, rightsHolder: e.target.value }))}
-                      placeholder="Pastor Kalu Chelsea (Executive Minister)"
+                      placeholder="Registered Rights Holder (leave blank if unassigned)"
                       className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-medium text-slate-800"
-                      required
                     />
                   </div>
                 </div>
@@ -2791,22 +2797,14 @@ function RightsPage({
     name: assets[0]?.name || '',
     category: assets[0]?.category || 'TV Programme',
     subcategory: assets[0]?.subcategory || 'Broadcast Series',
-    rightsType: 'Worldwide Broadcast & Streaming',
-    owner: 'Lovetoons Media Ltd',
-    validity: '2025 – 2035',
-    territory: 'Worldwide',
-    exclusivity: 'Exclusive Ministry Rights',
-    licenceType: 'Proprietary Broadcast License',
-    royaltyTerms: '100% In-House Retained',
-    documents: [
-      {
-        id: `doc-${Date.now()}`,
-        name: 'Lovetoons_IP_Registration_Filing_Certificate.pdf',
-        size: '2.4 MB',
-        date: 'Sep 25, 2025',
-        type: 'CERT',
-      },
-    ],
+    rightsType: '',
+    owner: '',
+    validity: '',
+    territory: '',
+    exclusivity: '',
+    licenceType: '',
+    royaltyTerms: '',
+    documents: [],
     newDocName: '',
   })
 
@@ -2823,9 +2821,9 @@ function RightsPage({
       rightsType: newRightsForm.rightsType,
       owner: newRightsForm.owner,
       validity: newRightsForm.validity,
-      status: 'Cleared',
+      status: newRightsForm.documents.length > 0 ? 'Review' : 'Pending',
       territory: newRightsForm.territory,
-      term: '10 Years',
+      term: '',
       exclusivity: newRightsForm.exclusivity,
       licenceType: newRightsForm.licenceType,
       royaltyTerms: newRightsForm.royaltyTerms,
@@ -2931,14 +2929,18 @@ function RightsPage({
                 <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{rec.category}</td>
                 <td className="px-4 py-3">
                   <span className="rounded-md bg-slate-100 border border-slate-200 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 px-2 py-0.5 text-[11px] font-medium text-slate-700">
-                    {rec.rightsType}
+                    {rec.rightsType || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Pending Scope</span>}
                   </span>
                 </td>
-                <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{rec.owner}</td>
-                <td className="px-4 py-3 font-medium text-slate-600 dark:text-slate-400">{rec.validity}</td>
+                <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">
+                  {rec.owner || <span className="text-slate-400 italic">Unregistered</span>}
+                </td>
+                <td className="px-4 py-3 font-medium text-slate-600 dark:text-slate-400">
+                  {rec.validity || <span className="text-slate-400 italic">—</span>}
+                </td>
                 <td className="px-4 py-3">
                   <span className="rounded bg-slate-100 border border-slate-200/80 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                    {rec.documents?.length || 1} File(s)
+                    {rec.documents?.length || 0} File(s)
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -3430,38 +3432,40 @@ function RightsDetailsPage({
 
   // Edit Governance Form State
   const [editForm, setEditForm] = useState({
-    rightsType: asset.rightsType,
-    owner: asset.owner,
-    validity: asset.validity,
-    territory: asset.territory || 'Worldwide',
-    term: asset.term || '10 Years',
-    exclusivity: asset.exclusivity || 'Exclusive Ministry Rights',
-    licenceType: asset.licenceType || 'Proprietary Broadcast License',
-    royaltyTerms: asset.royaltyTerms || '100% In-House Retained',
+    rightsType: asset.rightsType || '',
+    owner: asset.owner || '',
+    validity: asset.validity || '',
+    territory: asset.territory || '',
+    term: asset.term || '',
+    exclusivity: asset.exclusivity || '',
+    licenceType: asset.licenceType || '',
+    royaltyTerms: asset.royaltyTerms || '',
     governanceScore: asset.governanceScore ?? 0,
-    status: asset.status,
-    description: asset.description || 'Master chain of title and IP clearance certificate on file.',
+    status: asset.status || 'Pending',
+    description: asset.description || '',
   })
 
   // Submit Clearance / New Rights Record Form State
   const [addRightsForm, setAddRightsForm] = useState({
-    rightsType: 'Digital Streaming & International Syndication',
-    territory: 'North America & Europe',
-    term: '5 Years',
-    exclusivity: 'Non-Exclusive License',
-    licenceType: 'Syndication Broadcast',
-    royaltyTerms: '15% Gross Revenue Share',
-    docName: 'Syndication_Agreement_Draft.pdf',
+    rightsType: '',
+    territory: '',
+    term: '',
+    exclusivity: '',
+    licenceType: '',
+    royaltyTerms: '',
+    docName: '',
   })
 
-  const [checks, setChecks] = useState(
-    asset.governanceChecks || {
-      biblicalAlignment: true,
-      ageAppropriate: true,
-      musicSync: true,
-      copyrightReg: true,
-      voiceReleases: true,
-    }
+  const [checks, setChecks] = useState<Record<string, boolean>>(
+    asset.governanceChecks && Object.keys(asset.governanceChecks).length > 0
+      ? asset.governanceChecks
+      : {
+          biblicalAlignment: false,
+          ageAppropriate: false,
+          musicSync: false,
+          copyrightReg: false,
+          voiceReleases: false,
+        }
   )
 
   // Reusable Confirmation Modal State for RightsDetailsPage
@@ -3571,23 +3575,26 @@ function RightsDetailsPage({
         </div>
       ),
       onConfirm: () => {
-        const newDoc: RightsDocument = {
-          id: `doc-${Date.now()}`,
-          name: addRightsForm.docName || 'Rights_Clearance_Submission.pdf',
-          size: '2.5 MB',
-          date: 'Just now',
-          type: 'LICENSE',
-        }
+        const hasDoc = !!addRightsForm.docName.trim()
+        const newDoc: RightsDocument | null = hasDoc
+          ? {
+              id: `doc-${Date.now()}`,
+              name: addRightsForm.docName.trim(),
+              size: '2.5 MB',
+              date: 'Just now',
+              type: 'LICENSE',
+            }
+          : null
 
         addRightsRecord({
           assetId: asset.assetId || asset.id,
-          name: `${asset.name} (${addRightsForm.rightsType.split(' ')[0]})`,
+          name: `${asset.name} (${addRightsForm.rightsType.split(' ')[0] || 'Scope'})`,
           category: asset.category,
           subcategory: asset.subcategory,
           unit: asset.unit || currentUser.unit,
           rightsType: addRightsForm.rightsType,
-          owner: asset.owner,
-          validity: '2025 – 2030',
+          owner: asset.owner || '',
+          validity: '',
           status: 'Review',
           territory: addRightsForm.territory,
           term: addRightsForm.term,
@@ -3595,8 +3602,9 @@ function RightsDetailsPage({
           licenceType: addRightsForm.licenceType,
           royaltyTerms: addRightsForm.royaltyTerms,
           thumbType: asset.thumbType,
-          governanceScore: 85,
-          documents: [newDoc],
+          governanceScore: hasDoc ? 20 : 0,
+          documents: newDoc ? [newDoc] : [],
+          governanceChecks: {},
         })
 
         setIsAddRightsModalOpen(false)
@@ -3757,7 +3765,9 @@ function RightsDetailsPage({
                 </span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-[#09245a] dark:text-white pt-1">{asset.name}</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{asset.rightsType}</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                {asset.rightsType || <span className="text-amber-600 dark:text-amber-400 italic font-medium">Unconfigured Rights Scope (Pending Filing)</span>}
+              </p>
             </div>
           </div>
 
@@ -3784,15 +3794,24 @@ function RightsDetailsPage({
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
         <div className="rounded-xl border border-blue-100 bg-blue-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
           <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Chain of Title</div>
-          <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">Documented & Filed ✓</div>
+          <div className={cn(
+            "text-xs font-bold mt-0.5",
+            (asset.documents?.length || 0) > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
+          )}>
+            {(asset.documents?.length || 0) > 0 ? `Documented & Filed ✓ (${asset.documents?.length} Files)` : 'Pending Documentation (0 Files Attached)'}
+          </div>
         </div>
         <div className="rounded-xl border border-purple-100 bg-purple-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
           <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Rights Clearance</div>
-          <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{asset.status} ✓</div>
+          <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">{asset.status}</div>
         </div>
         <div className="rounded-xl border border-amber-100 bg-amber-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
           <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Territory & Term</div>
-          <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{asset.territory || 'Worldwide'} • {asset.term || '10 Yrs'}</div>
+          <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">
+            {asset.territory || asset.term
+              ? `${asset.territory || 'Unspecified'}${asset.term ? ` • ${asset.term}` : ''}`
+              : <span className="text-amber-600 dark:text-amber-400">Territory & Term Not Filed</span>}
+          </div>
         </div>
         <div className="rounded-xl border border-teal-100 bg-teal-50/50 dark:border-white/10 dark:bg-slate-800/50 p-4">
           <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400">Governance Score</div>
@@ -3832,33 +3851,47 @@ function RightsDetailsPage({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Primary Rights Scope</span>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">{asset.rightsType}</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{asset.exclusivity || 'Exclusive Ministry Rights'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">
+                    {asset.rightsType || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Not Configured (Pending Scope Filing)</span>}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {asset.exclusivity || <span className="text-slate-400 italic">No exclusivity terms filed</span>}
+                  </div>
                 </div>
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Territory Clearance</span>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">{asset.territory || 'Worldwide'}</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Term: {asset.term || '10 Years'} ({asset.validity})</div>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">
+                    {asset.territory || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Territory Not Filed</span>}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Term: {asset.term || <span className="text-slate-400 italic">Unspecified</span>} {asset.validity ? `(${asset.validity})` : ''}
+                  </div>
                 </div>
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Registered Rights Holder</span>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">{asset.owner}</div>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">
+                    {asset.owner || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Unregistered (No Holder Assigned)</span>}
+                  </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">Parent Agency: {asset.agency || 'Lovetoons'}</div>
                 </div>
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Licensing & Royalty Terms</span>
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">{asset.licenceType || 'Proprietary Broadcast'}</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{asset.royaltyTerms || '100% In-House Retained'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white text-sm">
+                    {asset.licenceType || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Unspecified License</span>}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {asset.royaltyTerms || <span className="text-slate-400 italic">No royalty terms configured</span>}
+                  </div>
                 </div>
               </div>
 
               <div className="rounded-xl bg-blue-50/60 p-4 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-800/40 text-xs">
                 <div className="font-bold text-blue-950 dark:text-blue-200 mb-1">Legal Summary & Chain of Title Notes</div>
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {asset.description || 'Full worldwide copyright, theatrical, broadcast and OTT streaming clearance on file with LoveWorld/Lovetoons intellectual property administration.'}
+                  {asset.description || 'No legal summary or chain of title notes filed yet. Click \'Edit Governance Details\' to record legal terms.'}
                 </p>
               </div>
             </div>
@@ -4275,8 +4308,8 @@ function RightsDetailsPage({
                 <input
                   value={editForm.rightsType}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, rightsType: e.target.value }))}
-                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
-                  required
+                  placeholder="e.g. Worldwide Broadcast & Streaming (or leave unassigned)"
+                  className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
                 />
               </div>
 

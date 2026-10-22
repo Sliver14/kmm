@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       createdTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       thumbType = body.thumbType || null,
       posterUrl = body.posterUrl || null,
-      rightsHolder = body.rightsHolder || 'Pastor Kalu Chelsea (Executive Minister)',
+      rightsHolder = body.rightsHolder || '',
       description = '',
       tags = [],
       attributes = {},

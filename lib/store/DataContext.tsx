@@ -263,11 +263,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           }
           if (parsed.categories) setCategories(parsed.categories)
           if (parsed.subcategories) setSubcategories(parsed.subcategories)
-          if (parsed.rightsRecords) {
+            // Sanitize rights records: strip legacy demo placeholders if unfiled
             setMasterRightsRecords(
               parsed.rightsRecords.map((r: any) => {
                 const docs = Array.isArray(r.documents) ? r.documents : []
                 const hasDocs = docs.length > 0
+                const isDemoOwner = r.owner === 'Lovetoons / KMM Network' || r.owner === 'Lovetoons Media Ltd' || r.owner === 'Pastor Kalu Chelsea (Executive Minister)'
+                const isDemoRightsType = r.rightsType === 'Worldwide Media Ministry Clearance'
+                const isDemoExclusivity = r.exclusivity === '100% Exclusive Ministry Ownership'
+                const isDemoTerritory = r.territory === 'Worldwide' && !hasDocs
+                const isDemoTerm = (r.term === '10 Years' || r.term === '10 Yrs') && !hasDocs
+                const isDemoLicence = r.licenceType === 'Proprietary Ministry IP'
+                const isDemoRoyalty = r.royaltyTerms === '100% In-House Retained'
+                const isDemoValidity = r.validity === '2025 – 2035' || r.validity === '2025–2035'
+
                 return {
                   ...r,
                   agency: r.agency || r.unit || 'Lovetoons',
@@ -275,11 +284,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                   documents: docs,
                   status: hasDocs ? r.status : (r.status === 'Cleared' ? 'Pending' : r.status || 'Pending'),
                   governanceScore: hasDocs ? (r.governanceScore ?? 0) : 0,
-                  owner: r.owner === 'Lovetoons Media Ltd' || !r.owner ? 'Pastor Kalu Chelsea (Executive Minister)' : r.owner,
+                  owner: isDemoOwner ? '' : (r.owner || ''),
+                  rightsType: isDemoRightsType ? '' : (r.rightsType || ''),
+                  exclusivity: isDemoExclusivity ? '' : (r.exclusivity || ''),
+                  territory: isDemoTerritory ? '' : (r.territory || ''),
+                  term: isDemoTerm ? '' : (r.term || ''),
+                  licenceType: isDemoLicence ? '' : (r.licenceType || ''),
+                  royaltyTerms: isDemoRoyalty ? '' : (r.royaltyTerms || ''),
+                  validity: isDemoValidity ? '' : (r.validity || ''),
+                  governanceChecks: hasDocs ? (r.governanceChecks || {}) : {},
                 }
               })
             )
-          }
           if (parsed.relationships) setMasterRelationships(parsed.relationships)
           if (parsed.approvals) {
             setMasterApprovals(
@@ -343,7 +359,34 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           setMasterAssets(cleanAssets)
         }
         if (rightsRes?.success && Array.isArray(rightsRes.records) && rightsRes.records.length > 0) {
-          setMasterRightsRecords(rightsRes.records)
+          const sanitizedRecords = rightsRes.records.map((r: any) => {
+            const docs = Array.isArray(r.documents) ? r.documents : []
+            const hasDocs = docs.length > 0
+            const isDemoOwner = r.owner === 'Lovetoons / KMM Network' || r.owner === 'Lovetoons Media Ltd' || r.owner === 'Pastor Kalu Chelsea (Executive Minister)'
+            const isDemoRightsType = r.rightsType === 'Worldwide Media Ministry Clearance'
+            const isDemoExclusivity = r.exclusivity === '100% Exclusive Ministry Ownership'
+            const isDemoTerritory = r.territory === 'Worldwide' && !hasDocs
+            const isDemoTerm = (r.term === '10 Years' || r.term === '10 Yrs' || !r.term) && !hasDocs
+            const isDemoLicence = r.licenceType === 'Proprietary Ministry IP'
+            const isDemoRoyalty = r.royaltyTerms === '100% In-House Retained'
+            const isDemoValidity = r.validity === '2025 – 2035' || r.validity === '2025–2035'
+
+            return {
+              ...r,
+              documents: docs,
+              governanceScore: hasDocs ? (r.governanceScore ?? 0) : 0,
+              owner: isDemoOwner ? '' : (r.owner || ''),
+              rightsType: isDemoRightsType ? '' : (r.rightsType || ''),
+              exclusivity: isDemoExclusivity ? '' : (r.exclusivity || ''),
+              territory: isDemoTerritory ? '' : (r.territory || ''),
+              term: isDemoTerm ? '' : (r.term || ''),
+              licenceType: isDemoLicence ? '' : (r.licenceType || ''),
+              royaltyTerms: isDemoRoyalty ? '' : (r.royaltyTerms || ''),
+              validity: isDemoValidity ? '' : (r.validity || ''),
+              governanceChecks: hasDocs ? (r.governanceChecks || {}) : {},
+            }
+          })
+          setMasterRightsRecords(sanitizedRecords)
         }
         if (approvalsRes?.success && Array.isArray(approvalsRes.approvals) && approvalsRes.approvals.length > 0) {
           setMasterApprovals(approvalsRes.approvals)
@@ -685,8 +728,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         : userAgency
 
       const contributors: AssetContributor[] = data.contributors || []
-      const defaultRightsHolder = 'Pastor Kalu Chelsea (Executive Minister)'
-      const assignedRightsHolder = data.rightsHolder?.trim() || defaultRightsHolder
+      const assignedRightsHolder = data.rightsHolder?.trim() || ''
 
       const newAssetItem: AssetData = {
         ...data,
@@ -733,14 +775,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         rightsType: '',
         owner: assignedRightsHolder,
         validity: '',
-        status: 'Review',
+        status: 'Pending',
         territory: '',
         term: '',
         exclusivity: '',
         licenceType: '',
         royaltyTerms: '',
         thumbType: newAssetItem.thumbType || 'tv_series',
-        description: `Intellectual property rights and governance registry entry for ${newAssetItem.name}. Awaiting representative filing of rights terms and clearance deeds.`,
+        description: '',
         documents: [],
         governanceChecks: {},
         governanceScore: 0,
@@ -1095,6 +1137,27 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         badgeColor: (record.governanceScore || 0) >= 80 ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800',
         agency: record.agency,
       })
+
+      // Asynchronously sync update to Neon database
+      fetch('/api/rights', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: record.id,
+          assetId: record.assetId,
+          rightsType: record.rightsType,
+          territory: record.territory,
+          validity: record.validity,
+          exclusivity: record.exclusivity,
+          licenceType: record.licenceType,
+          royaltyTerms: record.royaltyTerms,
+          description: record.description,
+          status: record.status,
+          governanceScore: record.governanceScore,
+          documents: record.documents,
+          governanceChecks: record.governanceChecks,
+        }),
+      }).catch((err) => console.warn('Neon DB rights update sync:', err))
 
       showToast(`Governance details for "${record.name}" updated.`)
     },

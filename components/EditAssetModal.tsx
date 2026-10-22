@@ -38,7 +38,7 @@ export function EditAssetModal({
   const [category, setCategory] = useState(asset.category)
   const [subcategory, setSubcategory] = useState(asset.subcategory || '')
   const [agency, setAgency] = useState<Agency>(asset.agency || 'Lovetoons')
-  const [rightsHolder, setRightsHolder] = useState(asset.rightsHolder || 'Pastor Kalu Chelsea (Executive Minister)')
+  const [rightsHolder, setRightsHolder] = useState(asset.rightsHolder || '')
   const [description, setDescription] = useState(asset.description || '')
   const [tags, setTags] = useState((asset.tags || []).join(', '))
   const [posterUrl, setPosterUrl] = useState(asset.posterUrl || '')
@@ -113,7 +113,7 @@ export function EditAssetModal({
       subcategory,
       agency,
       unit: agency,
-      rightsHolder: rightsHolder.trim() || 'Pastor Kalu Chelsea (Executive Minister)',
+      rightsHolder: rightsHolder.trim(),
       description: description.trim(),
       tags: tagList,
       posterUrl: posterUrl.trim() ? posterUrl.trim() : undefined,
@@ -229,14 +229,13 @@ export function EditAssetModal({
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Asset Owner / Rights Holder *</label>
+              <label className="block font-bold text-slate-700 mb-1">Asset Owner / Rights Holder</label>
               <input
                 type="text"
                 value={rightsHolder}
                 onChange={(e) => setRightsHolder(e.target.value)}
-                placeholder="Pastor Kalu Chelsea (Executive Minister)"
+                placeholder="Registered Rights Holder (leave blank if unassigned)"
                 className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-medium text-slate-800"
-                required
               />
             </div>
           </div>

@@ -1248,7 +1248,7 @@ export function AssetDetailsView({
                 </div>
                 <div>
                   <span className="text-slate-400 text-[11px] block">Rights Holder / Owner</span>
-                  <span className="font-semibold text-slate-900">{asset.rightsHolder || 'Pastor Kalu Chelsea (Executive Minister)'}</span>
+                  <span className="font-semibold text-slate-900">{asset.rightsHolder || <span className="text-slate-400 italic font-normal">Unassigned</span>}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 text-[11px] block">Tags & Keywords</span>
