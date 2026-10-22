@@ -250,6 +250,19 @@ export interface RightsDocument {
   notes?: string
 }
 
+export type GovernanceGateStatus = 'CLEARED' | 'IN_REVIEW' | 'PENDING' | 'EXEMPT' | 'FLAGGED'
+
+export interface GovernanceCheckValue {
+  status: GovernanceGateStatus
+  notes?: string
+  documentName?: string
+  documentId?: string
+  verifiedAt?: string
+  verifiedBy?: string
+}
+
+export type GovernanceChecksMap = Record<string, boolean | GovernanceGateStatus | GovernanceCheckValue | any>
+
 export interface RightsRecord {
   id: string
   assetId?: string
@@ -273,7 +286,7 @@ export interface RightsRecord {
   description?: string
   governanceScore?: number
   documents?: RightsDocument[]
-  governanceChecks?: Record<string, boolean>
+  governanceChecks?: GovernanceChecksMap
 }
 
 export interface RelationshipItem {
@@ -346,7 +359,7 @@ export interface ApprovalRequest {
   royaltyTerms?: string
   description?: string
   governanceScore?: number
-  governanceChecks?: Record<string, boolean>
+  governanceChecks?: GovernanceChecksMap
 }
 
 export interface ActivityLog {

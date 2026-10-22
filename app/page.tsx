@@ -28,6 +28,9 @@ import { getAssetRiskAssessment, getPortfolioRiskMetrics, PortfolioRiskMetrics }
 import {
   getCategoryComplianceProfile,
   evaluateComplianceReadiness,
+  isGatePassed,
+  getGateStatus,
+  getGateCheckValue,
   GovernanceGateDefinition,
   RequiredDocumentDefinition,
   CategoryCluster,
@@ -50,6 +53,9 @@ import {
   AssetStatus,
   RiskTier,
   AssetRiskAssessment,
+  GovernanceGateStatus,
+  GovernanceCheckValue,
+  GovernanceChecksMap,
 } from '@/types'
 
 export const tabToPath: Record<string, string> = {
@@ -3561,16 +3567,262 @@ function RightsDetailsPage({
     docName: '',
   })
 
-  const [checks, setChecks] = useState<Record<string, boolean>>(() => {
+  const [checks, setChecks] = useState<GovernanceChecksMap>(() => {
     if (asset.governanceChecks && Object.keys(asset.governanceChecks).length > 0) {
       return asset.governanceChecks
     }
-    const initial: Record<string, boolean> = {}
+    const initial: GovernanceChecksMap = {}
     complianceProfile.gates.forEach((g) => {
-      initial[g.key] = false
+      initial[g.key] = { status: 'PENDING' }
     })
     return initial
   })
+
+  // Scope Configuration & Certificate Modal State
+  const [isScopeModalOpen, setIsScopeModalOpen] = useState(false)
+  const [scopeForm, setScopeForm] = useState({
+    rightsType: asset.rightsType || '',
+    territory: asset.territory || '',
+    term: asset.term || '',
+    validity: asset.validity || '',
+    exclusivity: asset.exclusivity || '',
+    licenceType: asset.licenceType || '',
+    royaltyTerms: asset.royaltyTerms || '',
+    owner: asset.owner || '',
+    description: asset.description || '',
+    attachDoc: false,
+    docTitle: '',
+    docType: 'CERT' as RightsDocument['type'],
+    docFileSize: '2.4 MB',
+    docRegNumber: '',
+    docNotes: '',
+  })
+
+  const openScopeModal = () => {
+    setScopeForm({
+      rightsType: asset.rightsType || 'Worldwide Broadcast & Digital Distribution',
+      territory: asset.territory || 'Global / Worldwide',
+      term: asset.term || 'In Perpetuity',
+      validity: asset.validity || 'Active / Perpetual',
+      exclusivity: asset.exclusivity || 'Exclusive Ministry Rights',
+      licenceType: asset.licenceType || '100% Ministry Owned',
+      royaltyTerms: asset.royaltyTerms || 'Zero Royalty Encumbrance',
+      owner: asset.owner || 'Pastor Chelsea Kalu / LoveWorld Kiddies Ministries',
+      description: asset.description || '',
+      attachDoc: false,
+      docTitle: '',
+      docType: 'CERT',
+      docFileSize: '2.4 MB',
+      docRegNumber: '',
+      docNotes: '',
+    })
+    setIsScopeModalOpen(true)
+  }
+
+  const handleScopeModalSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const willAttach = scopeForm.attachDoc && !!scopeForm.docTitle.trim()
+    const targetDocName = scopeForm.docTitle.trim() || `Clearance_Certificate_${asset.name.replace(/\s+/g, '_')}.pdf`
+
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Confirm Rights Scope & Certificate Filing',
+      description: `Update the legal scope and filing details for "${asset.name}"? This action will update the chain of title and log all modifications in the audit trail.`,
+      confirmLabel: 'Confirm & Save Scope',
+      variant: 'primary',
+      badge: 'Scope Configuration',
+      details: (
+        <div className="text-xs space-y-1">
+          <div><span className="font-semibold text-slate-700">Rights Scope:</span> {scopeForm.rightsType}</div>
+          <div><span className="font-semibold text-slate-700">Territory:</span> {scopeForm.territory}</div>
+          <div><span className="font-semibold text-slate-700">Term:</span> {scopeForm.term}</div>
+          <div><span className="font-semibold text-slate-700">Rights Holder:</span> {scopeForm.owner}</div>
+          {willAttach && (
+            <div><span className="font-semibold text-emerald-700">Attached Certificate:</span> {targetDocName} ({scopeForm.docType})</div>
+          )}
+          <div><span className="font-semibold text-slate-700">Authorized By:</span> {currentUser.name}</div>
+        </div>
+      ),
+      onConfirm: () => {
+        let updatedDocs = [...(asset.documents || [])]
+        if (willAttach) {
+          const newDoc: RightsDocument = {
+            id: `doc-${Date.now()}`,
+            name: targetDocName,
+            size: scopeForm.docFileSize || '2.4 MB',
+            date: 'Just now',
+            type: scopeForm.docType,
+            targetScope: 'asset',
+            notes: scopeForm.docNotes.trim() || (scopeForm.docRegNumber ? `Filing/Reg #: ${scopeForm.docRegNumber}` : 'Filed via Scope Breakdown Modal'),
+          }
+          updatedDocs = [newDoc, ...updatedDocs]
+        }
+
+        updateRightsRecord({
+          ...asset,
+          rightsType: scopeForm.rightsType,
+          territory: scopeForm.territory,
+          term: scopeForm.term,
+          validity: scopeForm.validity,
+          exclusivity: scopeForm.exclusivity,
+          licenceType: scopeForm.licenceType,
+          royaltyTerms: scopeForm.royaltyTerms,
+          owner: scopeForm.owner,
+          description: scopeForm.description,
+          documents: updatedDocs,
+        })
+
+        setIsScopeModalOpen(false)
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
+        showToast(
+          willAttach
+            ? `Rights scope updated and certificate "${targetDocName}" attached!`
+            : `Rights & governance scope updated for "${asset.name}"!`
+        )
+      },
+    })
+  }
+
+  // Gate Clearance & Supporting Document Modal State
+  const [selectedGateForModal, setSelectedGateForModal] = useState<GovernanceGateDefinition | null>(null)
+  const [gateModalForm, setGateModalForm] = useState({
+    status: 'CLEARED' as GovernanceGateStatus,
+    notes: '',
+    attachDoc: false,
+    docTitle: '',
+    docType: 'CERT' as RightsDocument['type'],
+    docFileSize: '1.8 MB',
+  })
+
+  const openGateModal = (gate: GovernanceGateDefinition) => {
+    setSelectedGateForModal(gate)
+    const current = getGateCheckValue(checks[gate.key])
+    setGateModalForm({
+      status: current.status,
+      notes: current.notes || '',
+      attachDoc: !!current.documentName,
+      docTitle: current.documentName || '',
+      docType: gate.pillar === 'Legal' ? 'DEED' : 'CERT',
+      docFileSize: '1.8 MB',
+    })
+  }
+
+  const handleGateStatusChange = (gate: GovernanceGateDefinition, newStatus: GovernanceGateStatus) => {
+    const prevVal = checks[gate.key]
+    const currentValObj = getGateCheckValue(prevVal)
+    const updatedObj: GovernanceCheckValue = {
+      ...currentValObj,
+      status: newStatus,
+      verifiedAt: newStatus === 'CLEARED' || newStatus === 'EXEMPT' ? 'Just now' : undefined,
+      verifiedBy: newStatus === 'CLEARED' || newStatus === 'EXEMPT' ? currentUser.name : undefined,
+    }
+    const updatedChecks: GovernanceChecksMap = { ...checks, [gate.key]: updatedObj }
+    const passedCount = complianceProfile.gates.filter((g) => isGatePassed(updatedChecks[g.key])).length
+    const calculatedScore = Math.round((passedCount / Math.max(1, complianceProfile.gates.length)) * 100)
+
+    setConfirmConfig({
+      isOpen: true,
+      title: `Confirm Gate Status: ${newStatus}`,
+      description: `Set clearance status for "${gate.title}" to ${newStatus}? This update will be logged in the permanent audit trail.`,
+      confirmLabel: 'Confirm Status Update',
+      variant: newStatus === 'CLEARED' ? 'success' : newStatus === 'FLAGGED' ? 'danger' : 'primary',
+      badge: `${gate.pillar} Pillar Gate`,
+      details: (
+        <div className="text-xs space-y-1">
+          <div><span className="font-semibold text-slate-700">Governance Gate:</span> {gate.title}</div>
+          <div><span className="font-semibold text-slate-700">Cluster:</span> {complianceProfile.clusterLabel}</div>
+          <div><span className="font-semibold text-slate-700">New Status:</span> {newStatus}</div>
+          <div><span className="font-semibold text-slate-700">Compliance Score:</span> {calculatedScore}% ({passedCount}/{complianceProfile.gates.length} cleared)</div>
+          <div><span className="font-semibold text-slate-700">Authorized By:</span> {currentUser.name} ({currentUser.roleLabel})</div>
+        </div>
+      ),
+      onConfirm: () => {
+        setChecks(updatedChecks)
+        updateRightsRecord({
+          ...asset,
+          governanceChecks: updatedChecks,
+          governanceScore: calculatedScore,
+        })
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
+        showToast(`Gate "${gate.title}" updated to ${newStatus} (${calculatedScore}% Score)`)
+      },
+    })
+  }
+
+  const handleGateModalSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedGateForModal) return
+
+    const gate = selectedGateForModal
+    const newStatus = gateModalForm.status
+    const willAttach = gateModalForm.attachDoc && !!gateModalForm.docTitle.trim()
+    const targetDocName = gateModalForm.docTitle.trim() || `${gate.pillar}_Clearance_${asset.name.replace(/\s+/g, '_')}.pdf`
+
+    const updatedObj: GovernanceCheckValue = {
+      status: newStatus,
+      notes: gateModalForm.notes.trim() || undefined,
+      documentName: willAttach ? targetDocName : undefined,
+      verifiedAt: newStatus === 'CLEARED' || newStatus === 'EXEMPT' ? 'Just now' : undefined,
+      verifiedBy: newStatus === 'CLEARED' || newStatus === 'EXEMPT' ? currentUser.name : undefined,
+    }
+
+    const updatedChecks: GovernanceChecksMap = {
+      ...checks,
+      [gate.key]: updatedObj,
+    }
+    const passedCount = complianceProfile.gates.filter((g) => isGatePassed(updatedChecks[g.key])).length
+    const calculatedScore = Math.round((passedCount / Math.max(1, complianceProfile.gates.length)) * 100)
+
+    setConfirmConfig({
+      isOpen: true,
+      title: `Confirm Gate Clearance: ${gate.title}`,
+      description: `Save clearance status (${newStatus}) and details for "${gate.title}"? This verification will be logged in the permanent audit trail.`,
+      confirmLabel: 'Confirm & Save Gate',
+      variant: newStatus === 'CLEARED' ? 'success' : newStatus === 'FLAGGED' ? 'danger' : 'primary',
+      badge: `${gate.pillar} Pillar Gate`,
+      details: (
+        <div className="text-xs space-y-1">
+          <div><span className="font-semibold text-slate-700">Governance Gate:</span> {gate.title}</div>
+          <div><span className="font-semibold text-slate-700">Clearance Status:</span> {newStatus}</div>
+          {gateModalForm.notes && (
+            <div><span className="font-semibold text-slate-700">Verification Notes:</span> {gateModalForm.notes}</div>
+          )}
+          {willAttach && (
+            <div><span className="font-semibold text-emerald-700">Supporting Document:</span> {targetDocName}</div>
+          )}
+          <div><span className="font-semibold text-slate-700">Updated Score:</span> {calculatedScore}% ({passedCount}/{complianceProfile.gates.length} passed)</div>
+          <div><span className="font-semibold text-slate-700">Reviewer:</span> {currentUser.name}</div>
+        </div>
+      ),
+      onConfirm: () => {
+        let updatedDocs = [...(asset.documents || [])]
+        if (willAttach) {
+          const newDoc: RightsDocument = {
+            id: `doc-${Date.now()}`,
+            name: targetDocName,
+            size: gateModalForm.docFileSize || '1.8 MB',
+            date: 'Just now',
+            type: gateModalForm.docType,
+            targetScope: 'asset',
+            notes: `Supporting evidence for gate "${gate.title}" — Verified by ${currentUser.name}`,
+          }
+          updatedDocs = [newDoc, ...updatedDocs]
+        }
+
+        setChecks(updatedChecks)
+        updateRightsRecord({
+          ...asset,
+          governanceChecks: updatedChecks,
+          governanceScore: calculatedScore,
+          documents: updatedDocs,
+        })
+
+        setSelectedGateForModal(null)
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
+        showToast(`Gate "${gate.title}" updated to ${newStatus}! (${calculatedScore}% Score)`)
+      },
+    })
+  }
 
   // Reusable Confirmation Modal State for RightsDetailsPage
   const [confirmConfig, setConfirmConfig] = useState<{
@@ -3588,40 +3840,6 @@ function RightsDetailsPage({
     description: '',
     onConfirm: () => { },
   })
-
-  const toggleCheck = (gate: GovernanceGateDefinition) => {
-    const isCurrentlyChecked = !!checks[gate.key]
-    const updated = { ...checks, [gate.key]: !isCurrentlyChecked }
-    const passedCount = complianceProfile.gates.filter((g) => !!updated[g.key]).length
-    const calculatedScore = Math.round((passedCount / Math.max(1, complianceProfile.gates.length)) * 100)
-
-    setConfirmConfig({
-      isOpen: true,
-      title: isCurrentlyChecked ? 'Confirm Check Invalidation' : 'Confirm Governance Clearance',
-      description: `Are you sure you want to mark "${gate.title}" as ${!isCurrentlyChecked ? 'VERIFIED' : 'UNVERIFIED'} for "${asset.name}"? This governance check will be logged in the permanent audit trail.`,
-      confirmLabel: !isCurrentlyChecked ? 'Confirm Clearance & Log' : 'Confirm Invalidation',
-      variant: !isCurrentlyChecked ? 'success' : 'warning',
-      badge: `${gate.pillar} Pillar Gate`,
-      details: (
-        <div className="text-xs space-y-1">
-          <div><span className="font-semibold text-slate-700">Governance Gate:</span> {gate.title}</div>
-          <div><span className="font-semibold text-slate-700">Category Cluster:</span> {complianceProfile.clusterLabel}</div>
-          <div><span className="font-semibold text-slate-700">Compliance Score:</span> {calculatedScore}% verified</div>
-          <div><span className="font-semibold text-slate-700">Authorised By:</span> {currentUser.name} ({currentUser.roleLabel})</div>
-        </div>
-      ),
-      onConfirm: () => {
-        setChecks(updated)
-        updateRightsRecord({
-          ...asset,
-          governanceChecks: updated,
-          governanceScore: calculatedScore,
-        })
-        setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-        showToast(`Governance check updated: ${gate.title} (${calculatedScore}% Score)`)
-      },
-    })
-  }
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -4009,15 +4227,15 @@ function RightsDetailsPage({
 
       {/* Sub Tabs */}
       <div className="border-b border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900/90 px-3 rounded-xl shadow-2xs">
-        <div className="flex items-center gap-2">
-          {['Overview & Rights', 'Governance & Clearance', 'Audit History'].map((st) => (
+        <div className="flex items-center gap-2 overflow-x-auto">
+          {['Overview & Rights', 'Governance & Clearance', 'Filing Certificates & Legal Contracts', 'Audit History'].map((st) => (
             <button
               key={st}
               id={`rights-subtab-${st.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
               onClick={() => setSubTab(st)}
               className={cn(
-                'px-4 py-3.5 text-xs font-bold border-b-2 -mb-[1px] transition cursor-pointer flex items-center gap-2',
-                subTab === st || (st === 'Governance & Clearance' && (subTab === 'Governance Checklist' || subTab === 'Legal Documents'))
+                'px-4 py-3.5 text-xs font-bold border-b-2 -mb-[1px] transition cursor-pointer flex items-center gap-2 whitespace-nowrap',
+                subTab === st || (st === 'Governance & Clearance' && subTab === 'Governance Checklist') || (st === 'Filing Certificates & Legal Contracts' && subTab === 'Legal Documents')
                   ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
                   : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               )}
@@ -4026,9 +4244,17 @@ function RightsDetailsPage({
               {st === 'Governance & Clearance' && (
                 <span className={cn(
                   'rounded-full px-2 py-0.5 text-[10px] font-bold',
-                  (asset.documents?.length || 0) > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                  (complianceReadiness?.complianceScore || 0) >= 80 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
                 )}>
-                  {asset.governanceScore ?? 0}%
+                  {complianceReadiness?.complianceScore || 0}%
+                </span>
+              )}
+              {st === 'Filing Certificates & Legal Contracts' && (
+                <span className={cn(
+                  'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                  (asset.documents?.length || 0) > 0 ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                )}>
+                  {asset.documents?.length || 0} File(s)
                 </span>
               )}
               {st === 'Audit History' && (
@@ -4046,13 +4272,34 @@ function RightsDetailsPage({
         <div className="grid gap-5 xl:grid-cols-[1fr_320px] items-start">
           <div className="space-y-5">
             <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
-              <h2 className="text-base font-bold text-[#09245a] dark:text-white border-b border-slate-100 dark:border-white/10 pb-3">
-                Rights & Governance Scope Breakdown
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3">
+                <div>
+                  <h2 className="text-base font-bold text-[#09245a] dark:text-white">
+                    Rights & Governance Scope Breakdown
+                  </h2>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Active legal ownership parameters, territorial bounds, licensing rights, and filing certificates.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={openScopeModal}
+                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white px-3.5 py-2 text-xs font-bold shadow-md shadow-blue-600/20 transition cursor-pointer shrink-0"
+                >
+                  <FileUp className="size-3.5" />
+                  <span>+ Update Scope & Attach Certificate</span>
+                </button>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Primary Rights Scope</span>
+                <div
+                  onClick={openScopeModal}
+                  className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Primary Rights Scope</span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
+                  </div>
                   <div className="font-bold text-slate-900 dark:text-white text-sm">
                     {asset.rightsType || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Not Configured (Pending Scope Filing)</span>}
                   </div>
@@ -4061,8 +4308,14 @@ function RightsDetailsPage({
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Territory Clearance</span>
+                <div
+                  onClick={openScopeModal}
+                  className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Territory Clearance</span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
+                  </div>
                   <div className="font-bold text-slate-900 dark:text-white text-sm">
                     {asset.territory || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Territory Not Filed</span>}
                   </div>
@@ -4071,16 +4324,28 @@ function RightsDetailsPage({
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Registered Rights Holder</span>
+                <div
+                  onClick={openScopeModal}
+                  className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Registered Rights Holder</span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
+                  </div>
                   <div className="font-bold text-slate-900 dark:text-white text-sm">
                     {asset.owner || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Unregistered (No Holder Assigned)</span>}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">Parent Agency: {asset.agency || 'Lovetoons'}</div>
                 </div>
 
-                <div className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Licensing & Royalty Terms</span>
+                <div
+                  onClick={openScopeModal}
+                  className="rounded-xl border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-1 hover:border-blue-200 dark:hover:border-blue-800/60 transition cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Licensing & Royalty Terms</span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 transition" />
+                  </div>
                   <div className="font-bold text-slate-900 dark:text-white text-sm">
                     {asset.licenceType || <span className="text-amber-600 dark:text-amber-400 font-semibold italic">Unspecified License</span>}
                   </div>
@@ -4090,10 +4355,58 @@ function RightsDetailsPage({
                 </div>
               </div>
 
+              {/* Attached Scope Filing Certificates Strip */}
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+                    <span>Attached Scope Filing Certificates & Deeds:</span>
+                  </span>
+                  <button
+                    onClick={() => setSubTab('Filing Certificates & Legal Contracts')}
+                    className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                  >
+                    View all in Filing Repository →
+                  </button>
+                </div>
+
+                {asset.documents && asset.documents.filter(d => d.type === 'CERT' || d.type === 'LICENSE' || d.targetScope === 'asset').length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {asset.documents.filter(d => d.type === 'CERT' || d.type === 'LICENSE' || d.targetScope === 'asset').map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900">
+                        <div className="flex items-center gap-2 truncate">
+                          <FileCheck className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <div className="truncate">
+                            <div className="font-semibold text-slate-900 dark:text-white truncate">{doc.name}</div>
+                            <div className="text-[10px] text-slate-500">{doc.size} • {doc.date}</div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => showToast(`Starting download for ${doc.name}...`)}
+                          className="shrink-0 text-[11px] font-bold text-blue-600 hover:underline cursor-pointer"
+                        >
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-2.5 rounded-lg border border-amber-200 bg-amber-50/60 dark:border-amber-900/40 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300">
+                    <span>No official filing certificate attached for this rights scope yet.</span>
+                    <button
+                      onClick={openScopeModal}
+                      className="font-bold text-[11px] text-amber-700 dark:text-amber-400 hover:underline cursor-pointer shrink-0 ml-2"
+                    >
+                      + Attach Certificate Now
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="rounded-xl bg-blue-50/60 p-4 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-800/40 text-xs">
                 <div className="font-bold text-blue-950 dark:text-blue-200 mb-1">Legal Summary & Chain of Title Notes</div>
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {asset.description || 'No legal summary or chain of title notes filed yet. Click \'Edit Governance Details\' to record legal terms.'}
+                  {asset.description || 'No legal summary or chain of title notes filed yet. Click \'+ Update Scope & Attach Certificate\' to record legal terms.'}
                 </p>
               </div>
             </div>
@@ -4127,6 +4440,12 @@ function RightsDetailsPage({
               </div>
 
               <button
+                onClick={openScopeModal}
+                className="w-full rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 dark:hover:bg-blue-900/60 p-2.5 text-xs font-bold transition cursor-pointer"
+              >
+                Configure Scope & Attach Certificate
+              </button>
+              <button
                 onClick={() => setIsEditModalOpen(true)}
                 className="w-full rounded-xl bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 p-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition cursor-pointer"
               >
@@ -4138,7 +4457,7 @@ function RightsDetailsPage({
       )}
 
       {/* 2. Governance & Clearance Sub-Tab */}
-      {(subTab === 'Governance & Clearance' || subTab === 'Governance Checklist' || subTab === 'Legal Documents') && (
+      {(subTab === 'Governance & Clearance' || subTab === 'Governance Checklist') && (
         <div className="space-y-6">
           {/* Approval Scheduling & Documents Readiness Gate */}
           {(!asset.documents || asset.documents.length === 0) ? (
@@ -4152,11 +4471,18 @@ function RightsDetailsPage({
                     Executive Clearance Review Gate: Documentation Required
                   </h4>
                   <p className="text-xs text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-relaxed">
-                    This asset will <b>not enter the reviewer approvals queue</b> until executed legal chain of title, script clearances, or talent releases are uploaded below.
+                    This asset will <b>not enter the reviewer approvals queue</b> until executed legal chain of title, script clearances, or talent releases are uploaded in the Filing Certificates repository.
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setSubTab('Filing Certificates & Legal Contracts')}
+                  className="flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer"
+                >
+                  <Plus className="size-3.5" />
+                  <span>Attach Legal Deeds</span>
+                </button>
                 <div
                   className="flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-500 px-3 py-1.5 text-xs font-medium cursor-not-allowed"
                   title="Upload at least one legal clearance document before scheduling approval"
@@ -4215,437 +4541,514 @@ function RightsDetailsPage({
               )}
             </div>
           )}
-        <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Ministry Governance & Content Clearance Checklist</h3>
-                <span className="rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 dark:border dark:border-blue-800/40 px-2.5 py-0.5 text-[10px] font-bold">
-                  {complianceProfile.clusterLabel}
-                </span>
-                <span className={cn(
-                  'rounded-md px-2 py-0.5 text-[10px] font-bold',
-                  complianceProfile.inherentLiability === 'Critical' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' :
-                  complianceProfile.inherentLiability === 'High' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                )}>
-                  {complianceProfile.inherentLiability} Liability Profile
+
+          {/* Ministry Governance & Content Clearance Checklist Hub */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Ministry Governance & Content Clearance Checklist</h3>
+                  <span className="rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 dark:border dark:border-blue-800/40 px-2.5 py-0.5 text-[10px] font-bold">
+                    {complianceProfile.clusterLabel}
+                  </span>
+                  <span className={cn(
+                    'rounded-md px-2 py-0.5 text-[10px] font-bold',
+                    complianceProfile.inherentLiability === 'Critical' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300' :
+                    complianceProfile.inherentLiability === 'High' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                  )}>
+                    {complianceProfile.inherentLiability} Liability Profile
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Standard: <span className="font-semibold text-slate-700 dark:text-slate-300">{complianceProfile.standardsReference}</span> — {complianceProfile.description}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-3 py-1 text-xs font-bold">
+                  Score: {complianceReadiness.complianceScore}% ({complianceReadiness.passedGatesCount}/{complianceReadiness.totalGatesCount} Cleared)
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                Standard: <span className="font-semibold text-slate-700 dark:text-slate-300">{complianceProfile.standardsReference}</span> — {complianceProfile.description}
-              </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-3 py-1 text-xs font-bold">
-                Score: {complianceReadiness.complianceScore}% ({complianceReadiness.passedGatesCount}/{complianceReadiness.totalGatesCount} Cleared)
-              </span>
-            </div>
-          </div>
 
-          {/* Dynamic Category Gates */}
-          <div className="space-y-2.5 text-xs">
-            {complianceProfile.gates.map((gate) => {
-              const isChecked = !!checks[gate.key]
-              return (
-                <div key={gate.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 dark:border-white/10 p-3.5 bg-slate-50/60 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-800/80 transition">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={cn(
-                        'rounded px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider',
-                        gate.pillar === 'Doctrinal' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300' :
-                        gate.pillar === 'ChildSafety' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' :
-                        gate.pillar === 'Legal' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300' :
-                        'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
-                      )}>
-                        {gate.pillar} Pillar
-                      </span>
-                      {gate.mandatory && (
-                        <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
-                          * Mandatory
-                        </span>
-                      )}
-                      <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{gate.title}</div>
-                    </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">{gate.desc}</div>
-                  </div>
-                  <button
-                    onClick={() => toggleCheck(gate)}
-                    className={cn(
-                      'rounded-lg px-3.5 py-1.5 font-bold text-xs transition shadow-2xs shrink-0 cursor-pointer self-end sm:self-auto',
-                      isChecked
-                        ? 'bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
-                        : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                    )}
-                  >
-                    {isChecked ? 'Cleared ✓' : 'Pending'}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+            {/* Dynamic Category Gates with Select Options and Proof Modals */}
+            <div className="space-y-3 text-xs">
+              {complianceProfile.gates.map((gate) => {
+                const gateVal = checks[gate.key]
+                const gateStatus = getGateStatus(gateVal)
+                const gateObj = getGateCheckValue(gateVal)
 
-        {/* Legal Documents & Deeds Hub */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-white/10 pb-3">
-            <div>
-              <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Filing Certificates & Legal Contracts</h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Official certificates of registration, talent releases, work-for-hire deeds, and broadcast agreements.</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-2.5 py-0.5 text-[11px] font-bold">
-                {asset.documents?.length || 0} Total Document(s)
-              </span>
-            </div>
-          </div>
-
-          {/* Category Mandatory Deeds Requirements Strip */}
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <FileCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
-                <span>Mandatory Legal Clearances for {complianceProfile.clusterLabel}:</span>
-              </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                {complianceReadiness.missingMandatoryDocs.length === 0 ? (
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">All Category Deeds Verified ✓</span>
-                ) : (
-                  <span className="text-amber-600 dark:text-amber-400 font-bold">{complianceReadiness.missingMandatoryDocs.length} Mandatory Deed(s) Missing</span>
-                )}
-              </span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {complianceProfile.requiredDocuments.map((reqDoc, idx) => {
-                const hasDoc = (asset.documents || []).some(
-                  (d) =>
-                    d.type === reqDoc.type ||
-                    d.name.toLowerCase().includes(reqDoc.label.toLowerCase()) ||
-                    d.name.toLowerCase().includes(reqDoc.type.toLowerCase())
-                )
                 return (
                   <div
-                    key={idx}
+                    key={gate.key}
                     className={cn(
-                      'rounded-lg border p-2 text-xs flex items-center justify-between gap-2',
-                      hasDoc
-                        ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-800/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300'
-                        : reqDoc.mandatory
-                          ? 'border-amber-200 bg-amber-50/70 dark:border-amber-800/40 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300'
-                          : 'border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 text-slate-600 dark:text-slate-400'
+                      'rounded-xl border p-3.5 transition space-y-2.5',
+                      gateStatus === 'CLEARED'
+                        ? 'border-emerald-200/90 bg-emerald-50/40 dark:border-emerald-800/40 dark:bg-emerald-950/20'
+                        : gateStatus === 'FLAGGED'
+                        ? 'border-rose-200/90 bg-rose-50/40 dark:border-rose-800/40 dark:bg-rose-950/20'
+                        : gateStatus === 'IN_REVIEW'
+                        ? 'border-blue-200/90 bg-blue-50/40 dark:border-blue-800/40 dark:bg-blue-950/20'
+                        : gateStatus === 'EXEMPT'
+                        ? 'border-slate-200/80 bg-slate-100/60 dark:border-white/10 dark:bg-slate-800/40'
+                        : 'border-slate-200/80 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50'
                     )}
                   >
-                    <div className="truncate">
-                      <div className="font-semibold truncate">{reqDoc.label}</div>
-                      <div className="text-[10px] opacity-80 truncate">{reqDoc.desc}</div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className={cn(
+                              'rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider',
+                              gate.pillar === 'Doctrinal' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300' :
+                              gate.pillar === 'ChildSafety' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' :
+                              gate.pillar === 'Legal' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300' :
+                              'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
+                            )}
+                          >
+                            {gate.pillar} Pillar
+                          </span>
+                          {gate.mandatory && (
+                            <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                              * Mandatory
+                            </span>
+                          )}
+                          <div className="font-semibold text-slate-900 dark:text-white text-xs">{gate.title}</div>
+                        </div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400">{gate.desc}</div>
+                      </div>
+
+                      {/* Right controls: Select Status Option + Modal Action */}
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                        <select
+                          value={gateStatus}
+                          onChange={(e) => handleGateStatusChange(gate, e.target.value as GovernanceGateStatus)}
+                          className={cn(
+                            'h-8.5 rounded-lg px-2.5 text-xs font-bold border transition cursor-pointer outline-none shadow-2xs',
+                            gateStatus === 'CLEARED'
+                              ? 'border-emerald-300 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700'
+                              : gateStatus === 'IN_REVIEW'
+                              ? 'border-blue-300 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-700'
+                              : gateStatus === 'FLAGGED'
+                              ? 'border-rose-300 bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-700'
+                              : gateStatus === 'EXEMPT'
+                              ? 'border-slate-300 bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                              : 'border-amber-300 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-700'
+                          )}
+                        >
+                          <option value="CLEARED">Cleared ✓</option>
+                          <option value="IN_REVIEW">Under Review ⏱</option>
+                          <option value="PENDING">Pending Clearance ⚠️</option>
+                          <option value="EXEMPT">Exempt / N/A —</option>
+                          <option value="FLAGGED">Flagged / Action Needed ❌</option>
+                        </select>
+
+                        <button
+                          type="button"
+                          onClick={() => openGateModal(gate)}
+                          className="flex items-center gap-1.5 h-8.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 hover:bg-slate-50 px-3 text-xs font-semibold text-slate-700 transition shadow-2xs cursor-pointer shrink-0"
+                          title="Attach clearance certificate, document proof, or verification notes"
+                        >
+                          <FileUp className="size-3.5 text-blue-600 dark:text-blue-400" />
+                          <span>{gateObj.documentName ? 'Proof Attached ✓' : 'Add Proof / Notes'}</span>
+                        </button>
+                      </div>
                     </div>
-                    <span className="shrink-0 text-[10px] font-bold">
-                      {hasDoc ? 'Attached ✓' : reqDoc.mandatory ? 'Required *' : 'Optional'}
-                    </span>
+
+                    {/* Reviewer Note / Attached Proof pill */}
+                    {(gateObj.notes || gateObj.documentName || gateObj.verifiedBy) && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/60 dark:border-white/5 text-[11px]">
+                        {gateObj.verifiedBy && (
+                          <span className="text-slate-500 dark:text-slate-400">
+                            Verified by <b>{gateObj.verifiedBy}</b> {gateObj.verifiedAt ? `(${gateObj.verifiedAt})` : ''}
+                          </span>
+                        )}
+                        {gateObj.notes && (
+                          <span className="text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200/80 dark:border-white/10">
+                            Note: {gateObj.notes}
+                          </span>
+                        )}
+                        {gateObj.documentName && (
+                          <span className="inline-flex items-center gap-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 px-2 py-0.5 font-semibold">
+                            <FileCheck className="size-3" />
+                            <span>Proof Doc: {gateObj.documentName}</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               })}
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Contributor Talent Releases Strip */}
-          {assetContributors.length > 0 && (
-            <div className="rounded-xl border border-purple-100 bg-purple-50/40 dark:border-purple-900/30 dark:bg-purple-950/20 p-3 space-y-1.5 text-xs">
-              <div className="flex items-center justify-between font-bold text-purple-950 dark:text-purple-300 text-[11px]">
-                <span className="flex items-center gap-1.5">
-                  <User className="size-3 text-purple-600 dark:text-purple-400" />
-                  <span>Individual Contributor Release Auditing ({assetContributors.length} Credited):</span>
+      {/* 3. Filing Certificates & Legal Contracts Sub-Tab */}
+      {(subTab === 'Filing Certificates & Legal Contracts' || subTab === 'Legal Documents') && (
+        <div className="space-y-6">
+          {/* Legal Documents & Deeds Hub */}
+          <div className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-white/10 pb-3">
+              <div>
+                <h3 className="font-bold text-[#09245a] dark:text-white text-base">Filing Certificates & Legal Contracts</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Official certificates of registration, talent releases, work-for-hire deeds, broadcast agreements, and compliance test records.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-3 py-1 text-xs font-bold">
+                  {asset.documents?.length || 0} Total Document(s)
                 </span>
-                <span>
-                  {complianceReadiness.missingContributorReleases.length === 0 ? (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">All Talent Released ✓</span>
+              </div>
+            </div>
+
+            {/* Category Mandatory Deeds Requirements Strip */}
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <FileCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>Mandatory Legal Clearances for {complianceProfile.clusterLabel}:</span>
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {complianceReadiness.missingMandatoryDocs.length === 0 ? (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">All Category Deeds Verified ✓</span>
                   ) : (
-                    <span className="text-amber-600 dark:text-amber-400 font-bold">
-                      {complianceReadiness.missingContributorReleases.length} Release(s) Pending
-                    </span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">{complianceReadiness.missingMandatoryDocs.length} Mandatory Deed(s) Missing</span>
                   )}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {assetContributors.map((c: AssetContributor, i: number) => {
-                  const hasRelease = (asset.documents || []).some(
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {complianceProfile.requiredDocuments.map((reqDoc, idx) => {
+                  const hasDoc = (asset.documents || []).some(
                     (d) =>
-                      (d.type === 'TALENT_RELEASE' || d.type === 'DEED') &&
-                      (d.assigneeName?.toLowerCase() === c.name.toLowerCase() ||
-                        d.name.toLowerCase().includes(c.name.toLowerCase()))
+                      d.type === reqDoc.type ||
+                      d.name.toLowerCase().includes(reqDoc.label.toLowerCase()) ||
+                      d.name.toLowerCase().includes(reqDoc.type.toLowerCase())
                   )
                   return (
-                    <span
-                      key={i}
+                    <div
+                      key={idx}
                       className={cn(
-                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold border',
-                        hasRelease
-                          ? 'border-emerald-200 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/40'
-                          : 'border-amber-200 bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/40'
+                        'rounded-lg border p-2 text-xs flex items-center justify-between gap-2',
+                        hasDoc
+                          ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-800/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300'
+                          : reqDoc.mandatory
+                            ? 'border-amber-200 bg-amber-50/70 dark:border-amber-800/40 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300'
+                            : 'border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 text-slate-600 dark:text-slate-400'
                       )}
                     >
-                      <span>{c.name} ({c.role}):</span>
-                      <b>{hasRelease ? 'Released ✓' : 'Pending Deed'}</b>
-                    </span>
+                      <div className="truncate">
+                        <div className="font-semibold truncate">{reqDoc.label}</div>
+                        <div className="text-[10px] opacity-80 truncate">{reqDoc.desc}</div>
+                      </div>
+                      <span className="shrink-0 text-[10px] font-bold">
+                        {hasDoc ? 'Attached ✓' : reqDoc.mandatory ? 'Required *' : 'Optional'}
+                      </span>
+                    </div>
                   )
                 })}
               </div>
             </div>
-          )}
 
-          <form onSubmit={handleAttachDocument} className="rounded-xl border border-blue-100 bg-blue-50/40 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-3 text-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100/70 dark:border-white/10 pb-2.5">
-              <div className="font-bold text-[#09245a] dark:text-white flex items-center gap-1.5">
-                <FileUp className="size-4 text-blue-600 dark:text-blue-400" />
-                <span>Attach Legal Document to Record</span>
-              </div>
-
-              {/* Target Scope Toggle */}
-              <div className="inline-flex rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-0.5 shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDetailsDocScope('individual')
-                    setDetailsDocType('TALENT_RELEASE')
-                  }}
-                  className={cn(
-                    'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition cursor-pointer',
-                    detailsDocScope === 'individual'
-                      ? 'bg-purple-600 text-white shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                  )}
-                >
-                  <User className="size-3" />
-                  <span>Individual Contributor / Talent</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDetailsDocScope('asset')
-                    setDetailsDocType('CERT')
-                  }}
-                  className={cn(
-                    'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition cursor-pointer',
-                    detailsDocScope === 'asset'
-                      ? 'bg-blue-600 text-white shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                  )}
-                >
-                  <ShieldCheck className="size-3" />
-                  <span>Asset-Level Master Document</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Individual Contributor Selector (only shown if scope === 'individual') */}
-            {detailsDocScope === 'individual' && (
-              <div className="rounded-lg border border-purple-100 bg-white dark:border-purple-900/40 dark:bg-slate-900/90 p-3 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold text-purple-900 dark:text-purple-300">Designated Contributor / Talent</label>
-                  {assetContributors.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setDetailsIsCustomAssignee(!detailsIsCustomAssignee)}
-                      className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
-                    >
-                      {detailsIsCustomAssignee ? 'Pick from asset credits' : '+ Custom talent name'}
-                    </button>
-                  )}
+            {/* Contributor Talent Releases Strip */}
+            {assetContributors.length > 0 && (
+              <div className="rounded-xl border border-purple-100 bg-purple-50/40 dark:border-purple-900/30 dark:bg-purple-950/20 p-3 space-y-1.5 text-xs">
+                <div className="flex items-center justify-between font-bold text-purple-950 dark:text-purple-300 text-[11px]">
+                  <span className="flex items-center gap-1.5">
+                    <User className="size-3 text-purple-600 dark:text-purple-400" />
+                    <span>Individual Contributor Release Auditing ({assetContributors.length} Credited):</span>
+                  </span>
+                  <span>
+                    {complianceReadiness.missingContributorReleases.length === 0 ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">All Talent Released ✓</span>
+                    ) : (
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">
+                        {complianceReadiness.missingContributorReleases.length} Release(s) Pending
+                      </span>
+                    )}
+                  </span>
                 </div>
-
-                {!detailsIsCustomAssignee && assetContributors.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div>
-                      <select
-                        value={detailsDocAssignee}
-                        onChange={(e) => {
-                          const val = e.target.value
-                          setDetailsDocAssignee(val)
-                          const found = assetContributors.find((c: AssetContributor) => c.name === val)
-                          if (found) setDetailsDocRole(found.role)
-                        }}
-                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-purple-400"
+                <div className="flex flex-wrap gap-1.5">
+                  {assetContributors.map((c: AssetContributor, i: number) => {
+                    const hasRelease = (asset.documents || []).some(
+                      (d) =>
+                        (d.type === 'TALENT_RELEASE' || d.type === 'DEED') &&
+                        (d.assigneeName?.toLowerCase() === c.name.toLowerCase() ||
+                          d.name.toLowerCase().includes(c.name.toLowerCase()))
+                    )
+                    return (
+                      <span
+                        key={i}
+                        className={cn(
+                          'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold border',
+                          hasRelease
+                            ? 'border-emerald-200 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/40'
+                            : 'border-amber-200 bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/40'
+                        )}
                       >
-                        {assetContributors.map((c: AssetContributor, idx: number) => (
-                          <option key={idx} value={c.name}>
-                            {c.name} — {c.role}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <input
-                        value={detailsDocRole}
-                        onChange={(e) => setDetailsDocRole(e.target.value)}
-                        placeholder="Talent role (e.g. Lead Voice Actor, Illustrator)"
-                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div>
-                      <input
-                        value={detailsDocAssignee}
-                        onChange={(e) => setDetailsDocAssignee(e.target.value)}
-                        placeholder="Talent or Contributor full name..."
-                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <input
-                        value={detailsDocRole}
-                        onChange={(e) => setDetailsDocRole(e.target.value)}
-                        placeholder="Role (e.g. Performer, Music Producer, Animator)..."
-                        className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
-                      />
-                    </div>
-                  </div>
-                )}
+                        <span>{c.name} ({c.role}):</span>
+                        <b>{hasRelease ? 'Released ✓' : 'Pending Deed'}</b>
+                      </span>
+                    )
+                  })}
+                </div>
               </div>
             )}
 
-            {/* Document Details: Type, File Picker, Title & Notes */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">Document Category</label>
-                <select
-                  value={detailsDocType}
-                  onChange={(e) => setDetailsDocType(e.target.value as any)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-400"
-                >
-                  <option value="TALENT_RELEASE">Talent Release Deed (Performer/Voice)</option>
-                  <option value="DEED">Work-for-Hire Assignment Deed</option>
-                  <option value="CERT">IP Filing Certificate / Copyright</option>
-                  <option value="LICENSE">License / Sync Agreement</option>
-                  <option value="CONTRACT">General Production Contract</option>
-                </select>
-              </div>
+            {/* Attach Document Form */}
+            <form onSubmit={handleAttachDocument} className="rounded-xl border border-blue-100 bg-blue-50/40 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-3 text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100/70 dark:border-white/10 pb-2.5">
+                <div className="font-bold text-[#09245a] dark:text-white flex items-center gap-1.5">
+                  <FileUp className="size-4 text-blue-600 dark:text-blue-400" />
+                  <span>Attach Legal Document to Record</span>
+                </div>
 
-              <div className="sm:col-span-2">
-                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">Document File or Title</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    value={newDocTitle}
-                    onChange={(e) => setNewDocTitle(e.target.value)}
-                    placeholder={
+                {/* Target Scope Toggle */}
+                <div className="inline-flex rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-0.5 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDetailsDocScope('individual')
+                      setDetailsDocType('TALENT_RELEASE')
+                    }}
+                    className={cn(
+                      'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition cursor-pointer',
                       detailsDocScope === 'individual'
-                        ? `Talent_Release_${(detailsDocAssignee || 'Contributor').replace(/\s+/g, '_')}_Signed.pdf`
-                        : `Clearance_Deed_${asset.name.replace(/\s+/g, '_')}.pdf`
-                    }
-                    className="h-8.5 flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                  />
-                  <label className="inline-flex items-center gap-1.5 h-8.5 cursor-pointer rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 shrink-0">
-                    <UploadCloud className="size-3.5 text-blue-600 dark:text-blue-400" />
-                    <span>Browse</span>
+                        ? 'bg-purple-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    )}
+                  >
+                    <User className="size-3" />
+                    <span>Individual Contributor / Talent</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDetailsDocScope('asset')
+                      setDetailsDocType('CERT')
+                    }}
+                    className={cn(
+                      'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition cursor-pointer',
+                      detailsDocScope === 'asset'
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    )}
+                  >
+                    <ShieldCheck className="size-3" />
+                    <span>Asset-Level Master Document</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Individual Contributor Selector */}
+              {detailsDocScope === 'individual' && (
+                <div className="rounded-lg border border-purple-100 bg-white dark:border-purple-900/40 dark:bg-slate-900/90 p-3 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-purple-900 dark:text-purple-300">Designated Contributor / Talent</label>
+                    {assetContributors.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setDetailsIsCustomAssignee(!detailsIsCustomAssignee)}
+                        className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+                      >
+                        {detailsIsCustomAssignee ? 'Pick from asset credits' : '+ Custom talent name'}
+                      </button>
+                    )}
+                  </div>
+
+                  {!detailsIsCustomAssignee && assetContributors.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <select
+                          value={detailsDocAssignee}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setDetailsDocAssignee(val)
+                            const found = assetContributors.find((c: AssetContributor) => c.name === val)
+                            if (found) setDetailsDocRole(found.role)
+                          }}
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-purple-400"
+                        >
+                          {assetContributors.map((c: AssetContributor, idx: number) => (
+                            <option key={idx} value={c.name}>
+                              {c.name} — {c.role}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <input
+                          value={detailsDocRole}
+                          onChange={(e) => setDetailsDocRole(e.target.value)}
+                          placeholder="Talent role (e.g. Lead Voice Actor, Illustrator)"
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <input
+                          value={detailsDocAssignee}
+                          onChange={(e) => setDetailsDocAssignee(e.target.value)}
+                          placeholder="Talent or Contributor full name..."
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <input
+                          value={detailsDocRole}
+                          onChange={(e) => setDetailsDocRole(e.target.value)}
+                          placeholder="Role (e.g. Performer, Music Producer, Animator)..."
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Document Details: Type, File Picker, Title & Notes */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">Document Category</label>
+                  <select
+                    value={detailsDocType}
+                    onChange={(e) => setDetailsDocType(e.target.value as any)}
+                    className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-400"
+                  >
+                    <option value="TALENT_RELEASE">Talent Release Deed (Performer/Voice)</option>
+                    <option value="DEED">Work-for-Hire Assignment Deed</option>
+                    <option value="CERT">IP Filing Certificate / Copyright</option>
+                    <option value="LICENSE">License / Sync Agreement</option>
+                    <option value="CONTRACT">General Production Contract</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">Document File or Title</label>
+                  <div className="flex items-center gap-2">
                     <input
-                      type="file"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) {
-                          setNewDocTitle(file.name)
-                          const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
-                          setDetailsDocFileSize(`${sizeMb} MB`)
-                        }
-                      }}
+                      value={newDocTitle}
+                      onChange={(e) => setNewDocTitle(e.target.value)}
+                      placeholder={
+                        detailsDocScope === 'individual'
+                          ? `Talent_Release_${(detailsDocAssignee || 'Contributor').replace(/\s+/g, '_')}_Signed.pdf`
+                          : `Clearance_Deed_${asset.name.replace(/\s+/g, '_')}.pdf`
+                      }
+                      className="h-8.5 flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
                     />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
-              <input
-                value={detailsDocNotes}
-                onChange={(e) => setDetailsDocNotes(e.target.value)}
-                placeholder="Optional governance notes / clauses cleared (e.g. Worldwide, in perpetuity, verified ID on record)..."
-                className="h-8.5 w-full sm:flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-              />
-              <button
-                type="submit"
-                className="h-8.5 w-full sm:w-auto rounded-lg bg-blue-600 px-4 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 transition shadow-2xs shrink-0 cursor-pointer"
-              >
-                + Attach Document
-              </button>
-            </div>
-          </form>
-
-          <div className="space-y-2.5 text-xs">
-            {asset.documents && asset.documents.length > 0 ? (
-              asset.documents.map((d) => (
-                <div key={d.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-white/10 p-3.5 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition">
-                  <div className="flex items-start gap-3">
-                    <div className={cn(
-                      "grid size-9 shrink-0 place-items-center rounded-lg font-bold text-[10px]",
-                      d.targetScope === 'individual' || d.assigneeName ? "bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300" : "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
-                    )}>
-                      {d.targetScope === 'individual' || d.type === 'TALENT_RELEASE' ? (
-                        <User className="size-4" />
-                      ) : d.type === 'DEED' ? (
-                        <FileCheck className="size-4" />
-                      ) : d.type === 'CERT' ? (
-                        <ShieldCheck className="size-4" />
-                      ) : d.type === 'LICENSE' ? (
-                        <ScrollText className="size-4" />
-                      ) : (
-                        <FileText className="size-4" />
-                      )}
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="font-bold text-slate-900 dark:text-white">{d.name}</span>
-                        <span className={cn(
-                          "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                          d.type === 'TALENT_RELEASE' ? "bg-purple-100 text-purple-800 dark:bg-purple-950/50 dark:text-purple-300 dark:border dark:border-purple-800/40" :
-                            d.type === 'DEED' ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border dark:border-emerald-800/40" :
-                              d.type === 'CERT' ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 dark:border dark:border-blue-800/40" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-white/10"
-                        )}>
-                          {d.type ? d.type.replace('_', ' ') : 'PDF'}
-                        </span>
-                        {d.assigneeName && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 dark:bg-purple-950/40 dark:border-purple-800/40 dark:text-purple-300 px-2 py-0.5 text-[10px] font-semibold">
-                            <User className="size-2.5" />
-                            <span>Individual: {d.assigneeName} {d.assigneeRole ? `(${d.assigneeRole})` : ''}</span>
-                          </span>
-                        )}
-                        {d.targetScope === 'asset' && !d.assigneeName && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold">
-                            Asset-Level Master
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[10px] text-slate-400 dark:text-slate-400">
-                        {d.size} • Uploaded on {d.date}
-                        {d.notes ? ` • Note: ${d.notes}` : ''}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                    <button
-                      onClick={() => showToast(`Starting download for ${d.name}...`)}
-                      className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs text-xs cursor-pointer"
-                    >
-                      Download
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteDocument(d.id, d.name)}
-                      className="rounded-lg border border-red-200 bg-white dark:border-red-500/30 dark:bg-rose-950/30 dark:text-red-400 dark:hover:bg-rose-950/60 p-1.5 font-bold text-red-600 hover:bg-red-50 transition shadow-2xs cursor-pointer"
-                      title="Delete document"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
+                    <label className="inline-flex items-center gap-1.5 h-8.5 cursor-pointer rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 shrink-0">
+                      <UploadCloud className="size-3.5 text-blue-600 dark:text-blue-400" />
+                      <span>Browse</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            setNewDocTitle(file.name)
+                            const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
+                            setDetailsDocFileSize(`${sizeMb} MB`)
+                          }
+                        }}
+                      />
+                    </label>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="p-6 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 dark:border dark:border-white/5 rounded-xl">
-                No legal documents attached yet. Use the upload box above to add talent release deeds or filing certificates.
               </div>
-            )}
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
+                <input
+                  value={detailsDocNotes}
+                  onChange={(e) => setDetailsDocNotes(e.target.value)}
+                  placeholder="Optional governance notes / clauses cleared (e.g. Worldwide, in perpetuity, verified ID on record)..."
+                  className="h-8.5 w-full sm:flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
+                />
+                <button
+                  type="submit"
+                  className="h-8.5 w-full sm:w-auto rounded-lg bg-blue-600 px-4 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 transition shadow-2xs shrink-0 cursor-pointer"
+                >
+                  + Attach Document
+                </button>
+              </div>
+            </form>
+
+            {/* Document List */}
+            <div className="space-y-2.5 text-xs">
+              {asset.documents && asset.documents.length > 0 ? (
+                asset.documents.map((d) => (
+                  <div key={d.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-white/10 p-3.5 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition">
+                    <div className="flex items-start gap-3">
+                      <div className={cn(
+                        "grid size-9 shrink-0 place-items-center rounded-lg font-bold text-[10px]",
+                        d.targetScope === 'individual' || d.assigneeName ? "bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300" : "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
+                      )}>
+                        {d.targetScope === 'individual' || d.type === 'TALENT_RELEASE' ? (
+                          <User className="size-4" />
+                        ) : d.type === 'DEED' ? (
+                          <FileCheck className="size-4" />
+                        ) : d.type === 'CERT' ? (
+                          <ShieldCheck className="size-4" />
+                        ) : d.type === 'LICENSE' ? (
+                          <ScrollText className="size-4" />
+                        ) : (
+                          <FileText className="size-4" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="font-bold text-slate-900 dark:text-white">{d.name}</span>
+                          <span className={cn(
+                            "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                            d.type === 'TALENT_RELEASE' ? "bg-purple-100 text-purple-800 dark:bg-purple-950/50 dark:text-purple-300 dark:border dark:border-purple-800/40" :
+                              d.type === 'DEED' ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border dark:border-emerald-800/40" :
+                                d.type === 'CERT' ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 dark:border dark:border-blue-800/40" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-white/10"
+                          )}>
+                            {d.type ? d.type.replace('_', ' ') : 'PDF'}
+                          </span>
+                          {d.assigneeName && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 dark:bg-purple-950/40 dark:border-purple-800/40 dark:text-purple-300 px-2 py-0.5 text-[10px] font-semibold">
+                              <User className="size-2.5" />
+                              <span>Individual: {d.assigneeName} {d.assigneeRole ? `(${d.assigneeRole})` : ''}</span>
+                            </span>
+                          )}
+                          {d.targetScope === 'asset' && !d.assigneeName && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold">
+                              Asset-Level Master
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-slate-400 dark:text-slate-400">
+                          {d.size} • Uploaded on {d.date}
+                          {d.notes ? ` • Note: ${d.notes}` : ''}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                      <button
+                        onClick={() => showToast(`Starting download for ${d.name}...`)}
+                        className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs text-xs cursor-pointer"
+                      >
+                        Download
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDocument(d.id, d.name)}
+                        className="rounded-lg border border-red-200 bg-white dark:border-red-500/30 dark:bg-rose-950/30 dark:text-red-400 dark:hover:bg-rose-950/60 p-1.5 font-bold text-red-600 hover:bg-red-50 transition shadow-2xs cursor-pointer"
+                        title="Delete document"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-6 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 dark:border dark:border-white/5 rounded-xl">
+                  No legal documents attached yet. Use the upload box above to add talent release deeds or filing certificates.
+                </div>
+              )}
+            </div>
           </div>
-        </div>
         </div>
       )}
 
@@ -4922,6 +5325,418 @@ function RightsDetailsPage({
                   className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm transition cursor-pointer"
                 >
                   Submit for Clearance Review
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 1. INDIVIDUAL CONCISE MODAL: RIGHTS & GOVERNANCE SCOPE & CERTIFICATE */}
+      {isScopeModalOpen && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsScopeModalOpen(false)
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+        >
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <div>
+                <div className="flex items-center gap-2 font-bold text-[#09245a] dark:text-white text-base">
+                  <ScrollText className="size-4.5 text-blue-600 dark:text-blue-400" />
+                  <span>Rights & Governance Scope Configuration</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Update legal scope dimensions and attach official filing certificates for <b>{asset.name}</b>.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsScopeModalOpen(false)}
+                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleScopeModalSubmit} className="space-y-4">
+              {/* Section 1: Scope Specifications */}
+              <div className="space-y-3">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                  1. Legal Scope & Licensing Terms
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Primary Rights Scope *</label>
+                    <input
+                      value={scopeForm.rightsType}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, rightsType: e.target.value }))}
+                      placeholder="e.g. Worldwide Broadcast & Digital Distribution"
+                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Exclusivity</label>
+                    <select
+                      value={scopeForm.exclusivity}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, exclusivity: e.target.value }))}
+                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                    >
+                      <option value="Exclusive Ministry Rights">Exclusive Ministry Rights</option>
+                      <option value="Non-Exclusive Ministry License">Non-Exclusive Ministry License</option>
+                      <option value="Sole Distributor Rights">Sole Distributor Rights</option>
+                      <option value="Co-Exclusive Partnership">Co-Exclusive Partnership</option>
+                      <option value="Unrestricted Public Domain">Unrestricted Public Domain</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Territory Clearance *</label>
+                    <input
+                      value={scopeForm.territory}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, territory: e.target.value }))}
+                      placeholder="e.g. Worldwide / Global, Sub-Saharan Africa"
+                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Term / Duration *</label>
+                    <input
+                      value={scopeForm.term}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, term: e.target.value }))}
+                      placeholder="e.g. In Perpetuity, 5 Years with Auto-Renewal"
+                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Registered Rights Holder / Owner</label>
+                    <input
+                      value={scopeForm.owner}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, owner: e.target.value }))}
+                      placeholder="e.g. Pastor Chelsea Kalu / LoveWorld Kiddies Ministries"
+                      className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Licence Type</label>
+                    <select
+                      value={scopeForm.licenceType}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, licenceType: e.target.value }))}
+                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                    >
+                      <option value="100% Ministry Owned">100% Ministry Owned</option>
+                      <option value="Work-for-Hire Assignment">Work-for-Hire Assignment</option>
+                      <option value="Master License Agreement">Master License Agreement</option>
+                      <option value="Royalty-Free Perpetual">Royalty-Free Perpetual</option>
+                      <option value="Commercial Syndication">Commercial Syndication</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Royalty & Financial Terms</label>
+                  <input
+                    value={scopeForm.royaltyTerms}
+                    onChange={(e) => setScopeForm((prev) => ({ ...prev, royaltyTerms: e.target.value }))}
+                    placeholder="e.g. Zero Royalty Encumbrance — 100% Retained by Ministry"
+                    className="h-9 w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Legal Summary & Chain of Title Notes</label>
+                  <textarea
+                    value={scopeForm.description}
+                    onChange={(e) => setScopeForm((prev) => ({ ...prev, description: e.target.value }))}
+                    placeholder="Legal history, chain of title, script sign-offs, and administrative records..."
+                    rows={2}
+                    className="w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400"
+                  />
+                </div>
+              </div>
+
+              {/* Section 2: Attach Official Certificate or Filing Document */}
+              <div className="rounded-xl border border-blue-100 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/20 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="scope-attach-doc-checkbox"
+                      checked={scopeForm.attachDoc}
+                      onChange={(e) => setScopeForm((prev) => ({ ...prev, attachDoc: e.target.checked }))}
+                      className="size-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="scope-attach-doc-checkbox" className="font-bold text-blue-950 dark:text-blue-200 cursor-pointer text-xs">
+                      Attach Official Filing Certificate / Legal Deed Document Now
+                    </label>
+                  </div>
+                  <span className="text-[10px] text-blue-700 dark:text-blue-300 font-medium">
+                    Auto-files into Filing Repository
+                  </span>
+                </div>
+
+                {scopeForm.attachDoc && (
+                  <div className="space-y-3 pt-2 border-t border-blue-100 dark:border-blue-900/40 animate-in fade-in">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Certificate / Document Title *</label>
+                        <input
+                          value={scopeForm.docTitle}
+                          onChange={(e) => setScopeForm((prev) => ({ ...prev, docTitle: e.target.value }))}
+                          placeholder={`Certificate_${asset.name.replace(/\s+/g, '_')}_Official.pdf`}
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                          required={scopeForm.attachDoc}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Document Category</label>
+                        <select
+                          value={scopeForm.docType}
+                          onChange={(e) => setScopeForm((prev) => ({ ...prev, docType: e.target.value as any }))}
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                        >
+                          <option value="CERT">IP Filing Certificate / Trademark</option>
+                          <option value="LICENSE">Master License / Sync Agreement</option>
+                          <option value="DEED">Work-for-Hire Assignment Deed</option>
+                          <option value="CONTRACT">General Production Contract</option>
+                          <option value="TALENT_RELEASE">Talent Release Deed</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Filing / Registration Ref # (Optional)</label>
+                        <input
+                          value={scopeForm.docRegNumber}
+                          onChange={(e) => setScopeForm((prev) => ({ ...prev, docRegNumber: e.target.value }))}
+                          placeholder="e.g. TM-2026-99482 / COP-1049"
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Browse Physical File</label>
+                        <label className="flex items-center justify-center gap-1.5 h-8.5 cursor-pointer rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-50 px-3 text-xs font-semibold text-slate-700">
+                          <UploadCloud className="size-3.5 text-blue-600 dark:text-blue-400" />
+                          <span>Choose PDF or Document</span>
+                          <input
+                            type="file"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                setScopeForm((prev) => ({
+                                  ...prev,
+                                  docTitle: file.name,
+                                  docFileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+                                }))
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setIsScopeModalOpen(false)}
+                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm transition cursor-pointer"
+                >
+                  Save Scope & Attach Certificate
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2. CONCISE MODAL: GATE CLEARANCE & SUPPORTING DOCUMENT */}
+      {selectedGateForModal && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedGateForModal(null)
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+        >
+          <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider',
+                    selectedGateForModal.pillar === 'Doctrinal' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300' :
+                    selectedGateForModal.pillar === 'ChildSafety' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' :
+                    selectedGateForModal.pillar === 'Legal' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300' :
+                    'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
+                  )}>
+                    {selectedGateForModal.pillar} Pillar Gate
+                  </span>
+                  {selectedGateForModal.mandatory && (
+                    <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                      * Mandatory
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-bold text-[#09245a] dark:text-white text-base mt-1">
+                  {selectedGateForModal.title}
+                </h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  {selectedGateForModal.desc}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedGateForModal(null)}
+                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleGateModalSubmit} className="space-y-4">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Clearance Gate Status *</label>
+                <select
+                  value={gateModalForm.status}
+                  onChange={(e) => setGateModalForm((prev) => ({ ...prev, status: e.target.value as GovernanceGateStatus }))}
+                  className={cn(
+                    'h-9 w-full rounded-lg px-3 text-xs font-bold border transition outline-none shadow-2xs',
+                    gateModalForm.status === 'CLEARED'
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
+                      : gateModalForm.status === 'IN_REVIEW'
+                      ? 'border-blue-300 bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300'
+                      : gateModalForm.status === 'FLAGGED'
+                      ? 'border-rose-300 bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300'
+                      : gateModalForm.status === 'EXEMPT'
+                      ? 'border-slate-300 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      : 'border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
+                  )}
+                >
+                  <option value="CLEARED">Cleared / Verified ✓</option>
+                  <option value="IN_REVIEW">Under Review / In Progress ⏱</option>
+                  <option value="PENDING">Pending Clearance ⚠️</option>
+                  <option value="EXEMPT">Exempt / Not Applicable —</option>
+                  <option value="FLAGGED">Flagged / Action Required ❌</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Reviewer Verification Notes / Sign-Off Comments</label>
+                <textarea
+                  value={gateModalForm.notes}
+                  onChange={(e) => setGateModalForm((prev) => ({ ...prev, notes: e.target.value }))}
+                  placeholder={`e.g. Theological review verified by ${currentUser.name}. Script checked for doctrinal consistency on ${new Date().toLocaleDateString('en-GB')}.`}
+                  rows={3}
+                  className="w-full rounded-lg border border-slate-200 dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400"
+                />
+              </div>
+
+              {/* Attach Supporting Clearance Document */}
+              <div className="rounded-xl border border-blue-100 bg-blue-50/50 dark:border-blue-900/40 dark:bg-blue-950/20 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="gate-attach-doc-checkbox"
+                      checked={gateModalForm.attachDoc}
+                      onChange={(e) => setGateModalForm((prev) => ({ ...prev, attachDoc: e.target.checked }))}
+                      className="size-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="gate-attach-doc-checkbox" className="font-bold text-blue-950 dark:text-blue-200 cursor-pointer text-xs">
+                      Attach Supporting Clearance Proof / Document
+                    </label>
+                  </div>
+                  <span className="text-[10px] text-blue-700 dark:text-blue-300 font-medium">
+                    Evidence Verification
+                  </span>
+                </div>
+
+                {gateModalForm.attachDoc && (
+                  <div className="space-y-3 pt-2 border-t border-blue-100 dark:border-blue-900/40 animate-in fade-in">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Document Title *</label>
+                        <input
+                          value={gateModalForm.docTitle}
+                          onChange={(e) => setGateModalForm((prev) => ({ ...prev, docTitle: e.target.value }))}
+                          placeholder={`${selectedGateForModal.pillar}_Proof_${asset.name.replace(/\s+/g, '_')}.pdf`}
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                          required={gateModalForm.attachDoc}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Document Category</label>
+                        <select
+                          value={gateModalForm.docType}
+                          onChange={(e) => setGateModalForm((prev) => ({ ...prev, docType: e.target.value as any }))}
+                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                        >
+                          <option value="CERT">Clearance Certificate / Report</option>
+                          <option value="DEED">Signed Deed / Assignment</option>
+                          <option value="TALENT_RELEASE">Talent Release Form</option>
+                          <option value="LICENSE">License / Agreement</option>
+                          <option value="CONTRACT">Review Contract / Protocol</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Upload File Proof</label>
+                      <label className="flex items-center justify-center gap-1.5 h-8.5 cursor-pointer rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-50 px-3 text-xs font-semibold text-slate-700">
+                        <UploadCloud className="size-3.5 text-blue-600 dark:text-blue-400" />
+                        <span>Choose Supporting PDF / File</span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              setGateModalForm((prev) => ({
+                                ...prev,
+                                docTitle: file.name,
+                                docFileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+                              }))
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setSelectedGateForModal(null)}
+                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-4 py-2 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-sm transition cursor-pointer"
+                >
+                  Save Gate Clearance & Document
                 </button>
               </div>
             </form>

@@ -1,4 +1,13 @@
-import { AssetData, RightsRecord, RightsDocument, AssetContributor, RiskTier } from '@/types'
+import {
+  AssetData,
+  RightsRecord,
+  RightsDocument,
+  AssetContributor,
+  RiskTier,
+  GovernanceGateStatus,
+  GovernanceCheckValue,
+  GovernanceChecksMap,
+} from '@/types'
 
 export type CategoryCluster =
   | 'Broadcast'
@@ -487,6 +496,54 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
 }
 
 /**
+ * Returns whether a gate check is considered cleared or exempt
+ */
+export function isGatePassed(val: any): boolean {
+  if (val === true) return true
+  if (val === 'CLEARED' || val === 'EXEMPT') return true
+  if (typeof val === 'object' && val !== null) {
+    return val.status === 'CLEARED' || val.status === 'EXEMPT'
+  }
+  return false
+}
+
+/**
+ * Normalizes any gate check value into a standard GovernanceGateStatus
+ */
+export function getGateStatus(val: any): GovernanceGateStatus {
+  if (val === true) return 'CLEARED'
+  if (val === false || val === undefined || val === null) return 'PENDING'
+  if (typeof val === 'string') {
+    if (['CLEARED', 'IN_REVIEW', 'PENDING', 'EXEMPT', 'FLAGGED'].includes(val)) {
+      return val as GovernanceGateStatus
+    }
+    return 'PENDING'
+  }
+  if (typeof val === 'object' && val !== null && val.status) {
+    return val.status as GovernanceGateStatus
+  }
+  return 'PENDING'
+}
+
+/**
+ * Returns structured details for a gate check (status, notes, attached document)
+ */
+export function getGateCheckValue(val: any): GovernanceCheckValue {
+  const status = getGateStatus(val)
+  if (typeof val === 'object' && val !== null) {
+    return {
+      status,
+      notes: val.notes || '',
+      documentName: val.documentName || '',
+      documentId: val.documentId,
+      verifiedAt: val.verifiedAt,
+      verifiedBy: val.verifiedBy,
+    }
+  }
+  return { status }
+}
+
+/**
  * Returns the compliance profile for a given category
  */
 export function getCategoryComplianceProfile(category: string, assetName?: string): CategoryComplianceProfile {
@@ -524,7 +581,7 @@ export function evaluateComplianceReadiness(
   const missingMandatoryGates: GovernanceGateDefinition[] = []
 
   gates.forEach((gate) => {
-    const isPassed = !!checks[gate.key]
+    const isPassed = isGatePassed(checks[gate.key])
     if (isPassed) {
       passedCount++
     } else if (gate.mandatory) {
