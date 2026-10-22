@@ -1644,7 +1644,7 @@ function AssetsPage({
   setActiveNav,
   initialAssetId,
 }: {
-  setActiveNav: (nav: string) => void
+  setActiveNav: (nav: string, assetId?: string | null) => void
   initialAssetId?: string | null
 }) {
   const { assets, allAssets, addAsset, bulkApproveAssets, bulkDeleteAssets, categories, subcategories, currentUser, showToast, isGlobalViewer, userAgency, availableUsers, rightsRecords, approvals } = useLovetoonsData()
@@ -2246,13 +2246,26 @@ function AssetsPage({
                       </td>
 
                       <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => handleSelectAsset(asset)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
-                          aria-label={`Open details for ${asset.name}`}
-                        >
-                          <ChevronRight className="size-4 text-blue-600" />
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            id={`row-rights-btn-${asset.id}`}
+                            onClick={() => {
+                              setActiveNav('Rights & Governance', asset.id)
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition shadow-2xs cursor-pointer"
+                            title={`Open Rights & Governance for ${asset.name}`}
+                          >
+                            <ShieldCheck className="size-3.5 text-blue-600" />
+                            <span>Rights ↗</span>
+                          </button>
+                          <button
+                            onClick={() => handleSelectAsset(asset)}
+                            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+                            aria-label={`Open details for ${asset.name}`}
+                          >
+                            <ChevronRight className="size-4 text-blue-600" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -2666,7 +2679,7 @@ function AssetDetailsPage({
   asset: AssetData
   onBack: () => void
   onSelectAsset?: (a: AssetData) => void
-  setActiveNav?: (nav: string) => void
+  setActiveNav?: (nav: string, assetId?: string | null) => void
 }) {
   return (
     <AssetDetailsView
@@ -3439,11 +3452,44 @@ function RightsDetailsPage({
   onBack: () => void
   setActiveNav?: (nav: string) => void
 }) {
-  const { updateRightsRecord, addRightsRecord, currentUser, showToast, activities, approvals, addAsset, assets } = useLovetoonsData()
+  const { updateRightsRecord, addRightsRecord, currentUser, showToast, activities, approvals, addAsset, assets, createApprovalRequest } = useLovetoonsData()
   const [subTab, setSubTab] = useState('Overview & Rights')
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isAddRightsModalOpen, setIsAddRightsModalOpen] = useState(false)
   const [newDocTitle, setNewDocTitle] = useState('')
+
+  // Existing approval request for this rights record's asset
+  const existingApproval = useMemo(() => {
+    return approvals.find((a) => a.assetId === (asset.assetId || asset.id))
+  }, [approvals, asset.assetId, asset.id])
+
+  const handleScheduleApproval = () => {
+    if (!asset.documents || asset.documents.length === 0) {
+      showToast('Cannot schedule approval: please attach at least one legal clearance deed first.')
+      return
+    }
+
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Confirm Approval Clearance Submission',
+      description: `Schedule "${asset.name}" for formal executive clearance review? Legal counsel and reviewer will be alerted, and this request will be permanently logged in the audit trail.`,
+      confirmLabel: 'Confirm & Schedule Approval',
+      variant: 'primary',
+      badge: 'Audit Logged',
+      details: (
+        <div className="space-y-1 text-xs">
+          <div><span className="font-semibold text-slate-700">Target Asset:</span> {asset.name} <span className="font-mono text-slate-500 ml-1.5">({asset.assetId || asset.id})</span></div>
+          <div><span className="font-semibold text-slate-700">Legal Documents Attached:</span> {asset.documents.length} files verified</div>
+          <div><span className="font-semibold text-slate-700">Submitting Officer:</span> {currentUser.name}</div>
+        </div>
+      ),
+      onConfirm: async () => {
+        createApprovalRequest(asset.assetId || asset.id, 'Medium')
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
+        showToast(`Approval request scheduled for ${asset.name}! Reviewer alerted.`)
+      },
+    })
+  }
 
   // Document Attachment Form State (Individual Contributor vs Asset-Level)
   const assetContributors = useMemo(() => {
@@ -3821,6 +3867,89 @@ function RightsDetailsPage({
           </div>
         </div>
       </div>
+
+      {/* Approval Scheduling & Documents Readiness Gate */}
+      {(!asset.documents || asset.documents.length === 0) ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/70 dark:border-amber-500/20 dark:bg-amber-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-start gap-3">
+            <div className="size-9 rounded-lg bg-amber-500 text-white grid place-items-center shrink-0 shadow-2xs">
+              <ShieldAlert className="size-4.5" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-amber-950 dark:text-amber-200 text-sm">
+                Legal Documentation Required Before Approval Scheduling
+              </h4>
+              <p className="text-xs text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-relaxed">
+                This asset will <b>not enter the reviewer approvals queue</b> until executed legal chain of title, script clearances, or talent releases are uploaded.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setSubTab('Legal Documents')}
+              className="flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer"
+            >
+              <Plus className="size-3.5" />
+              <span>Attach Legal Deeds</span>
+            </button>
+            <div
+              className="flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-500 px-3 py-1.5 text-xs font-medium cursor-not-allowed"
+              title="Upload at least one legal clearance document before scheduling approval"
+            >
+              <Lock className="size-3.5" />
+              <span>Schedule Approval</span>
+            </div>
+          </div>
+        </div>
+      ) : !existingApproval ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-start gap-3">
+            <div className="size-9 rounded-lg bg-emerald-600 text-white grid place-items-center shrink-0 shadow-2xs">
+              <FileCheck className="size-4.5" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-emerald-950 dark:text-emerald-200 text-sm">
+                Clearance Documents Ready for Executive Review
+              </h4>
+              <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
+                {asset.documents.length} legal deeds uploaded and verified. Ready to schedule formal executive review.
+              </p>
+            </div>
+          </div>
+          <button
+            id="rights-schedule-approval-btn"
+            onClick={handleScheduleApproval}
+            className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
+          >
+            <Send className="size-3.5" />
+            <span>Schedule for Approval Request</span>
+          </button>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-blue-200 bg-blue-50/70 dark:border-blue-500/20 dark:bg-blue-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-start gap-3">
+            <div className="size-9 rounded-lg bg-blue-600 text-white grid place-items-center shrink-0 shadow-2xs">
+              <Clock className="size-4.5" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-blue-950 dark:text-blue-200 text-sm">
+                Active Approval Request Scheduled ({existingApproval.priority} Priority)
+              </h4>
+              <p className="text-xs text-blue-800/90 dark:text-blue-300/90 mt-0.5 leading-relaxed">
+                Scheduled by {existingApproval.requesterName || 'Legal Representative'} on {existingApproval.submittedDate}. Status: <b>{existingApproval.status}</b>.
+              </p>
+            </div>
+          </div>
+          {setActiveNav && (
+            <button
+              onClick={() => setActiveNav('Approvals')}
+              className="flex items-center gap-1.5 rounded-lg border border-blue-300 bg-white text-blue-700 hover:bg-blue-50 px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer shrink-0"
+            >
+              <span>View in Approvals Queue →</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 4 Status KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">

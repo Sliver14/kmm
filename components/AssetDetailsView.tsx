@@ -16,12 +16,13 @@ import { AssetVisualPreview } from '@/components/AssetVisualPreview'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { EditAssetModal } from '@/components/EditAssetModal'
 import { AssetData, AssetStatus, RelationshipItem, RightsDocument, ApprovalRequest, AssetEpisode } from '@/types'
+import { getAssetRiskAssessment } from '@/lib/risk'
 
 interface AssetDetailsViewProps {
   asset: AssetData
   onBack: () => void
   onSelectAsset?: (a: AssetData) => void
-  setActiveNav?: (nav: string) => void
+  setActiveNav?: (nav: string, assetId?: string | null) => void
 }
 
 // Category icon helper
@@ -66,8 +67,8 @@ export function AssetDetailsView({
     isGlobalViewer,
   } = useLovetoonsData()
 
-  // 3 Intuitive Core Pillars (Tabs) - File archive details removed from frontend until secure cloud storage is connected
-  const [activeTab, setActiveTab] = useState<'overview' | 'rights' | 'connections'>('overview')
+  // 2 Intuitive Core Pillars (Tabs) - Rights & Governance centralized in its dedicated module
+  const [activeTab, setActiveTab] = useState<'overview' | 'connections'>('overview')
   const [statusMenuOpen, setStatusMenuOpen] = useState(false)
 
   // Add Relationship Modal
@@ -76,24 +77,12 @@ export function AssetDetailsView({
   const [relType, setRelType] = useState<RelationshipItem['relationshipType']>('Used In')
   const [relDetails, setRelDetails] = useState('')
 
-  // Representative Document Upload Modal
-  const [isUploadDocModalOpen, setIsUploadDocModalOpen] = useState(false)
-  const [docName, setDocName] = useState('')
-  const [docType, setDocType] = useState<'PDF' | 'DOCX' | 'CERT' | 'LICENSE'>('PDF')
-  const [docNotes, setDocNotes] = useState('')
-  const [isSavingDoc, setIsSavingDoc] = useState(false)
-
   // Cloudinary Media Upload Modal State
   const [isUploadMediaModalOpen, setIsUploadMediaModalOpen] = useState(false)
   const [mediaFile, setMediaFile] = useState<File | null>(null)
   const [mediaFileType, setMediaFileType] = useState('video_master')
   const [isMasterFile, setIsMasterFile] = useState(true)
   const [isUploadingMedia, setIsUploadingMedia] = useState(false)
-
-  // Schedule Approval Modal State
-  const [isScheduleApprovalModalOpen, setIsScheduleApprovalModalOpen] = useState(false)
-  const [schedulePriority, setSchedulePriority] = useState<ApprovalRequest['priority']>('Medium')
-  const [isSubmittingApproval, setIsSubmittingApproval] = useState(false)
 
   // Existing approval request for this asset
   const existingApproval = useMemo(() => {
@@ -105,64 +94,15 @@ export function AssetDetailsView({
     return rightsRecords.find((r) => r.assetId === asset.id || r.name.includes(asset.name))
   }, [rightsRecords, asset])
 
-  // Representative Governance Checks State
-  const [checks, setChecks] = useState<Record<string, boolean>>({
-    'Scripture & Biblical Fidelity Verification': false,
-    'Child Safety & COPPA Compliance Review': false,
-    'Audio Master & Soundtrack Synchronization License': false,
-    'Voice Cast Talent Release & Identity Clearance': false,
-    'KMM Ministry Trademark Registration Seal': false,
-  })
-
-  // Representative Uploaded Documents State
-  const [documents, setDocuments] = useState<RightsDocument[]>([])
-
-  // Representative Rights & Legal Terms Modal State
-  const [isEditRightsModalOpen, setIsEditRightsModalOpen] = useState(false)
-  const [rightsScopeInput, setRightsScopeInput] = useState('')
-  const [exclusivityInput, setExclusivityInput] = useState('')
-  const [territoryInput, setTerritoryInput] = useState('')
-  const [validityInput, setValidityInput] = useState('')
-  const [licenceTypeInput, setLicenceTypeInput] = useState('')
-  const [royaltyTermsInput, setRoyaltyTermsInput] = useState('')
-  const [attachDocWithRights, setAttachDocWithRights] = useState(false)
-  const [rightsDocTitle, setRightsDocTitle] = useState('')
-  const [rightsDocClassification, setRightsDocClassification] = useState<'PDF' | 'DOCX' | 'CERT' | 'LICENSE'>('PDF')
-  const [rightsDocNotes, setRightsDocNotes] = useState('')
-  const [isSavingRights, setIsSavingRights] = useState(false)
-
-  const openRightsModal = (defaultSection?: 'scope' | 'territory' | 'licensing') => {
-    setRightsScopeInput(linkedRights?.rightsType || '')
-    setExclusivityInput(linkedRights?.exclusivity || '')
-    setTerritoryInput(linkedRights?.territory || '')
-    setValidityInput(linkedRights?.validity || linkedRights?.term || '')
-    setLicenceTypeInput(linkedRights?.licenceType || '')
-    setRoyaltyTermsInput(linkedRights?.royaltyTerms || '')
-    setAttachDocWithRights(false)
-    setRightsDocTitle('')
-    setRightsDocNotes('')
-    setIsEditRightsModalOpen(true)
-  }
-
-  useEffect(() => {
-    if (linkedRights) {
-      if (Array.isArray(linkedRights.documents)) {
-        setDocuments(linkedRights.documents)
-      }
-      if (linkedRights.governanceChecks && typeof linkedRights.governanceChecks === 'object') {
-        setChecks((prev) => ({
-          ...prev,
-          ...linkedRights.governanceChecks,
-        }))
-      }
-    }
+  // Documents attached to Rights record
+  const documents = useMemo(() => {
+    return (linkedRights?.documents && Array.isArray(linkedRights.documents)) ? linkedRights.documents : []
   }, [linkedRights])
 
-  // Governance Score Calculation (Each check is 20%)
-  const completedChecksCount = useMemo(() => {
-    return Object.values(checks).filter(Boolean).length
-  }, [checks])
-  const calculatedGovernanceScore = completedChecksCount * 20
+  // Risk & Compliance Evaluation
+  const assetRisk = useMemo(() => {
+    return getAssetRiskAssessment(asset, rightsRecords, approvals)
+  }, [asset, rightsRecords, approvals])
 
   // Asset Relationships
   const assetRelationships = useMemo(() => {
@@ -455,333 +395,6 @@ export function AssetDetailsView({
       },
     })
   }
-
-  // Handle Governance Check Toggle with Confirmation & Audit Log
-  const handleToggleGovernanceCheck = (checkKey: string) => {
-    const isCurrentlyChecked = !!checks[checkKey]
-    const updatedChecks = {
-      ...checks,
-      [checkKey]: !isCurrentlyChecked,
-    }
-    const newScore = Object.values(updatedChecks).filter(Boolean).length * 20
-
-    setConfirmConfig({
-      isOpen: true,
-      title: isCurrentlyChecked ? 'Confirm Check Invalidation' : 'Confirm Governance Clearance',
-      description: `Are you sure you want to mark "${checkKey}" as ${!isCurrentlyChecked ? 'VERIFIED' : 'UNVERIFIED'} for "${asset.name}"?`,
-      details: (
-        <div className="space-y-1 text-xs">
-          <div><span className="font-semibold text-slate-700">Clearance Item:</span> {checkKey}</div>
-          <div><span className="font-semibold text-slate-700">Governance Score:</span> {completedChecksCount * 20}% → <span className="font-bold text-indigo-600">{newScore}%</span></div>
-          <div><span className="font-semibold text-slate-700">Acting Representative:</span> {currentUser.name} ({currentUser.roleLabel})</div>
-        </div>
-      ),
-      confirmLabel: !isCurrentlyChecked ? 'Confirm Clearance & Log' : 'Confirm Invalidation',
-      variant: !isCurrentlyChecked ? 'success' : 'warning',
-      badge: 'Audit Trail Required',
-      onConfirm: async () => {
-        setChecks(updatedChecks)
-        if (linkedRights) {
-          updateRightsRecord({
-            ...linkedRights,
-            governanceChecks: updatedChecks,
-            governanceScore: newScore,
-            status: newScore === 100 ? 'Cleared' : 'Review',
-          })
-        }
-
-        addActivity(
-          `Governance verification: ${asset.name}`,
-          `"${checkKey}" set to ${!isCurrentlyChecked ? 'Verified' : 'Unchecked'} by ${currentUser.name} (${newScore}% compliance score)`,
-          'shield',
-          !isCurrentlyChecked ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700',
-          asset.agency,
-          {
-            assetId: asset.id,
-            assetName: asset.name,
-            actionType: 'GOVERNANCE',
-            details: `Clearance check "${checkKey}" set to ${!isCurrentlyChecked ? 'TRUE' : 'FALSE'}. Governance score is now ${newScore}%.`,
-          }
-        )
-
-        try {
-          await fetch('/api/rights', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              assetId: asset.id,
-              governanceChecks: updatedChecks,
-              governanceScore: newScore,
-              status: newScore === 100 ? 'Cleared' : 'Pending Representative Review',
-            }),
-          })
-          showToast(`Governance verification updated & audit logged! (${newScore}% verified)`)
-        } catch (err) {
-          console.error(err)
-          showToast('Updated locally (offline mode)')
-        } finally {
-          setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-        }
-      },
-    })
-  }
-
-  // Handle Representative Document Upload with Confirmation & Audit Log
-  const handleSaveRepresentativeDoc = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!docName.trim()) {
-      showToast('Please enter document title')
-      return
-    }
-
-    setConfirmConfig({
-      isOpen: true,
-      title: 'Confirm Legal Document Attachment',
-      description: `Attach legal clearance document "${docName.trim()}" (${docType}) to "${asset.name}"? This deed attachment will be recorded in the permanent audit trail.`,
-      details: (
-        <div className="space-y-1 text-xs">
-          <div><span className="font-semibold text-slate-700">Document Title:</span> {docName.trim()}</div>
-          <div><span className="font-semibold text-slate-700">Classification:</span> {docType}</div>
-          <div><span className="font-semibold text-slate-700">Uploading Representative:</span> {currentUser.name}</div>
-        </div>
-      ),
-      confirmLabel: 'Confirm & Attach Document',
-      variant: 'primary',
-      badge: 'Audit Trail Logged',
-      onConfirm: async () => {
-        setIsSavingDoc(true)
-        const newDoc: RightsDocument = {
-          id: `doc-${Date.now().toString().slice(-6)}`,
-          name: docName.trim(),
-          type: docType,
-          size: '2.4 MB',
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        }
-
-        const updatedDocs = [...documents, newDoc]
-        setDocuments(updatedDocs)
-
-        if (linkedRights) {
-          updateRightsRecord({
-            ...linkedRights,
-            documents: updatedDocs,
-            status: 'Review',
-          })
-        }
-
-        addActivity(
-          `Legal document attached: ${newDoc.name}`,
-          `Attached to ${asset.name} by ${currentUser.name} (${docType})`,
-          'file',
-          'bg-indigo-100 text-indigo-700',
-          asset.agency,
-          {
-            assetId: asset.id,
-            assetName: asset.name,
-            actionType: 'DOCUMENT',
-            details: `Document "${newDoc.name}" (${docType}) attached to ${asset.name}.`,
-          }
-        )
-
-        try {
-          await fetch('/api/rights', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              assetId: asset.id,
-              documents: updatedDocs,
-              status: 'Under Review',
-            }),
-          })
-          showToast(`Document "${docName}" attached & audit logged!`)
-        } catch (err) {
-          console.error(err)
-          showToast('Document attached locally')
-        } finally {
-          setIsSavingDoc(false)
-          setIsUploadDocModalOpen(false)
-          setDocName('')
-          setDocNotes('')
-          setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-        }
-      },
-    })
-  }
-
-  // Handle Representative Saving Rights Scope, Territory, Term & Licensing with Confirmation & Audit Log
-  const handleSaveRightsTerms = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!rightsScopeInput.trim() && !territoryInput.trim() && !licenceTypeInput.trim()) {
-      showToast('Please specify at least Rights Scope, Territory, or Licensing Terms.')
-      return
-    }
-
-    if (attachDocWithRights && !rightsDocTitle.trim()) {
-      showToast('Please enter the document title or uncheck document attachment.')
-      return
-    }
-
-    setConfirmConfig({
-      isOpen: true,
-      title: 'Confirm Rights & Legal Clearances Filing',
-      description: `Save legal rights terms for "${asset.name}"? This filing will be recorded in the permanent audit trail.`,
-      details: (
-        <div className="space-y-1.5 text-xs">
-          <div><span className="font-semibold text-slate-700">Rights Scope:</span> {rightsScopeInput.trim() || 'Not Defined'} {exclusivityInput.trim() ? `(${exclusivityInput.trim()})` : ''}</div>
-          <div><span className="font-semibold text-slate-700">Territory & Term:</span> {territoryInput.trim() || 'Not Defined'} • {validityInput.trim() || 'Open Term'}</div>
-          <div><span className="font-semibold text-slate-700">Licensing Terms:</span> {licenceTypeInput.trim() || 'Not Defined'} {royaltyTermsInput.trim() ? `• ${royaltyTermsInput.trim()}` : ''}</div>
-          {attachDocWithRights && rightsDocTitle.trim() && (
-            <div className="pt-1 border-t border-slate-100 text-indigo-700 font-semibold">
-              Attached Deed: {rightsDocTitle.trim()} ({rightsDocClassification})
-            </div>
-          )}
-        </div>
-      ),
-      confirmLabel: 'Confirm & File Legal Terms',
-      variant: 'primary',
-      badge: 'Audit Trail Required',
-      onConfirm: async () => {
-        setIsSavingRights(true)
-        let updatedDocs = [...documents]
-        let attachedDocItem: RightsDocument | null = null
-
-        if (attachDocWithRights && rightsDocTitle.trim()) {
-          attachedDocItem = {
-            id: `doc-${Date.now().toString().slice(-6)}`,
-            name: rightsDocTitle.trim(),
-            type: rightsDocClassification,
-            size: '2.5 MB',
-            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          }
-          updatedDocs = [...documents, attachedDocItem]
-          setDocuments(updatedDocs)
-        }
-
-        const baseRecord = linkedRights || {
-          id: `rr-${asset.id}`,
-          name: `${asset.name} - Rights Record`,
-          assetId: asset.id,
-          assetTitle: asset.name,
-          assetCategory: asset.category,
-          registeredDate: new Date().toISOString().split('T')[0],
-          agency: asset.agency,
-          governanceChecks: checks,
-          governanceScore: calculatedGovernanceScore,
-          status: 'Review' as const,
-        }
-
-        const updatedRecord = {
-          ...baseRecord,
-          rightsType: rightsScopeInput.trim(),
-          exclusivity: exclusivityInput.trim(),
-          territory: territoryInput.trim(),
-          validity: validityInput.trim(),
-          term: validityInput.trim(),
-          licenceType: licenceTypeInput.trim(),
-          royaltyTerms: royaltyTermsInput.trim(),
-          documents: updatedDocs,
-          status: 'Review' as const,
-        }
-
-        updateRightsRecord(updatedRecord as any)
-
-        addActivity(
-          `Rights filed: ${asset.name}`,
-          `Legal terms filed by ${currentUser.name} (${rightsScopeInput.trim() || 'Custom'} • ${territoryInput.trim() || 'Global'})`,
-          'shield',
-          'bg-indigo-100 text-indigo-700',
-          asset.agency,
-          {
-            assetId: asset.id,
-            assetName: asset.name,
-            actionType: 'GOVERNANCE',
-            details: `Filed Rights: Scope="${rightsScopeInput.trim()}", Territory="${territoryInput.trim()}", Term="${validityInput.trim()}", License="${licenceTypeInput.trim()}". ${attachedDocItem ? `Attached Document: ${attachedDocItem.name}` : ''}`,
-          }
-        )
-
-        try {
-          await fetch('/api/rights', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              assetId: asset.id,
-              rightsType: rightsScopeInput.trim() || null,
-              exclusivity: exclusivityInput.trim() || null,
-              territory: territoryInput.trim() || null,
-              validity: validityInput.trim() || null,
-              licenceType: licenceTypeInput.trim() || null,
-              royaltyTerms: royaltyTermsInput.trim() || null,
-              documents: updatedDocs,
-              status: 'Under Review',
-            }),
-          })
-          showToast(`Rights & legal clearances filed successfully!`)
-        } catch (err) {
-          console.error(err)
-          showToast('Terms saved locally')
-        } finally {
-          setIsSavingRights(false)
-          setIsEditRightsModalOpen(false)
-          setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-        }
-      },
-    })
-  }
-
-  // Handle Representative Scheduling Approval Request with Confirmation & Audit Log
-  const handleScheduleApproval = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (documents.length === 0) {
-      showToast('Cannot schedule approval: please attach at least one legal clearance document.')
-      return
-    }
-
-    setConfirmConfig({
-      isOpen: true,
-      title: 'Confirm Approval Clearance Submission',
-      description: `Schedule "${asset.name}" for formal executive clearance review with priority "${schedulePriority}"? Legal counsel and reviewer will be alerted, and this request will be permanently logged in the audit trail.`,
-      details: (
-        <div className="space-y-1 text-xs">
-          <div><span className="font-semibold text-slate-700">Target Asset:</span> {asset.name} <span className="font-mono text-slate-500 ml-1.5">({asset.id})</span></div>
-          <div><span className="font-semibold text-slate-700">Clearance Priority:</span> {schedulePriority}</div>
-          <div><span className="font-semibold text-slate-700">Legal Documents Attached:</span> {documents.length} files</div>
-          <div><span className="font-semibold text-slate-700">Submitting Rep:</span> {currentUser.name}</div>
-        </div>
-      ),
-      confirmLabel: 'Confirm & Schedule',
-      variant: 'primary',
-      badge: 'Audit Logged',
-      onConfirm: async () => {
-        setIsSubmittingApproval(true)
-        try {
-          createApprovalRequest(asset.id, schedulePriority)
-          addActivity(
-            `Approval request scheduled: ${asset.name}`,
-            `Submitted for clearance review by ${currentUser.name} (Priority: ${schedulePriority})`,
-            'check',
-            'bg-blue-100 text-blue-700',
-            asset.agency,
-            {
-              assetId: asset.id,
-              assetName: asset.name,
-              actionType: 'APPROVAL',
-              details: `Approval clearance scheduled with priority ${schedulePriority}.`,
-            }
-          )
-          setIsScheduleApprovalModalOpen(false)
-          showToast(`Asset "${asset.name}" scheduled for approval clearance! Reviewer notified.`)
-        } catch (err: any) {
-          console.error(err)
-          showToast(err?.message || 'Failed to schedule approval')
-        } finally {
-          setIsSubmittingApproval(false)
-          setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-        }
-      },
-    })
-  }
-
   // Handle Cloudinary Media File Upload with Confirmation & Audit Log
   const handleUploadToCloudinary = (e: React.FormEvent) => {
     e.preventDefault()
@@ -1038,6 +651,21 @@ export function AssetDetailsView({
               )}
             </div>
 
+            {/* Direct Link to Rights & Governance */}
+            {setActiveNav && (
+              <button
+                id="header-rights-governance-btn"
+                onClick={() => {
+                  setActiveNav('Rights & Governance', asset.id)
+                }}
+                className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/70 hover:bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-2xs transition cursor-pointer"
+                title="Manage legal clearances, territory rights and compliance verification"
+              >
+                <ShieldCheck className="size-3.5 text-blue-600" />
+                <span>Rights & Governance ↗</span>
+              </button>
+            )}
+
             {/* Edit Asset Button */}
             <button
               id="edit-asset-header-btn"
@@ -1075,9 +703,9 @@ export function AssetDetailsView({
         </div>
       </div>
 
-      {/* 3. SIMPLIFIED 3-TAB PILL BAR */}
+      {/* 3. SIMPLIFIED 2-TAB PILL BAR */}
       <div className="border border-slate-200/80 bg-slate-100/70 dark:border-white/10 dark:bg-slate-900/90 p-1 rounded-xl">
-        <div className="grid grid-cols-3 gap-1">
+        <div className="grid grid-cols-2 gap-1">
           {/* Tab 1: Overview & Media */}
           <button
             id="tab-overview"
@@ -1093,32 +721,7 @@ export function AssetDetailsView({
             <span>Overview & Media</span>
           </button>
 
-          {/* Tab 2: Rights & Governance */}
-          <button
-            id="tab-rights"
-            onClick={() => setActiveTab('rights')}
-            className={cn(
-              'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs transition cursor-pointer',
-              activeTab === 'rights'
-                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60 dark:bg-slate-800 dark:text-white dark:border-white/15'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 font-medium'
-            )}
-          >
-            <ShieldCheck className="size-3.5" />
-            <span>Rights & Clearances</span>
-            <span
-              className={cn(
-                'rounded-md px-1.5 py-0.2 text-[9px] font-semibold',
-                activeTab === 'rights'
-                  ? 'bg-slate-100 text-slate-700 dark:bg-slate-700/80 dark:text-slate-200'
-                  : 'bg-white text-slate-600 border border-slate-200/60 dark:bg-slate-800 dark:text-slate-400 dark:border-white/10'
-              )}
-            >
-              {documents.length > 0 ? `${documents.length} Docs` : 'Pending Rep Docs'}
-            </span>
-          </button>
-
-          {/* Tab 3: Connected IP & History */}
+          {/* Tab 2: Connected IP & History */}
           <button
             id="tab-connections"
             onClick={() => setActiveTab('connections')}
@@ -1129,7 +732,7 @@ export function AssetDetailsView({
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 font-medium'
             )}
           >
-            <Link2 className="size-3.5" />
+            <Layers className="size-3.5" />
             <span>Connected IP & History</span>
             <span
               className={cn(
@@ -1139,7 +742,7 @@ export function AssetDetailsView({
                   : 'bg-white text-slate-600 border border-slate-200/60 dark:bg-slate-800 dark:text-slate-400 dark:border-white/10'
               )}
             >
-              {assetRelationships.length}
+              {assetRelationships.length} Links
             </span>
           </button>
         </div>
@@ -1276,6 +879,74 @@ export function AssetDetailsView({
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Rights & Governance Hub Summary Card with Direct Navigation */}
+          <div className="rounded-xl border border-blue-200/90 bg-gradient-to-br from-blue-50/70 via-white to-indigo-50/40 p-5 shadow-xs space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="size-10 rounded-xl bg-blue-600 text-white grid place-items-center shrink-0 shadow-xs">
+                  <ShieldCheck className="size-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-slate-900 text-sm">Rights & Governance</h4>
+                    <span className={cn(
+                      "rounded-md px-2 py-0.5 text-[10px] font-bold border shadow-2xs",
+                      assetRisk.riskBadgeColor
+                    )}>
+                      {assetRisk.level} Risk • {100 - assetRisk.score}% Compliant
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Clearance deeds, territory scope, legal licensing terms, and governance audit trails for this asset are managed centrally in Rights & Governance.
+                  </p>
+                </div>
+              </div>
+
+              {setActiveNav && (
+                <button
+                  id="open-rights-governance-hub-btn"
+                  onClick={() => {
+                    setActiveNav('Rights & Governance', asset.id)
+                  }}
+                  className="flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-semibold shadow-xs transition cursor-pointer shrink-0"
+                >
+                  <ShieldCheck className="size-4" />
+                  <span>Open in Rights & Governance ↗</span>
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-blue-100 text-xs">
+              <div>
+                <span className="text-slate-400 text-[10px] block">Rights Scope</span>
+                <span className="font-semibold text-slate-800 truncate block">
+                  {linkedRights?.rightsType || 'Unconfigured Scope'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] block">Territory & Term</span>
+                <span className="font-medium text-slate-700 truncate block">
+                  {linkedRights?.territory || 'Global'}{linkedRights?.term ? ` • ${linkedRights.term}` : ''}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] block">Clearance Deeds</span>
+                <span className="font-semibold text-slate-800">
+                  {documents.length > 0 ? `${documents.length} Deeds Filed` : 'No Deeds Attached'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] block">Clearance Status</span>
+                <span className={cn(
+                  "font-bold",
+                  asset.status === 'Approved' ? "text-emerald-600" : "text-amber-600"
+                )}>
+                  {asset.status}
+                </span>
               </div>
             </div>
           </div>
@@ -1658,465 +1329,8 @@ export function AssetDetailsView({
         </div>
       )}
 
-      {/* TAB 2: RIGHTS, CLEARANCES & REPRESENTATIVE GOVERNANCE HUB */}
-      {activeTab === 'rights' && (
-        <div className="space-y-6">
-          {/* Approval Scheduling & Documents Readiness Gate */}
-          {documents.length === 0 ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/70 dark:border-amber-500/20 dark:bg-amber-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-              <div className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-amber-500 text-white grid place-items-center shrink-0 shadow-2xs">
-                  <ShieldAlert className="size-4.5" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-amber-950 dark:text-amber-200 text-sm">
-                    Legal Documentation Required Before Approval Scheduling
-                  </h4>
-                  <p className="text-xs text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-relaxed">
-                    This asset will <b>not pop into the reviewer approvals queue</b> until executed legal chain of title, script clearances, or talent releases are uploaded.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  id="open-rep-upload-btn"
-                  onClick={() => setIsUploadDocModalOpen(true)}
-                  className="flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 text-xs font-medium shadow-2xs transition cursor-pointer"
-                >
-                  <Plus className="size-3.5" />
-                  <span>Upload Representative Doc</span>
-                </button>
-                <div
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-500 px-3 py-1.5 text-xs font-medium cursor-not-allowed"
-                  title="Upload at least one legal clearance document before scheduling approval"
-                >
-                  <Lock className="size-3.5" />
-                  <span>Schedule Approval</span>
-                </div>
-              </div>
-            </div>
-          ) : !existingApproval ? (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-950/30 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-              <div className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-emerald-600 text-white grid place-items-center shrink-0 shadow-2xs">
-                  <FileCheck className="size-4.5" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-emerald-950 dark:text-emerald-200 text-sm">
-                    {documents.length} Legal Document(s) Attached — Ready to Schedule Approval
-                  </h4>
-                  <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
-                    Chain of title and clearances on file. You can now schedule this asset so it pops into the Reviewer approvals queue for official sign-off.
-                  </p>
-                </div>
-              </div>
-              <button
-                id="schedule-approval-btn"
-                onClick={() => setIsScheduleApprovalModalOpen(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-medium shadow-2xs transition shrink-0 cursor-pointer"
-              >
-                <Send className="size-3.5" />
-                <span>Schedule for Approval Request</span>
-              </button>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-900/90 p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-              <div className="flex items-start gap-3">
-                <div className="size-9 rounded-lg bg-slate-900 dark:bg-blue-600 text-white grid place-items-center shrink-0 shadow-2xs">
-                  <Clock className="size-4.5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-slate-900 dark:text-white text-sm">
-                      Approval Request Scheduled ({existingApproval.status})
-                    </h4>
-                    <span className="rounded-md bg-slate-200/80 text-slate-800 dark:bg-slate-800 dark:text-slate-200 text-[10px] font-semibold px-2 py-0.5">
-                      {existingApproval.priority} Priority
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-                    Under review by <b className="text-slate-900 dark:text-white">{existingApproval.reviewerName}</b> • Stage: {existingApproval.stage} (Step {existingApproval.currentStep} of {existingApproval.totalSteps})
-                  </p>
-                </div>
-              </div>
-              {setActiveNav && (
-                <button
-                  onClick={() => setActiveNav('approvals')}
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-3.5 py-1.5 text-xs font-medium shadow-2xs transition shrink-0 cursor-pointer"
-                >
-                  <span>Open in Approvals Queue</span>
-                  <ArrowRight className="size-3.5" />
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Rights Status Summary Cards */}
-          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
-              <div>
-                <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                  <ShieldCheck className="size-4.5 text-slate-700 dark:text-slate-300" />
-                  <span>Legal Rights & Governance Registry</span>
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Global intellectual property protection, licensing mandates, and representative governance tracking.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => openRightsModal()}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
-                >
-                  <FileText className="size-3.5 text-slate-500 dark:text-slate-400" />
-                  <span>Configure Rights & Terms</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsUploadDocModalOpen(true)}
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-800 shadow-2xs transition cursor-pointer"
-                >
-                  <Plus className="size-3.5" />
-                  <span>Attach Document</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Structured Scope Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-              {/* Rights Scope */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-3.5 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
-                      Rights Scope
-                    </span>
-                    {linkedRights?.rightsType ? (
-                      <button
-                        type="button"
-                        onClick={() => openRightsModal('scope')}
-                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-0.5 cursor-pointer"
-                      >
-                        <Pencil className="size-2.5" />
-                        <span>Edit</span>
-                      </button>
-                    ) : null}
-                  </div>
-                  {linkedRights?.rightsType ? (
-                    <>
-                      <div className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm mt-1">
-                        {linkedRights.rightsType}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        {linkedRights.exclusivity || 'Standard Scope'}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="mt-1 space-y-1">
-                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 dark:text-amber-300 dark:bg-amber-950/40 dark:border-amber-800/50 rounded-md px-2 py-0.5 inline-block">
-                        Scope Not Defined Yet
-                      </div>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-400">
-                        Awaiting legal scope definition by representative.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {!linkedRights?.rightsType && (
-                  <button
-                    type="button"
-                    onClick={() => openRightsModal('scope')}
-                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
-                  >
-                    <Plus className="size-3" />
-                    <span>Define Rights Scope</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Territory & Term */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-3.5 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
-                      Territory & Term
-                    </span>
-                    {linkedRights?.territory || linkedRights?.validity ? (
-                      <button
-                        type="button"
-                        onClick={() => openRightsModal('territory')}
-                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-0.5 cursor-pointer"
-                      >
-                        <Pencil className="size-2.5" />
-                        <span>Edit</span>
-                      </button>
-                    ) : null}
-                  </div>
-                  {linkedRights?.territory || linkedRights?.validity ? (
-                    <>
-                      <div className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-1 mt-1">
-                        <Globe2 className="size-3.5 text-slate-600 dark:text-slate-400" />
-                        <span>{linkedRights?.territory || 'Unspecified Territory'}</span>
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Term: {linkedRights?.validity || linkedRights?.term || 'Open Term'}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="mt-1 space-y-1">
-                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 dark:text-amber-300 dark:bg-amber-950/40 dark:border-amber-800/50 rounded-md px-2 py-0.5 inline-block">
-                        Territory & Term Not Filed
-                      </div>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-400">
-                        No territorial bounds or term period recorded.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {!(linkedRights?.territory || linkedRights?.validity) && (
-                  <button
-                    type="button"
-                    onClick={() => openRightsModal('territory')}
-                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
-                  >
-                    <Plus className="size-3" />
-                    <span>Set Territory & Term</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Licensing Terms */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50 p-3.5 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
-                      Licensing Terms
-                    </span>
-                    {linkedRights?.licenceType || linkedRights?.royaltyTerms ? (
-                      <button
-                        type="button"
-                        onClick={() => openRightsModal('licensing')}
-                        className="text-[10px] font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-0.5 cursor-pointer"
-                      >
-                        <Pencil className="size-2.5" />
-                        <span>Edit</span>
-                      </button>
-                    ) : null}
-                  </div>
-                  {linkedRights?.licenceType || linkedRights?.royaltyTerms ? (
-                    <>
-                      <div className="font-semibold text-slate-900 dark:text-white text-xs sm:text-sm mt-1">
-                        {linkedRights.licenceType || 'Proprietary License'}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        {linkedRights.royaltyTerms || 'Standard Terms'}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="mt-1 space-y-1">
-                      <div className="text-[11px] font-medium text-amber-800 bg-amber-50 border border-amber-200/80 dark:text-amber-300 dark:bg-amber-950/40 dark:border-amber-800/50 rounded-md px-2 py-0.5 inline-block">
-                        Licensing Terms Not Filed
-                      </div>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-400">
-                        No licensing deed or terms added by representative.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {!(linkedRights?.licenceType || linkedRights?.royaltyTerms) && (
-                  <button
-                    type="button"
-                    onClick={() => openRightsModal('licensing')}
-                    className="w-full mt-2.5 rounded-md border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 py-1.5 text-center text-[11px] font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
-                  >
-                    <Plus className="size-3" />
-                    <span>Set Licensing Terms</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Representative Score */}
-              <div className={cn(
-                'rounded-lg border p-3.5 space-y-1',
-                calculatedGovernanceScore === 100
-                  ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-950/30'
-                  : 'border-slate-200 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/50'
-              )}>
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-                  Representative Score
-                </span>
-                <div className={cn(
-                  'font-semibold text-sm flex items-center gap-1',
-                  calculatedGovernanceScore === 100 ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-900 dark:text-white'
-                )}>
-                  <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>{calculatedGovernanceScore}% Verified</span>
-                </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {completedChecksCount} of 5 Verifications Checked
-                </div>
-              </div>
-            </div>
-
-            {/* Representative Legal Documents Section */}
-            <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
-                <div>
-                  <h4 className="font-semibold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-                    <FileText className="size-4 text-slate-700 dark:text-slate-300" />
-                    <span>Representative Legal Documents & Chain of Title</span>
-                  </h4>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Uploaded contracts, releases, synchronization licenses, and doctrinal seals.
-                  </p>
-                </div>
-                <span className="rounded-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-2 py-0.5 text-[10px] font-medium">
-                  {documents.length} Files
-                </span>
-              </div>
-
-              {documents.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                  {documents.map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 flex items-start gap-2.5 hover:bg-white hover:border-slate-300 dark:border-white/10 dark:bg-slate-800/50 dark:hover:bg-slate-800 dark:hover:border-white/20 transition shadow-2xs"
-                    >
-                      <div className="size-8 rounded-md bg-slate-900 dark:bg-blue-600 text-white grid place-items-center shrink-0 font-medium text-xs">
-                        <FileCheck className="size-3.5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-slate-900 dark:text-white text-xs truncate">{doc.name}</div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          {doc.type} • {doc.size || '2.4 MB'} • Added {doc.date}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 dark:border-white/10 dark:bg-slate-800/30 p-5 text-center space-y-2">
-                  <FileText className="size-7 text-slate-400 dark:text-slate-500 mx-auto" />
-                  <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">No Legal Documents Attached Yet</div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                    Ministry representatives can upload executed talent agreements, music licenses, and broadcast clearance certificates.
-                  </p>
-                  <button
-                    onClick={() => setIsUploadDocModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 shadow-2xs transition cursor-pointer mt-1"
-                  >
-                    <Plus className="size-3" />
-                    <span>Upload First Document</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Representative Interactive Governance Checklist */}
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 dark:border-white/10 dark:bg-slate-800/30 p-4.5 space-y-3 text-xs">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-semibold text-slate-900 dark:text-white text-xs uppercase tracking-wider block">
-                    Representative Doctrinal & Governance Verification Matrix
-                  </span>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Click each item to toggle verified compliance. Changes persist to the central Neon database.
-                  </p>
-                </div>
-                <span className="rounded-md bg-slate-200/80 text-slate-800 dark:bg-slate-800 dark:text-slate-200 px-2 py-0.5 text-[10px] font-semibold">
-                  {completedChecksCount}/5 Verified
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {Object.entries(checks).map(([title, isChecked]) => (
-                  <button
-                    key={title}
-                    type="button"
-                    onClick={() => handleToggleGovernanceCheck(title)}
-                    className={cn(
-                      'flex items-start gap-2.5 rounded-lg p-2.5 border text-left transition cursor-pointer',
-                      isChecked
-                        ? 'bg-emerald-50/70 border-emerald-200 shadow-2xs text-emerald-950 dark:bg-emerald-950/30 dark:border-emerald-500/30 dark:text-emerald-200'
-                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 dark:bg-slate-800/60 dark:border-white/10 dark:text-slate-300 dark:hover:border-white/20 dark:hover:bg-slate-800'
-                    )}
-                  >
-                    <div className="shrink-0 mt-0.5">
-                      {isChecked ? (
-                        <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                      ) : (
-                        <Square className="size-3.5 text-slate-300 dark:text-slate-600" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="font-semibold text-[11px] block">{title}</span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 block">
-                        {isChecked ? 'Verified ✓' : 'Click to Verify (Representative Action)'}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Approval Trail & Clearance Audits */}
-          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
-              <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Approval Pipeline & Clearance Audit</h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Sign-off trail and reviewer endorsements for broadcast</p>
-              </div>
-              <span className="rounded-md bg-emerald-50 border border-emerald-200/80 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-500/30 dark:text-emerald-300 px-2.5 py-0.5 text-xs font-medium">
-                {asset.status === 'Approved' ? '✓ Fully Approved' : 'In Clearance'}
-              </span>
-            </div>
-
-            {assetApprovals.length > 0 ? (
-              <div className="space-y-3 text-xs">
-                {assetApprovals.map((app) => (
-                  <div
-                    key={app.id}
-                    className="rounded-2xl border border-slate-200 p-4 bg-slate-50/80 dark:border-white/10 dark:bg-slate-800/50 space-y-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-black text-[#09245a] dark:text-white text-sm">{app.stage}</span>
-                      <span className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border dark:border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold">
-                        {app.status}
-                      </span>
-                    </div>
-                    <div className="text-slate-600 dark:text-slate-400 text-xs">
-                      Reviewer: <b className="text-slate-900 dark:text-white">{app.reviewerName}</b> • Submitted by: {app.requesterName} ({app.submittedDate})
-                    </div>
-                    {app.feedbackNotes && (
-                      <div className="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 italic">
-                        "{app.feedbackNotes}"
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 dark:border-emerald-500/20 dark:bg-emerald-950/30 p-4 text-xs space-y-1">
-                <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
-                  <CheckCircle2 className="size-4 text-emerald-700 dark:text-emerald-400" />
-                  Standard Ministry Clearance Active
-                </div>
-                <div className="text-emerald-700 dark:text-emerald-300 text-[11px]">
-                  Approved by Lead Content Reviewer Faith Daniel for worldwide broadcast and syndication.
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: CONNECTED IP, SUB-ASSETS & HISTORY */}
+      {/* TAB 2: CONNECTED IP, SUB-ASSETS & HISTORY */}
+      
       {activeTab === 'connections' && (
         <div className="space-y-6">
           {/* Connected Relationships Section */}
@@ -2277,87 +1491,6 @@ export function AssetDetailsView({
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* REPRESENTATIVE DOCUMENT UPLOAD MODAL */}
-      {isUploadDocModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="size-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/40 dark:border-indigo-800/50 dark:text-indigo-300 grid place-items-center">
-                  <UploadCloud className="size-4" />
-                </div>
-                <div>
-                  <h3 className="font-black text-[#09245a] dark:text-white text-sm">Upload Representative Document</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Attach legal agreements or clearances for {asset.name}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsUploadDocModalOpen(false)}
-                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 grid place-items-center cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveRepresentativeDoc} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Document Title:</label>
-                <input
-                  type="text"
-                  required
-                  value={docName}
-                  onChange={(e) => setDocName(e.target.value)}
-                  placeholder="e.g. Talent Release Agreement, Master Sync License..."
-                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs font-medium outline-none focus:border-indigo-400 transition"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Document Classification:</label>
-                <select
-                  value={docType}
-                  onChange={(e) => setDocType(e.target.value as any)}
-                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-400 cursor-pointer"
-                >
-                  <option value="PDF">PDF Contract / Agreement</option>
-                  <option value="DOCX">DOCX Script / Clearances</option>
-                  <option value="CERT">CERT Doctrinal Approval Certificate</option>
-                  <option value="LICENSE">LICENSE Master Synchronization License</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Clearance Notes (Optional):</label>
-                <textarea
-                  rows={3}
-                  value={docNotes}
-                  onChange={(e) => setDocNotes(e.target.value)}
-                  placeholder="e.g. Executed with voice actors and lead songwriter. Full perpetual worldwide license."
-                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white p-2.5 text-xs outline-none focus:border-indigo-400 transition"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setIsUploadDocModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingDoc}
-                  className="rounded-xl bg-indigo-600 px-5 py-2 font-bold text-white hover:bg-indigo-700 shadow-sm transition cursor-pointer disabled:opacity-50"
-                >
-                  {isSavingDoc ? 'Saving...' : 'Save & Attach'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
@@ -2543,86 +1676,6 @@ export function AssetDetailsView({
         </div>
       )}
 
-      {/* SCHEDULE APPROVAL MODAL */}
-      {isScheduleApprovalModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="size-9 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 grid place-items-center">
-                  <Send className="size-4" />
-                </div>
-                <div>
-                  <h3 className="font-black text-[#09245a] text-sm">Schedule Approval Request</h3>
-                  <p className="text-[11px] text-slate-500">Submit {asset.name} to the Reviewer clearance queue</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsScheduleApprovalModalOpen(false)}
-                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 grid place-items-center cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleScheduleApproval} className="space-y-4 text-xs">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">Attached Chain of Title</span>
-                  <span className="font-black text-emerald-700 text-[11px] bg-emerald-100 px-2 py-0.5 rounded-full">
-                    {documents.length} File(s) Verified
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  {documents.map((d) => (
-                    <div key={d.id} className="text-[11px] font-semibold text-slate-700 truncate flex items-center gap-1.5">
-                      <FileCheck className="size-3.5 text-emerald-600 shrink-0" />
-                      <span>{d.name} ({d.type})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Clearance Priority Level:</label>
-                <select
-                  value={schedulePriority}
-                  onChange={(e) => setSchedulePriority(e.target.value as ApprovalRequest['priority'])}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 cursor-pointer"
-                >
-                  <option value="Low">Low — Standard Scheduling</option>
-                  <option value="Medium">Medium — General Production Broadcast</option>
-                  <option value="High">High — Upcoming Global Syndication</option>
-                  <option value="Urgent">Urgent — Immediate Broadcast Clearance Needed</option>
-                </select>
-              </div>
-
-              <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-3 text-[11px] text-indigo-900 leading-relaxed">
-                <b>Reviewer Assignment:</b> This request will be scheduled into Faith Daniel's review workspace for multi-step content and doctrinal governance sign-off.
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsScheduleApprovalModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingApproval}
-                  className="rounded-xl bg-emerald-600 px-5 py-2 font-bold text-white hover:bg-emerald-700 shadow-sm transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-                >
-                  <Send className="size-3.5" />
-                  <span>{isSubmittingApproval ? 'Scheduling...' : 'Confirm & Schedule Approval'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* Add Production Episode Modal */}
       {isAddEpisodeModalOpen && (
         <div
@@ -2780,239 +1833,6 @@ export function AssetDetailsView({
                 >
                   <Plus className="size-3.5" />
                   <span>Add Episode</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Configure Rights & Legal Clearances Modal */}
-      {isEditRightsModalOpen && (
-        <div
-          onClick={() => setIsEditRightsModalOpen(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl text-xs space-y-4 cursor-default animate-in zoom-in-95 max-h-[90vh] overflow-y-auto"
-          >
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="size-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/40 dark:border-indigo-800/50 dark:text-indigo-300 grid place-items-center">
-                  <ShieldCheck className="size-4" />
-                </div>
-                <div>
-                  <h3 className="font-black text-[#09245a] dark:text-white text-sm">Configure Rights & Legal Clearances</h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    File legal terms, territory, and attach deeds for {asset.name}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsEditRightsModalOpen(false)}
-                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 grid place-items-center cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveRightsTerms} className="space-y-4 text-xs">
-              {/* Section 1: Scope & Exclusivity */}
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block mb-2">
-                  1. Rights Scope & Exclusivity
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Rights Scope</label>
-                    <input
-                      list="rights-scope-options"
-                      type="text"
-                      placeholder="e.g. Worldwide Master Copyright"
-                      value={rightsScopeInput}
-                      onChange={(e) => setRightsScopeInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
-                    />
-                    <datalist id="rights-scope-options">
-                      <option value="Worldwide Master Copyright" />
-                      <option value="Broadcast & Digital Streaming License" />
-                      <option value="Publishing & Distribution Rights" />
-                      <option value="Merchandising & Consumer Rights" />
-                      <option value="Sync & Master Recording Rights" />
-                      <option value="Educational & Ministry Exemption" />
-                    </datalist>
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Exclusivity Mandate</label>
-                    <select
-                      value={exclusivityInput}
-                      onChange={(e) => setExclusivityInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 cursor-pointer"
-                    >
-                      <option value="">-- Select Exclusivity --</option>
-                      <option value="100% Exclusive Ministry Ownership">100% Exclusive Ministry Ownership</option>
-                      <option value="Exclusive Commercial Partner">Exclusive Commercial Partner</option>
-                      <option value="Non-Exclusive Ministry License">Non-Exclusive Ministry License</option>
-                      <option value="Co-Ownership / Shared IP">Co-Ownership / Shared IP</option>
-                      <option value="Open Access / Public Domain">Open Access / Public Domain</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 2: Territory & Term */}
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block mb-2">
-                  2. Territory & Validity Term
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Geographical Territory</label>
-                    <input
-                      list="territory-options"
-                      type="text"
-                      placeholder="e.g. Worldwide, Sub-Saharan Africa..."
-                      value={territoryInput}
-                      onChange={(e) => setTerritoryInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
-                    />
-                    <datalist id="territory-options">
-                      <option value="Worldwide" />
-                      <option value="North America" />
-                      <option value="Sub-Saharan Africa" />
-                      <option value="United Kingdom & Europe" />
-                      <option value="Nigeria & West Africa" />
-                      <option value="Asia-Pacific" />
-                    </datalist>
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Validity / Term Limit</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Perpetual or 2026–2036"
-                      value={validityInput}
-                      onChange={(e) => setValidityInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 3: Licensing & Commercial Terms */}
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block mb-2">
-                  3. Licensing Agreement & Commercial Terms
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Licence Classification</label>
-                    <input
-                      list="licence-options"
-                      type="text"
-                      placeholder="e.g. Proprietary Ministry License"
-                      value={licenceTypeInput}
-                      onChange={(e) => setLicenceTypeInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
-                    />
-                    <datalist id="licence-options">
-                      <option value="Proprietary Ministry License" />
-                      <option value="Restricted Syndication Agreement" />
-                      <option value="Creative Commons / Educational" />
-                      <option value="Commercial Merchandising Agreement" />
-                      <option value="Broadcasting Sub-License" />
-                    </datalist>
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Commercial / Royalty Terms</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Non-transferable Broadcast Rights"
-                      value={royaltyTermsInput}
-                      onChange={(e) => setRoyaltyTermsInput(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 4: Relevant Document Attachment (Where Necessary) */}
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={attachDocWithRights}
-                      onChange={(e) => setAttachDocWithRights(e.target.checked)}
-                      className="size-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                    />
-                    <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
-                      Attach Relevant Legal Document / Deed with this filing
-                    </span>
-                  </label>
-                  <span className="text-[10px] text-slate-400">Where necessary</span>
-                </div>
-
-                {attachDocWithRights && (
-                  <div className="space-y-3 pt-2 border-t border-slate-200/80 dark:border-white/10 animate-in fade-in">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Document Title *</label>
-                        <input
-                          type="text"
-                          required={attachDocWithRights}
-                          placeholder="e.g. Deed of Master Assignment"
-                          value={rightsDocTitle}
-                          onChange={(e) => setRightsDocTitle(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-indigo-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Classification</label>
-                        <select
-                          value={rightsDocClassification}
-                          onChange={(e) => setRightsDocClassification(e.target.value as any)}
-                          className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 cursor-pointer"
-                        >
-                          <option value="PDF">PDF Contract / Agreement</option>
-                          <option value="DOCX">DOCX Script / Clearances</option>
-                          <option value="CERT">CERT Doctrinal Approval Certificate</option>
-                          <option value="LICENSE">LICENSE Master Synchronization License</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Filing Notes (Optional)</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Executed and notarized deed attached."
-                        value={rightsDocNotes}
-                        onChange={(e) => setRightsDocNotes(e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-3 py-2 text-xs outline-none focus:border-indigo-500"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setIsEditRightsModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingRights}
-                  className="rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-2 font-bold text-white shadow-md shadow-indigo-600/20 hover:from-indigo-700 hover:to-blue-700 transition cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-                >
-                  <Check className="size-3.5" />
-                  <span>{isSavingRights ? 'Saving...' : 'Confirm & File Rights Terms'}</span>
                 </button>
               </div>
             </form>
