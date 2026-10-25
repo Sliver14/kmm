@@ -658,10 +658,10 @@ export function AssetDetailsView({
                 onClick={() => {
                   setActiveNav('Rights & Governance', asset.id)
                 }}
-                className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/70 hover:bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-2xs transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/70 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 dark:text-blue-300 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-2xs transition cursor-pointer"
                 title="Manage legal clearances, territory rights and compliance verification"
               >
-                <ShieldCheck className="size-3.5 text-blue-600" />
+                <ShieldCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
                 <span>Rights & Governance ↗</span>
               </button>
             )}
@@ -884,15 +884,15 @@ export function AssetDetailsView({
           </div>
 
           {/* Rights & Governance Hub Summary Card with Direct Navigation */}
-          <div className="rounded-xl border border-blue-200/90 bg-gradient-to-br from-blue-50/70 via-white to-indigo-50/40 p-5 shadow-xs space-y-3.5">
+          <div className="rounded-xl border border-blue-200/90 bg-gradient-to-br from-blue-50/70 via-white to-indigo-50/40 dark:border-blue-500/20 dark:bg-gradient-to-br dark:from-blue-950/40 dark:via-slate-900/95 dark:to-indigo-950/30 p-5 shadow-xs space-y-3.5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start sm:items-center gap-3">
-                <div className="size-10 rounded-xl bg-blue-600 text-white grid place-items-center shrink-0 shadow-xs">
+                <div className="size-10 rounded-xl bg-blue-600 text-white grid place-items-center shrink-0 shadow-xs dark:bg-blue-600 dark:shadow-blue-900/40 dark:ring-1 dark:ring-blue-400/30">
                   <ShieldCheck className="size-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-slate-900 text-sm">Rights & Governance</h4>
+                    <h4 className="font-semibold text-slate-900 dark:text-white text-sm">Rights & Governance</h4>
                     <span className={cn(
                       "rounded-md px-2 py-0.5 text-[10px] font-bold border shadow-2xs",
                       assetRisk.riskBadgeColor
@@ -900,7 +900,7 @@ export function AssetDetailsView({
                       {assetRisk.level} Risk • {100 - assetRisk.score}% Compliant
                     </span>
                   </div>
-                  <p className="text-xs text-slate-600 mt-0.5">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                     Clearance deeds, territory scope, legal licensing terms, and governance audit trails for this asset are managed centrally in Rights & Governance.
                   </p>
                 </div>
@@ -912,7 +912,7 @@ export function AssetDetailsView({
                   onClick={() => {
                     setActiveNav('Rights & Governance', asset.id)
                   }}
-                  className="flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-semibold shadow-xs transition cursor-pointer shrink-0"
+                  className="flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-xs font-semibold shadow-xs transition cursor-pointer shrink-0 dark:bg-blue-600 dark:hover:bg-blue-500 dark:shadow-blue-950/50"
                 >
                   <ShieldCheck className="size-4" />
                   <span>Open in Rights & Governance ↗</span>
@@ -920,30 +920,30 @@ export function AssetDetailsView({
               )}
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-blue-100 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-blue-100 dark:border-white/10 text-xs">
               <div>
-                <span className="text-slate-400 text-[10px] block">Rights Scope</span>
-                <span className="font-semibold text-slate-800 truncate block">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block">Rights Scope</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-100 truncate block">
                   {linkedRights?.rightsType || 'Unconfigured Scope'}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] block">Territory & Term</span>
-                <span className="font-medium text-slate-700 truncate block">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block">Territory & Term</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300 truncate block">
                   {linkedRights?.territory || 'Global'}{linkedRights?.term ? ` • ${linkedRights.term}` : ''}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] block">Clearance Deeds</span>
-                <span className="font-semibold text-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block">Clearance Deeds</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-100 block">
                   {documents.length > 0 ? `${documents.length} Deeds Filed` : 'No Deeds Attached'}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] block">Clearance Status</span>
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block">Clearance Status</span>
                 <span className={cn(
-                  "font-bold",
-                  asset.status === 'Approved' ? "text-emerald-600" : "text-amber-600"
+                  "font-bold block",
+                  asset.status === 'Approved' ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
                 )}>
                   {asset.status}
                 </span>
