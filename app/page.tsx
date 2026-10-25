@@ -518,18 +518,18 @@ function NotificationModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[100] flex justify-end bg-slate-950/40 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer overflow-hidden"
+      className="fixed inset-0 z-[100] flex justify-end bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer overflow-hidden"
       role="dialog"
       aria-modal="true"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full sm:w-[480px] md:w-[520px] h-full border-l border-slate-200 bg-white shadow-2xl flex flex-col cursor-default animate-in slide-in-from-right duration-300 ease-out overflow-hidden"
+        className="relative w-full sm:w-[480px] md:w-[520px] h-full border-l border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 shadow-2xl flex flex-col cursor-default animate-in slide-in-from-right duration-300 ease-out overflow-hidden"
       >
         {/* Drawer Header */}
-        <div className="relative z-10 flex items-center justify-between border-b border-slate-200 px-5 py-4 bg-white shrink-0">
+        <div className="relative z-10 flex items-center justify-between border-b border-slate-200 dark:border-white/10 px-5 py-4 bg-white dark:bg-slate-900 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative size-10 rounded-xl bg-slate-900 text-white shadow-xs grid place-items-center shrink-0">
+            <div className="relative size-10 rounded-xl bg-slate-900 text-white dark:bg-slate-800 dark:border dark:border-white/10 shadow-xs grid place-items-center shrink-0">
               <Bell className="size-5" />
               {unreadNotificationsCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex size-3">
@@ -540,22 +540,22 @@ function NotificationModal({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-semibold text-slate-900 text-sm sm:text-base tracking-tight truncate">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight truncate">
                   Notifications & Alerts
                 </h3>
                 {unreadNotificationsCount > 0 ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-semibold text-rose-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 dark:bg-rose-950/50 dark:border-rose-800/50 dark:text-rose-300 px-2 py-0.5 text-[10px] font-semibold text-rose-700">
                     <span className="size-1.5 rounded-full bg-rose-500 animate-pulse" />
                     {unreadNotificationsCount} Unread
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800/50 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
                     <Check className="size-2.5" />
                     All Caught Up
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 truncate mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                 Live governance clearances, approvals & activity stream
               </p>
             </div>
@@ -565,7 +565,7 @@ function NotificationModal({
             {unreadNotificationsCount > 0 && (
               <button
                 onClick={markAllNotificationsAsRead}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 dark:bg-slate-800 dark:border-white/10 dark:text-slate-200 dark:hover:bg-slate-700 rounded-lg px-2.5 py-1.5 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
                 title="Mark all notifications as read"
               >
                 <CheckCheck className="size-3.5" />
@@ -575,7 +575,7 @@ function NotificationModal({
             {notifications.length > 0 && (
               <button
                 onClick={clearAllNotifications}
-                className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-lg px-2 py-1.5 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 dark:bg-slate-800 dark:border-white/10 dark:text-slate-400 dark:hover:bg-rose-950/40 dark:hover:text-rose-300 dark:hover:border-rose-800/50 rounded-lg px-2 py-1.5 transition-colors cursor-pointer"
                 title="Clear all notifications"
               >
                 <Trash2 className="size-3.5" />
@@ -584,7 +584,7 @@ function NotificationModal({
             )}
             <button
               onClick={onClose}
-              className="grid size-8 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+              className="grid size-8 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer"
               aria-label="Close notifications"
             >
               <X className="size-4" />
@@ -593,7 +593,7 @@ function NotificationModal({
         </div>
 
         {/* Filter Tabs */}
-        <div className="relative z-10 flex items-center gap-1.5 border-b border-slate-200 bg-slate-50/70 p-2.5 sm:px-4 text-xs overflow-x-auto no-scrollbar shrink-0">
+        <div className="relative z-10 flex items-center gap-1.5 border-b border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/50 p-2.5 sm:px-4 text-xs overflow-x-auto no-scrollbar shrink-0">
           {[
             { key: 'all', label: 'All', count: notifications.length },
             { key: 'unread', label: 'Unread', count: unreadNotificationsCount },
@@ -609,8 +609,8 @@ function NotificationModal({
                 className={cn(
                   'relative rounded-lg px-3 py-1.5 font-medium transition-all flex items-center gap-1.5 whitespace-nowrap text-xs cursor-pointer',
                   isActive
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shadow-2xs hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white shadow-xs dark:bg-blue-600'
+                    : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shadow-2xs hover:bg-slate-50 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
                 )}
               >
                 <span>{tab.label}</span>
@@ -619,7 +619,7 @@ function NotificationModal({
                     'rounded-full px-1.5 py-0.2 text-[10px] font-semibold',
                     isActive
                       ? 'bg-white/20 text-white'
-                      : 'bg-slate-100 text-slate-600'
+                      : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
                   )}
                 >
                   {tab.count}
@@ -630,15 +630,15 @@ function NotificationModal({
         </div>
 
         {/* Notifications List */}
-        <div className="relative z-10 flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 bg-slate-50/40 custom-scrollbar">
+        <div className="relative z-10 flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 bg-slate-50/40 dark:bg-slate-950/30 custom-scrollbar">
           {filteredNotifications.length === 0 ? (
             <div className="py-16 text-center space-y-3 px-6">
-              <div className="size-12 mx-auto rounded-xl bg-white border border-slate-200 grid place-items-center text-slate-500 shadow-xs">
-                <CheckCircle2 className="size-6 text-emerald-600" />
+              <div className="size-12 mx-auto rounded-xl bg-white border border-slate-200 dark:bg-slate-800 dark:border-white/10 grid place-items-center text-slate-500 shadow-xs">
+                <CheckCircle2 className="size-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-semibold text-slate-900 text-sm">All caught up!</h4>
-                <p className="text-xs text-slate-500 max-w-[280px] mx-auto leading-relaxed">
+                <h4 className="font-semibold text-slate-900 dark:text-white text-sm">All caught up!</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-[280px] mx-auto leading-relaxed">
                   {notificationFilter === 'unread'
                     ? 'You have zero unread notifications. Great work keeping on top of approvals!'
                     : 'No notifications in this filter view.'}
@@ -655,8 +655,8 @@ function NotificationModal({
                   className={cn(
                     'group relative rounded-xl p-3.5 sm:p-4 transition-all duration-150 border text-xs',
                     isRead
-                      ? 'bg-white/80 hover:bg-white border-slate-200/70 opacity-75 hover:opacity-100 shadow-2xs hover:shadow-xs'
-                      : 'bg-white border-slate-300 shadow-xs hover:border-slate-400'
+                      ? 'bg-white/80 hover:bg-white border-slate-200/70 opacity-75 hover:opacity-100 shadow-2xs hover:shadow-xs dark:bg-slate-800/40 dark:hover:bg-slate-800/80 dark:border-white/5'
+                      : 'bg-white border-slate-300 shadow-xs hover:border-slate-400 dark:bg-slate-800/90 dark:border-white/15 dark:shadow-md'
                   )}
                 >
                   <div className="flex items-start gap-3">
@@ -691,7 +691,7 @@ function NotificationModal({
                     {/* Notification Body */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-semibold text-slate-900 text-xs sm:text-[13px] leading-snug line-clamp-1">
+                        <h4 className="font-semibold text-slate-900 dark:text-white text-xs sm:text-[13px] leading-snug line-clamp-1">
                           {item.title}
                         </h4>
 
@@ -699,8 +699,8 @@ function NotificationModal({
                           {item.badge && (
                             <span
                               className={cn(
-                                'rounded-md px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider border border-slate-200/80',
-                                item.badgeColor || 'bg-slate-100 text-slate-700'
+                                'rounded-md px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider border border-slate-200/80 dark:border-white/10',
+                                item.badgeColor || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                               )}
                             >
                               {item.badge}
@@ -715,19 +715,19 @@ function NotificationModal({
                         </div>
                       </div>
 
-                      <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed font-normal">
+                      <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed font-normal">
                         {item.subtitle}
                       </p>
 
                       {/* Bottom metadata & Action */}
-                      <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-100 text-[11px]">
-                        <div className="flex items-center gap-1.5 text-slate-400 font-medium">
-                          <Clock className="size-3 text-slate-400" />
+                      <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-100 dark:border-white/10 text-[11px]">
+                        <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 font-medium">
+                          <Clock className="size-3 text-slate-400 dark:text-slate-500" />
                           <span>{item.time}</span>
                           {item.agency && (
                             <>
                               <span>•</span>
-                              <span className="font-semibold text-slate-600">{item.agency}</span>
+                              <span className="font-semibold text-slate-600 dark:text-slate-400">{item.agency}</span>
                             </>
                           )}
                         </div>
@@ -739,11 +739,11 @@ function NotificationModal({
                               e.stopPropagation()
                               toggleNotificationRead(item.id)
                             }}
-                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 dark:hover:text-white transition cursor-pointer"
                             title={isRead ? 'Mark as unread' : 'Mark as read'}
                             aria-label={isRead ? 'Mark as unread' : 'Mark as read'}
                           >
-                            {isRead ? <Eye className="size-3.5" /> : <Check className="size-3.5 text-slate-700" />}
+                            {isRead ? <Eye className="size-3.5" /> : <Check className="size-3.5 text-slate-700 dark:text-slate-300" />}
                           </button>
 
                           {/* Dismiss */}
@@ -752,7 +752,7 @@ function NotificationModal({
                               e.stopPropagation()
                               dismissNotification(item.id)
                             }}
-                            className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-300 transition cursor-pointer"
                             title="Dismiss notification"
                             aria-label="Dismiss notification"
                           >
@@ -762,7 +762,7 @@ function NotificationModal({
                           {/* Open Target */}
                           <button
                             onClick={() => handleNotificationClick(item.targetTab, item.assetId, item.id)}
-                            className="font-medium text-xs text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg px-2.5 py-1 flex items-center gap-1 transition-colors cursor-pointer ml-1"
+                            className="font-medium text-xs text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 dark:text-white dark:bg-slate-700 dark:border-white/10 dark:hover:bg-slate-600 rounded-lg px-2.5 py-1 flex items-center gap-1 transition-colors cursor-pointer ml-1"
                           >
                             <span>Open in {item.targetTab}</span>
                             <ArrowRight className="size-3" />
@@ -2317,19 +2317,19 @@ function AssetsPage({
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsAddModalOpen(false)
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3.5">
               <div>
                 <div className="flex items-center gap-2">
                   <div className="grid size-7 place-items-center rounded-lg bg-blue-600 text-white font-bold">
                     <Plus className="size-4" />
                   </div>
-                  <h3 className="font-bold text-[#09245a] text-sm">Add New Intellectual Asset</h3>
+                  <h3 className="font-bold text-[#09245a] dark:text-white text-sm">Add New Intellectual Asset</h3>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   Core Asset Identification & Operational Unit Intake
                 </p>
               </div>
@@ -2337,7 +2337,7 @@ function AssetsPage({
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 cursor-pointer"
+                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -2346,28 +2346,28 @@ function AssetsPage({
             <form onSubmit={handleAddAssetSubmit} className="mt-4 space-y-4">
               <div className="space-y-3.5">
                 {/* Auto-Generated Asset ID Preview */}
-                <div className="flex items-center justify-between rounded-xl bg-blue-50/80 p-3 border border-blue-100">
+                <div className="flex items-center justify-between rounded-xl bg-blue-50/80 dark:bg-blue-950/40 p-3 border border-blue-100 dark:border-blue-900/50">
                   <div>
-                    <span className="text-[10px] font-bold uppercase text-blue-700 block">Auto-Generated Asset ID</span>
-                    <div className="font-mono font-bold text-[#09245a] text-sm">{autoGeneratedIdPreview}</div>
+                    <span className="text-[10px] font-bold uppercase text-blue-700 dark:text-blue-300 block">Auto-Generated Asset ID</span>
+                    <div className="font-mono font-bold text-[#09245a] dark:text-white text-sm">{autoGeneratedIdPreview}</div>
                   </div>
                   <span className="rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white">Auto-Assigned</span>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Asset Name / Title *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Asset Name / Title *</label>
                   <input
                     value={newAssetForm.name}
                     onChange={(e) => setNewAssetForm((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="e.g. Brave Boy Adventures Episode 4"
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Category *</label>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Category *</label>
                     <select
                       value={newAssetForm.category}
                       onChange={(e) => {
@@ -2378,10 +2378,10 @@ function AssetsPage({
                           subcategory: '',
                         }))
                       }}
-                      className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                     >
                       {categories.map((c) => (
-                        <option key={c.id} value={c.name}>
+                        <option key={c.id} value={c.name} className="dark:bg-slate-900 dark:text-white">
                           {c.name}
                         </option>
                       ))}
@@ -2389,15 +2389,15 @@ function AssetsPage({
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Subcategory *</label>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Subcategory *</label>
                     <select
                       value={newAssetForm.subcategory}
                       onChange={(e) => setNewAssetForm((prev) => ({ ...prev, subcategory: e.target.value }))}
-                      className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400"
+                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
                     >
-                      <option value="">Select Subcategory</option>
+                      <option value="" className="dark:bg-slate-900 dark:text-white">Select Subcategory</option>
                       {availableSubcategoriesForForm.map((s) => (
-                        <option key={s.id} value={s.name}>
+                        <option key={s.id} value={s.name} className="dark:bg-slate-900 dark:text-white">
                           {s.name}
                         </option>
                       ))}
@@ -2407,7 +2407,7 @@ function AssetsPage({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Originating Agency *</label>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Originating Agency *</label>
                     {isGlobalViewer ? (
                       <select
                         value={newAssetForm.agency}
@@ -2418,45 +2418,45 @@ function AssetsPage({
                             unit: e.target.value as Agency,
                           }))
                         }
-                        className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
+                        className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
                       >
                         {agencies.map((agency) => (
-                          <option key={agency} value={agency}>
+                          <option key={agency} value={agency} className="dark:bg-slate-900 dark:text-white">
                             {agency}
                           </option>
                         ))}
                       </select>
                     ) : (
-                      <div className="flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-700">
+                      <div className="flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 dark:border-white/15 dark:bg-slate-800 dark:text-slate-200 px-3 text-xs font-bold text-slate-700">
                         {currentUser.agency || 'Lovetoons'}
                       </div>
                     )}
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Asset Owner / Rights Holder</label>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Asset Owner / Rights Holder</label>
                     <input
                       value={newAssetForm.rightsHolder}
                       onChange={(e) => setNewAssetForm((prev) => ({ ...prev, rightsHolder: e.target.value }))}
                       placeholder="Registered Rights Holder (leave blank if unassigned)"
-                      className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-medium text-slate-800"
+                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
                 </div>
 
                 {/* STAFF CONTRIBUTORS BUILDER */}
-                <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-3.5 space-y-3">
+                <div className="rounded-xl border border-blue-100 bg-blue-50/40 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <label className="block font-bold text-[#09245a] text-xs">
+                        <label className="block font-bold text-[#09245a] dark:text-white text-xs">
                           Staff Contributors ({newAssetForm.contributors.length})
                         </label>
-                        <span className="text-[10px] font-semibold text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-semibold text-blue-700 bg-blue-100/70 dark:bg-blue-950/60 dark:text-blue-300 dark:border dark:border-blue-800/40 px-2 py-0.5 rounded-full">
                           Optional
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                         Manually add contributing authors, animators, artists, or engineers (or leave blank)
                       </p>
                     </div>
@@ -2464,7 +2464,7 @@ function AssetsPage({
 
                   {/* Contributor List Chips */}
                   {newAssetForm.contributors.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-blue-200/90 bg-white/60 p-3 text-center text-xs text-slate-500">
+                    <div className="rounded-lg border border-dashed border-blue-200/90 bg-white/60 dark:border-white/15 dark:bg-slate-850 dark:bg-slate-800/60 p-3 text-center text-xs text-slate-500 dark:text-slate-400">
                       No contributors added yet. Use the fields below to add contributing team members, or leave blank.
                     </div>
                   ) : (
@@ -2472,14 +2472,14 @@ function AssetsPage({
                       {newAssetForm.contributors.map((c, idx) => (
                         <div
                           key={c.id || idx}
-                          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-2xs text-xs"
+                          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 px-2.5 py-1.5 shadow-2xs text-xs"
                         >
                           <div className="grid size-6 place-items-center rounded bg-slate-800 text-[10px] font-bold text-white uppercase">
                             {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'ST'}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-bold text-slate-900 leading-tight truncate max-w-[130px]">{c.name}</div>
-                            <div className="text-[10px] text-blue-700 truncate">{c.role} • {c.agency}</div>
+                            <div className="font-bold text-slate-900 dark:text-white leading-tight truncate max-w-[130px]">{c.name}</div>
+                            <div className="text-[10px] text-blue-700 dark:text-blue-400 truncate">{c.role} • {c.agency}</div>
                           </div>
                           <button
                             type="button"
@@ -2489,7 +2489,7 @@ function AssetsPage({
                                 contributors: prev.contributors.filter((_, i) => i !== idx),
                               }))
                             }}
-                            className="text-slate-400 hover:text-red-500 transition ml-1 cursor-pointer"
+                            className="text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400 transition ml-1 cursor-pointer"
                             title="Remove contributor"
                           >
                             <X className="size-3.5" />
@@ -2500,43 +2500,43 @@ function AssetsPage({
                   )}
 
                   {/* Add Contributor Mini-Form */}
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-t border-blue-100/80 pt-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-t border-blue-100/80 dark:border-white/10 pt-2.5">
                     <div className="sm:col-span-1">
                       <input
                         type="text"
                         placeholder="Contributor name..."
                         value={newContributorName}
                         onChange={(e) => setNewContributorName(e.target.value)}
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none focus:border-blue-400"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                     </div>
                     <div className="sm:col-span-1">
                       <select
                         value={newContributorRole}
                         onChange={(e) => setNewContributorRole(e.target.value)}
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-400"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
                       >
-                        <option value="Lead 3D Animator">Lead 3D Animator</option>
-                        <option value="Screenwriter & Author">Screenwriter & Author</option>
-                        <option value="Voice Artist / Director">Voice Artist / Director</option>
-                        <option value="Music Producer & Composer">Music Producer & Composer</option>
-                        <option value="Curriculum Author">Curriculum Author</option>
-                        <option value="Illustrator & Concept Artist">Illustrator & Concept Artist</option>
-                        <option value="Software Engineer">Software Engineer</option>
-                        <option value="UI/UX Designer">UI/UX Designer</option>
-                        <option value="Audio Sound Engineer">Audio Sound Engineer</option>
-                        <option value="Theological Reviewer">Theological Reviewer</option>
-                        <option value="Production Specialist">Production Specialist</option>
+                        <option value="Lead 3D Animator" className="dark:bg-slate-900 dark:text-white">Lead 3D Animator</option>
+                        <option value="Screenwriter & Author" className="dark:bg-slate-900 dark:text-white">Screenwriter & Author</option>
+                        <option value="Voice Artist / Director" className="dark:bg-slate-900 dark:text-white">Voice Artist / Director</option>
+                        <option value="Music Producer & Composer" className="dark:bg-slate-900 dark:text-white">Music Producer & Composer</option>
+                        <option value="Curriculum Author" className="dark:bg-slate-900 dark:text-white">Curriculum Author</option>
+                        <option value="Illustrator & Concept Artist" className="dark:bg-slate-900 dark:text-white">Illustrator & Concept Artist</option>
+                        <option value="Software Engineer" className="dark:bg-slate-900 dark:text-white">Software Engineer</option>
+                        <option value="UI/UX Designer" className="dark:bg-slate-900 dark:text-white">UI/UX Designer</option>
+                        <option value="Audio Sound Engineer" className="dark:bg-slate-900 dark:text-white">Audio Sound Engineer</option>
+                        <option value="Theological Reviewer" className="dark:bg-slate-900 dark:text-white">Theological Reviewer</option>
+                        <option value="Production Specialist" className="dark:bg-slate-900 dark:text-white">Production Specialist</option>
                       </select>
                     </div>
                     <div className="sm:col-span-1">
                       <select
                         value={newContributorAgency}
                         onChange={(e) => setNewContributorAgency(e.target.value as Agency)}
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-400"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
                       >
                         {agencies.map((agency) => (
-                          <option key={agency} value={agency}>
+                          <option key={agency} value={agency} className="dark:bg-slate-900 dark:text-white">
                             {agency}
                           </option>
                         ))}
@@ -2571,41 +2571,41 @@ function AssetsPage({
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Asset Description (Optional)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Asset Description (Optional)</label>
                   <textarea
                     value={newAssetForm.description}
                     onChange={(e) => setNewAssetForm((prev) => ({ ...prev, description: e.target.value }))}
                     rows={2}
                     placeholder="Summary of asset content, storyline, or technical specifications..."
-                    className="w-full rounded-lg border border-slate-200 p-2.5 text-xs outline-none focus:border-blue-400"
+                    className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Tag Chips (Optional, comma-separated)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tag Chips (Optional, comma-separated)</label>
                   <input
                     value={newAssetForm.tags}
                     onChange={(e) => setNewAssetForm((prev) => ({ ...prev, tags: e.target.value }))}
                     placeholder="e.g. Faith, 3D, Episode, Broadcast"
-                    className="h-9 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                 </div>
 
                 {/* Asset Poster / Cover Image (Optional) */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <label className="block font-bold text-slate-800 text-xs">Asset Cover Artwork</label>
-                      <span className="text-[10px] font-semibold text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded-full">
+                      <label className="block font-bold text-slate-800 dark:text-slate-200 text-xs">Asset Cover Artwork</label>
+                      <span className="text-[10px] font-semibold text-slate-500 bg-slate-200/70 dark:bg-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
                         Optional
                       </span>
                     </div>
-                    <span className="text-[10px] text-slate-500">Can be added or updated later</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">Can be added or updated later</span>
                   </div>
 
                   <div className="flex items-center gap-3">
                     {/* Live preview: either user image or typographic monogram using asset name */}
-                    <div className="relative size-16 rounded-xl border border-slate-200 bg-white overflow-hidden shrink-0 shadow-2xs">
+                    <div className="relative size-16 rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 overflow-hidden shrink-0 shadow-2xs">
                       {newAssetForm.posterUrl.trim() ? (
                         <img
                           src={newAssetForm.posterUrl}
@@ -2633,10 +2633,10 @@ function AssetsPage({
                         value={newAssetForm.posterUrl}
                         onChange={(e) => setNewAssetForm((prev) => ({ ...prev, posterUrl: e.target.value }))}
                         placeholder="https://... (Optional image URL)"
-                        className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs outline-none focus:border-blue-400"
+                        className="h-8 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                       <div className="flex items-center justify-between gap-2 text-[10px]">
-                        <span className="text-slate-500">
+                        <span className="text-slate-500 dark:text-slate-400">
                           {newAssetForm.posterUrl.trim()
                             ? 'Image cover set. Click Clear to use monogram badge.'
                             : 'No cover image? The asset name monogram badge will be displayed.'}
@@ -2645,7 +2645,7 @@ function AssetsPage({
                           <button
                             type="button"
                             onClick={() => setNewAssetForm((prev) => ({ ...prev, posterUrl: '' }))}
-                            className="text-red-600 hover:text-red-700 font-semibold cursor-pointer shrink-0"
+                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-semibold cursor-pointer shrink-0"
                           >
                             Clear
                           </button>
@@ -2656,11 +2656,11 @@ function AssetsPage({
                 </div>
 
                 {/* MODAL FOOTER BUTTONS */}
-                <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-4">
+                <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/10 pt-3 mt-4">
                   <button
                     type="button"
                     onClick={() => setIsAddModalOpen(false)}
-                    className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 text-xs cursor-pointer"
+                    className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/15 dark:text-slate-300 dark:hover:bg-slate-800 text-xs cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -6276,12 +6276,12 @@ function CategoriesPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsAddCatOpen(false)
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl text-xs cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-semibold text-slate-900 text-sm">Add Category</h3>
-              <button onClick={() => setIsAddCatOpen(false)} className="grid size-8 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Add Category</h3>
+              <button onClick={() => setIsAddCatOpen(false)} className="grid size-8 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition cursor-pointer">
                 <X className="size-4" />
               </button>
             </div>
@@ -6303,34 +6303,34 @@ function CategoriesPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
               className="mt-4 space-y-3"
             >
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Category Name *</label>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Category Name *</label>
                 <input
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition"
                   required
                 />
               </div>
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Description</label>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
                 <textarea
                   value={catDesc}
                   onChange={(e) => setCatDesc(e.target.value)}
                   rows={3}
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-xs outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddCatOpen(false)}
-                  className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 px-4 py-2 font-medium text-xs text-white hover:bg-slate-800 shadow-xs transition active:scale-98 cursor-pointer"
+                  className="rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 font-medium text-xs text-white hover:bg-slate-800 shadow-xs transition active:scale-98 cursor-pointer"
                 >
                   Save
                 </button>
@@ -6346,12 +6346,12 @@ function CategoriesPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsAddSubOpen(false)
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl text-xs cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-semibold text-slate-900 text-sm">Add Subcategory</h3>
-              <button onClick={() => setIsAddSubOpen(false)} className="grid size-8 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Add Subcategory</h3>
+              <button onClick={() => setIsAddSubOpen(false)} className="grid size-8 place-items-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition cursor-pointer">
                 <X className="size-4" />
               </button>
             </div>
@@ -6372,39 +6372,39 @@ function CategoriesPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
               className="mt-4 space-y-3"
             >
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Parent Category *</label>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Parent Category *</label>
                 <select
                   value={subParent}
                   onChange={(e) => setSubParent(e.target.value)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition"
                 >
                   {categories.map((c) => (
-                    <option key={c.id} value={c.name}>
+                    <option key={c.id} value={c.name} className="dark:bg-slate-900 dark:text-white">
                       {c.name}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Subcategory Name *</label>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Subcategory Name *</label>
                 <input
                   value={subName}
                   onChange={(e) => setSubName(e.target.value)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition"
                   required
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddSubOpen(false)}
-                  className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 px-4 py-2 font-medium text-xs text-white hover:bg-slate-800 shadow-xs transition active:scale-98 cursor-pointer"
+                  className="rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 font-medium text-xs text-white hover:bg-slate-800 shadow-xs transition active:scale-98 cursor-pointer"
                 >
                   Save
                 </button>
@@ -8037,20 +8037,20 @@ function SettingsPage() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsAddCatOpen(false)
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white p-6 shadow-2xl text-xs cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <div className="grid size-7 place-items-center rounded-lg bg-slate-100 text-slate-800 font-semibold">
+                <div className="grid size-7 place-items-center rounded-lg bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 font-semibold">
                   <Plus className="size-4" />
                 </div>
-                <h3 className="font-semibold text-slate-900 text-sm">Add New Category (Super Admin)</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Add New Category (Super Admin)</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddCatOpen(false)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -8074,30 +8074,30 @@ function SettingsPage() {
               className="mt-4 space-y-3.5"
             >
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Category Name *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Category Name *</label>
                 <input
                   type="text"
                   required
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
                   placeholder="e.g. Interactive & XR, Theatrical Outreach"
-                  className="h-8.5 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Description</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Description</label>
                 <textarea
                   value={catDesc}
                   onChange={(e) => setCatDesc(e.target.value)}
                   placeholder="Explain the scope and asset types for this classification..."
                   rows={3}
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-xs outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
+                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Color Theme</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Color Theme</label>
                 <div className="flex items-center gap-2">
                   {[
                     { label: 'Blue', val: 'bg-blue-600' },
@@ -8113,7 +8113,7 @@ function SettingsPage() {
                       className={cn(
                         'size-7 rounded-full transition flex items-center justify-center',
                         color.val,
-                        catColor === color.val ? 'ring-2 ring-offset-2 ring-slate-900 scale-110' : 'opacity-80'
+                        catColor === color.val ? 'ring-2 ring-offset-2 ring-slate-900 dark:ring-offset-slate-900 scale-110' : 'opacity-80'
                       )}
                     >
                       {catColor === color.val && <Check className="size-3 text-white" />}
@@ -8122,17 +8122,17 @@ function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddCatOpen(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
+                  className="px-4 py-2 border border-slate-200 dark:border-white/15 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 rounded-lg text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-slate-900 text-white font-medium rounded-lg hover:bg-slate-800 shadow-xs cursor-pointer"
+                  className="px-5 py-2 bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium rounded-lg hover:bg-slate-800 shadow-xs cursor-pointer"
                 >
                   Save Category
                 </button>
@@ -8148,20 +8148,20 @@ function SettingsPage() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsAddSubOpen(false)
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white p-6 shadow-2xl text-xs cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <div className="grid size-7 place-items-center rounded-lg bg-slate-100 text-slate-800 font-semibold">
+                <div className="grid size-7 place-items-center rounded-lg bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 font-semibold">
                   <Plus className="size-4" />
                 </div>
-                <h3 className="font-semibold text-slate-900 text-sm">Add New Subcategory (Super Admin)</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Add New Subcategory (Super Admin)</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddSubOpen(false)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -8184,14 +8184,14 @@ function SettingsPage() {
               className="mt-4 space-y-3.5"
             >
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Parent Category *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Parent Category *</label>
                 <select
                   value={subParent}
                   onChange={(e) => setSubParent(e.target.value)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500"
                 >
                   {categories.map((c) => (
-                    <option key={c.id} value={c.name}>
+                    <option key={c.id} value={c.name} className="dark:bg-slate-900 dark:text-white">
                       {c.name}
                     </option>
                   ))}
@@ -8199,28 +8199,28 @@ function SettingsPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Subcategory Name *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Subcategory Name *</label>
                 <input
                   type="text"
                   required
                   value={subName}
                   onChange={(e) => setSubName(e.target.value)}
                   placeholder="e.g. 3D CGI Short, Musical Album, Illustrated Comic"
-                  className="h-8.5 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddSubOpen(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
+                  className="px-4 py-2 border border-slate-200 dark:border-white/15 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 rounded-lg text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-slate-900 text-white font-medium rounded-lg hover:bg-slate-800 shadow-xs cursor-pointer"
+                  className="px-5 py-2 bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium rounded-lg hover:bg-slate-800 shadow-xs cursor-pointer"
                 >
                   Save Subcategory
                 </button>
@@ -8236,15 +8236,15 @@ function SettingsPage() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setEditingCategory(null)
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white p-6 shadow-2xl text-xs cursor-default">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-semibold text-slate-900 text-sm">Edit Category</h3>
+          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+              <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Edit Category</h3>
               <button
                 type="button"
                 onClick={() => setEditingCategory(null)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -8264,37 +8264,37 @@ function SettingsPage() {
               className="mt-4 space-y-3.5"
             >
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Category Name *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Category Name *</label>
                 <input
                   type="text"
                   required
                   value={editCatName}
                   onChange={(e) => setEditCatName(e.target.value)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 px-3 text-xs outline-none focus:border-slate-400"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Description</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Description</label>
                 <textarea
                   value={editCatDesc}
                   onChange={(e) => setEditCatDesc(e.target.value)}
                   rows={3}
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-xs outline-none focus:border-slate-400"
+                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setEditingCategory(null)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
+                  className="px-4 py-2 border border-slate-200 dark:border-white/15 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 rounded-lg text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-slate-900 text-white font-medium rounded-lg hover:bg-slate-800 shadow-xs cursor-pointer"
+                  className="px-5 py-2 bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium rounded-lg hover:bg-slate-800 shadow-xs cursor-pointer"
                 >
                   Update Category
                 </button>
@@ -8310,24 +8310,24 @@ function SettingsPage() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setDeleteTarget(null)
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white p-6 shadow-2xl text-xs cursor-default space-y-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default space-y-4">
             <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200">
+              <div className="grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/50 dark:border-rose-800/50 dark:text-rose-400">
                 <AlertTriangle className="size-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 text-sm">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
                   Delete {deleteTarget.type === 'category' ? 'Category' : 'Subcategory'}?
                 </h3>
-                <p className="text-[11px] text-slate-500">&ldquo;{deleteTarget.name}&rdquo;</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">&ldquo;{deleteTarget.name}&rdquo;</p>
               </div>
             </div>
 
-            <p className="text-slate-600 text-xs leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-200 dark:border-white/10">
               {deleteTarget.linkedAssetsCount > 0 ? (
-                <span className="text-amber-700 font-semibold">
+                <span className="text-amber-700 dark:text-amber-400 font-semibold">
                   Warning: There are currently {deleteTarget.linkedAssetsCount} assets catalogued under this {deleteTarget.type}. Deleting it will remove this taxonomy link.
                 </span>
               ) : (
@@ -8335,11 +8335,11 @@ function SettingsPage() {
               )}
             </p>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="rounded-lg border border-slate-200 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                className="rounded-lg border border-slate-200 dark:border-white/15 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -8368,28 +8368,28 @@ function SettingsPage() {
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsResetConfirmOpen(false)
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white p-6 shadow-2xl text-xs cursor-default space-y-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default space-y-4">
             <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200">
+              <div className="grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/50 dark:border-rose-800/50 dark:text-rose-400">
                 <AlertTriangle className="size-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 text-sm">Reset All Platform Data?</h3>
-                <p className="text-[11px] text-slate-500">This will restore initial demo assets, rights records, categories, and relationships.</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Reset All Platform Data?</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">This will restore initial demo assets, rights records, categories, and relationships.</p>
               </div>
             </div>
 
-            <p className="text-slate-600 text-xs leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-200 dark:border-white/10">
               Any custom assets or taxonomy additions stored in your browser local storage will be refreshed back to default Lovetoons production demo state.
             </p>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setIsResetConfirmOpen(false)}
-                className="rounded-lg border border-slate-200 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                className="rounded-lg border border-slate-200 dark:border-white/15 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
               >
                 Cancel
               </button>

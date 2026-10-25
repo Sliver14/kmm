@@ -1614,7 +1614,7 @@ export function AssetDetailsView({
 
       {/* ADD RELATIONSHIP MODAL */}
       {isAddRelModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2">
@@ -1831,25 +1831,25 @@ export function AssetDetailsView({
       {isAddEpisodeModalOpen && (
         <div
           onClick={() => setIsAddEpisodeModalOpen(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xl text-xs space-y-4 cursor-default animate-in zoom-in-95"
+            className="w-full max-w-lg rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs space-y-4 cursor-default animate-in zoom-in-95"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="size-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 grid place-items-center">
+                <div className="size-8 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 grid place-items-center">
                   <Film className="size-4" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900 text-sm">Add Production Episode</h3>
-                  <p className="text-[11px] text-slate-500">Record episode release details for {asset.name}</p>
+                  <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Add Production Episode</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Record episode release details for {asset.name}</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsAddEpisodeModalOpen(false)}
-                className="size-7 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 grid place-items-center transition cursor-pointer"
+                className="size-7 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 grid place-items-center transition cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -1858,63 +1858,63 @@ export function AssetDetailsView({
             <form onSubmit={handleInitiateAddEpisode} className="space-y-3.5 text-xs">
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-1">
-                  <label className="block font-medium text-slate-700 mb-1">Episode # *</label>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Episode # *</label>
                   <input
                     type="number"
                     min={1}
                     required
                     value={epNum}
                     onChange={(e) => setEpNum(Number(e.target.value))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                    className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800/80 dark:text-white px-3 py-2 text-xs font-semibold outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition"
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block font-medium text-slate-700 mb-1">Runtime (Minutes) *</label>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Runtime (Minutes) *</label>
                   <input
                     type="number"
                     min={1}
                     required
                     value={epDuration}
                     onChange={(e) => setEpDuration(Number(e.target.value))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                    className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800/80 dark:text-white px-3 py-2 text-xs font-semibold outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Episode Title *</label>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Episode Title *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Episode 04: The Armor of God in Action"
                   value={epTitle}
                   onChange={(e) => setEpTitle(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800/80 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">Production Status:</label>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Production Status:</label>
                   <select
                     value={epStatus}
                     onChange={(e) => setEpStatus(e.target.value as any)}
-                    className="w-full rounded-lg border border-slate-200 p-2 text-xs font-medium text-slate-800 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition cursor-pointer"
+                    className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800/80 dark:text-white p-2 text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition cursor-pointer"
                   >
-                    <option value="In Production">In Production</option>
-                    <option value="Mastered">Mastered</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Broadcast Ready">Broadcast Ready</option>
+                    <option value="In Production" className="dark:bg-slate-900 dark:text-white">In Production</option>
+                    <option value="Mastered" className="dark:bg-slate-900 dark:text-white">Mastered</option>
+                    <option value="Approved" className="dark:bg-slate-900 dark:text-white">Approved</option>
+                    <option value="Broadcast Ready" className="dark:bg-slate-900 dark:text-white">Broadcast Ready</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1 flex items-center justify-between">
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
-                      <Calendar className="size-3 text-slate-400" />
+                      <Calendar className="size-3 text-slate-400 dark:text-slate-400" />
                       <span>Release / Air Date:</span>
                     </span>
                     {epAirDate && (
-                      <span className="text-[10px] text-emerald-600 font-medium">
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
                         {/^\d{4}-\d{2}-\d{2}$/.test(epAirDate)
                           ? new Date(epAirDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                           : epAirDate}
@@ -1927,16 +1927,16 @@ export function AssetDetailsView({
                       id="episode-air-date-picker"
                       value={epAirDate}
                       onChange={(e) => setEpAirDate(e.target.value)}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-800 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition cursor-pointer [color-scheme:light]"
+                      className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800/80 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
                     />
                   </div>
-                  <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
+                  <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400 dark:text-slate-500">
                     <span>Select calendar date</span>
                     {epAirDate && (
                       <button
                         type="button"
                         onClick={() => setEpAirDate('')}
-                        className="text-slate-500 hover:text-rose-600 transition cursor-pointer"
+                        className="text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
                       >
                         Clear date
                       </button>
@@ -1946,41 +1946,41 @@ export function AssetDetailsView({
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Synopsis / Scripture Focus (Optional):</label>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">Synopsis / Scripture Focus (Optional):</label>
                 <textarea
                   rows={2}
                   placeholder="Summary of storyline, character lesson, and scripture references..."
                   value={epSynopsis}
                   onChange={(e) => setEpSynopsis(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-xs font-medium outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition resize-none"
+                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800/80 dark:text-white p-2.5 text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Master Video Link (Optional)
-                  <span className="text-[10px] font-normal text-amber-600 ml-1.5">• Cloud Storage In Provisioning</span>
+                  <span className="text-[10px] font-normal text-amber-600 dark:text-amber-400 ml-1.5">• Cloud Storage In Provisioning</span>
                 </label>
                 <input
                   type="url"
                   placeholder="https://... (Direct master URL if available)"
                   value={epVideoUrl}
                   onChange={(e) => setEpVideoUrl(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800/80 dark:text-white px-3 py-2 text-xs font-medium outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 transition placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddEpisodeModalOpen(false)}
-                  className="rounded-lg border border-slate-200 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 dark:border-white/15 dark:text-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 hover:bg-slate-800 px-4 py-2 font-medium text-white shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                  className="rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 font-medium text-white shadow-xs transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Plus className="size-3.5" />
                   <span>Add Episode</span>

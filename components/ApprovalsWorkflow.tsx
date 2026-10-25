@@ -1136,7 +1136,7 @@ export function ApprovalsWorkflow() {
         </div>
       )}
 
-      {/* 5. DOCUMENT PREVIEW MODAL */}
+      {/* 5. CERTIFIED DOCUMENT PREVIEW MODAL */}
       {selectedDocPreview && (
         <div
           onClick={(e) => {
@@ -1144,16 +1144,16 @@ export function ApprovalsWorkflow() {
           }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-2xl text-xs max-h-[90vh] overflow-y-auto space-y-4">
+          <div className="w-full max-w-2xl rounded-3xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-6 sm:p-7 shadow-2xl text-xs max-h-[90vh] overflow-y-auto space-y-4">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
               <div className="flex items-center gap-3">
                 <div className="size-11 rounded-2xl bg-[#03152c] p-2 flex items-center justify-center border border-slate-700 shadow-sm">
                   <img src="/lovetoons-logo.png" alt="Lovetoons" className="h-6 w-auto object-contain" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[#09245a] text-base">{selectedDocPreview.doc.name}</h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
+                  <h3 className="font-black text-[#09245a] dark:text-white text-base">{selectedDocPreview.doc.name}</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                     Official Chain of Title & Statutory Governance Register
                   </p>
                 </div>
@@ -1161,57 +1161,57 @@ export function ApprovalsWorkflow() {
               <button
                 id="close-doc-preview-btn"
                 onClick={() => setSelectedDocPreview(null)}
-                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+                className="grid size-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white transition cursor-pointer"
               >
                 <X className="size-4" />
               </button>
             </div>
 
             {/* Document Certificate Meta */}
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-3">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
                 <div>
-                  <span className="text-slate-400 block font-medium">File Format</span>
-                  <span className="font-black text-indigo-700 uppercase">{selectedDocPreview.doc.type} Master</span>
+                  <span className="text-slate-400 dark:text-slate-500 block font-medium">File Format</span>
+                  <span className="font-black text-indigo-700 dark:text-indigo-400 uppercase">{selectedDocPreview.doc.type} Master</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block font-medium">File Size</span>
-                  <span className="font-bold text-slate-800">{selectedDocPreview.doc.size}</span>
+                  <span className="text-slate-400 dark:text-slate-500 block font-medium">File Size</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{selectedDocPreview.doc.size}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block font-medium">Filing Timestamp</span>
-                  <span className="font-bold text-slate-800">{selectedDocPreview.doc.date}</span>
+                  <span className="text-slate-400 dark:text-slate-500 block font-medium">Filing Timestamp</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{selectedDocPreview.doc.date}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block font-medium">Integrity Stamp</span>
-                  <span className="font-bold text-emerald-700 flex items-center gap-1">
+                  <span className="text-slate-400 dark:text-slate-500 block font-medium">Integrity Stamp</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                     <ShieldCheck className="size-3.5" /> SHA-256 Valid
                   </span>
                 </div>
               </div>
 
               {/* Simulated Legal Document Body */}
-              <div className="border-t border-slate-200 pt-3 space-y-2">
+              <div className="border-t border-slate-200 dark:border-white/10 pt-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-black text-slate-900 text-xs">Chain of Title & Legal Governance Summary</span>
-                  <span className="rounded bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 text-[10px]">
+                  <span className="font-black text-slate-900 dark:text-white text-xs">Chain of Title & Legal Governance Summary</span>
+                  <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-bold px-2 py-0.5 text-[10px]">
                     KMM Certified Record
                   </span>
                 </div>
-                <div className="p-4 bg-white rounded-xl border border-slate-200 text-slate-700 text-xs leading-relaxed space-y-2 font-mono">
+                <div className="p-4 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs leading-relaxed space-y-2 font-mono">
                   <p>
-                    <b className="text-slate-900">Document ID:</b> {selectedDocPreview.doc.id}
+                    <b className="text-slate-900 dark:text-white">Document ID:</b> {selectedDocPreview.doc.id}
                   </p>
                   <p>
-                    <b className="text-slate-900">Target Asset:</b> {selectedDocPreview.approval.assetName} <span className="text-slate-500 font-normal ml-1.5">({selectedDocPreview.approval.category} • {selectedDocPreview.approval.id})</span>
+                    <b className="text-slate-900 dark:text-white">Target Asset:</b> {selectedDocPreview.approval.assetName} <span className="text-slate-500 dark:text-slate-400 font-normal ml-1.5">({selectedDocPreview.approval.category} • {selectedDocPreview.approval.id})</span>
                   </p>
                   <p>
-                    <b className="text-slate-900">Producing Agency:</b> {selectedDocPreview.approval.agency || selectedDocPreview.approval.unit}
+                    <b className="text-slate-900 dark:text-white">Producing Agency:</b> {selectedDocPreview.approval.agency || selectedDocPreview.approval.unit}
                   </p>
                   <p>
-                    <b className="text-slate-900">Submitting Officer:</b> {selectedDocPreview.approval.requesterName} ({selectedDocPreview.approval.requesterRole})
+                    <b className="text-slate-900 dark:text-white">Submitting Officer:</b> {selectedDocPreview.approval.requesterName} ({selectedDocPreview.approval.requesterRole})
                   </p>
-                  <p className="border-t border-slate-100 pt-2 text-[11px] text-slate-500 leading-normal">
+                  <p className="border-t border-slate-100 dark:border-white/10 pt-2 text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
                     This certified schedule certifies that all musical stems, voice-over talent releases, script adaptation agreements, and statutory trademark protections conform with Kiddies Media Ministries broadcast policies.
                   </p>
                 </div>
@@ -1219,12 +1219,12 @@ export function ApprovalsWorkflow() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/10">
               <button
                 onClick={() => showToast(`Document "${selectedDocPreview.doc.name}" downloaded.`)}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 text-xs transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs transition cursor-pointer"
               >
-                <Download className="size-3.5 text-indigo-600" />
+                <Download className="size-3.5 text-indigo-600 dark:text-indigo-400" />
                 <span>Download Document</span>
               </button>
 
@@ -1232,7 +1232,7 @@ export function ApprovalsWorkflow() {
                 <button
                   type="button"
                   onClick={() => setSelectedDocPreview(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 text-xs transition cursor-pointer"
+                  className="rounded-xl border border-slate-200 dark:border-white/10 dark:text-slate-300 dark:hover:bg-slate-800 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 text-xs transition cursor-pointer"
                 >
                   Close
                 </button>
@@ -1264,35 +1264,35 @@ export function ApprovalsWorkflow() {
               setActionType(null)
             }
           }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-2xl text-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-6 sm:p-7 shadow-2xl text-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3.5">
               <div className="flex items-center gap-2.5">
                 {actionType === 'approveNote' ? (
-                  <div className="grid size-9 place-items-center rounded-xl bg-emerald-100 text-emerald-700">
+                  <div className="grid size-9 place-items-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:border dark:border-emerald-800/40 dark:text-emerald-300">
                     <CheckCircle2 className="size-5" />
                   </div>
                 ) : actionType === 'feedback' ? (
-                  <div className="grid size-9 place-items-center rounded-xl bg-amber-100 text-amber-700">
+                  <div className="grid size-9 place-items-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:border dark:border-amber-800/40 dark:text-amber-300">
                     <MessageSquare className="size-5" />
                   </div>
                 ) : (
-                  <div className="grid size-9 place-items-center rounded-xl bg-rose-100 text-rose-700">
+                  <div className="grid size-9 place-items-center rounded-xl bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:border dark:border-rose-800/40 dark:text-rose-300">
                     <AlertTriangle className="size-5" />
                   </div>
                 )}
                 <div>
-                  <h3 className="font-black text-[#09245a] text-sm sm:text-base">
+                  <h3 className="font-black text-[#09245a] dark:text-white text-sm sm:text-base">
                     {actionType === 'approveNote'
                       ? 'Issue Broadcast Clearance & Seal'
                       : actionType === 'feedback'
                       ? 'Request Creator Revisions'
                       : 'Decline Asset Clearance'}
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                     {selectedApproval.assetName}
-                    <span className="font-mono text-slate-400 ml-1.5">({selectedApproval.id})</span>
+                    <span className="font-mono text-slate-400 dark:text-slate-500 ml-1.5">({selectedApproval.id})</span>
                     <span className="mx-1.5">•</span>
                     {selectedApproval.agency || selectedApproval.unit}
                   </p>
@@ -1304,7 +1304,7 @@ export function ApprovalsWorkflow() {
                   setSelectedApproval(null)
                   setActionType(null)
                 }}
-                className="grid size-7 place-items-center rounded-full text-slate-400 hover:bg-slate-100 cursor-pointer"
+                className="grid size-7 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -1314,16 +1314,16 @@ export function ApprovalsWorkflow() {
             <div className="space-y-3.5">
               {actionType === 'approveNote' ? (
                 <>
-                  <div className="rounded-2xl bg-emerald-50/70 border border-emerald-200 p-3.5 text-xs text-emerald-900 leading-relaxed">
-                    <span className="font-black block mb-1 flex items-center gap-1.5">
-                      <ShieldCheck className="size-4 text-emerald-700" />
+                  <div className="rounded-2xl bg-emerald-50/70 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800/40 dark:text-emerald-200 p-3.5 text-xs text-emerald-900 leading-relaxed">
+                    <span className="font-black block mb-1 flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
+                      <ShieldCheck className="size-4 text-emerald-700 dark:text-emerald-400" />
                       Sign-Off Certification Notice
                     </span>
                     Approving will issue an official broadcast certificate, update asset status to <b>Approved</b>, and notify the production team that this asset is cleared for airing.
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1.5">
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       Reviewer Sign-off Notes (Optional):
                     </label>
                     <textarea
@@ -1332,19 +1332,19 @@ export function ApprovalsWorkflow() {
                       value={approveNote}
                       onChange={(e) => setApproveNote(e.target.value)}
                       placeholder="e.g. Doctrinal review passed. Master files verified. Cleared for worldwide distribution."
-                      className="w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-3 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
                 </>
               ) : actionType === 'feedback' ? (
                 <>
-                  <p className="text-slate-600 text-xs">
+                  <p className="text-slate-600 dark:text-slate-300 text-xs">
                     Select quick revision reasons or enter specific instructions for the creator to address before re-submitting:
                   </p>
 
                   {/* Quick Tags */}
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Suggested Fast Tags:</span>
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Suggested Fast Tags:</span>
                     <div className="flex flex-wrap gap-1.5">
                       {REVISION_QUICK_TAGS.map((tag) => (
                         <button
@@ -1357,7 +1357,7 @@ export function ApprovalsWorkflow() {
                               setFeedbackInput(tag)
                             }
                           }}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-800 transition cursor-pointer"
+                          className="rounded-lg border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-300 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-800 transition cursor-pointer"
                         >
                           + {tag}
                         </button>
@@ -1366,7 +1366,7 @@ export function ApprovalsWorkflow() {
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1.5">
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       Detailed Revision Feedback:
                     </label>
                     <textarea
@@ -1375,14 +1375,14 @@ export function ApprovalsWorkflow() {
                       value={feedbackInput}
                       onChange={(e) => setFeedbackInput(e.target.value)}
                       placeholder="Specify required corrections, legal documents, or audio/video fixes..."
-                      className="w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/10 transition"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-3 text-xs outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/10 transition placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-900 leading-relaxed">
-                    <span className="font-black block mb-1 flex items-center gap-1.5 text-rose-700">
+                  <div className="rounded-2xl bg-rose-50 border border-rose-200 dark:bg-rose-950/40 dark:border-rose-800/40 dark:text-rose-200 p-3.5 text-xs text-rose-900 leading-relaxed">
+                    <span className="font-black block mb-1 flex items-center gap-1.5 text-rose-700 dark:text-rose-300">
                       <AlertTriangle className="size-4" />
                       Decline Clearance Notice
                     </span>
@@ -1390,7 +1390,7 @@ export function ApprovalsWorkflow() {
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1.5">
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       Reason for Declining Clearance:
                     </label>
                     <textarea
@@ -1399,14 +1399,14 @@ export function ApprovalsWorkflow() {
                       value={declineReason}
                       onChange={(e) => setDeclineReason(e.target.value)}
                       placeholder="e.g. Unresolved copyright infringement or does not conform to ministry doctrine."
-                      className="w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-500/10 transition"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-3 text-xs outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-500/10 transition placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
                 </>
               )}
 
               {/* Action buttons */}
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   id="cancel-action-modal-btn"
@@ -1414,7 +1414,7 @@ export function ApprovalsWorkflow() {
                     setSelectedApproval(null)
                     setActionType(null)
                   }}
-                  className="rounded-lg border border-slate-200 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 dark:border-white/15 dark:text-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancel
                 </button>

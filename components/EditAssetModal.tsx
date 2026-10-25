@@ -126,31 +126,31 @@ export function EditAssetModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+      className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
       role="dialog"
       aria-modal="true"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/80 bg-white p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 cursor-default space-y-5"
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 cursor-default space-y-5"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-black text-[#09245a]">Edit Asset Details & Metadata</h2>
-              <span className="font-mono text-xs font-bold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-lg ml-1">
+              <h2 className="text-lg font-black text-[#09245a] dark:text-white">Edit Asset Details & Metadata</h2>
+              <span className="font-mono text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-0.5 rounded-lg ml-1">
                 {asset.id}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Updates will prompt a confirmation step and will be permanently recorded in the ministry audit trail.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
+            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition cursor-pointer"
           >
             <X className="size-4" />
           </button>
@@ -159,12 +159,12 @@ export function EditAssetModal({
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {/* Asset Title */}
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Asset Name / Title *</label>
+            <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">Asset Name / Title *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
+              className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
               required
             />
           </div>
@@ -172,28 +172,28 @@ export function EditAssetModal({
           {/* Category & Subcategory */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Category *</label>
+              <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">Category *</label>
               <select
                 value={category}
                 onChange={(e) => {
                   setCategory(e.target.value)
                   setSubcategory('')
                 }}
-                className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
+                className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
               >
                 {categories.map((c) => (
-                  <option key={c.id} value={c.name}>
+                  <option key={c.id} value={c.name} className="dark:bg-slate-800 dark:text-white">
                     {c.name}
                   </option>
                 ))}
               </select>
               <div className="mt-1 flex items-center gap-1.5 text-[10px]">
-                <span className="text-slate-500 font-medium">Sub-Asset Hierarchy:</span>
-                <span className="font-mono font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Sub-Asset Hierarchy:</span>
+                <span className="font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 dark:bg-blue-950/50 dark:border-blue-800/50 dark:text-blue-300 px-1.5 py-0.5 rounded">
                   {getCategoryGovernance(category).subAssetStructure}
                 </span>
                 {isEpisodeCategory(category) && (
-                  <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                  <span className="font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/50 dark:border-emerald-800/50 dark:text-emerald-300 px-1.5 py-0.5 rounded">
                     Episodes Enabled
                   </span>
                 )}
@@ -201,15 +201,15 @@ export function EditAssetModal({
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Subcategory</label>
+              <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">Subcategory</label>
               <select
                 value={subcategory}
                 onChange={(e) => setSubcategory(e.target.value)}
-                className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
+                className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
               >
-                <option value="">Select Subcategory (Optional)</option>
+                <option value="" className="dark:bg-slate-800 dark:text-white">Select Subcategory (Optional)</option>
                 {availableSubcategories.map((s) => (
-                  <option key={s.id} value={s.name}>
+                  <option key={s.id} value={s.name} className="dark:bg-slate-800 dark:text-white">
                     {s.name}
                   </option>
                 ))}
@@ -220,67 +220,67 @@ export function EditAssetModal({
           {/* Agency & Rights Holder */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Originating Agency</label>
+              <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">Originating Agency</label>
               {isGlobalViewer ? (
                 <select
                   value={agency}
                   onChange={(e) => setAgency(e.target.value as Agency)}
-                  className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
+                  className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
                 >
                   {agencies.map((a) => (
-                    <option key={a} value={a}>
+                    <option key={a} value={a} className="dark:bg-slate-800 dark:text-white">
                       {a}
                     </option>
                   ))}
                 </select>
               ) : (
-                <div className="flex h-9 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-700">
+                <div className="flex h-9 items-center rounded-xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-slate-800/60 px-3 text-xs font-bold text-slate-700 dark:text-slate-200">
                   {agency}
                 </div>
               )}
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Asset Owner / Rights Holder</label>
+              <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">Asset Owner / Rights Holder</label>
               <input
                 type="text"
                 value={rightsHolder}
                 onChange={(e) => setRightsHolder(e.target.value)}
                 placeholder="Registered Rights Holder (leave blank if unassigned)"
-                className="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none focus:border-blue-400 font-medium text-slate-800"
+                className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
               />
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Asset Description</label>
+            <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">Asset Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               placeholder="Brief summary of storyline, themes, or production specs..."
-              className="w-full rounded-xl border border-slate-200 p-2.5 text-xs outline-none focus:border-blue-400"
+              className="w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400"
             />
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block font-bold text-slate-700 mb-1">Tag Chips (comma-separated)</label>
+            <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">Tag Chips (comma-separated)</label>
             <input
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="e.g. Faith, 3D Animation, Character, Broadcast"
-              className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs outline-none focus:border-blue-400"
+              className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
             />
           </div>
 
           {/* Cover Artwork */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-3">
+          <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-800/40 p-3.5 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="block font-bold text-slate-800 text-xs">Asset Cover Artwork (Optional)</label>
-              <span className="text-[10px] text-slate-500">Image URL or Local Upload</span>
+              <label className="block font-bold text-slate-800 dark:text-white text-xs">Asset Cover Artwork (Optional)</label>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">Image URL or Local Upload</span>
             </div>
 
             <div className="flex items-center gap-3">
@@ -313,12 +313,12 @@ export function EditAssetModal({
                   value={posterUrl}
                   onChange={(e) => setPosterUrl(e.target.value)}
                   placeholder="https://... (Optional image URL)"
-                  className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs outline-none focus:border-blue-400"
+                  className="h-8 w-full rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
                 />
 
                 <div className="flex items-center justify-between gap-2 text-[10px]">
-                  <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 font-semibold text-slate-700 cursor-pointer shadow-2xs">
-                    <UploadCloud className="size-3 text-blue-600" />
+                  <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-semibold text-slate-700 dark:text-slate-200 cursor-pointer shadow-2xs">
+                    <UploadCloud className="size-3 text-blue-600 dark:text-blue-400" />
                     <span>Upload Image</span>
                     <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                   </label>
@@ -327,7 +327,7 @@ export function EditAssetModal({
                     <button
                       type="button"
                       onClick={() => setPosterUrl('')}
-                      className="text-red-600 hover:text-red-700 font-semibold cursor-pointer"
+                      className="text-red-600 hover:text-red-700 dark:text-red-400 font-semibold cursor-pointer"
                     >
                       Use Monogram Badge
                     </button>
@@ -338,19 +338,19 @@ export function EditAssetModal({
           </div>
 
           {/* Staff Contributors Builder */}
-          <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-3.5 space-y-3">
+          <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20 p-3.5 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block font-bold text-[#09245a] text-xs">
+                <label className="block font-bold text-[#09245a] dark:text-white text-xs">
                   Staff Contributors ({contributors.length})
                 </label>
-                <p className="text-[11px] text-slate-500">Contributing writers, animators, artists, or engineers</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Contributing writers, animators, artists, or engineers</p>
               </div>
             </div>
 
             {/* Chips */}
             {contributors.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-blue-200 bg-white/70 p-2.5 text-center text-xs text-slate-500">
+              <div className="rounded-lg border border-dashed border-blue-200 dark:border-blue-800/50 bg-white/70 dark:bg-slate-900/60 p-2.5 text-center text-xs text-slate-500 dark:text-slate-400">
                 No contributors assigned yet.
               </div>
             ) : (
@@ -358,14 +358,14 @@ export function EditAssetModal({
                 {contributors.map((c, idx) => (
                   <div
                     key={c.id || idx}
-                    className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-2xs text-xs"
+                    className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 px-2.5 py-1.5 shadow-2xs text-xs"
                   >
-                    <div className="grid size-6 place-items-center rounded bg-slate-800 text-[10px] font-bold text-white uppercase">
+                    <div className="grid size-6 place-items-center rounded bg-slate-800 dark:bg-blue-600 text-[10px] font-bold text-white uppercase">
                       {c.name.split(' ').map((n) => n[0]).join('').slice(0, 2) || 'ST'}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-bold text-slate-900 leading-tight truncate max-w-[120px]">{c.name}</div>
-                      <div className="text-[10px] text-blue-700 truncate">{c.role}</div>
+                      <div className="font-bold text-slate-900 dark:text-white leading-tight truncate max-w-[120px]">{c.name}</div>
+                      <div className="text-[10px] text-blue-700 dark:text-blue-400 truncate">{c.role}</div>
                     </div>
                     <button
                       type="button"
@@ -381,43 +381,43 @@ export function EditAssetModal({
             )}
 
             {/* Add Contributor Mini-Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-t border-blue-100/80 pt-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-t border-blue-100/80 dark:border-white/10 pt-2.5">
               <div className="sm:col-span-1">
                 <input
                   type="text"
                   placeholder="Staff name..."
                   value={newContribName}
                   onChange={(e) => setNewContribName(e.target.value)}
-                  className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none focus:border-blue-400"
+                  className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
                 />
               </div>
               <div className="sm:col-span-1">
                 <select
                   value={newContribRole}
                   onChange={(e) => setNewContribRole(e.target.value)}
-                  className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-400"
+                  className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
                 >
-                  <option value="Lead 3D Animator">Lead 3D Animator</option>
-                  <option value="Screenwriter & Author">Screenwriter & Author</option>
-                  <option value="Voice Artist / Director">Voice Artist / Director</option>
-                  <option value="Music Producer & Composer">Music Producer & Composer</option>
-                  <option value="Curriculum Author">Curriculum Author</option>
-                  <option value="Illustrator & Concept Artist">Illustrator & Concept Artist</option>
-                  <option value="Software Engineer">Software Engineer</option>
-                  <option value="UI/UX Designer">UI/UX Designer</option>
-                  <option value="Audio Sound Engineer">Audio Sound Engineer</option>
-                  <option value="Theological Reviewer">Theological Reviewer</option>
-                  <option value="Production Specialist">Production Specialist</option>
+                  <option value="Lead 3D Animator" className="dark:bg-slate-800">Lead 3D Animator</option>
+                  <option value="Screenwriter & Author" className="dark:bg-slate-800">Screenwriter & Author</option>
+                  <option value="Voice Artist / Director" className="dark:bg-slate-800">Voice Artist / Director</option>
+                  <option value="Music Producer & Composer" className="dark:bg-slate-800">Music Producer & Composer</option>
+                  <option value="Curriculum Author" className="dark:bg-slate-800">Curriculum Author</option>
+                  <option value="Illustrator & Concept Artist" className="dark:bg-slate-800">Illustrator & Concept Artist</option>
+                  <option value="Software Engineer" className="dark:bg-slate-800">Software Engineer</option>
+                  <option value="UI/UX Designer" className="dark:bg-slate-800">UI/UX Designer</option>
+                  <option value="Audio Sound Engineer" className="dark:bg-slate-800">Audio Sound Engineer</option>
+                  <option value="Theological Reviewer" className="dark:bg-slate-800">Theological Reviewer</option>
+                  <option value="Production Specialist" className="dark:bg-slate-800">Production Specialist</option>
                 </select>
               </div>
               <div className="sm:col-span-1">
                 <select
                   value={newContribAgency}
                   onChange={(e) => setNewContribAgency(e.target.value as Agency)}
-                  className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-400"
+                  className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
                 >
                   {agencies.map((a) => (
-                    <option key={a} value={a}>
+                    <option key={a} value={a} className="dark:bg-slate-800">
                       {a}
                     </option>
                   ))}
@@ -436,15 +436,15 @@ export function EditAssetModal({
           </div>
 
           {/* Dynamic Attributes (Optional) */}
-          <div className="rounded-2xl border border-purple-100 bg-purple-50/40 p-3.5 space-y-3">
-            <label className="block font-bold text-purple-900 text-xs">
+          <div className="rounded-2xl border border-purple-100 dark:border-purple-900/40 bg-purple-50/40 dark:bg-purple-950/20 p-3.5 space-y-3">
+            <label className="block font-bold text-purple-900 dark:text-purple-300 text-xs">
               Dynamic Attributes ({category})
             </label>
 
             {isEpisodeCategory(category) && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Episodes</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Episodes</label>
                   <input
                     type="number"
                     placeholder="e.g. 1"
@@ -455,11 +455,11 @@ export function EditAssetModal({
                         episodesCount: e.target.value ? Number(e.target.value) : undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Runtime (Mins)</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Runtime (Mins)</label>
                   <input
                     type="number"
                     placeholder="e.g. 22"
@@ -470,11 +470,11 @@ export function EditAssetModal({
                         durationMinutes: e.target.value ? Number(e.target.value) : undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Resolution</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Resolution</label>
                   <select
                     value={attributes.resolution || ''}
                     onChange={(e) =>
@@ -483,12 +483,12 @@ export function EditAssetModal({
                         resolution: e.target.value || undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2 text-xs outline-none"
                   >
-                    <option value="">Select (Optional)</option>
-                    <option value="4K UHD">4K UHD</option>
-                    <option value="1080p Full HD">1080p Full HD</option>
-                    <option value="720p HD">720p HD</option>
+                    <option value="" className="dark:bg-slate-800">Select (Optional)</option>
+                    <option value="4K UHD" className="dark:bg-slate-800">4K UHD</option>
+                    <option value="1080p Full HD" className="dark:bg-slate-800">1080p Full HD</option>
+                    <option value="720p HD" className="dark:bg-slate-800">720p HD</option>
                   </select>
                 </div>
               </div>
@@ -497,7 +497,7 @@ export function EditAssetModal({
             {category.includes('Music') && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Audio Format</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Audio Format</label>
                   <select
                     value={attributes.audioFormat || ''}
                     onChange={(e) =>
@@ -506,16 +506,16 @@ export function EditAssetModal({
                         audioFormat: e.target.value || undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2 text-xs outline-none"
                   >
-                    <option value="">Select (Optional)</option>
-                    <option value="WAV (24-bit/48kHz)">WAV (24-bit/48kHz)</option>
-                    <option value="FLAC">FLAC</option>
-                    <option value="MP3 (320kbps)">MP3 (320kbps)</option>
+                    <option value="" className="dark:bg-slate-800">Select (Optional)</option>
+                    <option value="WAV (24-bit/48kHz)" className="dark:bg-slate-800">WAV (24-bit/48kHz)</option>
+                    <option value="FLAC" className="dark:bg-slate-800">FLAC</option>
+                    <option value="MP3 (320kbps)" className="dark:bg-slate-800">MP3 (320kbps)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Tempo (BPM)</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Tempo (BPM)</label>
                   <input
                     type="number"
                     placeholder="e.g. 124"
@@ -526,11 +526,11 @@ export function EditAssetModal({
                         bpm: e.target.value ? Number(e.target.value) : undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Key</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Key</label>
                   <input
                     type="text"
                     placeholder="e.g. C Major"
@@ -541,7 +541,7 @@ export function EditAssetModal({
                         keySignature: e.target.value || undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                   />
                 </div>
               </div>
@@ -550,7 +550,7 @@ export function EditAssetModal({
             {category.includes('Publishing') && (
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Page Count</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Page Count</label>
                   <input
                     type="number"
                     placeholder="e.g. 64"
@@ -561,11 +561,11 @@ export function EditAssetModal({
                         pageCount: e.target.value ? Number(e.target.value) : undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">ISBN</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">ISBN</label>
                   <input
                     type="text"
                     placeholder="978-..."
@@ -576,7 +576,7 @@ export function EditAssetModal({
                         isbn: e.target.value || undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                   />
                 </div>
               </div>
@@ -585,7 +585,7 @@ export function EditAssetModal({
             {category.includes('Consumer') && (
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Product SKU</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Product SKU</label>
                   <input
                     type="text"
                     placeholder="LT-SKU-..."
@@ -596,11 +596,11 @@ export function EditAssetModal({
                         sku: e.target.value || undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Manufacturer</label>
+                  <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Manufacturer</label>
                   <input
                     type="text"
                     placeholder="e.g. Lovetoons Merch Co."
@@ -611,7 +611,7 @@ export function EditAssetModal({
                         manufacturer: e.target.value || undefined,
                       }))
                     }
-                    className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                    className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                   />
                 </div>
               </div>
@@ -621,7 +621,7 @@ export function EditAssetModal({
               <div className="space-y-2.5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Live Production URL</label>
+                    <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Live Production URL</label>
                     <input
                       type="url"
                       placeholder="https://tv.lovetoons.org"
@@ -632,11 +632,11 @@ export function EditAssetModal({
                           liveUrl: e.target.value || undefined,
                         }))
                       }
-                      className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                      className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Git Repository URL</label>
+                    <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Git Repository URL</label>
                     <input
                       type="url"
                       placeholder="https://github.com/..."
@@ -647,14 +647,14 @@ export function EditAssetModal({
                           gitRepoUrl: e.target.value || undefined,
                         }))
                       }
-                      className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                      className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Server Host & Cloud Provider</label>
+                    <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Server Host & Cloud Provider</label>
                     <input
                       type="text"
                       placeholder="e.g. AWS Cloud • Kubernetes (eu-west-1)"
@@ -665,11 +665,11 @@ export function EditAssetModal({
                           serverHost: e.target.value || undefined,
                         }))
                       }
-                      className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                      className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Tech Stack & Frameworks</label>
+                    <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Tech Stack & Frameworks</label>
                     <input
                       type="text"
                       placeholder="e.g. Next.js 15, TypeScript, PostgreSQL"
@@ -680,7 +680,7 @@ export function EditAssetModal({
                           techStack: e.target.value || undefined,
                         }))
                       }
-                      className="h-8 w-full rounded-md border border-slate-200 bg-white px-2.5 text-xs outline-none"
+                      className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2.5 text-xs outline-none"
                     />
                   </div>
                 </div>
@@ -689,11 +689,11 @@ export function EditAssetModal({
           </div>
 
           {/* Modal Footer */}
-          <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+          <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/10 pt-3">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+              className="rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
             >
               Cancel
             </button>
