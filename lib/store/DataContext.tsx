@@ -248,14 +248,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           const parsed = JSON.parse(storedData)
           if (parsed.assets && Array.isArray(parsed.assets)) {
             // Preserve official status from Schedule / DB
-            const migrated = parsed.assets.map((a: any) => ({
-              ...a,
-              status: a.status || 'In Production',
-              agency: a.agency || a.unit || 'Lovetoons',
-              unit: a.agency || a.unit || 'Lovetoons',
-              contributors: a.contributors || [],
-              rightsHolder: a.rightsHolder || 'Lovetoons / KMM Network',
-            }))
+            const migrated = parsed.assets.map((a: any) => {
+              const defaultAsset = initialAssetsData.find((init) => init.id === a.id)
+              return {
+                ...a,
+                status: a.status || 'In Production',
+                agency: a.agency || a.unit || 'Lovetoons',
+                unit: a.agency || a.unit || 'Lovetoons',
+                contributors: a.contributors || [],
+                rightsHolder: a.rightsHolder || 'Lovetoons / KMM Network',
+                attributes: {
+                  ...(defaultAsset?.attributes || {}),
+                  ...(a.attributes || {}),
+                  episodes: (a.attributes?.episodes && a.attributes.episodes.length > 0)
+                    ? a.attributes.episodes
+                    : (defaultAsset?.attributes?.episodes || []),
+                },
+              }
+            })
             // If stored assets is missing newly catalogued items, fallback to full initialAssetsData
             if (migrated.length < initialAssetsData.length) {
               setMasterAssets(initialAssetsData)

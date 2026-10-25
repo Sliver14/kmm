@@ -1,4 +1,4 @@
-import { AssetData, AssetStatus, Agency } from '@/types'
+import { AssetData, AssetStatus, Agency, AssetEpisode } from '@/types'
 
 export interface RawScheduleEntry {
   sn: number
@@ -294,6 +294,72 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
   const creatorRole = ''
   const creatorSkill = undefined
 
+  const sampleEpisodes: AssetEpisode[] | undefined =
+    entry.sn === 1
+      ? [
+          {
+            id: 'ep-kmp-001-1',
+            episodeNumber: 1,
+            title: 'The Shield of Faith',
+            durationMinutes: 12,
+            synopsis: 'Early readers learn how faith quenches every fiery dart through scripture recitation and practical faith application.',
+            airDate: 'Jan 20, 2025',
+            status: 'Broadcast Ready',
+          },
+          {
+            id: 'ep-kmp-001-2',
+            episodeNumber: 2,
+            title: 'Walking in Divine Wisdom',
+            durationMinutes: 14,
+            synopsis: 'Children discover what divine wisdom accomplishes in school, at home, and in daily interactions.',
+            airDate: 'Jan 27, 2025',
+            status: 'Approved',
+          },
+          {
+            id: 'ep-kmp-001-3',
+            episodeNumber: 3,
+            title: 'Angels on Assignment',
+            durationMinutes: 11,
+            synopsis: 'Animated teaching on ministerial angels working on behalf of believers according to Hebrews 1:14.',
+            airDate: 'Feb 03, 2025',
+            status: 'Mastered',
+          },
+        ]
+      : entry.sn === 2
+      ? [
+          {
+            id: 'ep-kmp-002-1',
+            episodeNumber: 1,
+            title: 'Tick Goes to Bible Camp',
+            durationMinutes: 15,
+            synopsis: 'Tick the clock and his friends embark on a weekend adventure uncovering God\'s purpose for time.',
+            airDate: 'Jan 18, 2025',
+            status: 'Broadcast Ready',
+          },
+          {
+            id: 'ep-kmp-002-2',
+            episodeNumber: 2,
+            title: 'The Golden Rule in Motion',
+            durationMinutes: 13,
+            synopsis: 'Teaching kids kindness, sharing, and godly character when faced with challenges in the schoolyard.',
+            airDate: 'Jan 25, 2025',
+            status: 'Approved',
+          },
+        ]
+      : entry.sn === 4
+      ? [
+          {
+            id: 'ep-kmp-004-1',
+            episodeNumber: 1,
+            title: 'David and Goliath: Triumph of Faith',
+            durationMinutes: 18,
+            synopsis: 'Full 3D animated retelling of 1 Samuel 17 showing youth the victory of trusting in the Living God.',
+            airDate: 'Feb 01, 2025',
+            status: 'Broadcast Ready',
+          },
+        ]
+      : undefined
+
   return {
     id,
     name: entry.name,
@@ -340,6 +406,8 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
       officialStatus: entry.docStatus,
       status,
       attorneyGeneralSchedule: 'Schedule of Existing and Potential Intellectual Assets',
+      episodes: sampleEpisodes,
+      episodesCount: sampleEpisodes ? sampleEpisodes.length : undefined,
     },
     contributors: [],
   }

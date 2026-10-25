@@ -754,14 +754,12 @@ export function AssetDetailsView({
       {/* TAB 1: OVERVIEW & MEDIA */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Main Visual Media Player Engine - Disabled / commented out for now */}
-          {/*
+          {/* Episodes Showcase (Displays only for assets with catalogued episodes; returns null otherwise) */}
           <AssetVisualPreview
             asset={asset}
             showToast={showToast}
             onOpenEditModal={() => setIsEditAssetModalOpen(true)}
           />
-          */}
 
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5">
@@ -1596,85 +1594,119 @@ export function AssetDetailsView({
           </div>
         </div>
       )}
-      {/* CLOUDINARY MEDIA UPLOAD MODAL */}
+      {/* MEDIA UPLOAD MODAL - COMING SOON */}
       {isUploadMediaModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="size-8 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 grid place-items-center">
-                  <UploadCloud className="size-4" />
+        <div
+          onClick={() => setIsUploadMediaModalOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl space-y-5 cursor-default animate-in zoom-in-95"
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="size-11 rounded-xl bg-blue-50 border border-blue-200 dark:bg-blue-950/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400 grid place-items-center shrink-0 shadow-xs">
+                  <UploadCloud className="size-6" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[#09245a] text-sm">Upload Media to Cloudinary</h3>
-                  <p className="text-[11px] text-slate-500">Archive master video, audio stem, or key art for {asset.name}</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                      Cloud Media Archival
+                    </h3>
+                    <span className="rounded-md bg-amber-50 text-amber-700 border border-amber-200/80 dark:bg-amber-950/50 dark:border-amber-800/50 dark:text-amber-300 px-2 py-0.5 text-[10px] font-bold">
+                      Coming Soon
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Centralized media file storage for <span className="font-semibold text-slate-700 dark:text-slate-200">{asset.name}</span>
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsUploadMediaModalOpen(false)}
-                className="size-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 grid place-items-center cursor-pointer"
+                className="size-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 grid place-items-center cursor-pointer transition"
               >
                 <X className="size-4" />
               </button>
             </div>
 
-            <form onSubmit={handleUploadToCloudinary} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1.5">Select Media File:</label>
-                <input
-                  type="file"
-                  required
-                  onChange={(e) => setMediaFile(e.target.files?.[0] || null)}
-                  className="w-full rounded-xl border border-slate-200 p-2 text-xs font-medium file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
-                />
+            {/* Storage Provisioning Status Notice */}
+            <div className="rounded-xl border border-amber-200/80 bg-gradient-to-r from-amber-50/80 to-amber-100/40 dark:border-amber-800/40 dark:from-amber-950/40 dark:to-amber-900/20 p-4 space-y-2">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-semibold text-xs">
+                <span className="size-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                <span>Media Archive Storage in Provisioning Phase</span>
               </div>
+              <p className="text-xs text-amber-900/80 dark:text-amber-200/80 leading-relaxed">
+                Dedicated high-throughput cloud media storage is currently being configured for Kiddies Media Ministries. Direct master upload and CDN streaming pipelines will be activated upon storage connection.
+              </p>
+            </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Archive Classification:</label>
-                <select
-                  value={mediaFileType}
-                  onChange={(e) => setMediaFileType(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-400 cursor-pointer"
-                >
-                  <option value="video_master">Video Master (4K / 1080p ProRes or MP4)</option>
-                  <option value="audio_stem">Audio Stem / Soundtrack Master (WAV / FLAC)</option>
-                  <option value="trailer">Broadcast Trailer / Promo Clip</option>
-                  <option value="poster">Poster Key Art / Promotional Thumbnail</option>
-                  <option value="subtitle">Subtitle / Timed Text / Closed Captions</option>
-                  <option value="script_doc">Script / Storyboard Package</option>
-                </select>
-              </div>
+            {/* Feature Pipeline Grid */}
+            <div className="space-y-2.5">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Storage Deliverables Pipeline
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div className="rounded-lg border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-2.5 space-y-1">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Film className="size-3.5 text-blue-500" />
+                    <span>Master Video Files</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                    4K UHD & 1080p ProRes 422 HQ broadcast clean masters with split audio.
+                  </p>
+                </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="master-check"
-                  checked={isMasterFile}
-                  onChange={(e) => setIsMasterFile(e.target.checked)}
-                  className="size-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-                />
-                <label htmlFor="master-check" className="font-semibold text-slate-700 cursor-pointer text-xs">
-                  Mark as Primary Master Deliverable
-                </label>
-              </div>
+                <div className="rounded-lg border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-2.5 space-y-1">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Music className="size-3.5 text-indigo-500" />
+                    <span>Multitrack Audio Stems</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                    24-bit/48kHz WAV stems (Vocals, Music, SFX) and soundtrack stems.
+                  </p>
+                </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsUploadMediaModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isUploadingMedia}
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white hover:bg-blue-700 shadow-sm transition cursor-pointer disabled:opacity-50"
-                >
-                  {isUploadingMedia ? 'Uploading to Cloudinary...' : 'Upload & Archive'}
-                </button>
+                <div className="rounded-lg border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-2.5 space-y-1">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Globe2 className="size-3.5 text-emerald-500" />
+                    <span>Global CDN Distribution</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Direct low-latency streaming pipeline for authorized ministry stations.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-2.5 space-y-1">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <ShieldCheck className="size-3.5 text-amber-500" />
+                    <span>IP Rights Watermarking</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Automated digital fingerprinting and cryptographic provenance seal.
+                  </p>
+                </div>
               </div>
-            </form>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/10 text-xs">
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">
+                Storage Node: KMM-S3-ARCHIVE
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUploadMediaModalOpen(false)
+                  showToast('Cloud media storage provisioning is in progress. Notification will be sent upon activation.')
+                }}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 shadow-xs transition cursor-pointer dark:bg-blue-600 dark:hover:bg-blue-500"
+              >
+                Got It
+              </button>
+            </div>
           </div>
         </div>
       )}
