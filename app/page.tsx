@@ -1831,6 +1831,10 @@ function AssetsPage({
     tags: string
     posterUrl: string
     attributes: AssetDynamicAttributes
+    docName: string
+    docSize: string
+    docType: string
+    docNotes: string
   }>({
     name: '',
     category: categories[0]?.name || 'Animated Programme',
@@ -1853,6 +1857,10 @@ function AssetsPage({
     tags: '',
     posterUrl: '',
     attributes: {},
+    docName: '',
+    docSize: '',
+    docType: 'PDF',
+    docNotes: '',
   })
 
   // Dynamic subcategories list matching the selected category in the modal
@@ -1869,6 +1877,7 @@ function AssetsPage({
   // Computed check if any non-default governance fields requiring approval were entered
   const hasGovernanceInput = useMemo(() => {
     return (
+      Boolean(newAssetForm.docName.trim() !== '') ||
       Boolean(newAssetForm.owner && newAssetForm.owner !== 'Unassigned' && newAssetForm.owner.trim() !== '') ||
       Boolean(newAssetForm.trademarkStatus && newAssetForm.trademarkStatus !== 'Unregistered') ||
       Boolean(newAssetForm.distributionLicense && newAssetForm.distributionLicense !== 'None') ||
@@ -1935,6 +1944,20 @@ function AssetsPage({
 
     const tagList = newAssetForm.tags.split(',').map((t) => t.trim()).filter(Boolean)
 
+    const initialDocs: RightsDocument[] = newAssetForm.docName.trim()
+      ? [
+          {
+            id: `doc-${Date.now()}`,
+            name: newAssetForm.docName.trim(),
+            size: newAssetForm.docSize || '1.8 MB',
+            date: 'Just now',
+            type: newAssetForm.docType || 'PDF',
+            targetScope: 'asset',
+            notes: newAssetForm.docNotes.trim() || 'Attached during asset intake registration',
+          },
+        ]
+      : []
+
     addAsset({
       name: newAssetForm.name.trim(),
       type: newAssetForm.subcategory || 'Standard IP',
@@ -1959,6 +1982,7 @@ function AssetsPage({
       songWriterProvenance: newAssetForm.songWriterProvenance,
       description: newAssetForm.description.trim(),
       tags: tagList.length > 0 ? tagList : [newAssetForm.category],
+      documents: initialDocs,
     })
 
     setIsAddModalOpen(false)
@@ -1983,6 +2007,10 @@ function AssetsPage({
       description: '',
       tags: '',
       posterUrl: '',
+      docName: '',
+      docSize: '',
+      docType: 'CERT',
+      docNotes: '',
       attributes: {},
     })
   }
@@ -2808,6 +2836,90 @@ function AssetsPage({
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Optional Supporting Legal Deed / Certificate (.doc, .docx, .pdf) Intake */}
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <label className="block font-bold text-slate-800 dark:text-slate-200 text-xs">
+                        Intake Clearance Certificate / Legal Deed
+                      </label>
+                      <span className="text-[10px] font-semibold text-slate-500 bg-slate-200/70 dark:bg-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
+                        Optional (.pdf, .doc, .docx)
+                      </span>
+                    </div>
+                    {newAssetForm.docName && (
+                      <button
+                        type="button"
+                        onClick={() => setNewAssetForm((prev) => ({ ...prev, docName: '', docSize: '', docNotes: '' }))}
+                        className="text-[10px] text-red-500 hover:text-red-700 font-semibold cursor-pointer"
+                      >
+                        Remove File
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-1">
+                        Attached Document / Deed Name
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newAssetForm.docName}
+                          onChange={(e) => setNewAssetForm((prev) => ({ ...prev, docName: e.target.value }))}
+                          placeholder="e.g. Registration_Certificate.pdf or Deed.docx"
+                          className="h-8 flex-1 rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        />
+                        <label className="flex items-center gap-1 h-8 px-2.5 rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 text-[11px] font-semibold cursor-pointer shrink-0">
+                          <UploadCloud className="size-3.5 text-blue-600 dark:text-blue-400" />
+                          <span>Browse</span>
+                          <input
+                            type="file"
+                            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
+                                const ext = file.name.split('.').pop()?.toUpperCase() || 'FILE'
+                                setNewAssetForm((prev) => ({
+                                  ...prev,
+                                  docName: file.name,
+                                  docSize: `${sizeMb} MB`,
+                                  docType: ext.includes('DOC') ? 'CONTRACT' : 'CERT',
+                                }))
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-1">
+                        Certificate Notes / Registration Ref # (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={newAssetForm.docNotes}
+                        onChange={(e) => setNewAssetForm((prev) => ({ ...prev, docNotes: e.target.value }))}
+                        placeholder="e.g. Verified by ministry counsel, Worldwide perpetual"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      />
+                    </div>
+                  </div>
+
+                  {newAssetForm.docName && (
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 text-[11px]">
+                      <FileCheck className="size-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                      <span className="font-semibold text-blue-900 dark:text-blue-200 truncate">{newAssetForm.docName}</span>
+                      <span className="text-[10px] font-mono text-slate-400 shrink-0">({newAssetForm.docSize || 'Uploaded'})</span>
+                      <span className="ml-auto text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">✓ Ready for Intake</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* STAFF CONTRIBUTORS BUILDER */}
@@ -5301,258 +5413,200 @@ function RightsDetailsPage({
               </div>
             )}
 
-            {/* Attach Document Form */}
-            <form onSubmit={handleAttachDocument} className="rounded-xl border border-blue-100 bg-blue-50/40 dark:border-white/10 dark:bg-slate-800/50 p-4 space-y-3 text-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100/70 dark:border-white/10 pb-2.5">
-                <div className="font-bold text-[#09245a] dark:text-white flex items-center gap-1.5">
-                  <FileUp className="size-4 text-blue-600 dark:text-blue-400" />
-                  <span>Attach Legal Document to Record</span>
-                </div>
-
-                {/* Target Scope Toggle */}
-                <div className="inline-flex rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-0.5 shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDetailsDocScope('individual')
-                      setDetailsDocType('TALENT_RELEASE')
-                    }}
-                    className={cn(
-                      'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition cursor-pointer',
-                      detailsDocScope === 'individual'
-                        ? 'bg-purple-600 text-white shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                    )}
-                  >
-                    <User className="size-3" />
-                    <span>Individual Contributor / Talent</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDetailsDocScope('asset')
-                      setDetailsDocType('CERT')
-                    }}
-                    className={cn(
-                      'flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] font-bold transition cursor-pointer',
-                      detailsDocScope === 'asset'
-                        ? 'bg-blue-600 text-white shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                    )}
-                  >
-                    <ShieldCheck className="size-3" />
-                    <span>Asset-Level Master Document</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Individual Contributor Selector */}
-              {detailsDocScope === 'individual' && (
-                <div className="rounded-lg border border-purple-100 bg-white dark:border-purple-900/40 dark:bg-slate-900/90 p-3 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold text-purple-900 dark:text-purple-300">Designated Contributor / Talent</label>
-                    {assetContributors.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setDetailsIsCustomAssignee(!detailsIsCustomAssignee)}
-                        className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
-                      >
-                        {detailsIsCustomAssignee ? 'Pick from asset credits' : '+ Custom talent name'}
-                      </button>
-                    )}
-                  </div>
-
-                  {!detailsIsCustomAssignee && assetContributors.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <div>
-                        <select
-                          value={detailsDocAssignee}
-                          onChange={(e) => {
-                            const val = e.target.value
-                            setDetailsDocAssignee(val)
-                            const found = assetContributors.find((c: AssetContributor) => c.name === val)
-                            if (found) setDetailsDocRole(found.role)
-                          }}
-                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-purple-400"
-                        >
-                          {assetContributors.map((c: AssetContributor, idx: number) => (
-                            <option key={idx} value={c.name}>
-                              {c.name} — {c.role}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <input
-                          value={detailsDocRole}
-                          onChange={(e) => setDetailsDocRole(e.target.value)}
-                          placeholder="Talent role (e.g. Lead Voice Actor, Illustrator)"
-                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <div>
-                        <input
-                          value={detailsDocAssignee}
-                          onChange={(e) => setDetailsDocAssignee(e.target.value)}
-                          placeholder="Talent or Contributor full name..."
-                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <input
-                          value={detailsDocRole}
-                          onChange={(e) => setDetailsDocRole(e.target.value)}
-                          placeholder="Role (e.g. Performer, Music Producer, Animator)..."
-                          className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs text-slate-800 outline-none focus:border-purple-400"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Document Details: Type, File Picker, Title & Notes */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {/* Dedicated Governance Pillar Submissions Bar */}
+            <div className="rounded-xl border border-slate-200/80 bg-gradient-to-r from-blue-50/60 via-indigo-50/40 to-purple-50/60 dark:border-white/10 dark:from-slate-900/80 dark:via-slate-800/60 dark:to-slate-900/80 p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">Document Category</label>
-                  <select
-                    value={detailsDocType}
-                    onChange={(e) => setDetailsDocType(e.target.value as any)}
-                    className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-400"
-                  >
-                    <option value="TALENT_RELEASE">Talent Release Deed (Performer/Voice)</option>
-                    <option value="DEED">Work-for-Hire Assignment Deed</option>
-                    <option value="CERT">IP Filing Certificate / Copyright</option>
-                    <option value="LICENSE">License / Sync Agreement</option>
-                    <option value="CONTRACT">General Production Contract</option>
-                  </select>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">Document File or Title</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      value={newDocTitle}
-                      onChange={(e) => setNewDocTitle(e.target.value)}
-                      placeholder={
-                        detailsDocScope === 'individual'
-                          ? `Talent_Release_${(detailsDocAssignee || 'Contributor').replace(/\s+/g, '_')}_Signed.pdf`
-                          : `Clearance_Deed_${asset.name.replace(/\s+/g, '_')}.pdf`
-                      }
-                      className="h-8.5 flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                    />
-                    <label className="inline-flex items-center gap-1.5 h-8.5 cursor-pointer rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 shrink-0">
-                      <UploadCloud className="size-3.5 text-blue-600 dark:text-blue-400" />
-                      <span>Browse</span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) {
-                            setNewDocTitle(file.name)
-                            const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
-                            setDetailsDocFileSize(`${sizeMb} MB`)
-                          }
-                        }}
-                      />
-                    </label>
+                  <div className="font-bold text-[#09245a] dark:text-white flex items-center gap-2 text-xs">
+                    <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+                    <span>Upload Supporting Clearance Documents via Governance Pillars</span>
                   </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    To maintain ministerial compliance, legal deeds and certificates (.pdf, .doc, .docx) are uploaded through their dedicated pillar modals.
+                  </p>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
-                <input
-                  value={detailsDocNotes}
-                  onChange={(e) => setDetailsDocNotes(e.target.value)}
-                  placeholder="Optional governance notes / clauses cleared (e.g. Worldwide, in perpetuity, verified ID on record)..."
-                  className="h-8.5 w-full sm:flex-1 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 px-3 text-xs outline-none focus:border-blue-400"
-                />
+              <div className="flex flex-wrap items-center gap-2 pt-1">
                 <button
-                  type="submit"
-                  className="h-8.5 w-full sm:w-auto rounded-lg bg-blue-600 px-4 font-bold text-white hover:bg-blue-700 dark:hover:bg-blue-500 transition shadow-2xs shrink-0 cursor-pointer"
+                  type="button"
+                  onClick={() => openIndividualPillar('trademark_license')}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 dark:border-purple-800/50 bg-white dark:bg-purple-950/40 px-3 py-1.5 text-[11px] font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/40 transition shadow-2xs cursor-pointer"
                 >
-                  + Attach Document
+                  <BadgeCheck className="size-3.5 text-purple-600 dark:text-purple-400" />
+                  <span>+ Trademark / License Deed</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('territory')}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-white dark:bg-amber-950/40 px-3 py-1.5 text-[11px] font-bold text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/40 transition shadow-2xs cursor-pointer"
+                >
+                  <Globe2 className="size-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>+ Territory Clearance Permit</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('legal_owner')}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 dark:border-blue-800/50 bg-white dark:bg-blue-950/40 px-3 py-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/40 transition shadow-2xs cursor-pointer"
+                >
+                  <FileCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>+ Legal Title Deed</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('production_rights')}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800/50 bg-white dark:bg-indigo-950/40 px-3 py-1.5 text-[11px] font-bold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition shadow-2xs cursor-pointer"
+                >
+                  <Clapperboard className="size-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <span>+ Production & Broadcast Contract</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('ai_provenance')}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-emerald-950/40 px-3 py-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 transition shadow-2xs cursor-pointer"
+                >
+                  <Sparkles className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>+ AI Provenance Declaration</span>
                 </button>
               </div>
-            </form>
+            </div>
 
-            {/* Document List */}
+            {/* Submitted Documents Repository (Only Showing Submitted Files) */}
             <div className="space-y-2.5 text-xs">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Submitted Deeds & Verified Certificates ({asset.documents?.length || 0})
+                </span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                  Supported formats: PDF, DOC, DOCX
+                </span>
+              </div>
+
               {asset.documents && asset.documents.length > 0 ? (
-                asset.documents.map((d) => (
-                  <div key={d.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-white/10 p-3.5 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition">
-                    <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "grid size-9 shrink-0 place-items-center rounded-lg font-bold text-[10px]",
-                        d.targetScope === 'individual' || d.assigneeName ? "bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300" : "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
-                      )}>
-                        {d.targetScope === 'individual' || d.type === 'TALENT_RELEASE' ? (
-                          <User className="size-4" />
-                        ) : d.type === 'DEED' ? (
-                          <FileCheck className="size-4" />
-                        ) : d.type === 'CERT' ? (
-                          <ShieldCheck className="size-4" />
-                        ) : d.type === 'LICENSE' ? (
-                          <ScrollText className="size-4" />
-                        ) : (
-                          <FileText className="size-4" />
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="font-bold text-slate-900 dark:text-white">{d.name}</span>
-                          <span className={cn(
-                            "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                            d.type === 'TALENT_RELEASE' ? "bg-purple-100 text-purple-800 dark:bg-purple-950/50 dark:text-purple-300 dark:border dark:border-purple-800/40" :
-                              d.type === 'DEED' ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border dark:border-emerald-800/40" :
-                                d.type === 'CERT' ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300 dark:border dark:border-blue-800/40" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:border dark:border-white/10"
-                          )}>
-                            {d.type ? d.type.replace('_', ' ') : 'PDF'}
-                          </span>
-                          {d.assigneeName && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 dark:bg-purple-950/40 dark:border-purple-800/40 dark:text-purple-300 px-2 py-0.5 text-[10px] font-semibold">
-                              <User className="size-2.5" />
-                              <span>Individual: {d.assigneeName} {d.assigneeRole ? `(${d.assigneeRole})` : ''}</span>
-                            </span>
-                          )}
-                          {d.targetScope === 'asset' && !d.assigneeName && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-950/40 dark:border-blue-800/40 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold">
-                              Asset-Level Master
-                            </span>
+                asset.documents.map((d) => {
+                  const ext = d.name.split('.').pop()?.toUpperCase() || 'PDF'
+                  const isDocFormat = ext === 'DOC' || ext === 'DOCX'
+
+                  // Determine Pillar label and styling
+                  const pillarBadge = d.pillarKey === 'trademark_license' ? {
+                    label: 'Trademark & Licensing',
+                    className: 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/40',
+                  } : d.pillarKey === 'territory' ? {
+                    label: 'Territory Clearance',
+                    className: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/40',
+                  } : d.pillarKey === 'legal_owner' ? {
+                    label: 'Legal Title & Ownership',
+                    className: 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800/40',
+                  } : d.pillarKey === 'production_rights' ? {
+                    label: 'Production Rights',
+                    className: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800/40',
+                  } : d.pillarKey === 'ai_provenance' ? {
+                    label: 'AI Provenance',
+                    className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/40',
+                  } : d.type === 'TALENT_RELEASE' || d.assigneeName ? {
+                    label: 'Talent Release',
+                    className: 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/40',
+                  } : d.type === 'DEED' ? {
+                    label: 'Title Deed',
+                    className: 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800/40',
+                  } : d.type === 'LICENSE' ? {
+                    label: 'License Agreement',
+                    className: 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/40',
+                  } : {
+                    label: 'Filing Certificate',
+                    className: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:border-white/10',
+                  }
+
+                  return (
+                    <div key={d.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-white/10 p-3.5 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition">
+                      <div className="flex items-start gap-3">
+                        <div className={cn(
+                          "grid size-9 shrink-0 place-items-center rounded-lg font-bold text-[10px]",
+                          isDocFormat ? "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40" :
+                            d.pillarKey === 'territory' ? "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" :
+                              d.pillarKey === 'ai_provenance' ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300" :
+                                d.pillarKey === 'trademark_license' ? "bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300" :
+                                  "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
+                        )}>
+                          {isDocFormat ? (
+                            <FileText className="size-4.5" />
+                          ) : d.pillarKey === 'territory' ? (
+                            <Globe2 className="size-4" />
+                          ) : d.pillarKey === 'ai_provenance' ? (
+                            <Sparkles className="size-4" />
+                          ) : d.type === 'TALENT_RELEASE' || d.assigneeName ? (
+                            <User className="size-4" />
+                          ) : (
+                            <FileCheck className="size-4" />
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-400 dark:text-slate-400">
-                          {d.size} • Uploaded on {d.date}
-                          {d.notes ? ` • Note: ${d.notes}` : ''}
+
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="font-bold text-slate-900 dark:text-white">{d.name}</span>
+
+                            {/* Format Pill */}
+                            <span className={cn(
+                              "rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider border",
+                              isDocFormat
+                                ? "bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/50"
+                                : "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/50"
+                            )}>
+                              {ext}
+                            </span>
+
+                            {/* Pillar Badge */}
+                            <span className={cn(
+                              "rounded-full px-2 py-0.5 text-[9px] font-bold border",
+                              pillarBadge.className
+                            )}>
+                              {pillarBadge.label}
+                            </span>
+
+                            {d.assigneeName && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 text-purple-700 dark:bg-purple-950/40 dark:border-purple-800/40 dark:text-purple-300 px-2 py-0.5 text-[10px] font-semibold">
+                                <User className="size-2.5" />
+                                <span>Individual: {d.assigneeName} {d.assigneeRole ? `(${d.assigneeRole})` : ''}</span>
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="text-[10px] text-slate-400 dark:text-slate-400">
+                            {d.size || '1.8 MB'} • Uploaded on {d.date || 'Recent'}
+                            {d.notes ? ` • Note: ${d.notes}` : ''}
+                          </div>
                         </div>
                       </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => showToast(`Downloading ${d.name}...`)}
+                          className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs text-xs cursor-pointer"
+                        >
+                          Download
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDocument(d.id, d.name)}
+                          className="rounded-lg border border-red-200 bg-white dark:border-red-500/30 dark:bg-rose-950/30 dark:text-red-400 dark:hover:bg-rose-950/60 p-1.5 font-bold text-red-600 hover:bg-red-50 transition shadow-2xs cursor-pointer"
+                          title="Delete document"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                      <button
-                        onClick={() => showToast(`Starting download for ${d.name}...`)}
-                        className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs text-xs cursor-pointer"
-                      >
-                        Download
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteDocument(d.id, d.name)}
-                        className="rounded-lg border border-red-200 bg-white dark:border-red-500/30 dark:bg-rose-950/30 dark:text-red-400 dark:hover:bg-rose-950/60 p-1.5 font-bold text-red-600 hover:bg-red-50 transition shadow-2xs cursor-pointer"
-                        title="Delete document"
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  )
+                })
               ) : (
-                <div className="p-6 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 dark:border dark:border-white/5 rounded-xl">
-                  No legal documents attached yet. Use the upload box above to add talent release deeds or filing certificates.
+                <div className="p-8 text-center text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 dark:border dark:border-white/5 rounded-xl space-y-2">
+                  <FileText className="size-8 mx-auto text-slate-400 dark:text-slate-500" />
+                  <div className="font-bold text-slate-700 dark:text-slate-300 text-xs">
+                    No legal documents or certificates submitted yet
+                  </div>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 max-w-md mx-auto">
+                    To attach a legal deed, clearance certificate, or contract (.pdf, .doc, .docx), select the relevant governance pillar above to submit documentation for ministerial verification.
+                  </p>
                 </div>
               )}
             </div>

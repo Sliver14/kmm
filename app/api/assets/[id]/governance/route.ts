@@ -47,9 +47,15 @@ export async function PUT(
     }
 
     // Merge pillar payload into attributes and dedicated fields
+    const existingDocs = Array.isArray((currentAttributes as any).documents) ? (currentAttributes as any).documents : []
+    const updatedDocuments = payload.document
+      ? [payload.document, ...existingDocs.filter((d: any) => d.id !== payload.document?.id)]
+      : (payload.documents ? [...payload.documents, ...existingDocs] : existingDocs)
+
     const updatedAttributes = {
       ...currentAttributes,
       ...payload,
+      documents: updatedDocuments,
       lastGovernancePillarUpdated: pillar,
       governanceApprovalRequired: true,
       updatedAt: new Date().toISOString(),
@@ -99,7 +105,8 @@ export async function PUT(
       ai_provenance: 'AI Content Classification & Songwriter Provenance',
     }
 
-    const feedbackNotes = `Governance Pillar [${pillarTitles[pillar] || pillar}] updated by ${updatedBy}. ${notes || payload.justification || 'Submitted for ministerial governance clearance.'}`
+    const docNote = payload.document ? ` Supporting Document Attached: "${payload.document.name}" (${payload.document.type}).` : ''
+    const feedbackNotes = `Governance Pillar [${pillarTitles[pillar] || pillar}] updated by ${updatedBy}.${docNote} ${notes || payload.justification || 'Submitted for ministerial governance clearance.'}`
 
     const historyItem = {
       id: `h-gov-${Date.now()}`,
@@ -113,6 +120,8 @@ export async function PUT(
     }
 
     const historyJson = JSON.stringify([historyItem])
+    const approvalDocs = payload.document ? [payload.document] : (payload.documents || [])
+    const approvalDocsJson = JSON.stringify(approvalDocs)
 
     // Try upserting approval request for this asset
     await sql`
@@ -127,7 +136,7 @@ export async function PUT(
         ${approvalId}, 'min-kmm', ${id}, ${asset.name}, ${asset.category}, ${asset.subcategory || 'General'},
         ${asset.agency}, ${asset.unit || asset.agency}, ${updatedBy}, 'Governance Representative', 'admin',
         'Faith Daniel', 'Awaiting Pillar Clearance & Ministerial Verification', 1, 3, 'Pending', 'High',
-        ${dateStr}, ${timeStr}, ${feedbackNotes}, ${historyJson}::jsonb, '[]'::jsonb,
+        ${dateStr}, ${timeStr}, ${feedbackNotes}, ${historyJson}::jsonb, ${approvalDocsJson}::jsonb,
         ${payload.distributionLicense || 'Ministry Standard Scope'}, ${payload.territory || 'Global'},
         '2026–2036', 'Ministry Retained', 'Proprietary', '100% Ministry Owned',
         ${feedbackNotes}, 0

@@ -227,6 +227,7 @@ export interface AssetData {
   attorneyGeneralSchedule?: string
   governanceClearance?: string
   archiveStorageNotice?: string
+  documents?: RightsDocument[]
 }
 
 export type SubAssetHierarchy =
@@ -271,6 +272,7 @@ export interface RightsDocument {
   assigneeName?: string
   assigneeRole?: string
   targetScope?: 'individual' | 'asset'
+  pillarKey?: GovernancePillarKey
   notes?: string
 }
 
@@ -480,6 +482,8 @@ export interface GovernancePillarUpdatePayload {
   contentProvenance?: ContentProvenance
   songWriter?: string
   songWriterProvenance?: ContentProvenance
+  document?: RightsDocument
+  documents?: RightsDocument[]
   notes?: string
   justification?: string
 }

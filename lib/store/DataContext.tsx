@@ -16,6 +16,7 @@ import {
   ContentProvenance,
   GovernancePillarKey,
   GovernancePillarUpdatePayload,
+  RightsDocument,
 } from '@/types'
 import {
   initialUsers,
@@ -763,8 +764,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const assignedSongWriter = data.songWriter?.trim() || (isAudio ? 'KMM Music Ministry (Staff Composer)' : '')
       const assignedSongWriterProvenance = data.songWriterProvenance || 'Fully Custom'
 
+      const initialDocs: RightsDocument[] = (data.documents && Array.isArray(data.documents)) ? data.documents : []
+
       // Check if any governance inputs requiring approval were specified
       const hasGovernanceInput = 
+        Boolean(initialDocs.length > 0) ||
         Boolean(assignedOwner && assignedOwner !== 'Unassigned' && assignedOwner !== 'None') ||
         Boolean(assignedTrademarkStatus && assignedTrademarkStatus !== 'Unregistered') ||
         Boolean(assignedDistributionLicense && assignedDistributionLicense !== 'None') ||
@@ -803,6 +807,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         songWriter: assignedSongWriter,
         songWriterProvenance: assignedSongWriterProvenance,
         tags: data.tags && data.tags.length > 0 ? data.tags : ['New Asset'],
+        documents: initialDocs,
       }
 
       setMasterAssets((prev) => [newAssetItem, ...prev])
@@ -844,7 +849,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         status: hasGovernanceInput ? 'Pending' : 'Cleared',
         thumbType: newAssetItem.thumbType || 'tv_series',
         description: '',
-        documents: [],
+        documents: initialDocs,
         governanceChecks: {},
         governanceScore: hasGovernanceInput ? 0 : 100,
       }
@@ -873,7 +878,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           priority: 'High',
           submittedDate: dateStr,
           submittedTime: timeStr,
-          documents: [],
+          documents: initialDocs,
           governanceScore: 0,
           governanceChecks: {},
           history: [
@@ -1111,15 +1116,29 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
 
       setMasterAssets((prev) =>
-        prev.map((a) => (a.id === assetId ? { ...a, ...updatedAssetFields } : a))
+        prev.map((a) => {
+          if (a.id === assetId) {
+            const assetDocs = (a as any).documents || []
+            const newAssetDocs = payload.document
+              ? [payload.document, ...assetDocs.filter((d: any) => d.id !== payload.document?.id)]
+              : assetDocs
+            return { ...a, ...updatedAssetFields, documents: newAssetDocs }
+          }
+          return a
+        })
       )
 
       // 2. Update Rights Record in masterRightsRecords
       setMasterRightsRecords((prev) =>
         prev.map((r) => {
           if (r.assetId === assetId || r.id === assetId) {
+            const rightsDocs = r.documents || []
+            const newRightsDocs = payload.document
+              ? [payload.document, ...rightsDocs.filter((d: any) => d.id !== payload.document?.id)]
+              : rightsDocs
             return {
               ...r,
+              documents: newRightsDocs,
               status: 'Review',
               ...(payload.owner ? { owner: payload.owner } : {}),
               ...(payload.ownerCertificateRef !== undefined ? { ownerCertificateRef: payload.ownerCertificateRef } : {}),
@@ -1138,7 +1157,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       )
 
       // 3. Queue / Update Approval Request in masterApprovals
-      const auditNote = notes || payload.justification || `Updated governance pillar [${pillarTitle}]. All pillar changes require ministerial clearance.`
+      const docNote = payload.document ? ` Supporting Document Attached: "${payload.document.name}" (${payload.document.type}).` : ''
+      const auditNote = notes || payload.justification || `Updated governance pillar [${pillarTitle}].${docNote} All pillar changes require ministerial clearance.`
 
       const existingApp = masterApprovals.find((app) => app.assetId === assetId)
       if (existingApp) {
@@ -1156,11 +1176,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                   notes: auditNote,
                 },
               ]
+              const appDocs = app.documents || []
+              const newAppDocs = payload.document
+                ? [payload.document, ...appDocs.filter((d: any) => d.id !== payload.document?.id)]
+                : appDocs
               return {
                 ...app,
                 status: 'Pending',
                 stage: 'Awaiting Pillar Verification',
                 history: updatedHistory,
+                documents: newAppDocs,
                 feedbackNotes: auditNote,
                 priority: 'High',
               }
@@ -1190,7 +1215,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           submittedDate: dateStr,
           submittedTime: timeStr,
           feedbackNotes: auditNote,
-          documents: [],
+          documents: payload.document ? [payload.document] : [],
           governanceScore: 0,
           governanceChecks: {},
           history: [
