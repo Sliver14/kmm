@@ -16,6 +16,7 @@ import { AssetVisualPreview } from '@/components/AssetVisualPreview'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { EditAssetModal } from '@/components/EditAssetModal'
 import { GovernancePillarModal } from '@/components/GovernancePillarModals'
+import { AddContributorModal } from '@/components/AddContributorModal'
 import { AssetData, AssetStatus, RelationshipItem, RightsDocument, ApprovalRequest, AssetEpisode, GovernancePillarKey } from '@/types'
 import { getAssetRiskAssessment } from '@/lib/risk'
 import { getCategoryGovernance, isEpisodeCategory } from '@/lib/categoryGovernance'
@@ -76,6 +77,7 @@ export function AssetDetailsView({
   // Individual Governance Pillar Modal State (Universal Single-Pillar Edits)
   const [activeIndividualPillar, setActiveIndividualPillar] = useState<GovernancePillarKey | null>(null)
   const [isIndividualPillarModalOpen, setIsIndividualPillarModalOpen] = useState(false)
+  const [isAddContributorModalOpen, setIsAddContributorModalOpen] = useState(false)
 
   const openIndividualPillar = (pillarKey: GovernancePillarKey) => {
     setActiveIndividualPillar(pillarKey)
@@ -819,12 +821,22 @@ export function AssetDetailsView({
             </div>
 
             {/* Staff Contributors Card */}
-            <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="font-semibold text-xs uppercase tracking-wider text-slate-500">
+            <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#1c202c] p-5 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+                <span className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Staff Contributors ({asset.contributors?.length || 0})
                 </span>
-                <Users className="size-4 text-slate-400" />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddContributorModalOpen(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-[#2f80ed] dark:hover:text-blue-300 transition cursor-pointer"
+                  >
+                    <Plus className="size-3" />
+                    <span>Add</span>
+                  </button>
+                  <Users className="size-4 text-slate-400" />
+                </div>
               </div>
 
               <div className="space-y-2 text-xs">
@@ -833,27 +845,35 @@ export function AssetDetailsView({
                     {asset.contributors.map((c) => (
                       <div
                         key={c.id}
-                        className="flex items-center gap-2.5 rounded-lg border border-slate-100 bg-slate-50/70 p-2 text-xs"
+                        className="flex items-center gap-2.5 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#141622] p-2.5 text-xs"
                       >
-                        <div className="size-7 rounded-md bg-slate-900 text-white font-semibold text-[11px] grid place-items-center shrink-0">
+                        <div className="size-8 rounded-lg bg-slate-900 dark:bg-[#2f80ed]/20 text-white dark:text-[#2f80ed] font-bold text-xs grid place-items-center shrink-0 border border-transparent dark:border-[#2f80ed]/30">
                           {c.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-semibold text-slate-900 truncate">{c.name}</div>
-                          <div className="text-[10px] text-slate-500 truncate">{c.role} • {c.agency || asset.agency}</div>
+                          <div className="font-bold text-slate-900 dark:text-white truncate">{c.name}</div>
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                            {c.role} • <span className="font-medium text-slate-700 dark:text-slate-300">{c.agency || asset.agency}</span>
+                          </div>
                         </div>
+                        {c.contributionType && (
+                          <span className="rounded-md bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/10 px-1.5 py-0.5 text-[9px] font-bold text-slate-600 dark:text-slate-300 shrink-0">
+                            {c.contributionType}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-lg border border-dashed border-slate-200 p-3 text-center text-slate-400 text-[11px] flex flex-col items-center gap-1.5">
+                  <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/15 p-4 text-center text-slate-400 dark:text-slate-500 text-[11px] flex flex-col items-center gap-2">
                     <span>No specific staff contributors logged.</span>
                     <button
                       type="button"
-                      onClick={() => setIsEditAssetModalOpen(true)}
-                      className="font-medium text-blue-600 hover:underline cursor-pointer"
+                      onClick={() => setIsAddContributorModalOpen(true)}
+                      className="font-bold text-blue-600 hover:text-blue-700 dark:text-[#2f80ed] dark:hover:text-blue-300 hover:underline cursor-pointer flex items-center gap-1"
                     >
-                      + Add Contributors
+                      <Plus className="size-3.5" />
+                      <span>Add Contributor</span>
                     </button>
                   </div>
                 )}
@@ -2151,6 +2171,13 @@ export function AssetDetailsView({
         onClose={() => setIsIndividualPillarModalOpen(false)}
         asset={asset}
         activePillar={activeIndividualPillar}
+      />
+
+      {/* Add Contributor Modal */}
+      <AddContributorModal
+        isOpen={isAddContributorModalOpen}
+        onClose={() => setIsAddContributorModalOpen(false)}
+        asset={asset}
       />
     </div>
   )

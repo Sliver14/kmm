@@ -25,6 +25,7 @@ import { AssetDetailsView } from '@/components/AssetDetailsView'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { GovernancePillarModal } from '@/components/GovernancePillarModals'
+import { AddContributorModal } from '@/components/AddContributorModal'
 import {
   getAssetRiskAssessment,
   getPortfolioRiskMetrics,
@@ -4336,6 +4337,7 @@ function RightsDetailsPage({
   // Individual Focused Governance Pillar Modal State (Universal Individual Updates)
   const [activeIndividualPillar, setActiveIndividualPillar] = useState<GovernancePillarKey | null>(null)
   const [isIndividualPillarModalOpen, setIsIndividualPillarModalOpen] = useState(false)
+  const [isAddContributorModalOpen, setIsAddContributorModalOpen] = useState(false)
 
   const openIndividualPillar = (pillarKey: GovernancePillarKey) => {
     setActiveIndividualPillar(pillarKey)
@@ -5568,23 +5570,32 @@ function RightsDetailsPage({
             </div>
 
             {/* Contributor Talent Releases Strip */}
-            {assetContributors.length > 0 && (
-              <div className="rounded-xl border border-purple-100 bg-purple-50/40 dark:border-purple-900/30 dark:bg-purple-950/20 p-3 space-y-1.5 text-xs">
-                <div className="flex items-center justify-between font-bold text-purple-950 dark:text-purple-300 text-[11px]">
-                  <span className="flex items-center gap-1.5">
-                    <User className="size-3 text-purple-600 dark:text-purple-400" />
-                    <span>Individual Contributor Release Auditing ({assetContributors.length} Credited):</span>
-                  </span>
-                  <span>
-                    {complianceReadiness.missingContributorReleases.length === 0 ? (
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">All Talent Released ✓</span>
-                    ) : (
-                      <span className="text-amber-600 dark:text-amber-400 font-bold">
-                        {complianceReadiness.missingContributorReleases.length} Release(s) Pending
-                      </span>
-                    )}
-                  </span>
+            <div className="rounded-xl border border-purple-100 bg-purple-50/40 dark:border-purple-900/30 dark:bg-purple-950/20 p-3 space-y-2 text-xs">
+              <div className="flex items-center justify-between font-bold text-purple-950 dark:text-purple-300 text-[11px] gap-2">
+                <span className="flex items-center gap-1.5">
+                  <User className="size-3 text-purple-600 dark:text-purple-400" />
+                  <span>Individual Contributor Release Auditing ({assetContributors.length} Credited):</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  {complianceReadiness.missingContributorReleases.length === 0 && assetContributors.length > 0 ? (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">All Talent Released ✓</span>
+                  ) : assetContributors.length > 0 ? (
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">
+                      {complianceReadiness.missingContributorReleases.length} Release(s) Pending
+                    </span>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setIsAddContributorModalOpen(true)}
+                    className="inline-flex items-center gap-1 rounded-md bg-[#2f80ed] hover:bg-[#256fd1] text-white px-2 py-0.5 text-[10px] font-bold shadow-2xs transition cursor-pointer"
+                  >
+                    <Plus className="size-3" />
+                    <span>Add Contributor</span>
+                  </button>
                 </div>
+              </div>
+
+              {assetContributors.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
                   {assetContributors.map((c: AssetContributor, i: number) => {
                     const hasRelease = (asset.documents || []).some(
@@ -5609,8 +5620,12 @@ function RightsDetailsPage({
                     )
                   })}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                  No individual contributors logged yet. Click &quot;Add Contributor&quot; to assign creative talent.
+                </div>
+              )}
+            </div>
 
             {/* Dedicated Governance Pillar Submissions Bar */}
             <div className="rounded-xl border border-slate-200/80 bg-gradient-to-r from-blue-50/60 via-indigo-50/40 to-purple-50/60 dark:border-white/10 dark:from-slate-900/80 dark:via-slate-800/60 dark:to-slate-900/80 p-4 space-y-3">
@@ -6469,6 +6484,13 @@ function RightsDetailsPage({
         onClose={() => setIsIndividualPillarModalOpen(false)}
         asset={asset}
         activePillar={activeIndividualPillar}
+      />
+
+      {/* Add Contributor Modal */}
+      <AddContributorModal
+        isOpen={isAddContributorModalOpen}
+        onClose={() => setIsAddContributorModalOpen(false)}
+        asset={asset}
       />
     </div>
   )

@@ -76,6 +76,11 @@ interface DataContextType {
     payload: GovernancePillarUpdatePayload,
     notes?: string
   ) => Promise<boolean> | boolean
+  addAssetContributor: (
+    assetId: string,
+    contributor: Omit<AssetContributor, 'id'> & { id?: string }
+  ) => Promise<AssetContributor>
+  removeAssetContributor: (assetId: string, contributorId: string) => Promise<boolean>
 
   // Categories & Subcategories
   categories: CategoryItem[]
@@ -1281,6 +1286,122 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     [masterAssets, masterApprovals, currentUser, addActivity, addNotification, showToast]
   )
 
+  const addAssetContributor = useCallback(
+    async (
+      assetId: string,
+      contributorData: Omit<AssetContributor, 'id'> & { id?: string }
+    ): Promise<AssetContributor> => {
+      const targetAsset = masterAssets.find((a) => a.id === assetId)
+      const newContributor: AssetContributor = {
+        id: contributorData.id || `contrib-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        name: contributorData.name.trim(),
+        role: contributorData.role.trim(),
+        agency: contributorData.agency || targetAsset?.agency || userAgency,
+        email: contributorData.email?.trim() || undefined,
+        contributionType: contributorData.contributionType || 'Core Creative',
+        skills: contributorData.skills || [],
+        joinedDate: contributorData.joinedDate || new Date().toISOString().split('T')[0],
+      }
+
+      setMasterAssets((prev) =>
+        prev.map((a) => {
+          if (a.id === assetId) {
+            const current = a.contributors || []
+            return {
+              ...a,
+              contributors: [...current.filter((c) => c.id !== newContributor.id), newContributor],
+            }
+          }
+          return a
+        })
+      )
+
+      setMasterRightsRecords((prev) =>
+        prev.map((r) => {
+          if (r.assetId === assetId) {
+            const current = r.contributors || []
+            return {
+              ...r,
+              contributors: [...current.filter((c) => c.id !== newContributor.id), newContributor],
+            }
+          }
+          return r
+        })
+      )
+
+      addActivity(
+        `Added contributor: ${newContributor.name}`,
+        `Assigned as "${newContributor.role}" for ${targetAsset?.name || assetId} (${newContributor.agency})`,
+        'user',
+        'bg-purple-100 text-purple-700',
+        newContributor.agency,
+        {
+          assetId,
+          assetName: targetAsset?.name,
+          actionType: 'UPDATE',
+          details: `Staff contributor ${newContributor.name} (${newContributor.role}) registered for asset ${assetId}.`,
+        }
+      )
+
+      try {
+        await fetch(`/api/assets/${assetId}/contributors`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newContributor),
+        })
+      } catch (err) {
+        console.error('Failed to persist contributor to API:', err)
+      }
+
+      showToast(`Contributor "${newContributor.name}" added to asset!`)
+      return newContributor
+    },
+    [masterAssets, userAgency, addActivity, showToast]
+  )
+
+  const removeAssetContributor = useCallback(
+    async (assetId: string, contributorId: string): Promise<boolean> => {
+      const targetAsset = masterAssets.find((a) => a.id === assetId)
+      const targetContrib = targetAsset?.contributors?.find((c) => c.id === contributorId)
+
+      setMasterAssets((prev) =>
+        prev.map((a) => {
+          if (a.id === assetId) {
+            return {
+              ...a,
+              contributors: (a.contributors || []).filter((c) => c.id !== contributorId),
+            }
+          }
+          return a
+        })
+      )
+
+      setMasterRightsRecords((prev) =>
+        prev.map((r) => {
+          if (r.assetId === assetId) {
+            return {
+              ...r,
+              contributors: (r.contributors || []).filter((c) => c.id !== contributorId),
+            }
+          }
+          return r
+        })
+      )
+
+      try {
+        await fetch(`/api/assets/${assetId}/contributors?contributorId=${contributorId}`, {
+          method: 'DELETE',
+        })
+      } catch (err) {
+        console.error('Failed to remove contributor from API:', err)
+      }
+
+      showToast(`Contributor ${targetContrib ? `"${targetContrib.name}"` : ''} removed.`)
+      return true
+    },
+    [masterAssets, showToast]
+  )
+
 
   // -------------------------------------------------------------
   // Categories & Subcategories
@@ -2003,6 +2124,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     bulkApproveAssets,
     bulkDeleteAssets,
     updateAssetGovernancePillar,
+    addAssetContributor,
+    removeAssetContributor,
     categories,
     subcategories,
     addCategory,

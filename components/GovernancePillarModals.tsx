@@ -286,8 +286,8 @@ export function GovernancePillarModal({
         </div>
 
         {/* Approval Requirement Warning Callout */}
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 dark:border-amber-900/60 dark:bg-amber-950/30 p-3.5 text-xs text-amber-900 dark:text-amber-200 space-y-1">
-          <div className="flex items-center gap-2 font-bold text-[11px] text-amber-800 dark:text-amber-300">
+        <div className="mt-4 rounded-2xl border border-amber-300/80 bg-amber-50/90 dark:border-amber-600/30 dark:bg-[#201a14] p-3.5 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+          <div className="flex items-center gap-2 font-bold text-xs text-amber-800 dark:text-amber-300">
             <AlertTriangle className="size-3.5 text-amber-600 shrink-0" />
             <span>Ministerial Approval & Governance Audit Trail Required</span>
           </div>
@@ -308,7 +308,7 @@ export function GovernancePillarModal({
                   <button
                     type="button"
                     onClick={() => setOwner('Esteemed Executive Minister (Pastor Chelsea Kalu)')}
-                    className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold cursor-pointer underline"
+                    className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-[#2f80ed] dark:hover:text-blue-300 font-semibold cursor-pointer underline"
                   >
                     Preset: Executive Minister
                   </button>
@@ -318,7 +318,7 @@ export function GovernancePillarModal({
                   value={owner}
                   onChange={(e) => setOwner(e.target.value)}
                   placeholder="e.g. Esteemed Executive Minister (Pastor Chelsea Kalu)"
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] font-medium shadow-2xs"
                   required
                 />
               </div>
@@ -331,7 +331,7 @@ export function GovernancePillarModal({
                   <button
                     type="button"
                     onClick={() => setOwnerCertificateRef(`CERT-EXEC-MIN-${new Date().getFullYear()}-HQ`)}
-                    className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold cursor-pointer underline"
+                    className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-[#2f80ed] dark:hover:text-blue-300 font-semibold cursor-pointer underline"
                   >
                     Preset: Ministry HQ Ref
                   </button>
@@ -341,12 +341,12 @@ export function GovernancePillarModal({
                   value={ownerCertificateRef}
                   onChange={(e) => setOwnerCertificateRef(e.target.value)}
                   placeholder="e.g. CERT-EXEC-MIN-2026-HQ"
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-mono text-[11px]"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] font-mono text-[11px] shadow-2xs"
                 />
               </div>
 
-              <div className="rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 p-3 text-[11px] text-blue-900 dark:text-blue-300 flex items-center gap-2">
-                <ShieldCheck className="size-4 text-blue-600 shrink-0" />
+              <div className="rounded-xl bg-blue-50/70 dark:bg-[#131b2e] border border-blue-100 dark:border-blue-500/25 p-3 text-[11px] text-blue-900 dark:text-blue-300 flex items-center gap-2.5">
+                <ShieldCheck className="size-4 text-blue-600 dark:text-[#2f80ed] shrink-0" />
                 <span>All intellectual property created under KMM ministries is vested solely in ministry leadership in perpetuity.</span>
               </div>
             </div>
@@ -369,10 +369,10 @@ export function GovernancePillarModal({
                           type="button"
                           onClick={() => setTrademarkStatus(statusOption)}
                           className={cn(
-                            'p-2 rounded-lg border text-center transition font-semibold text-xs cursor-pointer',
+                            'p-2.5 rounded-xl border text-center transition font-semibold text-xs cursor-pointer',
                             isSelected
-                              ? 'border-purple-600 bg-purple-50 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-500 shadow-2xs'
-                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300'
+                              ? 'border-[#2f80ed] bg-blue-50 text-blue-900 dark:bg-[#2f80ed]/20 dark:text-blue-200 dark:border-[#2f80ed] shadow-2xs'
+                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#141622] dark:text-slate-300 dark:hover:bg-white/5'
                           )}
                         >
                           {statusOption}
@@ -392,7 +392,7 @@ export function GovernancePillarModal({
                     <button
                       type="button"
                       onClick={() => setDistributionLicense('Exclusive Ministry Global Distribution')}
-                      className="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold cursor-pointer underline"
+                      className="text-blue-600 hover:text-blue-700 dark:text-[#2f80ed] dark:hover:text-blue-300 font-semibold cursor-pointer underline"
                     >
                       Exclusive Global
                     </button>
@@ -410,7 +410,7 @@ export function GovernancePillarModal({
                   value={distributionLicense}
                   onChange={(e) => setDistributionLicense(e.target.value)}
                   placeholder="e.g. Exclusive Ministry Global Distribution or None"
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] font-medium shadow-2xs"
                   required
                 />
               </div>
@@ -447,7 +447,7 @@ export function GovernancePillarModal({
                   value={territory}
                   onChange={(e) => setTerritory(e.target.value)}
                   placeholder="e.g. Worldwide / Global or None"
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] font-medium shadow-2xs"
                   required
                 />
               </div>
@@ -459,13 +459,13 @@ export function GovernancePillarModal({
                 <select
                   value={territoryClearanceStatus}
                   onChange={(e) => setTerritoryClearanceStatus(e.target.value as any)}
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] cursor-pointer shadow-2xs"
                 >
-                  <option value="Pending Clearance" className="dark:bg-slate-900 dark:text-white">Pending Clearance (Review Required)</option>
-                  <option value="Cleared Global" className="dark:bg-slate-900 dark:text-white">Cleared Global (Subject to Approval)</option>
-                  <option value="Cleared Regional" className="dark:bg-slate-900 dark:text-white">Cleared Regional</option>
-                  <option value="Restricted" className="dark:bg-slate-900 dark:text-white">Restricted</option>
-                  <option value="None" className="dark:bg-slate-900 dark:text-white">None</option>
+                  <option value="Pending Clearance" className="dark:bg-[#1c202c] dark:text-white">Pending Clearance (Review Required)</option>
+                  <option value="Cleared Global" className="dark:bg-[#1c202c] dark:text-white">Cleared Global (Subject to Approval)</option>
+                  <option value="Cleared Regional" className="dark:bg-[#1c202c] dark:text-white">Cleared Regional</option>
+                  <option value="Restricted" className="dark:bg-[#1c202c] dark:text-white">Restricted</option>
+                  <option value="None" className="dark:bg-[#1c202c] dark:text-white">None</option>
                 </select>
               </div>
             </div>
@@ -501,7 +501,7 @@ export function GovernancePillarModal({
                   value={productionLicensees}
                   onChange={(e) => setProductionLicensees(e.target.value)}
                   placeholder="e.g. Lovetoons Animation Studio, KMM Publishing, LoveWorld Media or None"
-                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400 font-medium"
+                  className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white p-3 text-xs outline-none focus:border-[#2f80ed] font-medium shadow-2xs"
                   required
                 />
               </div>
@@ -528,10 +528,10 @@ export function GovernancePillarModal({
                         type="button"
                         onClick={() => setContentProvenance(prov)}
                         className={cn(
-                          'p-2.5 rounded-lg border text-center transition font-semibold text-xs cursor-pointer',
+                          'p-2.5 rounded-xl border text-center transition font-semibold text-xs cursor-pointer',
                           isSelected
                             ? 'border-cyan-600 bg-cyan-50 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-300 dark:border-cyan-500 shadow-2xs'
-                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300'
+                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#141622] dark:text-slate-300 dark:hover:bg-white/5'
                         )}
                       >
                         {prov === 'Fully Custom' && '✦ Fully Custom'}
@@ -553,7 +553,7 @@ export function GovernancePillarModal({
                   value={songWriter}
                   onChange={(e) => setSongWriter(e.target.value)}
                   placeholder="e.g. KMM Music Ministry (Staff Composer)"
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] font-medium shadow-2xs"
                 />
               </div>
 
@@ -564,11 +564,11 @@ export function GovernancePillarModal({
                 <select
                   value={songWriterProvenance}
                   onChange={(e) => setSongWriterProvenance(e.target.value as ContentProvenance)}
-                  className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] cursor-pointer shadow-2xs"
                 >
-                  <option value="Fully Custom" className="dark:bg-slate-900 dark:text-white">Fully Custom (100% Human Composer / Staff Author)</option>
-                  <option value="AI Assisted" className="dark:bg-slate-900 dark:text-white">AI Assisted (Generative Ideation / Human Arranged)</option>
-                  <option value="Fully AI" className="dark:bg-slate-900 dark:text-white">Fully AI (Fully Synthesized)</option>
+                  <option value="Fully Custom" className="dark:bg-[#1c202c] dark:text-white">Fully Custom (100% Human Composer / Staff Author)</option>
+                  <option value="AI Assisted" className="dark:bg-[#1c202c] dark:text-white">AI Assisted (Generative Ideation / Human Arranged)</option>
+                  <option value="Fully AI" className="dark:bg-[#1c202c] dark:text-white">Fully AI (Fully Synthesized)</option>
                 </select>
               </div>
             </div>
@@ -576,31 +576,44 @@ export function GovernancePillarModal({
 
           {/* Supporting Certificate & Legal Document (DOC, PDF) - Not applicable for AI Provenance */}
           {activePillar !== 'ai_provenance' && (
-            <div className="rounded-xl border border-blue-200/90 bg-gradient-to-br from-blue-50/50 via-white to-blue-50/20 dark:border-white/10 dark:bg-slate-800/40 p-4 space-y-3">
+            <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 dark:from-[#141824] dark:via-[#161a29] dark:to-[#141824] p-4.5 space-y-3.5 shadow-xs">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Paperclip className="size-4 text-blue-600 dark:text-blue-400" />
-                  <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">
-                    Supporting Legal Document / Certificate (DOC, PDF)
-                  </label>
+                <div className="flex items-center gap-2.5">
+                  <div className="grid size-7 place-items-center rounded-xl bg-blue-100 text-blue-700 dark:bg-[#2f80ed]/20 dark:text-[#2f80ed] border border-blue-200/60 dark:border-[#2f80ed]/30">
+                    <Paperclip className="size-3.5" />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-900 dark:text-white text-xs block">
+                      Supporting Legal Document / Certificate
+                    </label>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                      Clearance deed, official registration, or signed licensing deed
+                    </span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full font-medium">
-                  Official Evidence
+                <span className="inline-flex items-center gap-1 text-[10px] text-blue-700 dark:text-blue-300 bg-blue-100/80 dark:bg-[#2f80ed]/15 border border-blue-200/80 dark:border-[#2f80ed]/30 px-2.5 py-0.5 rounded-full font-bold">
+                  <ShieldCheck className="size-3" />
+                  <span>Official Evidence</span>
                 </span>
               </div>
 
               {attachedFile || docName ? (
-                <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50/70 dark:border-emerald-800/40 dark:bg-emerald-950/20">
-                  <div className="flex items-center gap-2.5 truncate">
-                    <div className="grid size-8 place-items-center rounded bg-emerald-600 text-white shrink-0">
-                      <FileCheck className="size-4" />
+                <div className="flex items-center justify-between gap-3 p-3.5 rounded-2xl border border-emerald-300/80 bg-emerald-50/80 dark:border-emerald-500/30 dark:bg-emerald-950/30 shadow-2xs">
+                  <div className="flex items-center gap-3 truncate">
+                    <div className="grid size-9 place-items-center rounded-xl bg-emerald-600 text-white shrink-0 shadow-xs">
+                      <FileCheck className="size-5" />
                     </div>
                     <div className="truncate">
-                      <div className="font-bold text-slate-900 dark:text-white truncate text-xs">
-                        {docName}
+                      <div className="font-bold text-slate-900 dark:text-white truncate text-xs flex items-center gap-1.5">
+                        <span className="truncate">{docName}</span>
+                        <span className="rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 px-1.5 py-0.2 text-[9px] font-mono font-bold shrink-0">
+                          {docType}
+                        </span>
                       </div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                        Format: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{docType}</span> • {docSize || 'File Selected'}
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+                        <span>Size: <strong className="text-slate-700 dark:text-slate-200">{docSize || 'File Attached'}</strong></span>
+                        <span>•</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Evidence Ready for Review ✓</span>
                       </div>
                     </div>
                   </div>
@@ -608,22 +621,30 @@ export function GovernancePillarModal({
                   <button
                     type="button"
                     onClick={handleRemoveFile}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-white dark:hover:bg-slate-800 transition cursor-pointer"
+                    className="size-8 grid place-items-center rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition cursor-pointer shrink-0"
                     title="Remove file"
                   >
-                    <Trash2 className="size-3.5" />
+                    <Trash2 className="size-4" />
                   </button>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <label className="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 dark:border-white/15 dark:hover:border-blue-500 bg-white dark:bg-slate-900 transition cursor-pointer group">
-                    <UploadCloud className="size-6 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-1 transition" />
-                    <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                      Click to browse or drop legal document (.pdf, .doc, .docx)
+                  <label className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-slate-300 hover:border-[#2f80ed] dark:border-white/15 dark:hover:border-[#2f80ed] bg-white/90 hover:bg-white dark:bg-[#11131c] dark:hover:bg-[#131623] transition-all cursor-pointer group shadow-2xs">
+                    <div className="size-11 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/10 grid place-items-center group-hover:scale-105 group-hover:border-blue-400 dark:group-hover:border-[#2f80ed] transition mb-2">
+                      <UploadCloud className="size-5 text-slate-500 group-hover:text-[#2f80ed] dark:text-slate-400 dark:group-hover:text-[#2f80ed] transition" />
+                    </div>
+                    <span className="font-bold text-slate-800 dark:text-slate-100 text-xs text-center">
+                      Click to upload or drag & drop legal document (.pdf, .doc, .docx)
                     </span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-                      Clearance certificates, official registration, or signed licensing deed
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 text-center">
+                      Official trademark certificates, clearance deeds, or territory licenses
                     </span>
+                    <div className="flex items-center gap-1.5 mt-2.5">
+                      <span className="rounded-md bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[9px] font-mono font-bold text-slate-600 dark:text-slate-300">PDF</span>
+                      <span className="rounded-md bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[9px] font-mono font-bold text-slate-600 dark:text-slate-300">DOC</span>
+                      <span className="rounded-md bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[9px] font-mono font-bold text-slate-600 dark:text-slate-300">DOCX</span>
+                      <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">• Up to 50MB</span>
+                    </div>
                     <input
                       type="file"
                       accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -640,8 +661,8 @@ export function GovernancePillarModal({
                   type="text"
                   value={docNotes}
                   onChange={(e) => setDocNotes(e.target.value)}
-                  placeholder="Document reference or note (e.g. Registered in UK IPO, Signed by Director)..."
-                  className="h-8 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  placeholder="Document reference note (e.g. Registered with UK IPO ref #49921, Signed by Ministry Director)..."
+                  className="h-9 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#11131c] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-2xs"
                 />
               </div>
             </div>
@@ -657,7 +678,7 @@ export function GovernancePillarModal({
               value={justificationNotes}
               onChange={(e) => setJustificationNotes(e.target.value)}
               placeholder="State the reason or ministerial authorization for this individual pillar update..."
-              className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white p-3 text-xs outline-none focus:border-[#2f80ed] placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-2xs"
               required
             />
           </div>
@@ -668,7 +689,7 @@ export function GovernancePillarModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="rounded-full border border-slate-200 dark:border-white/15 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5 text-xs transition cursor-pointer"
+              className="rounded-full border border-slate-200 dark:border-white/15 px-5 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5 text-xs transition cursor-pointer"
             >
               Cancel
             </button>
@@ -676,7 +697,7 @@ export function GovernancePillarModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-full bg-[#2f80ed] hover:bg-[#256fd1] px-5 py-2 font-bold text-white shadow-md shadow-blue-500/25 text-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-50"
+              className="rounded-full bg-[#2f80ed] hover:bg-[#256fd1] px-6 py-2.5 font-bold text-white shadow-md shadow-blue-500/25 text-xs flex items-center gap-2 transition active:scale-98 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <span>Submitting Approval...</span>
