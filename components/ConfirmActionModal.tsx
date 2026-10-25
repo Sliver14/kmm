@@ -47,31 +47,31 @@ export function ConfirmActionModal({
     switch (variant) {
       case 'danger':
         return {
-          icon: <AlertTriangle className="size-5 text-rose-600 dark:text-rose-400" />,
+          icon: <AlertTriangle className="size-5 text-[#ff5c75]" />,
           iconBg: 'bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:border-rose-800/40',
-          confirmBtn: 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-rose-600/25',
+          confirmBtn: 'bg-[#ff5c75] hover:bg-[#e04860] text-white shadow-rose-500/25',
           badgeBg: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/50',
         }
       case 'warning':
         return {
-          icon: <ShieldAlert className="size-5 text-amber-600 dark:text-amber-400" />,
+          icon: <ShieldAlert className="size-5 text-amber-500" />,
           iconBg: 'bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:border-amber-800/40',
-          confirmBtn: 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-amber-600/25',
+          confirmBtn: 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-500/25',
           badgeBg: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/50',
         }
       case 'success':
         return {
-          icon: <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400" />,
+          icon: <CheckCircle2 className="size-5 text-emerald-500" />,
           iconBg: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800/40',
-          confirmBtn: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-600/25',
+          confirmBtn: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25',
           badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/50',
         }
       case 'primary':
       default:
         return {
-          icon: <Info className="size-5 text-blue-600 dark:text-blue-400" />,
+          icon: <Info className="size-5 text-[#2f80ed]" />,
           iconBg: 'bg-blue-50 border-blue-200 dark:bg-blue-950/40 dark:border-blue-800/40',
-          confirmBtn: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-blue-600/25',
+          confirmBtn: 'bg-[#2f80ed] hover:bg-[#256fd1] text-white shadow-blue-500/25',
           badgeBg: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800/50',
         }
     }
@@ -88,16 +88,16 @@ export function ConfirmActionModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md rounded-2xl border border-slate-200/90 bg-white/95 dark:border-white/10 dark:bg-slate-900/95 p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 cursor-default space-y-4"
+        className="relative w-full max-w-md rounded-3xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-[#1c202c] p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 cursor-default space-y-4"
       >
         {/* Header Icon + Title */}
         <div className="flex items-start gap-3.5">
-          <div className={cn('grid size-10 shrink-0 place-items-center rounded-xl border shadow-xs', vStyles.iconBg)}>
+          <div className={cn('grid size-10 shrink-0 place-items-center rounded-2xl border shadow-xs', vStyles.iconBg)}>
             {vStyles.icon}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-black text-slate-900 dark:text-white text-base leading-tight truncate">{title}</h3>
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base leading-tight truncate">{title}</h3>
               {badge && (
                 <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold border shrink-0', vStyles.badgeBg)}>
                   {badge}
@@ -110,7 +110,7 @@ export function ConfirmActionModal({
             type="button"
             disabled={isLoading}
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition -mr-1 -mt-1 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer disabled:opacity-40"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition -mr-1 -mt-1 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer disabled:opacity-40"
           >
             <X className="size-4" />
           </button>
@@ -118,13 +118,13 @@ export function ConfirmActionModal({
 
         {/* Optional Context Details Box */}
         {details && (
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 dark:border-white/10 dark:bg-slate-800/80 p-3 text-xs text-slate-700 dark:text-slate-200 space-y-1">
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 dark:border-white/10 dark:bg-[#171a24] p-3 text-xs text-slate-700 dark:text-slate-200 space-y-1">
             {details}
           </div>
         )}
 
         {/* Audit Compliance Notice */}
-        <div className="flex items-center gap-2 rounded-lg bg-slate-100/70 dark:bg-slate-800/60 px-3 py-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium border border-slate-200/50 dark:border-white/10">
+        <div className="flex items-center gap-2 rounded-xl bg-slate-100/70 dark:bg-[#171a24] px-3 py-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium border border-slate-200/50 dark:border-white/10">
           <span className="size-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
           <span>Permanently recorded in the KMM Intellectual Property Audit Trail</span>
         </div>
@@ -135,7 +135,7 @@ export function ConfirmActionModal({
             type="button"
             disabled={isLoading}
             onClick={onClose}
-            className="rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-white/20 transition cursor-pointer disabled:opacity-50"
+            className="rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-[#1c202c] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 hover:border-slate-300 dark:hover:border-white/20 transition cursor-pointer disabled:opacity-50"
           >
             {cancelLabel}
           </button>
@@ -144,7 +144,7 @@ export function ConfirmActionModal({
             disabled={isLoading}
             onClick={onConfirm}
             className={cn(
-              'rounded-xl px-4 py-2 text-xs font-bold shadow-md transition active:scale-98 cursor-pointer disabled:opacity-50 flex items-center gap-1.5',
+              'rounded-full px-5 py-2 text-xs font-bold shadow-md transition active:scale-98 cursor-pointer disabled:opacity-50 flex items-center gap-1.5',
               vStyles.confirmBtn
             )}
           >

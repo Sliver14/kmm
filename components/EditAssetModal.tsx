@@ -132,7 +132,7 @@ export function EditAssetModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 cursor-default space-y-5"
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-[#1c202c] p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 cursor-default space-y-5"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
@@ -693,13 +693,13 @@ export function EditAssetModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+              className="rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-[#1c202c] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-blue-600/25 hover:from-blue-700 hover:to-indigo-700 transition flex items-center gap-1.5 cursor-pointer"
+              className="rounded-full bg-[#2f80ed] hover:bg-[#256fd1] px-5 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/25 transition flex items-center gap-1.5 cursor-pointer active:scale-98"
             >
               <Check className="size-3.5" />
               <span>Save Modifications</span>

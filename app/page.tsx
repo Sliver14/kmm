@@ -231,13 +231,13 @@ function Sidebar({
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-30 flex flex-col bg-slate-50 text-slate-700 transition-all duration-300 ease-in-out border-r border-slate-200 shadow-xs',
+        'fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-[#181a24] text-slate-700 dark:text-slate-300 transition-all duration-300 ease-in-out border-r border-slate-200/80 dark:border-white/[0.08] shadow-xs',
         isCollapsed ? 'w-[76px]' : 'w-[248px]',
         open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}
     >
       {/* Header / Logo */}
-      <div className="flex h-16 items-center border-b border-slate-200 px-4 relative shrink-0">
+      <div className="flex h-16 items-center border-b border-slate-200/80 dark:border-white/[0.08] px-4 relative shrink-0">
         <Logo collapsed={isCollapsed} />
       </div>
 
@@ -253,11 +253,11 @@ function Sidebar({
                 headerSearch.select()
               }
             }}
-            className="group relative flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-100 shadow-2xs transition cursor-pointer"
+            className="group relative flex size-9 items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#222636] text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#293044] shadow-2xs transition cursor-pointer"
             title="Search platform"
-            aria-label="Search platform "
+            aria-label="Search platform"
           >
-            <Search className="size-4 text-slate-500 group-hover:text-slate-800 transition" />
+            <Search className="size-4 text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-white transition" />
             <span className="pointer-events-none absolute left-full ml-2 hidden group-hover:flex items-center gap-1 rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white shadow-md z-50 whitespace-nowrap">
               <span>Search</span>
             </span>
@@ -274,7 +274,7 @@ function Sidebar({
                 headerSearch.select()
               }
             }}
-            className="w-full flex items-center justify-between rounded-lg bg-white border border-slate-200 px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-100/60 shadow-2xs transition cursor-pointer"
+            className="w-full flex items-center justify-between rounded-xl bg-slate-50/80 dark:bg-[#222636] border border-slate-200/80 dark:border-white/10 px-3 py-2 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 transition cursor-pointer"
           >
             <div className="flex items-center gap-2 min-w-0">
               <Search className="size-3.5 text-slate-400 shrink-0" />
@@ -285,9 +285,9 @@ function Sidebar({
       )}
 
       {/* Navigation List */}
-      <nav className="flex flex-1 flex-col px-3 py-3 overflow-y-auto overflow-x-hidden space-y-1">
+      <nav className="flex flex-1 flex-col px-3 py-3 overflow-y-auto overflow-x-hidden space-y-1.5 custom-scrollbar">
         {!isCollapsed && (
-          <div className="px-2 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <div className="px-2 pt-1 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
             Workspaces
           </div>
         )}
@@ -304,27 +304,33 @@ function Sidebar({
                   setOpen(false)
                 }}
                 className={cn(
-                  'group relative flex items-center rounded-lg font-medium transition-all duration-150 cursor-pointer w-full',
-                  isCollapsed ? 'justify-center p-2.5 text-xs' : 'gap-2.5 px-3 py-2 text-left text-xs',
+                  'group relative flex items-center rounded-xl font-medium transition-all duration-150 cursor-pointer w-full',
+                  isCollapsed ? 'justify-center p-2.5 text-xs' : 'gap-2.5 px-3 py-2.5 text-left text-xs',
                   isActive
-                    ? 'bg-white text-slate-900 font-semibold border border-slate-200/90 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                    ? 'bg-blue-50/80 dark:bg-[#222636] text-[#2f80ed] dark:text-white font-semibold border border-blue-200/60 dark:border-white/10 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-[#222636]/60 hover:text-slate-900 dark:hover:text-white'
                 )}
               >
                 {isActive && !isCollapsed && (
-                  <span className="absolute left-1 top-2 bottom-2 w-1 rounded-full bg-slate-900" />
+                  <span className="absolute left-1.5 top-2 bottom-2 w-1 rounded-full bg-[#2f80ed] shadow-xs shadow-blue-500/50" />
                 )}
-                <Icon className={cn('size-4 shrink-0', isActive ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600')} strokeWidth={isActive ? 2.2 : 1.8} />
+                <Icon
+                  className={cn(
+                    'size-4 shrink-0 transition-colors',
+                    isActive ? 'text-[#2f80ed]' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                  )}
+                  strokeWidth={isActive ? 2.2 : 1.8}
+                />
                 {!isCollapsed && <span className="flex-1 truncate text-xs">{label}</span>}
                 {!isCollapsed && label === 'Approvals' && stats.pendingApprovalsCount > 0 && (
-                  <span className="rounded-md bg-rose-500 text-[10px] font-bold text-white px-1.5 py-0.2 shadow-2xs">
+                  <span className="rounded-full bg-[#ff5c75] text-[10px] font-bold text-white px-2 py-0.5 shadow-2xs">
                     {stats.pendingApprovalsCount}
                   </span>
                 )}
 
                 {/* Collapsed floating indicator dot */}
                 {isCollapsed && label === 'Approvals' && stats.pendingApprovalsCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-rose-500 ring-2 ring-slate-50" />
+                  <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#ff5c75] ring-2 ring-white dark:ring-[#181a24]" />
                 )}
 
                 {/* Tooltip for collapsed view */}
@@ -339,7 +345,7 @@ function Sidebar({
           })}
 
         {!isCollapsed && (
-          <div className="px-2 pt-4 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <div className="px-2 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
             Governance & Audit
           </div>
         )}
@@ -356,17 +362,23 @@ function Sidebar({
                   setOpen(false)
                 }}
                 className={cn(
-                  'group relative flex items-center rounded-lg font-medium transition-all duration-150 cursor-pointer w-full',
-                  isCollapsed ? 'justify-center p-2.5 text-xs' : 'gap-2.5 px-3 py-2 text-left text-xs',
+                  'group relative flex items-center rounded-xl font-medium transition-all duration-150 cursor-pointer w-full',
+                  isCollapsed ? 'justify-center p-2.5 text-xs' : 'gap-2.5 px-3 py-2.5 text-left text-xs',
                   isActive
-                    ? 'bg-white text-slate-900 font-semibold border border-slate-200/90 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                    ? 'bg-blue-50/80 dark:bg-[#222636] text-[#2f80ed] dark:text-white font-semibold border border-blue-200/60 dark:border-white/10 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/70 dark:hover:bg-[#222636]/60 hover:text-slate-900 dark:hover:text-white'
                 )}
               >
                 {isActive && !isCollapsed && (
-                  <span className="absolute left-1 top-2 bottom-2 w-1 rounded-full bg-slate-900" />
+                  <span className="absolute left-1.5 top-2 bottom-2 w-1 rounded-full bg-[#2f80ed] shadow-xs shadow-blue-500/50" />
                 )}
-                <Icon className={cn('size-4 shrink-0', isActive ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600')} strokeWidth={isActive ? 2.2 : 1.8} />
+                <Icon
+                  className={cn(
+                    'size-4 shrink-0 transition-colors',
+                    isActive ? 'text-[#2f80ed]' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                  )}
+                  strokeWidth={isActive ? 2.2 : 1.8}
+                />
                 {!isCollapsed && <span className="flex-1 truncate text-xs">{label}</span>}
 
                 {/* Tooltip for collapsed view */}
@@ -382,12 +394,12 @@ function Sidebar({
 
       {/* Current User Profile Card */}
       <div className={cn(
-        'mx-2.5 mb-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs transition-all',
+        'mx-2.5 mb-2.5 rounded-2xl bg-slate-50/80 dark:bg-[#222636] border border-slate-200/80 dark:border-white/[0.08] shadow-2xs transition-all',
         isCollapsed ? 'p-2 flex flex-col items-center gap-1.5' : 'p-3'
       )}>
         <div className={cn('flex items-center gap-2.5', isCollapsed && 'justify-center')}>
           <div className="relative group/user">
-            <div className="grid size-7.5 place-items-center rounded-lg bg-slate-900 text-[11px] font-semibold text-white shadow-xs">
+            <div className="grid size-8 place-items-center rounded-xl bg-[#2f80ed] text-[11px] font-bold text-white shadow-xs">
               {currentUser.initials}
             </div>
             {isCollapsed && (
@@ -400,14 +412,14 @@ function Sidebar({
           </div>
           {!isCollapsed && (
             <div className="min-w-0 flex-1">
-              <div className="font-semibold truncate text-slate-900 text-xs leading-tight">{currentUser.name}</div>
-              <div className="text-[10px] text-slate-500 truncate leading-tight mt-0.5">{currentUser.roleLabel}</div>
+              <div className="font-semibold truncate text-slate-900 dark:text-white text-xs leading-tight">{currentUser.name}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">{currentUser.roleLabel}</div>
             </div>
           )}
         </div>
 
         {!isCollapsed && (
-          <div className="mt-2 text-[10px] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-2 py-1 truncate">
+          <div className="mt-2 text-[10px] font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-[#181a24] border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1 truncate">
             {currentUser.agency || currentUser.unit}
           </div>
         )}
@@ -416,8 +428,8 @@ function Sidebar({
           onClick={logout}
           title="Sign out of platform"
           className={cn(
-            'flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition cursor-pointer',
-            isCollapsed ? 'size-7 mt-1' : 'w-full mt-2 gap-1.5 py-1 text-[11px] font-medium'
+            'flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#181a24] text-slate-600 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-800/40 transition cursor-pointer',
+            isCollapsed ? 'size-7 mt-1' : 'w-full mt-2 gap-1.5 py-1.5 text-[11px] font-medium'
           )}
         >
           <LogOut className="size-3" />
@@ -427,16 +439,16 @@ function Sidebar({
 
       {/* Footer Bottom Bar */}
       {!isCollapsed ? (
-        <div className="px-3.5 pb-3 text-[11px] text-slate-400 border-t border-slate-200 pt-2.5">
+        <div className="px-3.5 pb-3 text-[11px] text-slate-400 border-t border-slate-200/80 dark:border-white/[0.08] pt-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-medium text-slate-400">KMM Platform • v2.1</span>
+            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">KMM Platform • v2.1</span>
             <div className="flex items-center gap-1">
               <ThemeToggle variant="icon" className="size-6 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 border-none bg-transparent shadow-none" />
               {setIsCollapsed && (
                 <button
                   onClick={() => setIsCollapsed(true)}
                   title="Collapse sidebar (Ctrl+[)"
-                  className="hidden lg:flex p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+                  className="hidden lg:flex p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition cursor-pointer"
                 >
                   <PanelLeftClose className="size-3.5" />
                 </button>
@@ -445,13 +457,13 @@ function Sidebar({
           </div>
         </div>
       ) : (
-        <div className="hidden lg:flex flex-col items-center gap-2 p-2.5 border-t border-slate-200">
+        <div className="hidden lg:flex flex-col items-center gap-2 p-2.5 border-t border-slate-200/80 dark:border-white/[0.08]">
           <ThemeToggle variant="icon" className="size-6 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 border-none bg-transparent shadow-none" />
           {setIsCollapsed && (
             <button
               onClick={() => setIsCollapsed(false)}
               title="Expand sidebar (Ctrl+[)"
-              className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+              className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition cursor-pointer"
             >
               <PanelLeftOpen className="size-3.5" />
             </button>
@@ -840,69 +852,91 @@ function Header({
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
   const [searchFilter, setSearchFilter] = useState('')
 
+  const todayStr = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat('en-GB', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }).format(new Date())
+    } catch {
+      return 'Monday, 25 October 2026'
+    }
+  }, [])
+
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur-md transition-all lg:px-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)] shrink-0">
-      <button className="lg:hidden p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 cursor-pointer" onClick={() => setOpen(true)} aria-label="Open sidebar menu">
-        <Menu className="size-5 text-slate-800" />
+    <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200/80 dark:border-white/[0.08] bg-white/95 dark:bg-[#14161f]/95 px-4 backdrop-blur-md transition-all lg:px-8 shadow-[0_1px_2px_rgba(0,0,0,0.03)] shrink-0">
+      <button
+        className="lg:hidden p-1.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 cursor-pointer"
+        onClick={() => setOpen(true)}
+        aria-label="Open sidebar menu"
+      >
+        <Menu className="size-5" />
       </button>
 
       {/* Desktop Sidebar Toggle in Header */}
       {setIsCollapsed && (
         <button
           onClick={() => setIsCollapsed((prev) => !prev)}
-          className="hidden lg:flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 shadow-2xs transition cursor-pointer"
+          className="hidden lg:flex size-8.5 items-center justify-center rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#1c202c] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#222636] shadow-2xs transition cursor-pointer"
           title={isCollapsed ? 'Expand sidebar (Ctrl+[)' : 'Collapse sidebar (Ctrl+[)'}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {isCollapsed ? <PanelLeftOpen className="size-3.5" /> : <PanelLeftClose className="size-3.5" />}
+          {isCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
         </button>
       )}
 
-      {/* Breadcrumb Navigation Trail (AgentOps Inspiration) */}
-      <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 font-medium select-none">
-        <span
-          className="text-slate-500 hover:text-slate-800 transition cursor-pointer"
-          onClick={() => setActiveNav && setActiveNav('Dashboard')}
-        >
-          KMM Platform
-        </span>
-        <span className="text-slate-300 font-normal">›</span>
-        <span className="text-slate-900 font-semibold">{activeTab}</span>
-      </nav>
-
-      {/* Mobile Branding */}
-      <div className="flex items-center gap-2 lg:hidden">
-        <img src="/kmm-logo.png" alt="Kiddies Media Ministries" className="size-6 object-contain" />
-        <span className="text-xs font-bold text-slate-900 tracking-tight">KMM</span>
+      {/* Title & Dynamic Date Subtitle (Matching UI Inspiration Screenshot) */}
+      <div className="hidden sm:flex flex-col justify-center min-w-[140px]">
+        <h1 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+          {activeTab}
+        </h1>
+        <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500 leading-tight">
+          {todayStr}
+        </p>
       </div>
 
-      {/* Search Input with Clean Subtle Styling & ⌘K badge */}
-      <div className="relative max-w-sm sm:max-w-md flex-1 ml-1 sm:ml-3">
+      {/* Mobile Branding */}
+      <div className="flex items-center gap-2 sm:hidden">
+        <img src="/kmm-logo.png" alt="Kiddies Media Ministries" className="size-6 object-contain" />
+        <span className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">KMM</span>
+      </div>
+
+      {/* Pill Search Input (Matching Inspiration) */}
+      <div className="relative max-w-sm sm:max-w-md flex-1 ml-1 sm:ml-4">
         <div className="relative flex items-center">
-          <Search className="absolute left-2.5 size-3.5 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3.5 size-3.5 text-slate-400 pointer-events-none" />
           <input
             id="header-global-search-input"
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
-            className="h-8.5 w-full rounded-lg border border-slate-200 bg-slate-50/70 pl-8 pr-12 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:bg-white focus:ring-2 focus:ring-slate-100 transition"
-            placeholder="Search intellectual assets, titles, or rights..."
+            className="h-9 w-full rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-[#1c202c] pl-9.5 pr-10 text-xs text-slate-800 dark:text-white outline-none placeholder:text-slate-400 focus:border-[#2f80ed] focus:bg-white dark:focus:bg-[#1c202c] focus:ring-2 focus:ring-[#2f80ed]/20 transition"
+            placeholder="Search for Application, Asset or Rights..."
           />
-          {searchFilter ? (
+          {searchFilter && (
             <button
               onClick={() => setSearchFilter('')}
-              className="absolute right-2 grid size-5 place-items-center rounded text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+              className="absolute right-2.5 grid size-5 place-items-center rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition cursor-pointer"
               title="Clear search"
               aria-label="Clear search"
             >
               <X className="size-3" />
             </button>
-          ) : (
-            <div></div>
           )}
         </div>
       </div>
 
       <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        {/* Vibrant Primary Action CTA (Matching Inspiration + Button) */}
+        <button
+          onClick={() => setActiveNav && setActiveNav('Assets')}
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2 transition-all shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+        >
+          <Plus className="size-3.5 stroke-[2.5]" />
+          <span>Add Asset</span>
+        </button>
+
         {/* Dark Mode Theme Toggle */}
         <ThemeToggle />
 
@@ -911,18 +945,18 @@ function Header({
           <button
             onClick={onOpenNotifications}
             className={cn(
-              'grid size-8.5 place-items-center rounded-lg transition border cursor-pointer',
+              'grid size-9 place-items-center rounded-full transition border cursor-pointer',
               isNotificationModalOpen
-                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-2xs'
+                ? 'bg-[#2f80ed] text-white border-[#2f80ed] shadow-xs'
+                : 'border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#1c202c] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#222636] shadow-2xs'
             )}
             aria-label="Notifications"
             id="notification-bell-btn"
           >
-            <Bell className="size-3.5" />
+            <Bell className="size-4" />
           </button>
           {unreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 grid min-w-4 px-1 h-4 place-items-center rounded-full bg-rose-500 text-[9px] font-bold text-white shadow-xs ring-2 ring-white">
+            <span className="absolute -right-0.5 -top-0.5 grid min-w-4 px-1 h-4 place-items-center rounded-full bg-[#ff5c75] text-[9px] font-bold text-white shadow-xs ring-2 ring-white dark:ring-[#14161f]">
               {unreadCount}
             </span>
           )}
@@ -932,21 +966,18 @@ function Header({
         <div className="relative">
           <button
             onClick={() => setProfileDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-2.5 py-1.5 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
+            className="flex items-center gap-2 rounded-full border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#1c202c] pl-1.5 pr-3 py-1 shadow-2xs hover:bg-slate-50 dark:hover:bg-[#222636] transition cursor-pointer"
             aria-label="Current user profile"
           >
             <div className={cn(
-              'grid size-6.5 place-items-center rounded-md text-[10px] font-bold text-white shadow-xs',
-              currentUser.role === 'super_admin' ? 'bg-purple-600' : currentUser.role === 'reviewer' ? 'bg-emerald-600' : 'bg-blue-600'
+              'grid size-7 place-items-center rounded-full text-[10px] font-bold text-white shadow-xs',
+              currentUser.role === 'super_admin' ? 'bg-purple-600' : currentUser.role === 'reviewer' ? 'bg-emerald-600' : 'bg-[#2f80ed]'
             )}>
               {currentUser.initials}
             </div>
             <div className="hidden text-left sm:block">
               <div className="text-xs font-semibold leading-tight text-slate-900 dark:text-white flex items-center gap-1.5">
-                <span className="truncate max-w-[120px]">{currentUser.name}</span>
-                <span className="rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-1.5 py-0.2 text-[9px] font-medium text-slate-600 dark:text-slate-300">
-                  {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role === 'reviewer' ? 'Reviewer' : 'Agency Rep'}
-                </span>
+                <span className="truncate max-w-[110px]">{currentUser.name}</span>
               </div>
             </div>
             <ChevronDown className="size-3 text-slate-400" />
@@ -1229,25 +1260,84 @@ function StatusPill({ status }: { status: AssetStatus | 'Active' | 'Inactive' | 
   }
 }
 
+function CircularProgressRing({
+  percentage,
+  size = 56,
+  strokeWidth = 5.5,
+  color = '#2f80ed',
+  trackColor = 'currentColor',
+  textColor,
+  showLabel = true,
+}: {
+  percentage: number
+  size?: number
+  strokeWidth?: number
+  color?: string
+  trackColor?: string
+  textColor?: string
+  showLabel?: boolean
+}) {
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const validPct = Math.min(100, Math.max(0, percentage))
+  const offset = circumference - (validPct / 100) * circumference
+
+  return (
+    <div className="relative inline-flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="rotate-[-90deg]">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={trackColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          className="opacity-20"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          fill="none"
+          className="transition-all duration-700 ease-out"
+        />
+      </svg>
+      {showLabel && (
+        <span
+          className="absolute text-[11px] font-black tracking-tight"
+          style={{ color: textColor || color }}
+        >
+          {percentage > 0 ? `+${percentage}%` : `${percentage}%`}
+        </span>
+      )}
+    </div>
+  )
+}
+
 function Stat({ icon: Icon, label, value, color, trend }: { icon: any; label: string; value: string | number; color: string; trend: string }) {
   const isPositive = trend.includes('↑') || trend.startsWith('+')
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-slate-300">
+    <div className="group relative overflow-hidden rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between">
-        <div className={cn('grid size-10 place-items-center rounded-lg text-white shadow-xs transition-transform group-hover:scale-105', color)}>
+        <div className={cn('grid size-11 place-items-center rounded-2xl text-white shadow-xs transition-transform group-hover:scale-105', color)}>
           <Icon className="size-5" strokeWidth={2} />
         </div>
         <span className={cn(
-          'inline-flex items-center gap-0.5 rounded-md px-2 py-0.5 text-xs font-medium',
-          isPositive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-slate-100 text-slate-700 border border-slate-200'
+          'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold',
+          isPositive ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40' : 'bg-slate-100 dark:bg-[#222636] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10'
         )}>
           {trend}
         </span>
       </div>
-      <div className="mt-3.5">
-        <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</div>
-        <div className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">{value}</div>
-        <div className="mt-1 text-[11px] text-slate-400 font-medium">vs. previous period</div>
+      <div className="mt-4">
+        <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{label}</div>
+        <div className="mt-1 text-3xl font-black tracking-tight text-slate-900 dark:text-white">{value}</div>
+        <div className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 font-medium">vs. previous period</div>
       </div>
     </div>
   )
@@ -1279,13 +1369,13 @@ function Donut({
     <div
       className="relative grid size-36 place-items-center rounded-full p-1.5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]"
       style={{
-        background: `conic-gradient(#10b981 0% ${lowPct}%, #f59e0b ${lowPct}% ${lowPct + medPct}%, #ef4444 ${lowPct + medPct}% 100%)`,
+        background: `conic-gradient(#10b981 0% ${lowPct}%, #f59e0b ${lowPct}% ${lowPct + medPct}%, #ff5c75 ${lowPct + medPct}% 100%)`,
       }}
     >
-      <div className="grid size-26 place-items-center rounded-full bg-white dark:bg-slate-900 text-center shadow-xs border border-slate-100 dark:border-slate-800">
+      <div className="grid size-26 place-items-center rounded-full bg-white dark:bg-[#1c202c] text-center shadow-xs border border-slate-100 dark:border-white/10">
         <div>
-          <div className="text-2xl font-bold text-slate-900 tracking-tight">{total}</div>
-          <div className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Total Assets</div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{total}</div>
+          <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Total Assets</div>
         </div>
       </div>
     </div>
@@ -1293,7 +1383,7 @@ function Donut({
 }
 
 // -------------------------------------------------------------
-// DASHBOARD COMPONENT
+// DASHBOARD COMPONENT (Ultra-Modern UI Inspiration Transformation)
 // -------------------------------------------------------------
 function Dashboard({
   setActiveNav,
@@ -1302,6 +1392,7 @@ function Dashboard({
 }) {
   const { assets, allAssets, stats, globalStats, categories, activities, currentUser, isGlobalViewer, userAgency, rightsRecords, approvals } = useLovetoonsData()
   const [query, setQuery] = useState('')
+  const [chartTimeframe, setChartTimeframe] = useState<'This Year' | 'This Week' | 'Today'>('This Year')
 
   const filtered = useMemo(
     () =>
@@ -1317,358 +1408,466 @@ function Dashboard({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat
-          icon={Boxes}
-          label="Total Catalogued IP"
-          value={stats.totalAssets}
-          color="bg-slate-900 dark:bg-slate-800"
-          trend={`${categories.length} Categories`}
-        />
-        <Stat
-          icon={ShieldCheck}
-          label="Low Risk IP"
-          value={riskMetrics.lowCount}
-          color="bg-emerald-600"
-          trend={`${riskMetrics.lowPct}% Baseline Secure`}
-        />
-        <Stat
-          icon={Clock3}
-          label="Moderate Exposure"
-          value={riskMetrics.mediumCount}
-          color="bg-amber-600"
-          trend={`${riskMetrics.mediumPct}% Review / Pre-Launch`}
-        />
-        <Stat
-          icon={AlertCircle}
-          label="High & Critical Exposure"
-          value={riskMetrics.criticalCount + riskMetrics.highCount}
-          color="bg-rose-600"
-          trend={`${riskMetrics.criticalPct + riskMetrics.highPct}% Documentation Required`}
-        />
+      {/* ROW 1: TOP 3 METRIC CARDS (Direct UI Inspiration from Screenshot) */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Card 1: Total Assets with Circular Progress Donut */}
+        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between">
+          <div className="space-y-1.5">
+            <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Total Assets Registered
+            </div>
+            <div className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              {stats.totalAssets}
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="size-1.5 rounded-full bg-emerald-500" />
+              <span>+12% vs. last month</span>
+            </div>
+          </div>
+          <CircularProgressRing percentage={70} color="#2f80ed" trackColor="#94a3b8" />
+        </div>
+
+        {/* Card 2: Hero Solid Electric Blue Card (Hero feature in screenshot) */}
+        <div className="rounded-3xl bg-gradient-to-br from-[#2f80ed] to-[#1c6bd9] text-white p-6 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between relative overflow-hidden">
+          {/* Subtle ambient ring */}
+          <div className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full bg-white/10 blur-xl" />
+          <div className="space-y-1.5 relative z-10">
+            <div className="text-[11px] font-bold text-blue-100 uppercase tracking-wider">
+              Active & Cleared IP
+            </div>
+            <div className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+              {riskMetrics.lowCount}
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-blue-100">
+              <span className="size-1.5 rounded-full bg-white" />
+              <span>Vested in ministry leadership</span>
+            </div>
+          </div>
+          <div className="relative z-10">
+            <CircularProgressRing percentage={60} color="#ffffff" trackColor="#ffffff" textColor="#ffffff" />
+          </div>
+        </div>
+
+        {/* Card 3: Pending Approvals with Coral Rose Progress Donut */}
+        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between sm:col-span-2 lg:col-span-1">
+          <div className="space-y-1.5">
+            <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Pending Reviews & Approvals
+            </div>
+            <div className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              {stats.pendingApprovalsCount}
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#ff5c75]">
+              <span className="size-1.5 rounded-full bg-[#ff5c75]" />
+              <span>Action required by legal counsel</span>
+            </div>
+          </div>
+          <CircularProgressRing percentage={40} color="#ff5c75" trackColor="#94a3b8" />
+        </div>
       </div>
 
-      {/* Portfolio Risk & Governance Exposure At-A-Glance Card */}
-      <section className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/80 p-5 shadow-xs transition-all backdrop-blur-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-white/5">
-          <div className="flex items-center gap-3">
-            {/* <div className="grid size-9 place-items-center rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 shadow-2xs">
-              <ShieldCheck className="size-4.5" />
-            </div> */}
-            {/* <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Portfolio Risk & Governance Exposure</h3>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-700/60 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                  {riskMetrics.lowPct}% Low Risk
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Independent intellectual asset liability & title exposure matrix</p>
-            </div> */}
-          </div>
-          {setActiveNav && (
-            <button
-              onClick={() => setActiveNav('Reports')}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/90 px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 hover:border-slate-300 dark:hover:border-white/20 transition group self-start sm:self-auto cursor-pointer"
-            >
-              <span>View Full Risk Audit</span>
-              <ArrowRight className="size-3 text-slate-500 dark:text-slate-400 group-hover:translate-x-0.5 group-hover:text-slate-900 dark:group-hover:text-white transition" />
-            </button>
-          )}
-        </div>
-
-        {/* Visual Multi-Segment Exposure Meter */}
-        <div className="pt-4 space-y-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-medium text-slate-600 dark:text-slate-400">Exposure Profile Distribution</span>
-            <span className="font-semibold text-slate-900 dark:text-slate-100">
-              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{riskMetrics.lowPct}% Low Risk</span>
-              <span className="text-slate-400 dark:text-slate-600 mx-1.5">·</span>
-              <span className="text-blue-600 dark:text-blue-400 font-semibold">{riskMetrics.mediumPct}% Moderate</span>
-              <span className="text-slate-400 dark:text-slate-600 mx-1.5">·</span>
-              <span className="text-amber-600 dark:text-amber-400 font-semibold">{riskMetrics.highPct}% High</span>
-              <span className="text-slate-400 dark:text-slate-600 mx-1.5">·</span>
-              <span className="text-rose-600 dark:text-rose-400 font-semibold">{riskMetrics.criticalPct}% Critical</span>
-            </span>
-          </div>
-
-          {/* Stacked Progress Bar */}
-          <div className="h-3 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden flex shadow-inner border border-slate-200/40 dark:border-white/5">
-            <div
-              style={{ width: `${riskMetrics.lowPct}%` }}
-              className="h-full bg-emerald-500 transition-all hover:opacity-90"
-              title={`Low Risk: ${riskMetrics.lowCount} assets (${riskMetrics.lowPct}%)`}
-            />
-            <div
-              style={{ width: `${riskMetrics.mediumPct}%` }}
-              className="h-full bg-blue-500 transition-all hover:opacity-90"
-              title={`Moderate Risk: ${riskMetrics.mediumCount} assets (${riskMetrics.mediumPct}%)`}
-            />
-            <div
-              style={{ width: `${riskMetrics.highPct}%` }}
-              className="h-full bg-amber-500 transition-all hover:opacity-90"
-              title={`High Exposure: ${riskMetrics.highCount} assets (${riskMetrics.highPct}%)`}
-            />
-            <div
-              style={{ width: `${riskMetrics.criticalPct}%` }}
-              className="h-full bg-rose-500 transition-all hover:opacity-90"
-              title={`Critical Exposure: ${riskMetrics.criticalCount} assets (${riskMetrics.criticalPct}%)`}
-            />
-          </div>
-
-          {/* 4 Interactive Risk Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
-            <div className="p-3.5 rounded-xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/30 transition-all hover:border-emerald-200 dark:hover:border-emerald-500/40">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-                <span>Low Risk</span>
-                <span className="size-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-xs shadow-emerald-500/50" />
-              </div>
-              <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mt-1.5 tracking-tight">{riskMetrics.lowCount}</div>
-              <div className="text-[11px] text-emerald-700/90 dark:text-emerald-300/80 mt-0.5 font-medium">In-house liturgy & clean archives</div>
-            </div>
-
-            <div className="p-3.5 rounded-xl border border-blue-100 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/30 transition-all hover:border-blue-200 dark:hover:border-blue-500/40">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-blue-800 dark:text-blue-300">
-                <span>Moderate Risk</span>
-                <span className="size-2 rounded-full bg-blue-500 dark:bg-blue-400 shadow-xs shadow-blue-500/50" />
-              </div>
-              <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 mt-1.5 tracking-tight">{riskMetrics.mediumCount}</div>
-              <div className="text-[11px] text-blue-700/90 dark:text-blue-300/80 mt-0.5 font-medium">Books, podcasts, audio & pre-launch</div>
-            </div>
-
-            <div className="p-3.5 rounded-xl border border-amber-100 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/30 transition-all hover:border-amber-200 dark:hover:border-amber-500/40">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 dark:text-amber-300">
-                <span>High Exposure</span>
-                <span className="size-2 rounded-full bg-amber-500 dark:bg-amber-400 shadow-xs shadow-amber-500/50" />
-              </div>
-              <div className="text-2xl font-bold text-amber-900 dark:text-amber-100 mt-1.5 tracking-tight">{riskMetrics.highCount}</div>
-              <div className="text-[11px] text-amber-700/90 dark:text-amber-300/80 mt-0.5 font-medium">Broadcast IP missing talent releases</div>
-            </div>
-
-            <div className="p-3.5 rounded-xl border border-rose-100 dark:border-rose-500/20 bg-rose-50/50 dark:bg-rose-950/30 transition-all hover:border-rose-200 dark:hover:border-rose-500/40">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-rose-800 dark:text-rose-300">
-                <span>Critical Exposure</span>
-                <span className="size-2 rounded-full bg-rose-500 dark:bg-rose-400 shadow-xs shadow-rose-500/50" />
-              </div>
-              <div className="text-2xl font-bold text-rose-900 dark:text-rose-100 mt-1.5 tracking-tight">{riskMetrics.criticalCount}</div>
-              <div className="text-[11px] text-rose-700/90 dark:text-rose-300/80 mt-0.5 font-medium">Commercial products / flagship syndication</div>
-            </div>
-          </div>
-
-          <div className="flex items-start sm:items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-            <CircleHelp className="size-3.5 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5 sm:mt-0" />
-            <span>
-              <strong className="text-slate-700 dark:text-slate-300">Schedule Legal Guidance:</strong> Intellectual asset risk is evaluated independently per asset based on documentation completeness, public liability surface, and distribution reach. Discontinued assets carry low active liability, while active broadcast and commercial assets require attached chain of title deeds.
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <div className="grid gap-5 xl:grid-cols-[1.6fr_.8fr]">
-        <section className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="mb-4 flex items-center justify-between">
+      {/* ROW 2: DUAL-WAVE VELOCITY CHART & GREETING / PRIORITY RAIL */}
+      <div className="grid gap-6 xl:grid-cols-[1.6fr_.8fr]">
+        {/* Left Column: Intellectual Asset Activity & Velocity Dual-Wave Area Chart */}
+        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-6">
+          {/* Card Header with Time Filters */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-slate-900 text-sm">Assets by Category</h2>
-              <p className="text-xs text-slate-500">Distribution across active content streams</p>
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+                IP Pipeline & Activity Velocity
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Registration, title clearance, and legal throughput
+              </p>
             </div>
-            <span className="rounded-md bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-              {categories.length} Categories
-            </span>
+
+            {/* Time Filter Pill Buttons + Download Report Button */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center bg-slate-100 dark:bg-[#14161f] p-1 rounded-full border border-slate-200/80 dark:border-white/10 text-xs">
+                {(['This Year', 'This Week', 'Today'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setChartTimeframe(t)}
+                    className={cn(
+                      'px-3 py-1 rounded-full font-semibold transition text-xs cursor-pointer',
+                      chartTimeframe === t
+                        ? 'bg-[#2f80ed] text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              {setActiveNav && (
+                <button
+                  onClick={() => setActiveNav('Reports')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#222636] text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#293044] transition cursor-pointer"
+                  title="Download executive governance report"
+                >
+                  <Download className="size-3.5 text-slate-500 dark:text-slate-400" />
+                  <span className="hidden sm:inline">Download Report</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex h-56 items-end justify-between gap-2 border-b border-slate-100 px-2 pb-2">
-            {categories.slice(0, 8).map((cat, i) => {
-              const count = assets.filter((a) => a.category === cat.name).length
-              const heightPct = Math.max(10, Math.min(100, (count / Math.max(1, assets.length)) * 250))
-              return (
-                <div key={cat.id} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5 group">
-                  <span className="text-xs font-semibold text-slate-800 group-hover:scale-110 transition">{count}</span>
-                  <div
-                    className={cn(
-                      'w-full max-w-7 rounded-t-sm transition-all group-hover:brightness-110 shadow-2xs',
-                      ['bg-slate-900', 'bg-indigo-600', 'bg-blue-600', 'bg-emerald-600', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-600', 'bg-violet-600'][i % 8]
-                    )}
-                    style={{ height: `${heightPct}%` }}
-                  />
-                  <span className="text-[10px] font-medium text-slate-500 truncate max-w-[65px] text-center mt-1" title={cat.name}>
-                    {cat.name.split(' ')[0]}
-                  </span>
+          {/* Dual-Wave Smooth SVG Area Chart */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 pb-1">
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-[#2f80ed]" />
+                <span className="text-slate-700 dark:text-slate-300 font-bold">Catalogued IP Assets</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-[#ff5c75]" />
+                <span className="text-slate-700 dark:text-slate-300 font-bold">Cleared Deeds & Title</span>
+              </span>
+            </div>
+
+            <div className="relative h-48 w-full overflow-hidden rounded-2xl bg-slate-50/50 dark:bg-[#14161f]/50 p-2 border border-slate-100 dark:border-white/5">
+              <svg viewBox="0 0 800 200" preserveAspectRatio="none" className="h-full w-full">
+                <defs>
+                  <linearGradient id="gradient-wave-blue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#2f80ed" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#2f80ed" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="gradient-wave-coral" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ff5c75" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#ff5c75" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+                {/* Grid guidelines */}
+                <line x1="0" y1="50" x2="800" y2="50" stroke="currentColor" className="text-slate-200 dark:text-white/5" strokeDasharray="4 4" />
+                <line x1="0" y1="100" x2="800" y2="100" stroke="currentColor" className="text-slate-200 dark:text-white/5" strokeDasharray="4 4" />
+                <line x1="0" y1="150" x2="800" y2="150" stroke="currentColor" className="text-slate-200 dark:text-white/5" strokeDasharray="4 4" />
+
+                {/* Primary Wave 1: Electric Blue Area */}
+                <path
+                  d="M 0 140 C 60 120, 100 80, 160 95 C 220 110, 260 50, 320 70 C 380 90, 420 35, 500 50 C 560 65, 600 25, 660 45 C 720 65, 760 30, 800 35 L 800 200 L 0 200 Z"
+                  fill="url(#gradient-wave-blue)"
+                />
+                <path
+                  d="M 0 140 C 60 120, 100 80, 160 95 C 220 110, 260 50, 320 70 C 380 90, 420 35, 500 50 C 560 65, 600 25, 660 45 C 720 65, 760 30, 800 35"
+                  fill="none"
+                  stroke="#2f80ed"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+
+                {/* Secondary Wave 2: Coral Rose Area */}
+                <path
+                  d="M 0 160 C 70 150, 120 120, 180 130 C 240 140, 280 95, 340 110 C 400 125, 440 80, 520 90 C 580 100, 620 60, 680 75 C 740 90, 770 65, 800 70 L 800 200 L 0 200 Z"
+                  fill="url(#gradient-wave-coral)"
+                />
+                <path
+                  d="M 0 160 C 70 150, 120 120, 180 130 C 240 140, 280 95, 340 110 C 400 125, 440 80, 520 90 C 580 100, 620 60, 680 75 C 740 90, 770 65, 800 70"
+                  fill="none"
+                  stroke="#ff5c75"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+
+            {/* Month labels */}
+            <div className="flex justify-between px-2 pt-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500">
+              {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m) => (
+                <span key={m}>{m}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Horizontal Pipeline Progress Bars (5 metrics from inspiration) */}
+          <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-white/5">
+            <div className="text-xs font-bold text-slate-900 dark:text-white">
+              Portfolio Pipeline Distribution
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+              {/* Metric 1 */}
+              <div className="p-3 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-500/20">
+                <div className="flex justify-between text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
+                  <span>Cleared</span>
+                  <span>{riskMetrics.lowPct}%</span>
                 </div>
-              )
-            })}
+                <div className="mt-2 h-1.5 w-full rounded-full bg-emerald-200/60 dark:bg-emerald-900/40 overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${riskMetrics.lowPct}%` }} />
+                </div>
+              </div>
+
+              {/* Metric 2 */}
+              <div className="p-3 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-500/20">
+                <div className="flex justify-between text-[11px] font-bold text-blue-800 dark:text-blue-300">
+                  <span>In Review</span>
+                  <span>{riskMetrics.mediumPct}%</span>
+                </div>
+                <div className="mt-2 h-1.5 w-full rounded-full bg-blue-200/60 dark:bg-blue-900/40 overflow-hidden">
+                  <div className="h-full bg-[#2f80ed] rounded-full" style={{ width: `${riskMetrics.mediumPct}%` }} />
+                </div>
+              </div>
+
+              {/* Metric 3 */}
+              <div className="p-3 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-500/20">
+                <div className="flex justify-between text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                  <span>Pre-Launch</span>
+                  <span>{riskMetrics.highPct}%</span>
+                </div>
+                <div className="mt-2 h-1.5 w-full rounded-full bg-amber-200/60 dark:bg-amber-900/40 overflow-hidden">
+                  <div className="h-full bg-amber-500 rounded-full" style={{ width: `${riskMetrics.highPct}%` }} />
+                </div>
+              </div>
+
+              {/* Metric 4 */}
+              <div className="p-3 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-500/20">
+                <div className="flex justify-between text-[11px] font-bold text-rose-800 dark:text-rose-300">
+                  <span>Documentation</span>
+                  <span>{riskMetrics.criticalPct}%</span>
+                </div>
+                <div className="mt-2 h-1.5 w-full rounded-full bg-rose-200/60 dark:bg-rose-900/40 overflow-hidden">
+                  <div className="h-full bg-[#ff5c75] rounded-full" style={{ width: `${riskMetrics.criticalPct}%` }} />
+                </div>
+              </div>
+
+              {/* Metric 5 */}
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/10">
+                <div className="flex justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                  <span>Discontinued</span>
+                  <span>{Math.max(0, 100 - riskMetrics.lowPct - riskMetrics.mediumPct - riskMetrics.highPct - riskMetrics.criticalPct)}%</span>
+                </div>
+                <div className="mt-2 h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                  <div
+                    className="h-full bg-slate-400 rounded-full"
+                    style={{ width: `${Math.max(0, 100 - riskMetrics.lowPct - riskMetrics.mediumPct - riskMetrics.highPct - riskMetrics.criticalPct)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: User Welcome & Action Banner + Priority Submissions */}
+        <div className="space-y-6">
+          {/* Greeting Hero Card (Matching inspiration's "Hello John Bayer..." card) */}
+          <div className="rounded-3xl p-6 bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white dark:from-[#22293d] dark:to-[#171a25] border border-blue-100 dark:border-white/10 shadow-sm relative overflow-hidden space-y-4">
+            <div className="pointer-events-none absolute -right-6 -bottom-6 size-32 rounded-full bg-blue-500/10 blur-xl" />
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-3 py-1 text-[11px] font-bold">
+                  <Sparkles className="size-3" />
+                  <span>KMM Portal Overview</span>
+                </span>
+                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2.5">
+                  Hello, {currentUser.name}!
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                  You have <strong className="text-[#2f80ed] font-bold">{stats.pendingApprovalsCount} Approvals & Review Tasks</strong> pending your clearance today.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setActiveNav && setActiveNav('Approvals')}
+              className="inline-flex items-center gap-2 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2 transition shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+            >
+              <span>Review Approvals Now</span>
+              <ArrowRight className="size-3.5" />
+            </button>
+          </div>
+
+          {/* Priority Review Submissions Card */}
+          <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                  Priority Submissions
+                </h3>
+                <p className="text-[11px] text-slate-400">Queue awaiting clearance</p>
+              </div>
+              {setActiveNav && (
+                <button
+                  onClick={() => setActiveNav('Approvals')}
+                  className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer"
+                >
+                  View All
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-2.5">
+              {filtered.slice(0, 4).map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => setActiveNav && setActiveNav('Assets', item.id)}
+                  className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-3 cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <AssetThumbnail type={item.thumbType} name={item.name} posterUrl={item.posterUrl} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#2f80ed] transition">
+                        {item.name}
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate">
+                        {item.category} • {item.agency}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="size-4 text-slate-400 group-hover:translate-x-0.5 group-hover:text-[#2f80ed] transition shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ROW 3: RECENT ASSETS TABLE & PORTFOLIO COMPLIANCE BREAKDOWN */}
+      <div className="grid gap-6 xl:grid-cols-[1.6fr_.8fr]">
+        {/* Left Column: Recent Registered Assets */}
+        <section className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-extrabold text-slate-900 dark:text-white text-sm">
+                Recent Registered Assets
+              </h2>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                {isGlobalViewer ? 'Latest intellectual property assets registered across all agencies' : `Latest assets for ${currentUser.agency}`}
+              </p>
+            </div>
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-2.5 size-3.5 text-slate-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="h-8.5 w-full rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-[#14161f] pl-8.5 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-[#2f80ed] focus:ring-1 focus:ring-[#2f80ed] transition text-slate-800 dark:text-white"
+                placeholder="Search recent assets..."
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-xs">
+              <thead>
+                <tr className="bg-slate-50/75 dark:bg-[#171a24] text-slate-400 font-semibold border-b border-slate-100 dark:border-white/5 text-[10px] uppercase tracking-wider">
+                  <th className="px-5 py-3">Asset</th>
+                  <th className="px-4 py-3">Category</th>
+                  <th className="px-4 py-3">Agency</th>
+                  <th className="px-4 py-3">Risk & Compliance</th>
+                  <th className="px-4 py-3">Created On</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                {filtered.slice(0, 6).map((item) => {
+                  const assessment = getAssetRiskAssessment(item, rightsRecords, approvals)
+                  return (
+                    <tr
+                      key={item.id}
+                      onClick={() => {
+                        if (setActiveNav) {
+                          setActiveNav('Assets', item.id)
+                        }
+                      }}
+                      className="hover:bg-slate-50/80 dark:hover:bg-[#222636] cursor-pointer transition-colors group"
+                      title={`Click to view ${item.name} details`}
+                    >
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <AssetThumbnail type={item.thumbType} name={item.name} posterUrl={item.posterUrl} />
+                          <div className="space-y-0.5 min-w-0">
+                            <div className="font-bold text-slate-900 dark:text-white group-hover:text-[#2f80ed] transition flex items-center gap-1.5 text-xs">
+                              <span className="truncate max-w-[200px]">{item.name}</span>
+                              <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 text-[#2f80ed] transition shrink-0" />
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-mono">{item.id}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-700 dark:text-slate-300 font-medium">
+                        <div>{item.category}</div>
+                        <div className="text-[10px] text-slate-400">{item.subcategory}</div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className="rounded-full bg-slate-100 dark:bg-[#222636] border border-slate-200/80 dark:border-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
+                          {item.agency || item.unit}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold border shadow-2xs',
+                            assessment.riskBadgeColor
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'size-1.5 rounded-full',
+                              assessment.level === 'Low'
+                                ? 'bg-emerald-500'
+                                : assessment.level === 'Medium'
+                                  ? 'bg-amber-500'
+                                  : 'bg-rose-500'
+                            )}
+                          />
+                          <span>{assessment.level} Risk</span>
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-400 font-medium text-[11px]">
+                        {item.createdDate}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="font-semibold text-slate-900 text-sm">Portfolio Compliance Breakdown</h2>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
-              {riskMetrics.lowPct}% Low Risk
+        {/* Right Column: Portfolio Compliance Breakdown */}
+        <section className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-extrabold text-slate-900 dark:text-white text-sm">
+              Portfolio Title & Compliance
+            </h2>
+            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/40">
+              {riskMetrics.lowPct}% Secure
             </span>
           </div>
-          <p className="text-xs text-slate-500 mb-3">Independent risk & title distribution</p>
-          <div className="flex items-center justify-center gap-5 py-2">
+          <p className="text-xs text-slate-400">
+            Chain of title & risk distribution across agencies
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-4">
             <Donut
               low={riskMetrics.lowCount}
               medium={riskMetrics.mediumCount}
               high={riskMetrics.criticalCount + riskMetrics.highCount}
             />
-            <div className="space-y-3 text-xs text-slate-700 font-medium">
-              <div className="flex items-center justify-between gap-3">
-                <span className="flex items-center gap-1.5 text-slate-600">
-                  <span className="size-2 rounded-full bg-emerald-500" />
-                  Low Risk IP
+            <div className="space-y-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <div className="flex items-center justify-between gap-4">
+                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                  <span className="size-2.5 rounded-full bg-emerald-500" />
+                  Low Risk Assets
                 </span>
-                <b className="text-slate-900 font-semibold">{riskMetrics.lowCount}</b>
+                <b className="text-slate-900 dark:text-white">{riskMetrics.lowCount}</b>
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="flex items-center gap-1.5 text-slate-600">
-                  <span className="size-2 rounded-full bg-amber-400" />
+              <div className="flex items-center justify-between gap-4">
+                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                  <span className="size-2.5 rounded-full bg-amber-400" />
                   Moderate Risk
                 </span>
-                <b className="text-slate-900 font-semibold">{riskMetrics.mediumCount}</b>
+                <b className="text-slate-900 dark:text-white">{riskMetrics.mediumCount}</b>
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="flex items-center gap-1.5 text-slate-600">
-                  <span className="size-2 rounded-full bg-rose-500" />
-                  High & Critical
+              <div className="flex items-center justify-between gap-4">
+                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                  <span className="size-2.5 rounded-full bg-[#ff5c75]" />
+                  High / Critical
                 </span>
-                <b className="text-slate-900 font-semibold">{riskMetrics.criticalCount + riskMetrics.highCount}</b>
+                <b className="text-slate-900 dark:text-white">{riskMetrics.criticalCount + riskMetrics.highCount}</b>
               </div>
             </div>
           </div>
         </section>
       </div>
-
-      <section className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-        <div className="p-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-semibold text-slate-900 text-sm">Recent Registered Assets</h2>
-            <p className="text-[11px] text-slate-500">
-              {isGlobalViewer ? 'Latest intellectual property assets registered across all agencies' : `Latest assets for ${currentUser.agency}`}
-            </p>
-          </div>
-          <div className="relative w-64">
-            <Search className="absolute left-2.5 top-2.5 size-3.5 text-slate-400" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="h-8.5 w-full rounded-lg border border-slate-200 bg-slate-50/70 pl-8 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:ring-1 focus:ring-slate-300 transition"
-              placeholder="Search recent assets..."
-            />
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-xs">
-            <thead>
-              <tr className="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
-                <th className="px-4 py-3">Asset</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Subcategory</th>
-                <th className="px-4 py-3">Agency</th>
-                <th className="px-4 py-3">Contributors</th>
-                <th className="px-4 py-3">Risk & Compliance</th>
-                <th className="px-4 py-3">Created On</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.slice(0, 6).map((item) => (
-                <tr
-                  key={item.id}
-                  onClick={() => {
-                    if (setActiveNav) {
-                      setActiveNav('Assets', item.id)
-                    }
-                  }}
-                  className="hover:bg-slate-50/80 cursor-pointer transition-colors group"
-                  title={`Click to view ${item.name} details`}
-                >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <AssetThumbnail type={item.thumbType} name={item.name} posterUrl={item.posterUrl} />
-                      <div className="space-y-1">
-                        <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition flex items-center gap-1 text-xs">
-                          <span>{item.name}</span>
-                          <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 text-blue-600 transition shrink-0" />
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-mono mt-1">{item.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700 font-medium">{item.category}</td>
-                  <td className="px-4 py-3 text-slate-500">{item.subcategory}</td>
-                  <td className="px-4 py-3">
-                    <span className="rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-700">
-                      {item.agency || item.unit}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    {item.contributors && item.contributors.length > 0 ? (
-                      <div className="flex items-center -space-x-1.5" title={`${item.contributors.length} staff contributor(s)`}>
-                        {item.contributors.slice(0, 3).map((c, i) => (
-                          <div
-                            key={c.id || i}
-                            className="grid size-6 place-items-center rounded-full bg-slate-800 text-[9px] font-bold text-white ring-2 ring-white"
-                            title={`${c.name} (${c.role})`}
-                          >
-                            {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'ST'}
-                          </div>
-                        ))}
-                        {item.contributors.length > 3 && (
-                          <div className="grid size-6 place-items-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-600 ring-2 ring-white">
-                            +{item.contributors.length - 3}
-                          </div>
-                        )}
-                      </div>
-                    ) : item.creatorName ? (
-                      <div className="flex items-center gap-1.5" title={item.creatorName}>
-                        <div className="grid size-6 place-items-center rounded-full bg-slate-800 text-[9px] font-bold text-white">
-                          {item.creatorName.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <span className="text-[10px] text-slate-600 font-medium truncate max-w-[80px]">{item.creatorName}</span>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] text-slate-400 italic">No contributors</span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    {(() => {
-                      const assessment = getAssetRiskAssessment(item, rightsRecords, approvals)
-                      return (
-                        <div className="flex flex-col gap-1 items-start">
-                          <span
-                            className={cn(
-                              'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold border shadow-2xs',
-                              assessment.riskBadgeColor
-                            )}
-                          >
-                            <span
-                              className={cn(
-                                'size-1.5 rounded-full',
-                                assessment.level === 'Low'
-                                  ? 'bg-emerald-500'
-                                  : assessment.level === 'Medium'
-                                    ? 'bg-amber-500'
-                                    : 'bg-rose-500'
-                              )}
-                            />
-                            <span>{assessment.level} Risk · {100 - assessment.score}% Compliant</span>
-                          </span>
-                          <span className="text-[9px] text-slate-400 font-medium truncate max-w-[140px]">
-                            {item.status} · {assessment.category}
-                          </span>
-                        </div>
-                      )
-                    })()}
-                  </td>
-                  <td className="p-3 text-slate-500 font-medium text-[11px]">{item.createdDate}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div >
+    </div>
   )
 }
 
@@ -9011,7 +9210,7 @@ export function MainApp({
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-slate-900 selection:bg-slate-900 selection:text-white">
+    <div className="min-h-screen bg-[#f5f6fa] dark:bg-[#14161f] text-slate-900 dark:text-slate-100 selection:bg-[#2f80ed] selection:text-white">
       {/* Glossy System Toast Notification */}
       {toastMessage && (
         <aside

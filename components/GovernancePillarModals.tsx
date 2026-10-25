@@ -248,7 +248,7 @@ export function GovernancePillarModal({
       }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
     >
-      <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[92vh] overflow-y-auto cursor-default">
+      <div className="w-full max-w-xl rounded-3xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-[#1c202c] p-6 shadow-2xl text-xs max-h-[92vh] overflow-y-auto cursor-default">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
           <div className="flex items-center gap-3">
@@ -668,7 +668,7 @@ export function GovernancePillarModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/15 dark:text-slate-300 dark:hover:bg-slate-800 text-xs transition cursor-pointer"
+              className="rounded-full border border-slate-200 dark:border-white/15 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/5 text-xs transition cursor-pointer"
             >
               Cancel
             </button>
@@ -676,7 +676,7 @@ export function GovernancePillarModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 font-bold text-white shadow-md shadow-blue-600/25 hover:from-blue-700 hover:to-indigo-700 text-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-50"
+              className="rounded-full bg-[#2f80ed] hover:bg-[#256fd1] px-5 py-2 font-bold text-white shadow-md shadow-blue-500/25 text-xs flex items-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <span>Submitting Approval...</span>

@@ -158,7 +158,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-slate-50/80 text-foreground antialiased;
+    @apply bg-[#f5f6fa] text-foreground antialiased;
     font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
@@ -182,12 +182,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  background: rgba(100, 116, 139, 0.55);
 }
 
 @keyframes toastProgress {
@@ -204,20 +204,20 @@
 }
 
 /* ==========================================================================
-   Comprehensive Dark Theme Design System & Surface Overrides
+   Comprehensive UI Inspiration Theme Tokens (#14161f / #1c202c / #2f80ed)
    ========================================================================== */
 .dark {
   color-scheme: dark;
 }
 
 .dark body {
-  background-color: #0b0f17 !important;
+  background-color: #14161f !important;
   color: #f8fafc !important;
 }
 
-/* Base Surfaces & Elevation Hierarchy */
+/* Base Surfaces & Modular Card Grid (Level 1 Elevation) */
 .dark .bg-white {
-  background-color: #111827 !important;
+  background-color: #1c202c !important;
 }
 
 /* Secondary Panels, Filter Bars, Insets, Table Headers (Level 2 Elevation) */
@@ -235,7 +235,7 @@
 .dark .bg-\[\#f4faff\],
 .dark .bg-\[\#f1f3f5\],
 .dark .bg-\[\#f8fafc\] {
-  background-color: #162032 !important;
+  background-color: #171a24 !important;
 }
 
 .dark [class*="bg-slate-100"],
@@ -243,14 +243,14 @@
 .dark .bg-slate-100\/60,
 .dark .bg-slate-100\/70,
 .dark .bg-slate-100\/80 {
-  background-color: #1c283d !important;
+  background-color: #212636 !important;
 }
 
 .dark [class*="bg-slate-200"],
 .dark .bg-slate-200,
 .dark .bg-slate-200\/50,
 .dark .bg-slate-200\/60 {
-  background-color: #273752 !important;
+  background-color: #293044 !important;
 }
 
 /* Header & Top Navigation Bar in Dark Mode */
@@ -258,7 +258,7 @@
 .dark [role="banner"],
 .dark nav.sticky,
 .dark .sticky.top-0 {
-  background-color: rgba(11, 15, 23, 0.88) !important;
+  background-color: rgba(20, 22, 31, 0.92) !important;
   backdrop-filter: blur(16px) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
@@ -266,7 +266,7 @@
 /* Sidebar in Dark Mode */
 .dark aside,
 .dark [data-sidebar="sidebar"] {
-  background-color: #0d131f !important;
+  background-color: #181a24 !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -277,13 +277,13 @@
 
 .dark aside a:hover,
 .dark aside button:hover {
-  background-color: #1a253a !important;
+  background-color: #222636 !important;
   color: #ffffff !important;
 }
 
 .dark aside a:hover svg,
 .dark aside button:hover svg {
-  color: #60a5fa !important;
+  color: #2f80ed !important;
 }
 
 /* Base Text Colors */
@@ -596,9 +596,9 @@
 .dark .absolute.right-0.bg-white,
 .dark .absolute.bg-white,
 .dark .modal-content {
-  background-color: #111827 !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  background-color: #1c202c !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Status Badges & Semantic Pills */
@@ -642,4 +642,28 @@
   color: #c084fc !important;
   border-color: rgba(168, 85, 247, 0.35) !important;
 }
+
+/* ==========================================================================
+   Modular Inspiration Design System Utility Classes
+   ========================================================================== */
+.kmm-card {
+  @apply rounded-3xl bg-white dark:bg-[#1c202c] border border-slate-200/80 dark:border-white/[0.08] shadow-sm transition-all duration-200;
+}
+
+.kmm-card-hero {
+  @apply rounded-3xl bg-gradient-to-br from-[#2f80ed] to-[#1c6bd9] text-white shadow-lg shadow-blue-500/25 p-6;
+}
+
+.kmm-btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2 transition-all shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer;
+}
+
+.kmm-btn-coral {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-full bg-[#ff5c75] hover:bg-[#e04860] text-white text-xs font-semibold px-4 py-2 transition-all shadow-md shadow-rose-500/20 active:scale-98 cursor-pointer;
+}
+
+.kmm-pill-indicator {
+  @apply w-1.5 h-6 rounded-full bg-[#2f80ed] shadow-xs shadow-blue-500/50;
+}
+
 
