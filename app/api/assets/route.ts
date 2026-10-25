@@ -80,7 +80,17 @@ export async function POST(req: NextRequest) {
       createdTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       thumbType = body.thumbType || null,
       posterUrl = body.posterUrl || null,
-      rightsHolder = body.rightsHolder || '',
+      rightsHolder = body.rightsHolder || body.owner || '',
+      owner = body.owner || body.rightsHolder || '',
+      ownerCertificateRef = body.ownerCertificateRef || '',
+      trademarkStatus = body.trademarkStatus || 'Unregistered',
+      distributionLicense = body.distributionLicense || 'None',
+      productionLicensees = body.productionLicensees || 'None',
+      territory = body.territory || 'None',
+      territoryClearanceStatus = body.territoryClearanceStatus || 'None',
+      contentProvenance = body.contentProvenance || 'Fully Custom',
+      songWriter = body.songWriter || '',
+      songWriterProvenance = body.songWriterProvenance || 'Fully Custom',
       description = '',
       tags = [],
       attributes = {},
@@ -91,10 +101,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Asset name is required' }, { status: 400 })
     }
 
+    const hasGovernanceInput = 
+      Boolean(owner && owner !== 'Unassigned' && owner.trim() !== '') ||
+      Boolean(trademarkStatus && trademarkStatus !== 'Unregistered') ||
+      Boolean(distributionLicense && distributionLicense !== 'None') ||
+      Boolean(productionLicensees && productionLicensees !== 'None') ||
+      Boolean(territory && territory !== 'None') ||
+      Boolean(contentProvenance && contentProvenance !== 'Fully Custom') ||
+      Boolean(songWriter && songWriter.trim() !== '')
+
+    const resolvedStatus = hasGovernanceInput ? 'Pending' : status
+    const resolvedClearanceStatus = hasGovernanceInput ? (territoryClearanceStatus === 'None' ? 'Pending Clearance' : territoryClearanceStatus) : territoryClearanceStatus
+
     const assetId = id || `LT-${Date.now().toString().slice(-6)}`
     const tagsJson = JSON.stringify(tags)
     const contributorsJson = JSON.stringify(contributors)
-    const attributesJson = JSON.stringify(attributes)
+    const mergedAttributes = {
+      ...attributes,
+      owner,
+      ownerCertificateRef,
+      trademarkStatus,
+      distributionLicense,
+      productionLicensees,
+      territory,
+      territoryClearanceStatus: resolvedClearanceStatus,
+      contentProvenance,
+      songWriter,
+      songWriterProvenance,
+      requiresGovernanceApproval: hasGovernanceInput,
+    }
+    const attributesJson = JSON.stringify(mergedAttributes)
 
     await sql`
       INSERT INTO assets (
@@ -105,8 +141,8 @@ export async function POST(req: NextRequest) {
       ) VALUES (
         ${assetId}, ${ministryId}, ${name}, ${type}, ${category}, ${categoryGroup}, ${subcategory},
         ${agency}, ${unit}, ${creatorName}, ${creatorRole}, ${creatorSkill}, ${contributorsJson}::jsonb,
-        ${status}, ${createdDate}, ${createdTime}, ${thumbType}, ${posterUrl},
-        ${rightsHolder}, ${description}, ${tagsJson}::jsonb, ${attributesJson}::jsonb, 'pending_cloud_storage'
+        ${resolvedStatus}, ${createdDate}, ${createdTime}, ${thumbType}, ${posterUrl},
+        ${owner || rightsHolder}, ${description}, ${tagsJson}::jsonb, ${attributesJson}::jsonb, 'pending_cloud_storage'
       )
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
@@ -124,24 +160,70 @@ export async function POST(req: NextRequest) {
         updated_at = CURRENT_TIMESTAMP
     `
 
-    // Seed unconfigured rights record for representative to configure subsequently
+    // Seed companion rights record with governance details
     await sql`
       INSERT INTO rights_records (
         id, ministry_id, asset_id, name, rights_type, territory,
         validity, exclusivity, licence_type, royalty_terms, status, governance_score, documents, governance_checks
       ) VALUES (
         ${`rr-${assetId}`}, ${ministryId}, ${assetId}, ${name},
-        NULL, NULL, NULL, NULL, NULL, NULL, 'Pending Review', 0,
+        ${distributionLicense}, ${territory}, 'Perpetual', 'Exclusive', 'Ministerial Title', 'Retained',
+        ${hasGovernanceInput ? 'Pending Review' : 'Draft'}, 0,
         '[]'::jsonb,
         '{}'::jsonb
       )
-      ON CONFLICT (id) DO NOTHING
+      ON CONFLICT (id) DO UPDATE SET
+        rights_type = EXCLUDED.rights_type,
+        territory = EXCLUDED.territory,
+        status = EXCLUDED.status,
+        updated_at = CURRENT_TIMESTAMP
     `
+
+    // If governance input was provided, queue an initial Approval Request
+    if (hasGovernanceInput) {
+      const approvalId = `APP-${assetId}-${Date.now().toString().slice(-4)}`
+      const feedbackNotes = `Initial intake governance review requested: Owner: ${owner || 'Unassigned'}, Trademark: ${trademarkStatus}, License: ${distributionLicense}, Territory: ${territory}`
+      const historyJson = JSON.stringify([
+        {
+          id: `h-${Date.now()}`,
+          step: 1,
+          title: 'Intake Governance Submission',
+          author: creatorName,
+          date: createdDate,
+          time: createdTime,
+          status: 'Pending Clearance',
+          feedback: feedbackNotes,
+        },
+      ])
+
+      await sql`
+        INSERT INTO approvals (
+          id, ministry_id, asset_id, asset_name, category, subcategory,
+          agency, unit, requester_name, requester_role, requester_skill,
+          reviewer_name, stage, current_step, total_steps, status, priority,
+          submitted_date, submitted_time, feedback_notes, history, documents,
+          rights_type, territory, term, exclusivity, licence_type,
+          royalty_terms, description, governance_score
+        ) VALUES (
+          ${approvalId}, ${ministryId}, ${assetId}, ${name}, ${category}, ${subcategory},
+          ${agency}, ${unit}, ${creatorName}, ${creatorRole}, ${creatorSkill},
+          'Faith Daniel', 'Awaiting Representative Clearance & Documentation', 1, 3, 'Pending', 'High',
+          ${createdDate}, ${createdTime}, ${feedbackNotes}, ${historyJson}::jsonb, '[]'::jsonb,
+          ${distributionLicense}, ${territory}, '2026–2036', 'Ministry Retained', 'Proprietary',
+          '100% Ministry Owned', ${description}, 0
+        )
+        ON CONFLICT (id) DO NOTHING
+      `
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Asset registered in database with blank legal docs. Awaiting document upload before approval request can be scheduled.',
+      message: hasGovernanceInput 
+        ? 'Asset registered and queued for ministerial governance approval.'
+        : 'Asset registered as draft with unregistered defaults.',
       assetId,
+      status: resolvedStatus,
+      approvalRequired: hasGovernanceInput,
     })
   } catch (error: any) {
     console.error('Error creating asset:', error)

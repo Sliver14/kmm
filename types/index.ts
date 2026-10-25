@@ -55,6 +55,7 @@ export type AssetStatus =
   | 'Pending'
   | 'Requires Attention'
   | 'In Review'
+  | 'Draft'
 
 export type AssetThumbType =
   | 'tv_series'
@@ -205,11 +206,13 @@ export interface AssetData {
   thumbType?: AssetThumbType
   posterUrl?: string
   rightsHolder: string
+  owner?: string
   ownerCertificateRef?: string
   trademarkStatus?: 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered'
   distributionLicense?: string
   productionLicensees?: string
-  territoryClearanceStatus?: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted'
+  territory?: string
+  territoryClearanceStatus?: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted' | 'Unassigned' | 'None'
   songWriter?: string
   songWriterProvenance?: ContentProvenance
   contentProvenance?: ContentProvenance
@@ -314,7 +317,7 @@ export interface RightsRecord {
 
   // 4. Territory License & Clearance
   territory?: string
-  territoryClearanceStatus?: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted'
+  territoryClearanceStatus?: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted' | 'Unassigned' | 'None'
 
   // 5. Creation Provenance & Audio Songwriter
   contentProvenance?: ContentProvenance
@@ -458,3 +461,26 @@ export interface AssetRiskAssessment {
   docCount?: number
   governanceScore?: number
 }
+
+export type GovernancePillarKey =
+  | 'legal_owner'
+  | 'trademark_license'
+  | 'territory'
+  | 'production_rights'
+  | 'ai_provenance'
+
+export interface GovernancePillarUpdatePayload {
+  owner?: string
+  ownerCertificateRef?: string
+  trademarkStatus?: 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered'
+  distributionLicense?: string
+  productionLicensees?: string
+  territory?: string
+  territoryClearanceStatus?: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted' | 'Unassigned' | 'None'
+  contentProvenance?: ContentProvenance
+  songWriter?: string
+  songWriterProvenance?: ContentProvenance
+  notes?: string
+  justification?: string
+}
+

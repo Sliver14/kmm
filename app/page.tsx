@@ -24,6 +24,7 @@ import { ApprovalsWorkflow } from '@/components/ApprovalsWorkflow'
 import { AssetDetailsView } from '@/components/AssetDetailsView'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { GovernancePillarModal } from '@/components/GovernancePillarModals'
 import {
   getAssetRiskAssessment,
   getPortfolioRiskMetrics,
@@ -67,6 +68,7 @@ import {
   GovernanceCheckValue,
   GovernanceChecksMap,
   ContentProvenance,
+  GovernancePillarKey,
 } from '@/types'
 
 export const tabToPath: Record<string, string> = {
@@ -1215,6 +1217,13 @@ function StatusPill({ status }: { status: AssetStatus | 'Active' | 'Inactive' | 
           Inactive
         </span>
       )
+    case 'Draft':
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 border border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-white/10 shadow-xs">
+          <span className="size-1.5 rounded-full bg-slate-400" />
+          Draft
+        </span>
+      )
     default:
       return null
   }
@@ -1799,7 +1808,7 @@ function AssetsPage({
     setSelectedSubcategory('All Subcategories')
   }
 
-  // 2-Step Dynamic Add Asset Form State
+  // Dynamic Add Asset Form State with 5-Pillar Governance Defaults
   const [newAssetForm, setNewAssetForm] = useState<{
     name: string
     category: string
@@ -1808,6 +1817,16 @@ function AssetsPage({
     unit?: Agency
     contributors: AssetContributor[]
     rightsHolder: string
+    owner: string
+    ownerCertificateRef: string
+    trademarkStatus: 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered'
+    distributionLicense: string
+    productionLicensees: string
+    territory: string
+    territoryClearanceStatus: 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted' | 'Unassigned' | 'None'
+    contentProvenance: ContentProvenance
+    songWriter: string
+    songWriterProvenance: ContentProvenance
     description: string
     tags: string
     posterUrl: string
@@ -1820,6 +1839,16 @@ function AssetsPage({
     unit: currentUser.agency || 'Lovetoons',
     contributors: [],
     rightsHolder: '',
+    owner: '',
+    ownerCertificateRef: '',
+    trademarkStatus: 'Unregistered',
+    distributionLicense: 'None',
+    productionLicensees: 'None',
+    territory: 'None',
+    territoryClearanceStatus: 'Pending Clearance',
+    contentProvenance: 'Fully Custom',
+    songWriter: '',
+    songWriterProvenance: 'Fully Custom',
     description: '',
     tags: '',
     posterUrl: '',
@@ -1836,6 +1865,19 @@ function AssetsPage({
     const prefix = (newAssetForm.category || 'AS').slice(0, 2).toUpperCase()
     return `LT-${prefix}-${String(assets.length + 1).padStart(3, '0')}`
   }, [newAssetForm.category, assets.length])
+
+  // Computed check if any non-default governance fields requiring approval were entered
+  const hasGovernanceInput = useMemo(() => {
+    return (
+      Boolean(newAssetForm.owner && newAssetForm.owner !== 'Unassigned' && newAssetForm.owner.trim() !== '') ||
+      Boolean(newAssetForm.trademarkStatus && newAssetForm.trademarkStatus !== 'Unregistered') ||
+      Boolean(newAssetForm.distributionLicense && newAssetForm.distributionLicense !== 'None') ||
+      Boolean(newAssetForm.productionLicensees && newAssetForm.productionLicensees !== 'None') ||
+      Boolean(newAssetForm.territory && newAssetForm.territory !== 'None') ||
+      Boolean(newAssetForm.contentProvenance && newAssetForm.contentProvenance !== 'Fully Custom') ||
+      Boolean(newAssetForm.songWriter && newAssetForm.songWriter.trim() !== '')
+    )
+  }, [newAssetForm])
 
   // Pill filter options built from categories
   const pillFilters = useMemo(() => {
@@ -1902,14 +1944,23 @@ function AssetsPage({
       agency: isGlobalViewer ? newAssetForm.agency : (currentUser.agency || 'Lovetoons'),
       unit: isGlobalViewer ? newAssetForm.agency : (currentUser.agency || 'Lovetoons'),
       contributors: newAssetForm.contributors,
-      status: 'Pending',
+      status: hasGovernanceInput ? 'Pending' : 'Draft',
       posterUrl: newAssetForm.posterUrl.trim() ? newAssetForm.posterUrl.trim() : undefined,
-      rightsHolder: newAssetForm.rightsHolder.trim(),
+      owner: newAssetForm.owner.trim() || newAssetForm.rightsHolder.trim(),
+      rightsHolder: newAssetForm.owner.trim() || newAssetForm.rightsHolder.trim() || 'Unassigned',
+      ownerCertificateRef: newAssetForm.ownerCertificateRef.trim(),
+      trademarkStatus: newAssetForm.trademarkStatus,
+      distributionLicense: newAssetForm.distributionLicense.trim(),
+      productionLicensees: newAssetForm.productionLicensees.trim(),
+      territory: newAssetForm.territory.trim(),
+      territoryClearanceStatus: hasGovernanceInput ? 'Pending Clearance' : 'Pending Clearance',
+      contentProvenance: newAssetForm.contentProvenance,
+      songWriter: newAssetForm.songWriter.trim(),
+      songWriterProvenance: newAssetForm.songWriterProvenance,
       description: newAssetForm.description.trim(),
       tags: tagList.length > 0 ? tagList : [newAssetForm.category],
     })
 
-    showToast(`Asset "${newAssetForm.name.trim()}" registered successfully!`)
     setIsAddModalOpen(false)
     setNewAssetForm({
       name: '',
@@ -1919,6 +1970,16 @@ function AssetsPage({
       unit: currentUser.agency || 'Lovetoons',
       contributors: [],
       rightsHolder: '',
+      owner: '',
+      ownerCertificateRef: '',
+      trademarkStatus: 'Unregistered',
+      distributionLicense: 'None',
+      productionLicensees: 'None',
+      territory: 'None',
+      territoryClearanceStatus: 'Pending Clearance',
+      contentProvenance: 'Fully Custom',
+      songWriter: '',
+      songWriterProvenance: 'Fully Custom',
       description: '',
       tags: '',
       posterUrl: '',
@@ -2433,14 +2494,319 @@ function AssetsPage({
                     )}
                   </div>
 
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Asset Owner / Rights Holder</label>
-                    <input
-                      value={newAssetForm.rightsHolder}
-                      onChange={(e) => setNewAssetForm((prev) => ({ ...prev, rightsHolder: e.target.value }))}
-                      placeholder="Registered Rights Holder (leave blank if unassigned)"
-                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    />
+                  </div>
+                </div>
+
+                {/* 5-PILLAR GOVERNANCE SPECIFICATION & INTAKE (DYNAMIC WITH APPROVAL NOTICES) */}
+                <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-800/40 p-4 space-y-3.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-2.5">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+                        <h4 className="font-bold text-slate-900 dark:text-white text-xs">
+                          Legal Governance & Clearance Specification (5 Pillars)
+                        </h4>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        Defaults to Unregistered / None. Inputting ownership, licenses, or clearance will automatically route for ministerial approval.
+                      </p>
+                    </div>
+
+                    <div className="shrink-0">
+                      {hasGovernanceInput ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 text-[10px] font-bold border border-amber-300 dark:border-amber-800/60 animate-in fade-in">
+                          <AlertTriangle className="size-3 text-amber-600" />
+                          <span>Requires Ministerial Approval</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-[10px] font-medium border border-slate-200 dark:border-white/10">
+                          <Check className="size-3 text-emerald-600" />
+                          <span>Default: Unregistered / Draft</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* 1. Legal Owner & Certificate */}
+                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Crown className="size-3.5 text-amber-500" />
+                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">1. Assign Legal Owner & Title Certificate</label>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewAssetForm((prev) => ({
+                              ...prev,
+                              owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+                              rightsHolder: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+                              ownerCertificateRef: `CERT-EXEC-MIN-${new Date().getFullYear()}-HQ`,
+                            }))
+                          }}
+                          className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold cursor-pointer underline"
+                        >
+                          Preset: Executive Minister
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={newAssetForm.owner}
+                          onChange={(e) =>
+                            setNewAssetForm((prev) => ({
+                              ...prev,
+                              owner: e.target.value,
+                              rightsHolder: e.target.value,
+                            }))
+                          }
+                          placeholder="Legal Owner (Leave blank for unassigned)"
+                          className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        />
+                        <input
+                          type="text"
+                          value={newAssetForm.ownerCertificateRef}
+                          onChange={(e) =>
+                            setNewAssetForm((prev) => ({
+                              ...prev,
+                              ownerCertificateRef: e.target.value,
+                            }))
+                          }
+                          placeholder="Title Certificate Ref (e.g. CERT-EXEC-MIN-2026-HQ)"
+                          className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs font-mono outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* 2. Trademark & Distribution License */}
+                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <BadgeCheck className="size-3.5 text-purple-500" />
+                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">2. Trademark & Licensing</label>
+                        </div>
+                        <div className="flex gap-2 text-[10px]">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                trademarkStatus: 'Registered',
+                                distributionLicense: 'Exclusive Ministry Global Distribution',
+                              }))
+                            }
+                            className="text-purple-600 hover:text-purple-700 dark:text-purple-400 font-semibold cursor-pointer underline"
+                          >
+                            Set Exclusive Ministry
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                trademarkStatus: 'Unregistered',
+                                distributionLicense: 'None',
+                              }))
+                            }
+                            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold cursor-pointer underline"
+                          >
+                            Reset to Default
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Trademark Status</label>
+                          <select
+                            value={newAssetForm.trademarkStatus}
+                            onChange={(e) =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                trademarkStatus: e.target.value as any,
+                              }))
+                            }
+                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
+                          >
+                            <option value="Unregistered" className="dark:bg-slate-900 dark:text-white">Unregistered (Default)</option>
+                            <option value="Pending Filing" className="dark:bg-slate-900 dark:text-white">Pending Filing</option>
+                            <option value="In Progress" className="dark:bg-slate-900 dark:text-white">In Progress</option>
+                            <option value="Registered" className="dark:bg-slate-900 dark:text-white">Registered</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Distribution License</label>
+                          <input
+                            type="text"
+                            value={newAssetForm.distributionLicense}
+                            onChange={(e) =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                distributionLicense: e.target.value,
+                              }))
+                            }
+                            placeholder="e.g. None or Exclusive Ministry Global Distribution"
+                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Cleared Territory & Clearance Status */}
+                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Globe2 className="size-3.5 text-amber-500" />
+                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">3. Territory Clearance</label>
+                        </div>
+                        <div className="flex gap-2 text-[10px]">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                territory: 'Worldwide / Global',
+                                territoryClearanceStatus: 'Cleared Global',
+                              }))
+                            }
+                            className="text-amber-600 hover:text-amber-700 dark:text-amber-400 font-semibold cursor-pointer underline"
+                          >
+                            Set Worldwide
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                territory: 'None',
+                                territoryClearanceStatus: 'Pending Clearance',
+                              }))
+                            }
+                            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold cursor-pointer underline"
+                          >
+                            Reset to Default
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Cleared Territory</label>
+                          <input
+                            type="text"
+                            value={newAssetForm.territory}
+                            onChange={(e) =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                territory: e.target.value,
+                              }))
+                            }
+                            placeholder="e.g. None or Worldwide / Global"
+                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Clearance Status</label>
+                          <select
+                            value={newAssetForm.territoryClearanceStatus}
+                            onChange={(e) =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                territoryClearanceStatus: e.target.value as any,
+                              }))
+                            }
+                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
+                          >
+                            <option value="Pending Clearance" className="dark:bg-slate-900 dark:text-white">Pending Clearance (Review Triggered)</option>
+                            <option value="Cleared Global" className="dark:bg-slate-900 dark:text-white">Cleared Global</option>
+                            <option value="Cleared Regional" className="dark:bg-slate-900 dark:text-white">Cleared Regional</option>
+                            <option value="Restricted" className="dark:bg-slate-900 dark:text-white">Restricted</option>
+                            <option value="None" className="dark:bg-slate-900 dark:text-white">None</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. Broadcast & Production Rights */}
+                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Clapperboard className="size-3.5 text-indigo-500" />
+                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">4. Broadcast & Production Rights</label>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setNewAssetForm((prev) => ({
+                              ...prev,
+                              productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+                            }))
+                          }
+                          className="text-[10px] text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold cursor-pointer underline"
+                        >
+                          Preset: KMM Studios
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={newAssetForm.productionLicensees}
+                        onChange={(e) =>
+                          setNewAssetForm((prev) => ({
+                            ...prev,
+                            productionLicensees: e.target.value,
+                          }))
+                        }
+                        placeholder="Authorized Production Licensees (Default: None)"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                      />
+                    </div>
+
+                    {/* 5. AI Content & Provenance */}
+                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="size-3.5 text-cyan-500" />
+                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">5. AI Content & Provenance</label>
+                        </div>
+                        <span className="text-[10px] text-slate-400">Default: Fully Custom</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Content Provenance</label>
+                          <select
+                            value={newAssetForm.contentProvenance}
+                            onChange={(e) =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                contentProvenance: e.target.value as ContentProvenance,
+                              }))
+                            }
+                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
+                          >
+                            <option value="Fully Custom" className="dark:bg-slate-900 dark:text-white">Fully Custom (100% Human Crafted)</option>
+                            <option value="AI Assisted" className="dark:bg-slate-900 dark:text-white">AI Assisted</option>
+                            <option value="Fully AI" className="dark:bg-slate-900 dark:text-white">Fully AI</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Songwriter / Music Composer (Optional)</label>
+                          <input
+                            type="text"
+                            value={newAssetForm.songWriter}
+                            onChange={(e) =>
+                              setNewAssetForm((prev) => ({
+                                ...prev,
+                                songWriter: e.target.value,
+                              }))
+                            }
+                            placeholder="e.g. KMM Music Ministry"
+                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -2673,7 +3039,6 @@ function AssetsPage({
                     <span>Create Asset Now</span>
                   </button>
                 </div>
-              </div>
             </form>
           </div>
         </div>
@@ -3657,6 +4022,15 @@ function RightsDetailsPage({
   // Staff Covenant Pop-up Notification Modal State
   const [isStaffCovenantPopupOpen, setIsStaffCovenantPopupOpen] = useState(false)
 
+  // Individual Focused Governance Pillar Modal State (Universal Individual Updates)
+  const [activeIndividualPillar, setActiveIndividualPillar] = useState<GovernancePillarKey | null>(null)
+  const [isIndividualPillarModalOpen, setIsIndividualPillarModalOpen] = useState(false)
+
+  const openIndividualPillar = (pillarKey: GovernancePillarKey) => {
+    setActiveIndividualPillar(pillarKey)
+    setIsIndividualPillarModalOpen(true)
+  }
+
   // Edit Governance Form State (Unified with 5 Streamlined Pillars)
   const [editForm, setEditForm] = useState({
     owner: asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
@@ -4355,7 +4729,7 @@ function RightsDetailsPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
             {/* PILLAR 1: Universal Legal Ownership & Certificate */}
             <div
-              onClick={openScopeModal}
+              onClick={() => openIndividualPillar('legal_owner')}
               className="rounded-2xl border border-blue-200/90 bg-gradient-to-br from-blue-50/60 via-white to-blue-50/30 dark:border-blue-900/50 dark:from-blue-950/30 dark:via-slate-900 dark:to-blue-950/20 p-5 space-y-3 hover:border-blue-400 dark:hover:border-blue-700 transition cursor-pointer shadow-xs group"
             >
               <div className="flex items-center justify-between">
@@ -4385,7 +4759,7 @@ function RightsDetailsPage({
 
             {/* PILLAR 2: Trademark Protection & Distribution Licensing */}
             <div
-              onClick={openScopeModal}
+              onClick={() => openIndividualPillar('trademark_license')}
               className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-5 space-y-3 hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer shadow-xs group"
             >
               <div className="flex items-center justify-between">
@@ -4418,7 +4792,7 @@ function RightsDetailsPage({
 
             {/* PILLAR 3: Territory License & Clearance */}
             <div
-              onClick={openScopeModal}
+              onClick={() => openIndividualPillar('territory')}
               className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-5 space-y-3 hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer shadow-xs group"
             >
               <div className="flex items-center justify-between">
@@ -4447,7 +4821,7 @@ function RightsDetailsPage({
 
             {/* PILLAR 4: DYNAMIC CATEGORY PILLAR (Audio vs Video vs Publishing) */}
             <div
-              onClick={openScopeModal}
+              onClick={() => openIndividualPillar('production_rights')}
               className={cn(
                 "rounded-2xl border p-5 space-y-3 transition cursor-pointer shadow-xs group md:col-span-2 lg:col-span-2",
                 isAudioCategory
@@ -4513,14 +4887,14 @@ function RightsDetailsPage({
                   </span>
                 </div>
                 <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 underline shrink-0 ml-3">
-                  Read Staff Covenant →
+                  Read Staff Agreement
                 </span>
               </div>
             </div>
 
             {/* PILLAR 5: Universal AI Content Provenance Matrix */}
             <div
-              onClick={openScopeModal}
+              onClick={() => openIndividualPillar('ai_provenance')}
               className="rounded-2xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-slate-900 p-5 space-y-3 hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer shadow-xs group"
             >
               <div className="flex items-center justify-between">
@@ -5842,6 +6216,14 @@ function RightsDetailsPage({
         details={confirmConfig.details}
         onConfirm={confirmConfig.onConfirm}
         onClose={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* Individual Focused Governance Pillar Modal */}
+      <GovernancePillarModal
+        isOpen={isIndividualPillarModalOpen}
+        onClose={() => setIsIndividualPillarModalOpen(false)}
+        asset={asset}
+        activePillar={activeIndividualPillar}
       />
     </div>
   )

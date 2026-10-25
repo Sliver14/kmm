@@ -8,14 +8,15 @@ import {
   ExternalLink, Tag, Sparkles, Check, X, FileText, AlertCircle,
   Share2, Info, ArrowUpRight, Award, Flame, RefreshCw, BookOpen,
   Gamepad2, Package, UploadCloud, ShieldAlert, FileCheck, CheckSquare, Square,
-  Lock, Send, ArrowRight, Pencil
+  Lock, Send, ArrowRight, Pencil, Crown, BadgeCheck, Clapperboard
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLovetoonsData } from '@/lib/store/DataContext'
 import { AssetVisualPreview } from '@/components/AssetVisualPreview'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { EditAssetModal } from '@/components/EditAssetModal'
-import { AssetData, AssetStatus, RelationshipItem, RightsDocument, ApprovalRequest, AssetEpisode } from '@/types'
+import { GovernancePillarModal } from '@/components/GovernancePillarModals'
+import { AssetData, AssetStatus, RelationshipItem, RightsDocument, ApprovalRequest, AssetEpisode, GovernancePillarKey } from '@/types'
 import { getAssetRiskAssessment } from '@/lib/risk'
 import { getCategoryGovernance, isEpisodeCategory } from '@/lib/categoryGovernance'
 
@@ -71,6 +72,15 @@ export function AssetDetailsView({
   // 2 Intuitive Core Pillars (Tabs) - Rights & Governance centralized in its dedicated module
   const [activeTab, setActiveTab] = useState<'overview' | 'connections'>('overview')
   const [statusMenuOpen, setStatusMenuOpen] = useState(false)
+
+  // Individual Governance Pillar Modal State (Universal Single-Pillar Edits)
+  const [activeIndividualPillar, setActiveIndividualPillar] = useState<GovernancePillarKey | null>(null)
+  const [isIndividualPillarModalOpen, setIsIndividualPillarModalOpen] = useState(false)
+
+  const openIndividualPillar = (pillarKey: GovernancePillarKey) => {
+    setActiveIndividualPillar(pillarKey)
+    setIsIndividualPillarModalOpen(true)
+  }
 
   // Add Relationship Modal
   const [isAddRelModalOpen, setIsAddRelModalOpen] = useState(false)
@@ -962,6 +972,126 @@ export function AssetDetailsView({
                 )}>
                   {asset.status}
                 </span>
+              </div>
+            </div>
+
+            {/* 5 Focused Governance Pillars - Quick Individual Action Cards */}
+            <div className="pt-3 border-t border-blue-100 dark:border-white/10 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>5 Governance Pillars • Individual Quick Edit</span>
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 hidden sm:inline">
+                  Click any pillar to update individually (requires approval)
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                {/* 1. Legal Owner */}
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('legal_owner')}
+                  className="group relative flex flex-col justify-between p-3 rounded-xl border border-blue-200/80 bg-white/90 hover:bg-blue-50/60 dark:border-white/10 dark:bg-slate-900/90 dark:hover:bg-blue-950/30 transition text-left cursor-pointer shadow-2xs hover:border-blue-400 dark:hover:border-blue-600"
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 dark:text-blue-400">
+                      <Crown className="size-3 text-amber-500" />
+                      <span>Legal Owner</span>
+                    </span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition" />
+                  </div>
+                  <div className="font-semibold text-slate-900 dark:text-white text-xs truncate w-full" title={asset.owner || (asset as any).attributes?.owner || linkedRights?.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}>
+                    {asset.owner || (asset as any).attributes?.owner || linkedRights?.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}
+                  </div>
+                  <div className="text-[9px] text-slate-500 dark:text-slate-400 truncate mt-1">
+                    Ref: {asset.ownerCertificateRef || (asset as any).attributes?.ownerCertificateRef || linkedRights?.ownerCertificateRef || 'CERT-HQ'}
+                  </div>
+                </button>
+
+                {/* 2. Trademark & Licensing */}
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('trademark_license')}
+                  className="group relative flex flex-col justify-between p-3 rounded-xl border border-purple-200/80 bg-white/90 hover:bg-purple-50/60 dark:border-white/10 dark:bg-slate-900/90 dark:hover:bg-purple-950/30 transition text-left cursor-pointer shadow-2xs hover:border-purple-400 dark:hover:border-purple-600"
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-700 dark:text-purple-400">
+                      <BadgeCheck className="size-3 text-purple-600 dark:text-purple-400" />
+                      <span>Trademark</span>
+                    </span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition" />
+                  </div>
+                  <div className="font-semibold text-slate-900 dark:text-white text-xs truncate w-full">
+                    {asset.trademarkStatus || (asset as any).attributes?.trademarkStatus || linkedRights?.trademarkStatus || 'Unregistered'}
+                  </div>
+                  <div className="text-[9px] text-slate-500 dark:text-slate-400 truncate mt-1" title={asset.distributionLicense || (asset as any).attributes?.distributionLicense || linkedRights?.distributionLicense || 'None'}>
+                    License: {asset.distributionLicense || (asset as any).attributes?.distributionLicense || linkedRights?.distributionLicense || 'None'}
+                  </div>
+                </button>
+
+                {/* 3. Territory Clearance */}
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('territory')}
+                  className="group relative flex flex-col justify-between p-3 rounded-xl border border-amber-200/80 bg-white/90 hover:bg-amber-50/60 dark:border-white/10 dark:bg-slate-900/90 dark:hover:bg-amber-950/30 transition text-left cursor-pointer shadow-2xs hover:border-amber-400 dark:hover:border-amber-600"
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                      <Globe2 className="size-3 text-amber-600 dark:text-amber-400" />
+                      <span>Territory</span>
+                    </span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition" />
+                  </div>
+                  <div className="font-semibold text-slate-900 dark:text-white text-xs truncate w-full" title={asset.territory || (asset as any).attributes?.territory || linkedRights?.territory || 'None'}>
+                    {asset.territory || (asset as any).attributes?.territory || linkedRights?.territory || 'None'}
+                  </div>
+                  <div className="text-[9px] text-slate-500 dark:text-slate-400 truncate mt-1">
+                    Status: {asset.territoryClearanceStatus || (asset as any).attributes?.territoryClearanceStatus || linkedRights?.territoryClearanceStatus || 'None'}
+                  </div>
+                </button>
+
+                {/* 4. Production Rights */}
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('production_rights')}
+                  className="group relative flex flex-col justify-between p-3 rounded-xl border border-indigo-200/80 bg-white/90 hover:bg-indigo-50/60 dark:border-white/10 dark:bg-slate-900/90 dark:hover:bg-indigo-950/30 transition text-left cursor-pointer shadow-2xs hover:border-indigo-400 dark:hover:border-indigo-600"
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 dark:text-indigo-400">
+                      <Clapperboard className="size-3 text-indigo-600 dark:text-indigo-400" />
+                      <span>Production</span>
+                    </span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition" />
+                  </div>
+                  <div className="font-semibold text-slate-900 dark:text-white text-xs truncate w-full" title={asset.productionLicensees || (asset as any).attributes?.productionLicensees || linkedRights?.productionLicensees || 'None'}>
+                    {asset.productionLicensees || (asset as any).attributes?.productionLicensees || linkedRights?.productionLicensees || 'None'}
+                  </div>
+                  <div className="text-[9px] text-slate-500 dark:text-slate-400 truncate mt-1">
+                    Studio & Licensees
+                  </div>
+                </button>
+
+                {/* 5. AI Provenance */}
+                <button
+                  type="button"
+                  onClick={() => openIndividualPillar('ai_provenance')}
+                  className="group relative flex flex-col justify-between p-3 rounded-xl border border-cyan-200/80 bg-white/90 hover:bg-cyan-50/60 dark:border-white/10 dark:bg-slate-900/90 dark:hover:bg-cyan-950/30 transition text-left cursor-pointer shadow-2xs hover:border-cyan-400 dark:hover:border-cyan-600"
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-700 dark:text-cyan-400">
+                      <Sparkles className="size-3 text-cyan-600 dark:text-cyan-400" />
+                      <span>AI Provenance</span>
+                    </span>
+                    <Pencil className="size-3 text-slate-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition" />
+                  </div>
+                  <div className="font-semibold text-slate-900 dark:text-white text-xs truncate w-full">
+                    {asset.contentProvenance || (asset as any).attributes?.contentProvenance || linkedRights?.contentProvenance || 'Fully Custom'}
+                  </div>
+                  <div className="text-[9px] text-slate-500 dark:text-slate-400 truncate mt-1">
+                    3-Tier Verification
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -2013,6 +2143,14 @@ export function AssetDetailsView({
         details={confirmConfig.details}
         onConfirm={confirmConfig.onConfirm}
         onClose={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* Individual Focused Governance Pillar Modal */}
+      <GovernancePillarModal
+        isOpen={isIndividualPillarModalOpen}
+        onClose={() => setIsIndividualPillarModalOpen(false)}
+        asset={asset}
+        activePillar={activeIndividualPillar}
       />
     </div>
   )

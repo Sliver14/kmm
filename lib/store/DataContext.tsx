@@ -14,6 +14,8 @@ import {
   Agency,
   NotificationItem,
   ContentProvenance,
+  GovernancePillarKey,
+  GovernancePillarUpdatePayload,
 } from '@/types'
 import {
   initialUsers,
@@ -67,6 +69,12 @@ interface DataContextType {
   deleteAsset: (id: string) => void
   bulkApproveAssets: (ids: string[]) => void
   bulkDeleteAssets: (ids: string[]) => void
+  updateAssetGovernancePillar: (
+    assetId: string,
+    pillar: GovernancePillarKey,
+    payload: GovernancePillarUpdatePayload,
+    notes?: string
+  ) => Promise<boolean> | boolean
 
   // Categories & Subcategories
   categories: CategoryItem[]
@@ -742,31 +750,58 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         : userAgency
 
       const contributors: AssetContributor[] = data.contributors || []
-      const assignedRightsHolder = data.rightsHolder?.trim() || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'
+      const ownerInput = data.owner?.trim() || data.rightsHolder?.trim() || ''
+      const assignedOwner = ownerInput
+      const assignedRightsHolder = ownerInput || 'Unassigned'
+      const assignedTrademarkStatus = data.trademarkStatus || 'Unregistered'
+      const assignedDistributionLicense = data.distributionLicense || 'None'
+      const assignedProductionLicensees = data.productionLicensees || 'None'
+      const assignedTerritory = data.territory || 'None'
       const isAudio = data.category?.toLowerCase().includes('audio') || data.category?.toLowerCase().includes('music')
-      const defaultProvenance: ContentProvenance = isAudio ? 'Fully Custom' : 'AI Assisted'
+      const defaultProvenance: ContentProvenance = 'Fully Custom'
+      const assignedContentProvenance = data.contentProvenance || defaultProvenance
+      const assignedSongWriter = data.songWriter?.trim() || (isAudio ? 'KMM Music Ministry (Staff Composer)' : '')
+      const assignedSongWriterProvenance = data.songWriterProvenance || 'Fully Custom'
+
+      // Check if any governance inputs requiring approval were specified
+      const hasGovernanceInput = 
+        Boolean(assignedOwner && assignedOwner !== 'Unassigned' && assignedOwner !== 'None') ||
+        Boolean(assignedTrademarkStatus && assignedTrademarkStatus !== 'Unregistered') ||
+        Boolean(assignedDistributionLicense && assignedDistributionLicense !== 'None') ||
+        Boolean(assignedProductionLicensees && assignedProductionLicensees !== 'None') ||
+        Boolean(assignedTerritory && assignedTerritory !== 'None') ||
+        Boolean(assignedContentProvenance && assignedContentProvenance !== 'Fully Custom') ||
+        Boolean(data.songWriter && data.songWriter.trim() !== '')
+
+      const resolvedClearanceStatus = hasGovernanceInput
+        ? (data.territoryClearanceStatus || 'Pending Clearance')
+        : 'Pending Clearance'
+
+      const resolvedStatus = hasGovernanceInput ? 'Pending' : (data.status || 'Draft')
 
       const newAssetItem: AssetData = {
         ...data,
         id: autoId,
         createdDate: dateStr,
         createdTime: timeStr,
-        status: data.status || 'Pending',
+        status: resolvedStatus,
         agency: assignedAgency,
         unit: assignedAgency,
         creatorName: data.creatorName || (contributors[0]?.name) || 'KMM Creative Team',
         creatorRole: data.creatorRole || (contributors[0]?.role) || 'Contributing Staff',
         creatorSkill: data.creatorSkill || 'admin',
         contributors,
+        owner: assignedOwner,
         rightsHolder: assignedRightsHolder,
-        ownerCertificateRef: data.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
-        trademarkStatus: data.trademarkStatus || 'Registered',
-        distributionLicense: data.distributionLicense || 'Exclusive Ministry Global Distribution',
-        productionLicensees: data.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
-        territoryClearanceStatus: data.territoryClearanceStatus || 'Cleared Global',
-        contentProvenance: data.contentProvenance || defaultProvenance,
-        songWriter: data.songWriter || (isAudio ? 'KMM Music Ministry (Staff Composer)' : undefined),
-        songWriterProvenance: data.songWriterProvenance || (isAudio ? 'Fully Custom' : undefined),
+        ownerCertificateRef: data.ownerCertificateRef || '',
+        trademarkStatus: assignedTrademarkStatus,
+        distributionLicense: assignedDistributionLicense,
+        productionLicensees: assignedProductionLicensees,
+        territory: assignedTerritory,
+        territoryClearanceStatus: resolvedClearanceStatus,
+        contentProvenance: assignedContentProvenance,
+        songWriter: assignedSongWriter,
+        songWriterProvenance: assignedSongWriterProvenance,
         tags: data.tags && data.tags.length > 0 ? data.tags : ['New Asset'],
       }
 
@@ -797,23 +832,63 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         unit: newAssetItem.agency,
         contributors: newAssetItem.contributors,
         owner: assignedRightsHolder,
-        ownerCertificateRef: newAssetItem.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
-        trademarkStatus: newAssetItem.trademarkStatus || 'Registered',
-        distributionLicense: newAssetItem.distributionLicense || 'Exclusive Ministry Global Distribution',
-        productionLicensees: newAssetItem.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
-        territory: 'Worldwide / Global',
-        territoryClearanceStatus: newAssetItem.territoryClearanceStatus || 'Cleared Global',
+        ownerCertificateRef: newAssetItem.ownerCertificateRef || '',
+        trademarkStatus: newAssetItem.trademarkStatus || 'Unregistered',
+        distributionLicense: newAssetItem.distributionLicense || 'None',
+        productionLicensees: newAssetItem.productionLicensees || 'None',
+        territory: newAssetItem.territory || 'None',
+        territoryClearanceStatus: newAssetItem.territoryClearanceStatus || 'Pending Clearance',
         contentProvenance: newAssetItem.contentProvenance || defaultProvenance,
         songWriter: newAssetItem.songWriter,
         songWriterProvenance: newAssetItem.songWriterProvenance,
-        status: 'Pending',
+        status: hasGovernanceInput ? 'Pending' : 'Cleared',
         thumbType: newAssetItem.thumbType || 'tv_series',
         description: '',
         documents: [],
         governanceChecks: {},
-        governanceScore: 0,
+        governanceScore: hasGovernanceInput ? 0 : 100,
       }
       setMasterRightsRecords((prev) => [newRightsRecord, ...prev])
+
+      // If governance inputs were provided, schedule an automatic Approval Request
+      if (hasGovernanceInput) {
+        const approvalId = `APP-${now.getFullYear()}-${String(masterApprovals.length + 1).padStart(3, '0')}`
+        const initialApproval: ApprovalRequest = {
+          id: approvalId,
+          assetId: autoId,
+          assetName: newAssetItem.name,
+          category: newAssetItem.category,
+          subcategory: newAssetItem.subcategory,
+          agency: assignedAgency,
+          unit: assignedAgency,
+          contributors: newAssetItem.contributors,
+          requesterName: currentUser.name,
+          requesterRole: currentUser.roleLabel,
+          requesterSkill: currentUser.skills[0] || 'admin',
+          reviewerName: 'Faith Daniel',
+          stage: 'Awaiting Intake Governance Verification',
+          currentStep: 1,
+          totalSteps: 3,
+          status: 'Pending',
+          priority: 'High',
+          submittedDate: dateStr,
+          submittedTime: timeStr,
+          documents: [],
+          governanceScore: 0,
+          governanceChecks: {},
+          history: [
+            {
+              stage: 'Intake Governance Submission',
+              author: currentUser.name,
+              authorRole: currentUser.roleLabel,
+              date: `${dateStr} ${timeStr}`,
+              status: 'Pending Clearance',
+              notes: `Asset submitted with governance claims requiring approval (Owner: ${assignedOwner || 'Unassigned'}, Trademark: ${assignedTrademarkStatus}, License: ${assignedDistributionLicense}, Territory: ${assignedTerritory}).`,
+            },
+          ],
+        }
+        setMasterApprovals((prev) => [initialApproval, ...prev])
+      }
 
       // Asynchronously persist new asset to Neon DB
       fetch('/api/assets', {
@@ -837,12 +912,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           attributes: newAssetItem.attributes,
           posterUrl: newAssetItem.posterUrl,
           ministryId: 'min-kmm',
+          owner: newAssetItem.owner,
+          rightsHolder: newAssetItem.rightsHolder,
+          ownerCertificateRef: newAssetItem.ownerCertificateRef,
+          trademarkStatus: newAssetItem.trademarkStatus,
+          distributionLicense: newAssetItem.distributionLicense,
+          productionLicensees: newAssetItem.productionLicensees,
+          territory: newAssetItem.territory,
+          territoryClearanceStatus: newAssetItem.territoryClearanceStatus,
+          contentProvenance: newAssetItem.contentProvenance,
+          songWriter: newAssetItem.songWriter,
+          songWriterProvenance: newAssetItem.songWriterProvenance,
         }),
       }).catch(console.error)
 
       addActivity(
         `Registered intellectual asset: ${newAssetItem.name}`,
-        `Intake logged for ${newAssetItem.agency} • ID ${newAssetItem.id} • ${newAssetItem.contributors.length} contributors • Owner: ${assignedRightsHolder}`,
+        `Intake logged for ${newAssetItem.agency} • ID ${newAssetItem.id} • Status: ${newAssetItem.status} • Owner: ${assignedRightsHolder}`,
         'file',
         'bg-blue-100 text-blue-700',
         newAssetItem.agency,
@@ -857,16 +943,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       addNotification({
         type: 'asset',
         title: `Asset Registered: ${newAssetItem.name}`,
-        subtitle: `Registered for ${newAssetItem.agency} • Owner: ${assignedRightsHolder}`,
+        subtitle: `Registered for ${newAssetItem.agency} • Status: ${newAssetItem.status} • Owner: ${assignedRightsHolder}`,
         targetTab: 'Assets',
         assetId: newAssetItem.id,
-        priority: 'Medium',
-        badge: 'New Asset',
-        badgeColor: 'bg-blue-100 text-blue-800',
+        priority: hasGovernanceInput ? 'High' : 'Medium',
+        badge: hasGovernanceInput ? 'Approval Required' : 'New Asset',
+        badgeColor: hasGovernanceInput ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800',
         agency: newAssetItem.agency,
       })
 
-      showToast(`Asset "${newAssetItem.name}" registered successfully for ${newAssetItem.agency}!`)
+      showToast(
+        hasGovernanceInput
+          ? `Asset "${newAssetItem.name}" registered and approval request queued!`
+          : `Asset "${newAssetItem.name}" registered successfully as draft!`
+      )
       return newAssetItem
     },
     [masterAssets.length, masterApprovals.length, isGlobalViewer, userAgency, currentUser, addActivity, addNotification, showToast]
@@ -977,6 +1067,195 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     },
     [currentUser, addActivity, showToast]
   )
+
+  const updateAssetGovernancePillar = useCallback(
+    async (
+      assetId: string,
+      pillar: GovernancePillarKey,
+      payload: GovernancePillarUpdatePayload,
+      notes?: string
+    ) => {
+      const now = new Date()
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const dateStr = `${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+      const targetAsset = masterAssets.find((a) => a.id === assetId)
+      if (!targetAsset) {
+        showToast('Asset not found.')
+        return false
+      }
+
+      const pillarTitles: Record<GovernancePillarKey, string> = {
+        legal_owner: 'Legal Ownership & Title Deed',
+        trademark_license: 'Trademark & Distribution Licensing',
+        territory: 'Territory Scope & International Clearance',
+        production_rights: 'Authorized Production & Broadcast Rights',
+        ai_provenance: 'AI Content Classification & Provenance',
+      }
+      const pillarTitle = pillarTitles[pillar] || pillar
+
+      // 1. Update Asset in masterAssets
+      const updatedAssetFields: Partial<AssetData> = {
+        status: 'Pending',
+        ...(payload.owner ? { owner: payload.owner, rightsHolder: payload.owner } : {}),
+        ...(payload.ownerCertificateRef !== undefined ? { ownerCertificateRef: payload.ownerCertificateRef } : {}),
+        ...(payload.trademarkStatus ? { trademarkStatus: payload.trademarkStatus } : {}),
+        ...(payload.distributionLicense !== undefined ? { distributionLicense: payload.distributionLicense } : {}),
+        ...(payload.productionLicensees !== undefined ? { productionLicensees: payload.productionLicensees } : {}),
+        ...(payload.territory !== undefined ? { territory: payload.territory } : {}),
+        ...(payload.territoryClearanceStatus ? { territoryClearanceStatus: payload.territoryClearanceStatus } : { territoryClearanceStatus: 'Pending Clearance' }),
+        ...(payload.contentProvenance ? { contentProvenance: payload.contentProvenance } : {}),
+        ...(payload.songWriter !== undefined ? { songWriter: payload.songWriter } : {}),
+        ...(payload.songWriterProvenance ? { songWriterProvenance: payload.songWriterProvenance } : {}),
+      }
+
+      setMasterAssets((prev) =>
+        prev.map((a) => (a.id === assetId ? { ...a, ...updatedAssetFields } : a))
+      )
+
+      // 2. Update Rights Record in masterRightsRecords
+      setMasterRightsRecords((prev) =>
+        prev.map((r) => {
+          if (r.assetId === assetId || r.id === assetId) {
+            return {
+              ...r,
+              status: 'Review',
+              ...(payload.owner ? { owner: payload.owner } : {}),
+              ...(payload.ownerCertificateRef !== undefined ? { ownerCertificateRef: payload.ownerCertificateRef } : {}),
+              ...(payload.trademarkStatus ? { trademarkStatus: payload.trademarkStatus } : {}),
+              ...(payload.distributionLicense !== undefined ? { distributionLicense: payload.distributionLicense, rightsType: payload.distributionLicense } : {}),
+              ...(payload.productionLicensees !== undefined ? { productionLicensees: payload.productionLicensees } : {}),
+              ...(payload.territory !== undefined ? { territory: payload.territory } : {}),
+              ...(payload.territoryClearanceStatus ? { territoryClearanceStatus: payload.territoryClearanceStatus } : { territoryClearanceStatus: 'Pending Clearance' }),
+              ...(payload.contentProvenance ? { contentProvenance: payload.contentProvenance } : {}),
+              ...(payload.songWriter !== undefined ? { songWriter: payload.songWriter } : {}),
+              ...(payload.songWriterProvenance ? { songWriterProvenance: payload.songWriterProvenance } : {}),
+            }
+          }
+          return r
+        })
+      )
+
+      // 3. Queue / Update Approval Request in masterApprovals
+      const auditNote = notes || payload.justification || `Updated governance pillar [${pillarTitle}]. All pillar changes require ministerial clearance.`
+
+      const existingApp = masterApprovals.find((app) => app.assetId === assetId)
+      if (existingApp) {
+        setMasterApprovals((prev) =>
+          prev.map((app) => {
+            if (app.assetId === assetId) {
+              const updatedHistory = [
+                ...(app.history || []),
+                {
+                  stage: `Pillar Updated: ${pillarTitle}`,
+                  author: currentUser.name,
+                  authorRole: currentUser.roleLabel,
+                  date: `${dateStr} ${timeStr}`,
+                  status: 'Pending Clearance',
+                  notes: auditNote,
+                },
+              ]
+              return {
+                ...app,
+                status: 'Pending',
+                stage: 'Awaiting Pillar Verification',
+                history: updatedHistory,
+                feedbackNotes: auditNote,
+                priority: 'High',
+              }
+            }
+            return app
+          })
+        )
+      } else {
+        const newApprovalItem: ApprovalRequest = {
+          id: `APP-GOV-${Date.now().toString().slice(-6)}`,
+          assetId,
+          assetName: targetAsset.name,
+          category: targetAsset.category,
+          subcategory: targetAsset.subcategory,
+          agency: targetAsset.agency,
+          unit: targetAsset.unit,
+          contributors: targetAsset.contributors,
+          requesterName: currentUser.name,
+          requesterRole: currentUser.roleLabel,
+          requesterSkill: currentUser.skills[0] || 'admin',
+          reviewerName: 'Faith Daniel',
+          stage: 'Awaiting Pillar Verification',
+          currentStep: 1,
+          totalSteps: 3,
+          status: 'Pending',
+          priority: 'High',
+          submittedDate: dateStr,
+          submittedTime: timeStr,
+          feedbackNotes: auditNote,
+          documents: [],
+          governanceScore: 0,
+          governanceChecks: {},
+          history: [
+            {
+              stage: `Pillar Updated: ${pillarTitle}`,
+              author: currentUser.name,
+              authorRole: currentUser.roleLabel,
+              date: `${dateStr} ${timeStr}`,
+              status: 'Pending Clearance',
+              notes: auditNote,
+            },
+          ],
+        }
+        setMasterApprovals((prev) => [newApprovalItem, ...prev])
+      }
+
+      // 4. Call Backend API
+      try {
+        await fetch(`/api/assets/${assetId}/governance`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pillar,
+            payload,
+            updatedBy: currentUser.name,
+            notes: auditNote,
+          }),
+        })
+      } catch (err) {
+        console.error('Failed to persist pillar update to backend:', err)
+      }
+
+      // 5. Activity Log & Notification
+      addActivity(
+        `Updated Governance Pillar: ${pillarTitle}`,
+        `Asset "${targetAsset.name}" • Submitted by ${currentUser.name} • Approval request scheduled`,
+        'shield',
+        'bg-amber-100 text-amber-700',
+        targetAsset.agency,
+        {
+          assetId,
+          assetName: targetAsset.name,
+          actionType: 'GOVERNANCE',
+          details: `Pillar [${pillarTitle}] updated: ${auditNote}`,
+        }
+      )
+
+      addNotification({
+        type: 'approval',
+        title: `Clearance Required: ${targetAsset.name}`,
+        subtitle: `Pillar update (${pillarTitle}) submitted for review by ${currentUser.name}`,
+        targetTab: 'Approvals',
+        assetId,
+        priority: 'High',
+        badge: 'Pending Review',
+        badgeColor: 'bg-amber-100 text-amber-800',
+        agency: targetAsset.agency,
+      })
+
+      showToast(`Governance [${pillarTitle}] updated and queued for ministerial review!`)
+      return true
+    },
+    [masterAssets, masterApprovals, currentUser, addActivity, addNotification, showToast]
+  )
+
 
   // -------------------------------------------------------------
   // Categories & Subcategories
@@ -1698,6 +1977,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     deleteAsset,
     bulkApproveAssets,
     bulkDeleteAssets,
+    updateAssetGovernancePillar,
     categories,
     subcategories,
     addCategory,
