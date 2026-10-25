@@ -5460,14 +5460,6 @@ function RightsDetailsPage({
                   <Clapperboard className="size-3.5 text-indigo-600 dark:text-indigo-400" />
                   <span>+ Production & Broadcast Contract</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => openIndividualPillar('ai_provenance')}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-emerald-950/40 px-3 py-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 transition shadow-2xs cursor-pointer"
-                >
-                  <Sparkles className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>+ AI Provenance Declaration</span>
-                </button>
               </div>
             </div>
 

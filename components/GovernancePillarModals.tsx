@@ -210,8 +210,8 @@ export function GovernancePillarModal({
       payload.justification = justificationNotes.trim()
     }
 
-    // Attach Document Evidence if selected
-    if (attachedFile || docName.trim()) {
+    // Attach Document Evidence if selected (only for legal, trademark, territory, and production pillars)
+    if (activePillar !== 'ai_provenance' && (attachedFile || docName.trim())) {
       const targetDocName = docName.trim() || `${currentMeta.badge.replace(/\s+/g, '_')}_${asset.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
       const newDoc: RightsDocument = {
         id: `doc-${Date.now()}`,
@@ -574,76 +574,78 @@ export function GovernancePillarModal({
             </div>
           )}
 
-          {/* Supporting Certificate & Legal Document (DOC, PDF) */}
-          <div className="rounded-xl border border-blue-200/90 bg-gradient-to-br from-blue-50/50 via-white to-blue-50/20 dark:border-white/10 dark:bg-slate-800/40 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Paperclip className="size-4 text-blue-600 dark:text-blue-400" />
-                <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">
-                  Supporting Legal Document / Certificate (DOC, PDF)
-                </label>
-              </div>
-              <span className="text-[10px] text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full font-medium">
-                Official Evidence
-              </span>
-            </div>
-
-            {attachedFile || docName ? (
-              <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50/70 dark:border-emerald-800/40 dark:bg-emerald-950/20">
-                <div className="flex items-center gap-2.5 truncate">
-                  <div className="grid size-8 place-items-center rounded bg-emerald-600 text-white shrink-0">
-                    <FileCheck className="size-4" />
-                  </div>
-                  <div className="truncate">
-                    <div className="font-bold text-slate-900 dark:text-white truncate text-xs">
-                      {docName}
-                    </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                      Format: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{docType}</span> • {docSize || 'File Selected'}
-                    </div>
-                  </div>
+          {/* Supporting Certificate & Legal Document (DOC, PDF) - Not applicable for AI Provenance */}
+          {activePillar !== 'ai_provenance' && (
+            <div className="rounded-xl border border-blue-200/90 bg-gradient-to-br from-blue-50/50 via-white to-blue-50/20 dark:border-white/10 dark:bg-slate-800/40 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Paperclip className="size-4 text-blue-600 dark:text-blue-400" />
+                  <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                    Supporting Legal Document / Certificate (DOC, PDF)
+                  </label>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleRemoveFile}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-white dark:hover:bg-slate-800 transition cursor-pointer"
-                  title="Remove file"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
+                <span className="text-[10px] text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full font-medium">
+                  Official Evidence
+                </span>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <label className="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 dark:border-white/15 dark:hover:border-blue-500 bg-white dark:bg-slate-900 transition cursor-pointer group">
-                  <UploadCloud className="size-6 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-1 transition" />
-                  <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                    Click to browse or drop legal document (.pdf, .doc, .docx)
-                  </span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-                    Clearance certificates, official registration, or signed licensing deed
-                  </span>
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </label>
-              </div>
-            )}
 
-            {/* Optional document notes/description */}
-            <div>
-              <input
-                type="text"
-                value={docNotes}
-                onChange={(e) => setDocNotes(e.target.value)}
-                placeholder="Document reference or note (e.g. Registered in UK IPO, Signed by Director)..."
-                className="h-8 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-              />
+              {attachedFile || docName ? (
+                <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50/70 dark:border-emerald-800/40 dark:bg-emerald-950/20">
+                  <div className="flex items-center gap-2.5 truncate">
+                    <div className="grid size-8 place-items-center rounded bg-emerald-600 text-white shrink-0">
+                      <FileCheck className="size-4" />
+                    </div>
+                    <div className="truncate">
+                      <div className="font-bold text-slate-900 dark:text-white truncate text-xs">
+                        {docName}
+                      </div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                        Format: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{docType}</span> • {docSize || 'File Selected'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-white dark:hover:bg-slate-800 transition cursor-pointer"
+                    title="Remove file"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 dark:border-white/15 dark:hover:border-blue-500 bg-white dark:bg-slate-900 transition cursor-pointer group">
+                    <UploadCloud className="size-6 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-1 transition" />
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                      Click to browse or drop legal document (.pdf, .doc, .docx)
+                    </span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                      Clearance certificates, official registration, or signed licensing deed
+                    </span>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+              )}
+
+              {/* Optional document notes/description */}
+              <div>
+                <input
+                  type="text"
+                  value={docNotes}
+                  onChange={(e) => setDocNotes(e.target.value)}
+                  placeholder="Document reference or note (e.g. Registered in UK IPO, Signed by Director)..."
+                  className="h-8 w-full rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Submission Audit Justification */}
           <div>
