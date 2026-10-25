@@ -707,6 +707,7 @@ export function AssetDetailsView({
       <div className="border border-slate-200/80 bg-slate-100/70 dark:border-white/10 dark:bg-slate-900/90 p-1 rounded-xl">
         <div className="grid grid-cols-2 gap-1">
           {/* Tab 1: Overview & Media */}
+          {/* Tab 1: Overview */}
           <button
             id="tab-overview"
             onClick={() => setActiveTab('overview')}
@@ -717,8 +718,8 @@ export function AssetDetailsView({
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 font-medium'
             )}
           >
-            <Play className="size-3.5" />
-            <span>Overview & Media</span>
+            <Info className="size-3.5" />
+            <span>Overview</span>
           </button>
 
           {/* Tab 2: Connected IP & History */}
@@ -753,12 +754,14 @@ export function AssetDetailsView({
       {/* TAB 1: OVERVIEW & MEDIA */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Main Visual Media Player Engine */}
+          {/* Main Visual Media Player Engine - Disabled / commented out for now */}
+          {/*
           <AssetVisualPreview
             asset={asset}
             showToast={showToast}
             onOpenEditModal={() => setIsEditAssetModalOpen(true)}
           />
+          */}
 
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5">
