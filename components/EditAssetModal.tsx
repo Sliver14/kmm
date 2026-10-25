@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react'
 import { X, Check, UploadCloud, Plus, Trash2, Image as ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AssetData, CategoryItem, SubcategoryItem, Agency, AssetContributor } from '@/types'
+import { isEpisodeCategory, getCategoryGovernance } from '@/lib/categoryGovernance'
 
 const DEFAULT_AGENCIES: Agency[] = [
   'Lovetoons',
@@ -186,6 +187,17 @@ export function EditAssetModal({
                   </option>
                 ))}
               </select>
+              <div className="mt-1 flex items-center gap-1.5 text-[10px]">
+                <span className="text-slate-500 font-medium">Sub-Asset Hierarchy:</span>
+                <span className="font-mono font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
+                  {getCategoryGovernance(category).subAssetStructure}
+                </span>
+                {isEpisodeCategory(category) && (
+                  <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                    Episodes Enabled
+                  </span>
+                )}
+              </div>
             </div>
 
             <div>
@@ -429,7 +441,7 @@ export function EditAssetModal({
               Dynamic Attributes ({category})
             </label>
 
-            {(category.includes('TV') || category.includes('Animated')) && (
+            {isEpisodeCategory(category) && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 <div>
                   <label className="block text-slate-600 mb-0.5 text-[11px] font-semibold">Episodes</label>

@@ -273,7 +273,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               setMasterAssets(migrated)
             }
           }
-          if (parsed.categories) setCategories(parsed.categories)
+          if (parsed.categories && Array.isArray(parsed.categories)) {
+            const mergedCategories = parsed.categories.map((c: any) => {
+              const defCat = initialCategories.find((init) => init.id === c.id || init.name === c.name)
+              return {
+                ...c,
+                subAssetStructure: c.subAssetStructure || defCat?.subAssetStructure,
+                supportsEpisodes: typeof c.supportsEpisodes === 'boolean' ? c.supportsEpisodes : defCat?.supportsEpisodes,
+                subAssetType: c.subAssetType || defCat?.subAssetType,
+              }
+            })
+            setCategories(mergedCategories)
+          }
           if (parsed.subcategories) setSubcategories(parsed.subcategories)
             // Sanitize rights records: strip legacy demo placeholders if unfiled
             setMasterRightsRecords(

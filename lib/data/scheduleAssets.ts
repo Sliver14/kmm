@@ -358,6 +358,39 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
             status: 'Broadcast Ready',
           },
         ]
+      : entry.sn === 27
+      ? [
+          {
+            id: 'ep-kmp-027-1',
+            episodeNumber: 1,
+            title: 'Joyful Praise & Worship',
+            durationMinutes: 20,
+            synopsis: 'Children lead energetic worship session with uplifting kingdom melodies and scripture choruses.',
+            airDate: 'Feb 05, 2025',
+            status: 'Broadcast Ready',
+          },
+          {
+            id: 'ep-kmp-027-2',
+            episodeNumber: 2,
+            title: 'Songs of Victory',
+            durationMinutes: 22,
+            synopsis: 'Sing-along episode celebrating victory in Christ Jesus with full studio kid choir.',
+            airDate: 'Feb 12, 2025',
+            status: 'Approved',
+          },
+        ]
+      : entry.sn === 28
+      ? [
+          {
+            id: 'ep-kmp-028-1',
+            episodeNumber: 1,
+            title: 'First Day of Elementary School',
+            durationMinutes: 16,
+            synopsis: 'Gratia journals her adventures, trusting the Holy Spirit for peace and excellence on day one.',
+            airDate: 'Feb 08, 2025',
+            status: 'Broadcast Ready',
+          },
+        ]
       : undefined
 
   return {

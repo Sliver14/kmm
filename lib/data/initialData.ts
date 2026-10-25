@@ -133,6 +133,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'tv',
     color: 'bg-[#8b5cf6]',
+    subAssetStructure: 'Product → Episodes',
+    supportsEpisodes: true,
+    subAssetType: 'episodes',
   },
   {
     id: 'cat-2',
@@ -143,6 +146,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'tv',
     color: 'bg-[#3b82f6]',
+    subAssetStructure: 'Product → Episodes',
+    supportsEpisodes: true,
+    subAssetType: 'episodes',
   },
   {
     id: 'cat-3',
@@ -153,6 +159,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'bible',
     color: 'bg-[#0284c7]',
+    subAssetStructure: 'nil',
+    supportsEpisodes: false,
+    subAssetType: 'none',
   },
   {
     id: 'cat-4',
@@ -163,6 +172,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'tv',
     color: 'bg-[#6366f1]',
+    subAssetStructure: 'nil',
+    supportsEpisodes: false,
+    subAssetType: 'none',
   },
   {
     id: 'cat-5',
@@ -173,6 +185,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'game',
     color: 'bg-[#10b981]',
+    subAssetStructure: 'nil',
+    supportsEpisodes: false,
+    subAssetType: 'none',
   },
   {
     id: 'cat-6',
@@ -183,6 +198,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'edu',
     color: 'bg-[#f59e0b]',
+    subAssetStructure: 'Product → Volumes',
+    supportsEpisodes: false,
+    subAssetType: 'volumes',
   },
   {
     id: 'cat-7',
@@ -193,6 +211,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'edu',
     color: 'bg-[#f97316]',
+    subAssetStructure: 'Product → Volumes',
+    supportsEpisodes: false,
+    subAssetType: 'volumes',
   },
   {
     id: 'cat-8',
@@ -203,6 +224,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'game',
     color: 'bg-[#06b6d4]',
+    subAssetStructure: 'Product → Releases / Versions',
+    supportsEpisodes: false,
+    subAssetType: 'releases',
   },
   {
     id: 'cat-9',
@@ -213,6 +237,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'event',
     color: 'bg-[#a855f7]',
+    subAssetStructure: 'Product → Event Editions / Instances',
+    supportsEpisodes: false,
+    subAssetType: 'event_instances',
   },
   {
     id: 'cat-10',
@@ -223,6 +250,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'character',
     color: 'bg-[#ef4444]',
+    subAssetStructure: 'nil',
+    supportsEpisodes: false,
+    subAssetType: 'none',
   },
   {
     id: 'cat-11',
@@ -233,6 +263,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'music',
     color: 'bg-[#ec4899]',
+    subAssetStructure: 'nil',
+    supportsEpisodes: false,
+    subAssetType: 'none',
   },
   {
     id: 'cat-12',
@@ -243,6 +276,9 @@ export const initialCategories: CategoryItem[] = [
     status: 'Active',
     iconType: 'other',
     color: 'bg-[#334155]',
+    subAssetStructure: 'Versions',
+    supportsEpisodes: false,
+    subAssetType: 'versions',
   },
 ]
 

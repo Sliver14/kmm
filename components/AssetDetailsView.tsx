@@ -17,6 +17,7 @@ import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { EditAssetModal } from '@/components/EditAssetModal'
 import { AssetData, AssetStatus, RelationshipItem, RightsDocument, ApprovalRequest, AssetEpisode } from '@/types'
 import { getAssetRiskAssessment } from '@/lib/risk'
+import { getCategoryGovernance, isEpisodeCategory } from '@/lib/categoryGovernance'
 
 interface AssetDetailsViewProps {
   asset: AssetData
@@ -187,13 +188,9 @@ export function AssetDetailsView({
     })
   }
 
-  // Category classification helpers
-  const isVideoCategory =
-    asset.category === 'Animated Programme' ||
-    asset.category === 'TV Programme' ||
-    asset.category === 'Film / Short Movie' ||
-    asset.category === 'Documentary / Video'
-
+  // Category Governance Framework resolution
+  const govRule = useMemo(() => getCategoryGovernance(asset.category), [asset.category])
+  const isEpisodeStructuredCategory = isEpisodeCategory(asset.category)
   const isDigitalCategory = asset.category === 'Digital / Interactive Platform'
   const isPublishingCategory = asset.category === 'Publishing / Book' || asset.category === 'Publishing / Comics'
   const isMusicCategory = asset.category === 'Music / Audio'
@@ -780,6 +777,23 @@ export function AssetDetailsView({
                   <span className="font-semibold text-slate-900 text-sm">{asset.category}</span>
                 </div>
                 <div>
+                  <span className="text-slate-400 text-[11px] block">Sub-Asset Hierarchy</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded text-[10px]">
+                      {govRule.subAssetStructure}
+                    </span>
+                    {govRule.supportsEpisodes ? (
+                      <span className="font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px]">
+                        Episodes
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
+                        {govRule.subAssetLabel}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div>
                   <span className="text-slate-400 text-[11px] block">Subcategory / Genre</span>
                   <span className="font-medium text-slate-700">{asset.subcategory || 'Standard Series'}</span>
                 </div>
@@ -953,9 +967,9 @@ export function AssetDetailsView({
           </div>
 
           {/* ------------------------------------------------------------- */}
-          {/* PRODUCTION EPISODES & RELEASES MANAGER (VIDEO / ANIMATION)    */}
+          {/* PRODUCTION EPISODES & RELEASES MANAGER (EPISODE CATEGORIES)   */}
           {/* ------------------------------------------------------------- */}
-          {isVideoCategory && (
+          {isEpisodeStructuredCategory && (
             <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-2.5">
@@ -1327,6 +1341,89 @@ export function AssetDetailsView({
               </div>
             </div>
           )}
+
+          {/* ------------------------------------------------------------- */}
+          {/* CATEGORY GOVERNANCE & SUB-ASSET SPECIFICATION                 */}
+          {/* ------------------------------------------------------------- */}
+          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="size-8 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-950/50 dark:border-blue-800/50 text-blue-700 dark:text-blue-300 grid place-items-center shrink-0">
+                  <ShieldCheck className="size-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white">
+                      Category Governance & Hierarchy Model
+                    </h3>
+                    <span className="font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 dark:bg-blue-950/50 dark:border-blue-800/50 dark:text-blue-300 px-2 py-0.5 rounded text-[10px]">
+                      {govRule.subAssetStructure}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {govRule.hierarchyGovernanceNote}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs">
+                {govRule.supportsEpisodes ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800/40 dark:text-emerald-300 px-3 py-1 font-semibold text-[11px]">
+                    <span className="size-2 rounded-full bg-emerald-500" />
+                    Episodes Structured Category
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 px-3 py-1 font-medium text-[11px]">
+                    <span className="size-1.5 rounded-full bg-slate-400" />
+                    Sub-Asset Hierarchy: {govRule.subAssetLabel}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              {/* Core Rights to Track */}
+              <div className="rounded-lg border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2">
+                <div className="font-semibold text-slate-900 dark:text-white flex items-center justify-between text-xs">
+                  <span>Core Rights & Governance to Track</span>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {govRule.coreRightsToTrack.length} Elements
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {govRule.coreRightsToTrack.map((right, idx) => (
+                    <span
+                      key={idx}
+                      className="rounded-md bg-white border border-slate-200 dark:bg-slate-900 dark:border-white/10 dark:text-slate-300 px-2 py-1 text-[10px] text-slate-700"
+                    >
+                      {right}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Typical Approval & Control Points */}
+              <div className="rounded-lg border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2">
+                <div className="font-semibold text-slate-900 dark:text-white flex items-center justify-between text-xs">
+                  <span>Typical Approval & Control Points</span>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {govRule.approvalControlPoints.length} Checkpoints
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {govRule.approvalControlPoints.map((pt, idx) => (
+                    <span
+                      key={idx}
+                      className="rounded-md bg-white border border-slate-200 dark:bg-slate-900 dark:border-white/10 dark:text-blue-300 px-2 py-1 text-[10px] text-slate-700 flex items-center gap-1"
+                    >
+                      <Check className="size-2.5 text-blue-600 dark:text-blue-400" />
+                      <span>{pt}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1352,6 +1449,25 @@ export function AssetDetailsView({
                 <span>Connect New Asset</span>
               </button>
             </div>
+
+            {govRule.primaryAssetRelations && govRule.primaryAssetRelations.length > 0 && (
+              <div className="rounded-lg bg-blue-50/60 border border-blue-200/80 dark:bg-blue-950/30 dark:border-blue-800/40 p-3 text-xs space-y-1.5">
+                <div className="font-semibold text-blue-900 dark:text-blue-300 text-[11px] flex items-center gap-1.5">
+                  <ShieldCheck className="size-3.5" />
+                  <span>Approved Framework Relations for {asset.category}:</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {govRule.primaryAssetRelations.map((relGuideline, idx) => (
+                    <span
+                      key={idx}
+                      className="rounded-md bg-white border border-blue-200 dark:bg-slate-900 dark:border-blue-800/50 dark:text-blue-200 px-2 py-0.5 text-[10px] text-blue-800 font-medium"
+                    >
+                      {relGuideline}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {assetRelationships.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2 text-xs">

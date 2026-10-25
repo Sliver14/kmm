@@ -226,6 +226,14 @@ export interface AssetData {
   archiveStorageNotice?: string
 }
 
+export type SubAssetHierarchy =
+  | 'Product → Episodes'
+  | 'Product → Volumes'
+  | 'Product → Releases / Versions'
+  | 'Product → Event Editions / Instances'
+  | 'Versions'
+  | 'nil'
+
 export interface CategoryItem {
   id: string
   name: string
@@ -235,6 +243,9 @@ export interface CategoryItem {
   status: 'Active' | 'Inactive'
   iconType: 'tv' | 'bible' | 'music' | 'edu' | 'character' | 'game' | 'event' | 'other'
   color: string
+  subAssetStructure?: SubAssetHierarchy
+  supportsEpisodes?: boolean
+  subAssetType?: string
 }
 
 export interface SubcategoryItem {

@@ -42,6 +42,10 @@ import {
   CategoryCluster,
 } from '@/lib/compliance'
 import {
+  isEpisodeCategory,
+  getCategoryGovernance,
+} from '@/lib/categoryGovernance'
+import {
   AssetData,
   AssetDynamicAttributes,
   CategoryItem,
@@ -7651,9 +7655,20 @@ function SettingsPage() {
                       <CategoryBadgeIcon category={cat.name} />
                       <div>
                         <h3 className="font-semibold text-slate-900 text-sm leading-snug">{cat.name}</h3>
-                        <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.2">
-                          Active Category
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          <span className="text-[9px] font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.2">
+                            {cat.subAssetStructure || getCategoryGovernance(cat.name).subAssetStructure}
+                          </span>
+                          {isEpisodeCategory(cat.name) ? (
+                            <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.2">
+                              Episodes
+                            </span>
+                          ) : (
+                            <span className="text-[9px] text-slate-500 bg-slate-100 rounded px-1.5 py-0.2">
+                              {getCategoryGovernance(cat.name).subAssetLabel}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 

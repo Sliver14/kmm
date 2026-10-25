@@ -3,10 +3,11 @@
 import React, { useState, useMemo } from 'react'
 import {
   Film, Clock, Calendar, Search, Sparkles, CheckCircle2,
-  Tv, AlertCircle, FileText, ChevronRight, Hash, Layers
+  Tv, AlertCircle, FileText, ChevronRight, Hash, Layers, ShieldCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AssetData, AssetEpisode } from '@/types'
+import { isEpisodeCategory, getCategoryGovernance } from '@/lib/categoryGovernance'
 
 interface AssetVisualPreviewProps {
   asset: AssetData
@@ -22,10 +23,15 @@ export function AssetVisualPreview({ asset, showToast, onOpenEditModal }: AssetV
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<string>('All Statuses')
 
-  // Rule: display ONLY when asset actually has episodes
-  if (episodes.length === 0) {
+  // Category Governance Framework rule:
+  // Display ONLY when asset category is an approved episode-structured category
+  // ("Product → Episodes": Animated Programme & TV Programme) AND has episodes.
+  const categorySupportsEpisodes = isEpisodeCategory(asset.category)
+  if (!categorySupportsEpisodes || episodes.length === 0) {
     return null
   }
+
+  const govRule = getCategoryGovernance(asset.category)
 
   const filteredEpisodes = episodes.filter((ep) => {
     if (selectedStatus !== 'All Statuses' && ep.status !== selectedStatus) {
@@ -61,6 +67,9 @@ export function AssetVisualPreview({ asset, showToast, onOpenEditModal }: AssetV
               <span className="rounded-md bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/50 dark:border-blue-800/50 dark:text-blue-300 px-2 py-0.5 text-[10px] font-bold">
                 {episodes.length} {episodes.length === 1 ? 'Episode' : 'Episodes'} Catalogued
               </span>
+              <span className="rounded-md bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/50 dark:border-purple-800/50 dark:text-purple-300 px-2 py-0.5 text-[10px] font-bold font-mono">
+                Hierarchy: {govRule.subAssetStructure}
+              </span>
               {totalMinutes > 0 && (
                 <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
                   • {totalMinutes}m Total Runtime
@@ -68,7 +77,7 @@ export function AssetVisualPreview({ asset, showToast, onOpenEditModal }: AssetV
               )}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Official catalog of broadcast episodes and seasonal chapters for {asset.name}.
+              Official category governance catalog ({asset.category} → {govRule.subAssetStructure}) for {asset.name}.
             </p>
           </div>
         </div>
