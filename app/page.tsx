@@ -24,6 +24,7 @@ import { ApprovalsWorkflow } from '@/components/ApprovalsWorkflow'
 import { AssetDetailsView } from '@/components/AssetDetailsView'
 import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { WelcomeSplash } from '@/components/WelcomeSplash'
 import { GovernancePillarModal } from '@/components/GovernancePillarModals'
 import { AddContributorModal } from '@/components/AddContributorModal'
 import {
@@ -851,7 +852,7 @@ function Header({
   setIsCollapsed?: (v: boolean | ((prev: boolean) => boolean)) => void
   onOpenAddAsset?: () => void
 }) {
-  const { currentUser, logout } = useLovetoonsData()
+  const { currentUser, logout, openWelcomeSplash } = useLovetoonsData()
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
   const [searchFilter, setSearchFilter] = useState('')
 
@@ -1044,8 +1045,20 @@ function Header({
                 )}
               </div>
 
-              {/* Sign Out Action */}
-              <div className="pt-3">
+              {/* Actions */}
+              <div className="pt-3 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileDropdownOpen(false)
+                    openWelcomeSplash()
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 py-2.5 px-3 text-xs font-bold border border-amber-500/20 transition cursor-pointer"
+                >
+                  <Sparkles className="size-3.5 text-amber-500 dark:text-amber-400" />
+                  <span>Play Welcome Animation</span>
+                </button>
+
                 <button
                   onClick={() => {
                     setProfileDropdownOpen(false)
@@ -7758,6 +7771,7 @@ function SettingsPage() {
     setCurrentUser,
     availableUsers,
     logout,
+    openWelcomeSplash,
   } = useLovetoonsData()
 
   const [activeSettingsTab, setActiveSettingsTab] = useState<'general' | 'taxonomy' | 'governance' | 'database'>('general')
@@ -7993,6 +8007,21 @@ function SettingsPage() {
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Toggle Light, Dark, or System Sync</div>
                 </div>
                 <ThemeToggle variant="segmented" />
+              </div>
+
+              <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="font-semibold text-slate-800 dark:text-white text-xs">Welcome Brand Animation</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">3D Medallion Gold Coin & Logo Showcase</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={openWelcomeSplash}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/25 px-3 py-1.5 text-xs font-semibold transition cursor-pointer"
+                >
+                  <Sparkles className="size-3.5 text-amber-500 dark:text-amber-400" />
+                  <span>Play Welcome Animation</span>
+                </button>
               </div>
 
               <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/30 p-3 rounded-lg border border-slate-200/60 dark:border-white/5">
@@ -8970,7 +8999,31 @@ export function MainApp({
     })
   }
 
-  const { currentUser, toastMessage, dismissToast, unreadNotificationsCount, isAuthenticated, isInitialized } = useLovetoonsData()
+  const {
+    currentUser,
+    toastMessage,
+    dismissToast,
+    unreadNotificationsCount,
+    isAuthenticated,
+    isInitialized,
+    isWelcomeSplashOpen,
+    openWelcomeSplash,
+    closeWelcomeSplash,
+  } = useLovetoonsData()
+
+  // Welcome splash screen on initial session arrival
+  useEffect(() => {
+    if (isInitialized && isAuthenticated) {
+      try {
+        if (typeof window !== 'undefined') {
+          const dismissed = sessionStorage.getItem('kmm_welcome_dismissed')
+          if (!dismissed) {
+            openWelcomeSplash()
+          }
+        }
+      } catch {}
+    }
+  }, [isInitialized, isAuthenticated, openWelcomeSplash])
 
   // Auth Guard: Redirect unauthenticated sessions to /signin
   useEffect(() => {
@@ -9067,6 +9120,13 @@ export function MainApp({
 
   return (
     <div className="min-h-screen bg-[#f5f6fa] dark:bg-[#14161f] text-slate-900 dark:text-slate-100 selection:bg-[#2f80ed] selection:text-white">
+      {/* Cinematic Welcome Splash Animation */}
+      <WelcomeSplash
+        isOpen={isWelcomeSplashOpen}
+        onClose={closeWelcomeSplash}
+        userName={currentUser?.name}
+      />
+
       {/* Sleek & Simple System Toast Notification */}
       {toastMessage && (() => {
         const isError = /fail|error|invalid|cannot|denied/i.test(toastMessage)

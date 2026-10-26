@@ -148,6 +148,9 @@ interface DataContextType {
   toastMessage: string | null
   showToast: (msg: string) => void
   dismissToast: () => void
+  isWelcomeSplashOpen: boolean
+  openWelcomeSplash: () => void
+  closeWelcomeSplash: () => void
 }
 
 const STORAGE_KEY = 'kmp_platform_data_v10'
@@ -251,6 +254,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => {
       setToastMessage((prev) => (prev === msg ? null : prev))
     }, 4000)
+  }, [])
+
+  // Welcome Splash Screen
+  const [isWelcomeSplashOpen, setIsWelcomeSplashOpen] = useState(false)
+  const openWelcomeSplash = useCallback(() => {
+    setIsWelcomeSplashOpen(true)
+  }, [])
+  const closeWelcomeSplash = useCallback(() => {
+    setIsWelcomeSplashOpen(false)
+    try {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('kmm_welcome_dismissed', 'true')
+      }
+    } catch {}
   }, [])
 
   // Load session from LocalStorage and sync with live Neon DB as Single Source of Truth
@@ -406,6 +423,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                 localStorage.setItem(USER_KEY, loggedInUser.id)
                 localStorage.setItem(AUTH_KEY, 'true')
               }
+              setIsWelcomeSplashOpen(true)
               showToast(`Welcome back, ${loggedInUser.name}! Secure authentication verified.`)
               return true
             } else {
@@ -436,6 +454,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem(USER_KEY, targetUser.id)
         localStorage.setItem(AUTH_KEY, 'true')
       }
+      setIsWelcomeSplashOpen(true)
       showToast(`Welcome back, ${targetUser.name}! Logged in as ${targetUser.roleLabel}.`)
       return true
     },
@@ -2126,6 +2145,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     toastMessage,
     showToast,
     dismissToast,
+    isWelcomeSplashOpen,
+    openWelcomeSplash,
+    closeWelcomeSplash,
   }
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

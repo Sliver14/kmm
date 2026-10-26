@@ -90,11 +90,16 @@ function SignInContent() {
         <div className="lg:col-span-5 relative flex flex-col justify-between p-8 sm:p-10 bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-800 text-white">
           <div>
             <div className="flex items-center gap-3">
-              <img
-                src="/kmm-logo.png"
-                alt="Kiddies Media Ministries"
-                className="size-10 object-contain drop-shadow-md"
-              />
+              <div className="relative group size-11 shrink-0 rounded-full overflow-hidden p-0.5 bg-gradient-to-tr from-amber-400 via-yellow-500 to-amber-600 shadow-md shadow-amber-500/20">
+                <video
+                  src="/kmm-welcome-animation.mp4"
+                  autoPlay
+                  muted
+                  playsInline
+                  loop
+                  className="size-full object-cover rounded-full"
+                />
+              </div>
               <div>
                 <div className="text-lg font-bold text-white tracking-tight leading-none">
                   Kiddies Media
