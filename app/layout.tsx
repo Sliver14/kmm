@@ -35,10 +35,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
+  colorScheme: 'dark light',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f8f9fa' },
     { media: '(prefers-color-scheme: dark)', color: '#0b0f17' },
+    { media: '(prefers-color-scheme: light)', color: '#f8f9fa' },
   ],
 }
 
@@ -51,7 +51,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
+      className={`dark ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <script
@@ -60,15 +60,17 @@ export default function RootLayout({
               (function() {
                 try {
                   var stored = localStorage.getItem('kmp_theme');
-                  var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (stored === 'dark' || (!stored && sysDark)) {
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.style.colorScheme = 'dark';
-                  } else {
+                  if (stored === 'light') {
                     document.documentElement.classList.remove('dark');
                     document.documentElement.style.colorScheme = 'light';
+                  } else {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.style.colorScheme = 'dark';
                   }
-                } catch(e) {}
+                } catch(e) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.style.colorScheme = 'dark';
+                }
               })();
             `,
           }}

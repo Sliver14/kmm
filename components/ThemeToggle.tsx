@@ -27,7 +27,7 @@ export function ThemeToggle({
     return (
       <div
         className={cn(
-          'size-8.5 rounded-lg border border-slate-200 bg-white/50 animate-pulse',
+          'size-8.5 rounded-lg border border-slate-700 bg-slate-800/50 animate-pulse',
           className
         )}
       />

@@ -17,8 +17,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 const THEME_STORAGE_KEY = 'kmp_theme'
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('light')
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light')
+  const [theme, setThemeState] = useState<Theme>('dark')
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark')
   const [mounted, setMounted] = useState(false)
 
   // Apply theme to document
@@ -44,11 +44,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null
-      const initialTheme: Theme = stored && ['light', 'dark', 'system'].includes(stored) ? stored : 'light'
+      const initialTheme: Theme = stored && ['light', 'dark', 'system'].includes(stored) ? stored : 'dark'
       setThemeState(initialTheme)
       applyTheme(initialTheme)
     } catch {
-      applyTheme('light')
+      applyTheme('dark')
     }
     setMounted(true)
   }, [applyTheme])
