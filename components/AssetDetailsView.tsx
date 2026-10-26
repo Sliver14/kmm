@@ -154,7 +154,7 @@ export function AssetDetailsView({
     isOpen: false,
     title: '',
     description: '',
-    onConfirm: () => {},
+    onConfirm: () => { },
   })
 
   // Edit Asset Modal State
@@ -630,8 +630,8 @@ export function AssetDetailsView({
                   asset.status === 'Approved'
                     ? 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
                     : asset.status === 'Pending'
-                    ? 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'
-                    : 'border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100'
+                      ? 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                      : 'border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100'
                 )}
               >
                 <span className="size-1.5 rounded-full bg-current" />
@@ -1021,8 +1021,8 @@ export function AssetDetailsView({
                     </span>
                     <Pencil className="size-3 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition" />
                   </div>
-                  <div className="font-semibold text-slate-900 dark:text-white text-xs truncate w-full" title={asset.owner || (asset as any).attributes?.owner || linkedRights?.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}>
-                    {asset.owner || (asset as any).attributes?.owner || linkedRights?.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}
+                  <div className="font-semibold text-slate-900 dark:text-white text-xs truncate w-full" title={asset.owner || (asset as any).attributes?.owner || linkedRights?.owner || 'Esteemed Executive Minister (Super Admin)'}>
+                    {asset.owner || (asset as any).attributes?.owner || linkedRights?.owner || 'Esteemed Executive Minister (Super Admin)'}
                   </div>
                   <div className="text-[9px] text-slate-500 dark:text-slate-400 truncate mt-1">
                     Ref: {asset.ownerCertificateRef || (asset as any).attributes?.ownerCertificateRef || linkedRights?.ownerCertificateRef || 'CERT-HQ'}
@@ -1197,10 +1197,10 @@ export function AssetDetailsView({
                                 ep.status === 'Broadcast Ready'
                                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                                   : ep.status === 'Mastered'
-                                  ? 'bg-blue-50 text-blue-800 border-blue-200'
-                                  : ep.status === 'Approved'
-                                  ? 'bg-purple-50 text-purple-800 border-purple-200'
-                                  : 'bg-amber-50 text-amber-800 border-amber-200'
+                                    ? 'bg-blue-50 text-blue-800 border-blue-200'
+                                    : ep.status === 'Approved'
+                                      ? 'bg-purple-50 text-purple-800 border-purple-200'
+                                      : 'bg-amber-50 text-amber-800 border-amber-200'
                               )}
                             >
                               {ep.status || 'In Production'}
@@ -1495,90 +1495,12 @@ export function AssetDetailsView({
           {/* ------------------------------------------------------------- */}
           {/* CATEGORY GOVERNANCE & SUB-ASSET SPECIFICATION                 */}
           {/* ------------------------------------------------------------- */}
-          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
-              <div className="flex items-center gap-2.5">
-                <div className="size-8 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-950/50 dark:border-blue-800/50 text-blue-700 dark:text-blue-300 grid place-items-center shrink-0">
-                  <ShieldCheck className="size-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white">
-                      Category Governance & Hierarchy Model
-                    </h3>
-                    <span className="font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 dark:bg-blue-950/50 dark:border-blue-800/50 dark:text-blue-300 px-2 py-0.5 rounded text-[10px]">
-                      {govRule.subAssetStructure}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {govRule.hierarchyGovernanceNote}
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2 text-xs">
-                {govRule.supportsEpisodes ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800/40 dark:text-emerald-300 px-3 py-1 font-semibold text-[11px]">
-                    <span className="size-2 rounded-full bg-emerald-500" />
-                    Episodes Structured Category
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-white/10 dark:text-slate-300 px-3 py-1 font-medium text-[11px]">
-                    <span className="size-1.5 rounded-full bg-slate-400" />
-                    Sub-Asset Hierarchy: {govRule.subAssetLabel}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              {/* Core Rights to Track */}
-              <div className="rounded-lg border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2">
-                <div className="font-semibold text-slate-900 dark:text-white flex items-center justify-between text-xs">
-                  <span>Core Rights & Governance to Track</span>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    {govRule.coreRightsToTrack.length} Elements
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {govRule.coreRightsToTrack.map((right, idx) => (
-                    <span
-                      key={idx}
-                      className="rounded-md bg-white border border-slate-200 dark:bg-slate-900 dark:border-white/10 dark:text-slate-300 px-2 py-1 text-[10px] text-slate-700"
-                    >
-                      {right}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Typical Approval & Control Points */}
-              <div className="rounded-lg border border-slate-100 bg-slate-50/60 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-2">
-                <div className="font-semibold text-slate-900 dark:text-white flex items-center justify-between text-xs">
-                  <span>Typical Approval & Control Points</span>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    {govRule.approvalControlPoints.length} Checkpoints
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {govRule.approvalControlPoints.map((pt, idx) => (
-                    <span
-                      key={idx}
-                      className="rounded-md bg-white border border-slate-200 dark:bg-slate-900 dark:border-white/10 dark:text-blue-300 px-2 py-1 text-[10px] text-slate-700 flex items-center gap-1"
-                    >
-                      <Check className="size-2.5 text-blue-600 dark:text-blue-400" />
-                      <span>{pt}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
       {/* TAB 2: CONNECTED IP, SUB-ASSETS & HISTORY */}
-      
+
       {activeTab === 'connections' && (
         <div className="space-y-6">
           {/* Connected Relationships Section */}

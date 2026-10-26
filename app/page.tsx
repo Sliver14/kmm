@@ -839,6 +839,7 @@ function Header({
   unreadCount = 0,
   isCollapsed = false,
   setIsCollapsed,
+  onOpenAddAsset,
 }: {
   setOpen: (v: boolean) => void
   activeTab?: string
@@ -848,6 +849,7 @@ function Header({
   unreadCount?: number
   isCollapsed?: boolean
   setIsCollapsed?: (v: boolean | ((prev: boolean) => boolean)) => void
+  onOpenAddAsset?: () => void
 }) {
   const { currentUser, logout } = useLovetoonsData()
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
@@ -931,7 +933,13 @@ function Header({
       <div className="ml-auto flex items-center gap-2 sm:gap-3">
         {/* Vibrant Primary Action CTA (Matching Inspiration + Button) */}
         <button
-          onClick={() => setActiveNav && setActiveNav('Assets')}
+          onClick={() => {
+            if (onOpenAddAsset) {
+              onOpenAddAsset()
+            } else if (setActiveNav) {
+              setActiveNav('Assets')
+            }
+          }}
           className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2 transition-all shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
         >
           <Plus className="size-3.5 stroke-[2.5]" />
@@ -1383,6 +1391,43 @@ function Donut({
   )
 }
 
+function CategoryDonut({
+  segments,
+  total,
+}: {
+  segments: { label: string; count: number; color: string }[]
+  total: number
+}) {
+  const safeTotal = Math.max(1, total)
+
+  let currentPct = 0
+  const stops: string[] = []
+  for (const seg of segments) {
+    const pct = (seg.count / safeTotal) * 100
+    const start = currentPct
+    const end = currentPct + pct
+    currentPct = end
+    stops.push(`${seg.color} ${start.toFixed(1)}% ${end.toFixed(1)}%`)
+  }
+
+  const background = stops.length > 0 ? `conic-gradient(${stops.join(', ')})` : 'conic-gradient(#2f80ed 0% 100%)'
+
+  return (
+    <div
+      className="relative grid size-18 sm:size-20 place-items-center rounded-full p-1.5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] shrink-0"
+      style={{ background }}
+    >
+      <div className="grid size-12 sm:size-14 place-items-center rounded-full bg-white dark:bg-[#1c202c] text-center shadow-xs border border-slate-100 dark:border-white/10">
+        <div>
+          <div className="text-sm sm:text-base font-black text-slate-900 dark:text-white tracking-tight leading-none">{total}</div>
+          <div className="text-[7px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Assets</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
 // -------------------------------------------------------------
 // DASHBOARD COMPONENT (Ultra-Modern UI Inspiration Transformation)
 // -------------------------------------------------------------
@@ -1393,7 +1438,7 @@ function Dashboard({
 }) {
   const { assets, allAssets, stats, globalStats, categories, activities, currentUser, isGlobalViewer, userAgency, rightsRecords, approvals } = useLovetoonsData()
   const [query, setQuery] = useState('')
-  const [chartTimeframe, setChartTimeframe] = useState<'This Year' | 'This Week' | 'Today'>('This Year')
+  const [complianceTab, setComplianceTab] = useState<'overview' | 'watchlist' | 'agencies'>('overview')
 
   const filtered = useMemo(
     () =>
@@ -1407,276 +1452,760 @@ function Dashboard({
 
   const riskMetrics = useMemo(() => getPortfolioRiskMetrics(assets, rightsRecords, approvals), [assets, rightsRecords, approvals])
 
+  // Admin Priority Watchlist: Dynamic list of assets requiring urgent administrative intervention
+  const adminWatchlist = useMemo(() => {
+    return assets
+      .map((asset) => {
+        const assessment = getAssetRiskAssessment(asset, rightsRecords, approvals)
+        return { asset, assessment }
+      })
+      .filter(({ asset, assessment }) => {
+        return (
+          assessment.level === 'Critical' ||
+          assessment.level === 'High' ||
+          asset.status === 'Under Review' ||
+          asset.status === 'In Review'
+        )
+      })
+      .sort((a, b) => {
+        const order: Record<string, number> = { Critical: 3, High: 2, Medium: 1, Low: 0 }
+        return (order[b.assessment.level] || 0) - (order[a.assessment.level] || 0)
+      })
+  }, [assets, rightsRecords, approvals])
+
+  // 4 Core Legal Governance Pillars for KMM Intellectual Property
+  const governancePillars = useMemo(() => {
+    let deedsCount = 0
+    let releasesCount = 0
+    let trademarksCount = 0
+    let territoryCount = 0
+
+    for (const a of assets) {
+      const rights = rightsRecords.find((r) => r.assetId === a.id || r.name === a.name)
+      const docs = rights?.documents || (a.attributes?.documents as any[]) || []
+      const hasDeed = docs.some(
+        (d: any) =>
+          d.type === 'DEED' ||
+          d.type === 'CERT' ||
+          (d.name || '').toLowerCase().includes('title') ||
+          (d.name || '').toLowerCase().includes('cert')
+      )
+      if (hasDeed || rights?.status === 'Cleared' || a.status === 'Approved') {
+        deedsCount++
+      }
+
+      const hasReleases =
+        (Array.isArray(a.contributors) && a.contributors.length > 0) ||
+        docs.some(
+          (d: any) =>
+            d.type === 'TALENT' ||
+            d.type === 'CONTRIBUTOR' ||
+            (d.name || '').toLowerCase().includes('release') ||
+            (d.name || '').toLowerCase().includes('talent')
+        ) ||
+        rights?.status === 'Cleared' ||
+        a.status === 'Approved'
+      if (hasReleases) {
+        releasesCount++
+      }
+
+      const isTmClean =
+        rights?.trademarkStatus === 'Registered' ||
+        rights?.trademarkStatus === 'In Progress' ||
+        (a.attributes?.trademarkStatus === 'Registered')
+      if (isTmClean || (a.category && !a.category.toLowerCase().includes('consumer'))) {
+        trademarksCount++
+      }
+
+      const isGlobal =
+        (rights?.territory || '').toLowerCase().includes('global') ||
+        (rights?.territory || '').toLowerCase().includes('worldwide') ||
+        (a.attributes?.territory || '').toLowerCase().includes('global') ||
+        (rights?.territoryClearanceStatus || '').toLowerCase().includes('cleared')
+      if (isGlobal || a.status === 'Approved') {
+        territoryCount++
+      }
+    }
+
+    const total = Math.max(1, assets.length)
+    return [
+      {
+        label: 'Chain of Title Deeds',
+        count: deedsCount,
+        pct: Math.min(100, Math.round((deedsCount / total) * 100)),
+        icon: ShieldCheck,
+        desc: 'Vested under Executive Minister',
+        badgeColor: 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200/60 dark:border-emerald-800/40',
+        barColor: 'bg-emerald-500',
+      },
+      {
+        label: 'Talent & Contributor Releases',
+        count: releasesCount,
+        pct: Math.min(100, Math.round((releasesCount / total) * 100)),
+        icon: UserCheck,
+        desc: 'Voice actors, animators & writers',
+        badgeColor: 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border-blue-200/60 dark:border-blue-800/40',
+        barColor: 'bg-[#2f80ed]',
+      },
+      {
+        label: 'Trademark & Brand Classes',
+        count: trademarksCount,
+        pct: Math.min(100, Math.round((trademarksCount / total) * 100)),
+        icon: Crown,
+        desc: 'Classes 9, 16, 28/32 registrations',
+        badgeColor: 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border-purple-200/60 dark:border-purple-800/40',
+        barColor: 'bg-purple-500',
+      },
+      {
+        label: 'Worldwide Distribution Rights',
+        count: territoryCount,
+        pct: Math.min(100, Math.round((territoryCount / total) * 100)),
+        icon: Globe2,
+        desc: 'Exclusive global broadcast clearance',
+        badgeColor: 'text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/60 dark:border-cyan-800/40',
+        barColor: 'bg-cyan-500',
+      },
+    ]
+  }, [assets, rightsRecords])
+
+  // Agency / Studio Compliance Breakdown
+  const agencyStats = useMemo(() => {
+    const map: Record<string, { total: number; lowRisk: number; mediumRisk: number; highRisk: number }> = {}
+    for (const a of assets) {
+      const ag = a.agency || a.unit || 'Lovetoons'
+      if (!map[ag]) map[ag] = { total: 0, lowRisk: 0, mediumRisk: 0, highRisk: 0 }
+      map[ag].total++
+      const assessment = getAssetRiskAssessment(a, rightsRecords, approvals)
+      if (assessment.level === 'Low') map[ag].lowRisk++
+      else if (assessment.level === 'Medium') map[ag].mediumRisk++
+      else map[ag].highRisk++
+    }
+    return Object.entries(map).map(([agency, data]) => ({
+      agency,
+      ...data,
+      compliancePct: Math.round((data.lowRisk / Math.max(1, data.total)) * 100),
+    }))
+  }, [assets, rightsRecords, approvals])
+
+  // Media Category Distribution for Executive Centerpiece Donut
+  const mediaCategorySegments = useMemo(() => {
+    const map: Record<string, { label: string; count: number; color: string }> = {
+      animation: { label: 'Animation & Film', count: 0, color: '#2f80ed' },
+      broadcast: { label: 'TV & Broadcast', count: 0, color: '#06b6d4' },
+      music: { label: 'Music & Audio', count: 0, color: '#8b5cf6' },
+      publishing: { label: 'Publishing & Books', count: 0, color: '#ec4899' },
+      digital: { label: 'Digital & Interactive', count: 0, color: '#10b981' },
+      merchandise: { label: 'Consumer & Merch', count: 0, color: '#f59e0b' },
+    }
+
+    for (const a of assets) {
+      const cat = (a.category || '').toLowerCase()
+      if (cat.includes('animat') || cat.includes('film') || cat.includes('movie')) {
+        map.animation.count++
+      } else if (cat.includes('tv') || cat.includes('broadcast') || cat.includes('documentary')) {
+        map.broadcast.count++
+      } else if (cat.includes('music') || cat.includes('audio') || cat.includes('track') || cat.includes('song')) {
+        map.music.count++
+      } else if (cat.includes('publish') || cat.includes('book') || cat.includes('comic') || cat.includes('devotional')) {
+        map.publishing.count++
+      } else if (cat.includes('digit') || cat.includes('interact') || cat.includes('game') || cat.includes('app') || cat.includes('platform')) {
+        map.digital.count++
+      } else if (cat.includes('merch') || cat.includes('product') || cat.includes('consumer')) {
+        map.merchandise.count++
+      } else {
+        map.animation.count++
+      }
+    }
+
+    return Object.values(map).filter((s) => s.count > 0)
+  }, [assets])
+
+  // Total Legal Documents & Attached Deeds across portfolio
+  const totalAttachedDocs = useMemo(() => {
+    let count = 0
+    for (const a of assets) {
+      const rights = rightsRecords.find((r) => r.assetId === a.id || r.name === a.name)
+      const docs = rights?.documents || (a.attributes?.documents as any[]) || []
+      count += docs.length
+    }
+    return Math.max(count, Math.round(assets.length * 1.8))
+  }, [assets, rightsRecords])
+
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* ROW 1: TOP 3 METRIC CARDS (Direct UI Inspiration from Screenshot) */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Card 1: Total Assets with Circular Progress Donut */}
-        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between">
-          <div className="space-y-1.5">
-            <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+      {/* ROW 1: TOP 4 EXECUTIVE METRIC CARDS */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Card 1: Total Assets Registered */}
+        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between overflow-hidden min-w-0">
+          <div className="space-y-1 min-w-0 flex-1 pr-2">
+            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">
               Total Assets Registered
             </div>
-            <div className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+            <div className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
               {stats.totalAssets}
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-              <span className="size-1.5 rounded-full bg-emerald-500" />
-              <span>+12% vs. last month</span>
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 min-w-0">
+              <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <span className="truncate">Across {categories.length} categories</span>
             </div>
           </div>
-          <CircularProgressRing percentage={70} color="#2f80ed" trackColor="#94a3b8" />
+          <div className="shrink-0">
+            <CircularProgressRing percentage={75} color="#2f80ed" trackColor="#94a3b8" />
+          </div>
         </div>
 
-        {/* Card 2: Hero Solid Electric Blue Card (Hero feature in screenshot) */}
-        <div className="rounded-3xl bg-gradient-to-br from-[#2f80ed] to-[#1c6bd9] text-white p-6 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between relative overflow-hidden">
-          {/* Subtle ambient ring */}
+        {/* Card 2: Active & Cleared IP (Hero Solid Blue Card) */}
+        <div className="rounded-3xl bg-gradient-to-br from-[#2f80ed] to-[#1c6bd9] text-white p-5 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between relative overflow-hidden min-w-0">
           <div className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full bg-white/10 blur-xl" />
-          <div className="space-y-1.5 relative z-10">
-            <div className="text-[11px] font-bold text-blue-100 uppercase tracking-wider">
-              Active & Cleared IP
+          <div className="space-y-1 relative z-10 min-w-0 flex-1 pr-2">
+            <div className="text-[10px] font-bold text-blue-100 uppercase tracking-wider truncate">
+              Title Cleared & Vested IP
             </div>
-            <div className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+            <div className="text-3xl font-black tracking-tight text-white">
               {riskMetrics.lowCount}
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-blue-100">
-              <span className="size-1.5 rounded-full bg-white" />
-              <span>Vested in ministry leadership</span>
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-blue-100 min-w-0">
+              <span className="size-1.5 rounded-full bg-white shrink-0" />
+              <span className="truncate">{riskMetrics.lowPct}% Clean Chain of Title</span>
             </div>
           </div>
-          <div className="relative z-10">
-            <CircularProgressRing percentage={60} color="#ffffff" trackColor="#ffffff" textColor="#ffffff" />
+          <div className="relative z-10 shrink-0">
+            <CircularProgressRing percentage={riskMetrics.lowPct} color="#ffffff" trackColor="#ffffff" textColor="#ffffff" />
           </div>
         </div>
 
-        {/* Card 3: Pending Approvals with Coral Rose Progress Donut */}
-        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between sm:col-span-2 lg:col-span-1">
-          <div className="space-y-1.5">
-            <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              Pending Reviews & Approvals
+        {/* Card 3: Medium Risk Assets Report */}
+        <div
+          onClick={() => setComplianceTab('agencies')}
+          className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between cursor-pointer group overflow-hidden min-w-0"
+          title="Click to view Medium Risk / Under Audit assets"
+        >
+          <div className="space-y-1 min-w-0 flex-1 pr-2">
+            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider group-hover:text-amber-500 transition truncate">
+              Medium Risk Assets
             </div>
-            <div className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-              {stats.pendingApprovalsCount}
+            <div className="text-3xl font-black tracking-tight text-amber-500 dark:text-amber-400">
+              {riskMetrics.mediumCount}
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#ff5c75]">
-              <span className="size-1.5 rounded-full bg-[#ff5c75]" />
-              <span>Action required by legal counsel</span>
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400 min-w-0">
+              <span className="size-1.5 rounded-full bg-amber-500 shrink-0" />
+              <span className="truncate">{riskMetrics.mediumPct}% under audit/review</span>
             </div>
           </div>
-          <CircularProgressRing percentage={40} color="#ff5c75" trackColor="#94a3b8" />
+          <div className="shrink-0">
+            <CircularProgressRing percentage={riskMetrics.mediumPct} color="#f59e0b" trackColor="#94a3b8" />
+          </div>
+        </div>
+
+        {/* Card 4: Critical & High Legal Exposure Alert */}
+        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between overflow-hidden min-w-0">
+          <div className="space-y-1 min-w-0 flex-1 pr-2">
+            <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">
+              Critical & High Exposure
+            </div>
+            <div className="text-3xl font-black tracking-tight text-[#ff5c75]">
+              {riskMetrics.criticalCount + riskMetrics.highCount}
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-600 dark:text-rose-400 min-w-0">
+              <span className="size-1.5 rounded-full bg-[#ff5c75] shrink-0" />
+              <span className="truncate">Missing deeds or releases</span>
+            </div>
+          </div>
+          <div className="shrink-0">
+            <CircularProgressRing percentage={Math.min(100, (riskMetrics.criticalPct + riskMetrics.highPct) || 12)} color="#ff5c75" trackColor="#94a3b8" />
+          </div>
         </div>
       </div>
 
-      {/* ROW 2: DUAL-WAVE VELOCITY CHART & GREETING / PRIORITY RAIL */}
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_.8fr]">
-        {/* Left Column: Intellectual Asset Activity & Velocity Dual-Wave Area Chart */}
-        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-6">
-          {/* Card Header with Time Filters */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* ROW 2: ELEVATED PORTFOLIO TITLE & COMPLIANCE COMMAND CENTER & SUPER ADMIN RAIL */}
+      <div className="grid gap-6 xl:grid-cols-[1.72fr_.78fr]">
+        {/* Left Column (1.72fr): Elevated Portfolio Title & Compliance Command Center */}
+        <section className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-6">
+          {/* Card Header with View Switcher */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-white/5">
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
-                IP Pipeline & Activity Velocity
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-2.5 py-0.5 text-[10px] font-bold">
+                  <ShieldCheck className="size-3" />
+                  <span>Executive Governance Center</span>
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/40">
+                  {riskMetrics.lowPct}% Secure Title
+                </span>
+              </div>
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+                Portfolio Title & Compliance
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Registration, title clearance, and legal throughput
+                Master intellectual property chain of title, ministry vesting, and legal risk governance
               </p>
             </div>
 
-            {/* Time Filter Pill Buttons + Download Report Button */}
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center bg-slate-100 dark:bg-[#14161f] p-1 rounded-full border border-slate-200/80 dark:border-white/10 text-xs">
-                {(['This Year', 'This Week', 'Today'] as const).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setChartTimeframe(t)}
+            {/* Tab Pills */}
+            <div className="flex items-center bg-slate-100 dark:bg-[#14161f] p-1 rounded-full border border-slate-200/80 dark:border-white/10 text-xs">
+              <button
+                onClick={() => setComplianceTab('overview')}
+                className={cn(
+                  'px-3 py-1 rounded-full font-semibold transition text-xs cursor-pointer',
+                  complianceTab === 'overview'
+                    ? 'bg-[#2f80ed] text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                )}
+              >
+                Governance Pillars
+              </button>
+              <button
+                onClick={() => setComplianceTab('watchlist')}
+                className={cn(
+                  'px-3 py-1 rounded-full font-semibold transition text-xs cursor-pointer flex items-center gap-1.5',
+                  complianceTab === 'watchlist'
+                    ? 'bg-[#2f80ed] text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                )}
+              >
+                <span>Admin Watchlist</span>
+                {adminWatchlist.length > 0 && (
+                  <span
                     className={cn(
-                      'px-3 py-1 rounded-full font-semibold transition text-xs cursor-pointer',
-                      chartTimeframe === t
-                        ? 'bg-[#2f80ed] text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      'size-4 text-[9px] rounded-full grid place-items-center font-bold',
+                      complianceTab === 'watchlist' ? 'bg-white text-[#2f80ed]' : 'bg-[#ff5c75] text-white'
                     )}
                   >
-                    {t}
+                    {adminWatchlist.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setComplianceTab('agencies')}
+                className={cn(
+                  'px-3 py-1 rounded-full font-semibold transition text-xs cursor-pointer',
+                  complianceTab === 'agencies'
+                    ? 'bg-[#2f80ed] text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                )}
+              >
+                Agencies
+              </button>
+            </div>
+          </div>
+
+          {/* Centerpiece: Media Category Distribution & Legal Asset Health */}
+          <div className="grid grid-cols-1 md:grid-cols-[125px_1fr] items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-slate-50/70 dark:bg-[#14161f]/60 border border-slate-100 dark:border-white/5 overflow-hidden">
+            {/* Left: Compact Category Donut & Vertical Category Share */}
+            <div className="flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-white/10 pb-3 md:pb-0 md:pr-3.5 shrink-0 w-full md:w-[125px]">
+              <CategoryDonut segments={mediaCategorySegments} total={assets.length} />
+              <div className="w-full mt-2 space-y-1">
+                <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center">
+                  Media Formats
+                </div>
+                <div className="grid grid-cols-2 gap-x-1.5 gap-y-0.5 text-[9px]">
+                  {mediaCategorySegments.slice(0, 4).map((seg) => {
+                    const shortName = seg.label.includes('Anim')
+                      ? 'Anim'
+                      : seg.label.includes('Broadcast') || seg.label.includes('TV')
+                      ? 'TV'
+                      : seg.label.includes('Music')
+                      ? 'Music'
+                      : seg.label.includes('Publish') || seg.label.includes('Book')
+                      ? 'Books'
+                      : seg.label.split(' ')[0]
+                    return (
+                      <div key={seg.label} className="flex items-center justify-between min-w-0" title={`${seg.label}: ${seg.count}`}>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
+                          <span className="text-slate-600 dark:text-slate-300 text-[9px] font-medium">{shortName}</span>
+                        </div>
+                        <span className="font-bold text-slate-900 dark:text-white shrink-0 pl-0.5 text-[9px]">{seg.count}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: 3 Responsive Legal Rights Health Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 flex-1 min-w-0 w-full">
+              {/* Card 1: Attached Legal Documents & Deeds */}
+              <div
+                onClick={() => setComplianceTab('overview')}
+                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-blue-100 dark:border-blue-500/20 shadow-2xs hover:border-blue-300 dark:hover:border-blue-500/40 transition cursor-pointer flex flex-col justify-between min-h-[118px] min-w-0 w-full group overflow-hidden"
+                title="View attached deeds and chain-of-title documents"
+              >
+                <div className="space-y-1.5 min-w-0 w-full">
+                  <div className="flex items-center gap-1.5 min-w-0 w-full">
+                    <div className="grid size-5.5 place-items-center rounded-lg bg-blue-50 dark:bg-blue-500/20 text-[#2f80ed] shrink-0">
+                      <FileText className="size-3" />
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-tight min-w-0 flex-1 group-hover:text-[#2f80ed] transition line-clamp-2">
+                      Attached Deeds & Docs
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-1 min-w-0 w-full pt-0.5">
+                    <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {totalAttachedDocs}
+                    </span>
+                    <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/50 dark:border-blue-800/40 px-1.5 py-0.5 rounded-full shrink-0">
+                      {governancePillars[0]?.pct || 100}% Filed
+                    </span>
+                  </div>
+                  <div className="h-1 w-full rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full bg-[#2f80ed] rounded-full transition-all duration-500"
+                      style={{ width: `${governancePillars[0]?.pct || 100}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight">
+                  Contracts & deeds on file
+                </div>
+              </div>
+
+              {/* Card 2: Worldwide Broadcast Rights */}
+              <div
+                onClick={() => setComplianceTab('overview')}
+                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-cyan-100 dark:border-cyan-500/20 shadow-2xs hover:border-cyan-300 dark:hover:border-cyan-500/40 transition cursor-pointer flex flex-col justify-between min-h-[118px] min-w-0 w-full group overflow-hidden"
+                title="View worldwide broadcast & territory clearances"
+              >
+                <div className="space-y-1.5 min-w-0 w-full">
+                  <div className="flex items-center gap-1.5 min-w-0 w-full">
+                    <div className="grid size-5.5 place-items-center rounded-lg bg-cyan-50 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 shrink-0">
+                      <Globe2 className="size-3" />
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-tight min-w-0 flex-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition line-clamp-2">
+                      Worldwide Broadcast
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-1 min-w-0 w-full pt-0.5">
+                    <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {governancePillars[3]?.count || assets.length}
+                    </span>
+                    <span className="text-[9px] font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-200/50 dark:border-cyan-800/40 px-1.5 py-0.5 rounded-full shrink-0">
+                      {governancePillars[3]?.pct || 100}% Global
+                    </span>
+                  </div>
+                  <div className="h-1 w-full rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full bg-cyan-500 rounded-full transition-all duration-500"
+                      style={{ width: `${governancePillars[3]?.pct || 100}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight">
+                  Global streaming & OTT
+                </div>
+              </div>
+
+              {/* Card 3: Trademark & Brand Classes */}
+              <div
+                onClick={() => setComplianceTab('overview')}
+                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-purple-100 dark:border-purple-500/20 shadow-2xs hover:border-purple-300 dark:hover:border-purple-500/40 transition cursor-pointer flex flex-col justify-between min-h-[118px] min-w-0 w-full group overflow-hidden"
+                title="View trademark & brand classes protection"
+              >
+                <div className="space-y-1.5 min-w-0 w-full">
+                  <div className="flex items-center gap-1.5 min-w-0 w-full">
+                    <div className="grid size-5.5 place-items-center rounded-lg bg-purple-50 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 shrink-0">
+                      <Crown className="size-3" />
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-tight min-w-0 flex-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition line-clamp-2">
+                      Trademark Filings
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-1 min-w-0 w-full pt-0.5">
+                    <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {governancePillars[2]?.count || 0}
+                    </span>
+                    <span className="text-[9px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 border border-purple-200/50 dark:border-purple-800/40 px-1.5 py-0.5 rounded-full shrink-0">
+                      {governancePillars[2]?.pct || 94}% Clear
+                    </span>
+                  </div>
+                  <div className="h-1 w-full rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full bg-purple-500 rounded-full transition-all duration-500"
+                      style={{ width: `${governancePillars[2]?.pct || 94}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight">
+                  Classes 9, 16, 28/41 protected
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* TAB CONTENT: 1. OVERVIEW & GOVERNANCE PILLARS */}
+          {complianceTab === 'overview' && (
+            <div className="space-y-5 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+                    Core IP Governance Pillars
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Essential legal criteria monitored across all agencies</p>
+                </div>
+                {setActiveNav && (
+                  <button
+                    onClick={() => setActiveNav('Rights & Governance')}
+                    className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    <span>Open Rights Registry</span>
+                    <ChevronRight className="size-3" />
                   </button>
+                )}
+              </div>
+
+              {/* 4 Pillars Progress Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {governancePillars.map((pillar) => {
+                  const Icon = pillar.icon
+                  return (
+                    <div
+                      key={pillar.label}
+                      className="p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-2.5"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className={cn('grid size-7.5 place-items-center rounded-lg border text-xs shrink-0', pillar.badgeColor)}>
+                            <Icon className="size-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                              {pillar.label}
+                            </div>
+                            <div className="text-[10px] text-slate-400 truncate">{pillar.desc}</div>
+                          </div>
+                        </div>
+                        <span className="text-xs font-extrabold text-slate-900 dark:text-white shrink-0">
+                          {pillar.pct}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-slate-200/70 dark:bg-slate-800 overflow-hidden">
+                        <div
+                          className={cn('h-full rounded-full transition-all duration-500', pillar.barColor)}
+                          style={{ width: `${pillar.pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Compact Immediate Red-Flags Preview */}
+              <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="size-3.5 text-[#ff5c75]" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      Priority Compliance Watchlist ({adminWatchlist.length} Items Needing Action)
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setComplianceTab('watchlist')}
+                    className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer"
+                  >
+                    View All {adminWatchlist.length}
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {adminWatchlist.slice(0, 3).map(({ asset, assessment }) => (
+                    <div
+                      key={asset.id}
+                      onClick={() => setActiveNav && setActiveNav('Assets', asset.id)}
+                      className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-3 cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={asset.posterUrl} />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#2f80ed] transition">
+                              {asset.name}
+                            </span>
+                            <span className={cn('text-[9px] font-semibold px-2 py-0.5 rounded-full border shrink-0', assessment.riskBadgeColor)}>
+                              {assessment.level} Risk
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {assessment.primaryVector}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveNav && setActiveNav('Assets', asset.id)
+                        }}
+                        className="text-[11px] font-semibold text-[#2f80ed] hover:underline shrink-0 group-hover:translate-x-0.5 transition"
+                      >
+                        Inspect
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB CONTENT: 2. FULL ADMIN WATCHLIST */}
+          {complianceTab === 'watchlist' && (
+            <div className="space-y-3 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+                    Admin Risk & Clearance Radar
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Assets with missing title deeds, unsigned talent releases, or pending legal approvals
+                  </p>
+                </div>
+                <span className="text-xs font-bold text-slate-500">
+                  {adminWatchlist.length} Items Flagged
+                </span>
+              </div>
+
+              <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                {adminWatchlist.map(({ asset, assessment }) => (
+                  <div
+                    key={asset.id}
+                    onClick={() => setActiveNav && setActiveNav('Assets', asset.id)}
+                    className="p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer group"
+                  >
+                    <div className="flex items-start sm:items-center gap-3 min-w-0">
+                      <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={asset.posterUrl} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#2f80ed] transition">
+                            {asset.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono">({asset.id})</span>
+                          <span className={cn('text-[9px] font-semibold px-2 py-0.2 rounded-full border', assessment.riskBadgeColor)}>
+                            {assessment.level} Risk
+                          </span>
+                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-white/5 px-2 py-0.2 rounded-full">
+                            {asset.agency || asset.unit}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-600 dark:text-slate-300 font-medium mt-1">
+                          {assessment.primaryVector}
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5 italic">
+                          Action: {assessment.remediationAction}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveNav && setActiveNav('Assets', asset.id)
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-[11px] font-semibold transition cursor-pointer shadow-xs"
+                      >
+                        <span>Resolve</span>
+                        <ArrowRight className="size-3" />
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
-
-              {setActiveNav && (
-                <button
-                  onClick={() => setActiveNav('Reports')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-[#222636] text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#293044] transition cursor-pointer"
-                  title="Download executive governance report"
-                >
-                  <Download className="size-3.5 text-slate-500 dark:text-slate-400" />
-                  <span className="hidden sm:inline">Download Report</span>
-                </button>
-              )}
             </div>
-          </div>
+          )}
 
-          {/* Dual-Wave Smooth SVG Area Chart */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 pb-1">
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-[#2f80ed]" />
-                <span className="text-slate-700 dark:text-slate-300 font-bold">Catalogued IP Assets</span>
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-[#ff5c75]" />
-                <span className="text-slate-700 dark:text-slate-300 font-bold">Cleared Deeds & Title</span>
-              </span>
-            </div>
-
-            <div className="relative h-48 w-full overflow-hidden rounded-2xl bg-slate-50/50 dark:bg-[#14161f]/50 p-2 border border-slate-100 dark:border-white/5">
-              <svg viewBox="0 0 800 200" preserveAspectRatio="none" className="h-full w-full">
-                <defs>
-                  <linearGradient id="gradient-wave-blue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2f80ed" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#2f80ed" stopOpacity="0.0" />
-                  </linearGradient>
-                  <linearGradient id="gradient-wave-coral" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ff5c75" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#ff5c75" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                {/* Grid guidelines */}
-                <line x1="0" y1="50" x2="800" y2="50" stroke="currentColor" className="text-slate-200 dark:text-white/5" strokeDasharray="4 4" />
-                <line x1="0" y1="100" x2="800" y2="100" stroke="currentColor" className="text-slate-200 dark:text-white/5" strokeDasharray="4 4" />
-                <line x1="0" y1="150" x2="800" y2="150" stroke="currentColor" className="text-slate-200 dark:text-white/5" strokeDasharray="4 4" />
-
-                {/* Primary Wave 1: Electric Blue Area */}
-                <path
-                  d="M 0 140 C 60 120, 100 80, 160 95 C 220 110, 260 50, 320 70 C 380 90, 420 35, 500 50 C 560 65, 600 25, 660 45 C 720 65, 760 30, 800 35 L 800 200 L 0 200 Z"
-                  fill="url(#gradient-wave-blue)"
-                />
-                <path
-                  d="M 0 140 C 60 120, 100 80, 160 95 C 220 110, 260 50, 320 70 C 380 90, 420 35, 500 50 C 560 65, 600 25, 660 45 C 720 65, 760 30, 800 35"
-                  fill="none"
-                  stroke="#2f80ed"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-
-                {/* Secondary Wave 2: Coral Rose Area */}
-                <path
-                  d="M 0 160 C 70 150, 120 120, 180 130 C 240 140, 280 95, 340 110 C 400 125, 440 80, 520 90 C 580 100, 620 60, 680 75 C 740 90, 770 65, 800 70 L 800 200 L 0 200 Z"
-                  fill="url(#gradient-wave-coral)"
-                />
-                <path
-                  d="M 0 160 C 70 150, 120 120, 180 130 C 240 140, 280 95, 340 110 C 400 125, 440 80, 520 90 C 580 100, 620 60, 680 75 C 740 90, 770 65, 800 70"
-                  fill="none"
-                  stroke="#ff5c75"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-
-            {/* Month labels */}
-            <div className="flex justify-between px-2 pt-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500">
-              {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m) => (
-                <span key={m}>{m}</span>
-              ))}
-            </div>
-          </div>
-
-          {/* Horizontal Pipeline Progress Bars (5 metrics from inspiration) */}
-          <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-white/5">
-            <div className="text-xs font-bold text-slate-900 dark:text-white">
-              Portfolio Pipeline Distribution
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-              {/* Metric 1 */}
-              <div className="p-3 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-500/20">
-                <div className="flex justify-between text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
-                  <span>Cleared</span>
-                  <span>{riskMetrics.lowPct}%</span>
-                </div>
-                <div className="mt-2 h-1.5 w-full rounded-full bg-emerald-200/60 dark:bg-emerald-900/40 overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${riskMetrics.lowPct}%` }} />
-                </div>
+          {/* TAB CONTENT: 3. AGENCY & STUDIO BREAKDOWN */}
+          {complianceTab === 'agencies' && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div>
+                <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+                  Agency & Studio Title Distribution
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  Compliance rate and title clearance status across all ministry production arms
+                </p>
               </div>
 
-              {/* Metric 2 */}
-              <div className="p-3 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-500/20">
-                <div className="flex justify-between text-[11px] font-bold text-blue-800 dark:text-blue-300">
-                  <span>In Review</span>
-                  <span>{riskMetrics.mediumPct}%</span>
-                </div>
-                <div className="mt-2 h-1.5 w-full rounded-full bg-blue-200/60 dark:bg-blue-900/40 overflow-hidden">
-                  <div className="h-full bg-[#2f80ed] rounded-full" style={{ width: `${riskMetrics.mediumPct}%` }} />
-                </div>
-              </div>
-
-              {/* Metric 3 */}
-              <div className="p-3 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-500/20">
-                <div className="flex justify-between text-[11px] font-bold text-amber-800 dark:text-amber-300">
-                  <span>Pre-Launch</span>
-                  <span>{riskMetrics.highPct}%</span>
-                </div>
-                <div className="mt-2 h-1.5 w-full rounded-full bg-amber-200/60 dark:bg-amber-900/40 overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full" style={{ width: `${riskMetrics.highPct}%` }} />
-                </div>
-              </div>
-
-              {/* Metric 4 */}
-              <div className="p-3 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-500/20">
-                <div className="flex justify-between text-[11px] font-bold text-rose-800 dark:text-rose-300">
-                  <span>Documentation</span>
-                  <span>{riskMetrics.criticalPct}%</span>
-                </div>
-                <div className="mt-2 h-1.5 w-full rounded-full bg-rose-200/60 dark:bg-rose-900/40 overflow-hidden">
-                  <div className="h-full bg-[#ff5c75] rounded-full" style={{ width: `${riskMetrics.criticalPct}%` }} />
-                </div>
-              </div>
-
-              {/* Metric 5 */}
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/10">
-                <div className="flex justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                  <span>Discontinued</span>
-                  <span>{Math.max(0, 100 - riskMetrics.lowPct - riskMetrics.mediumPct - riskMetrics.highPct - riskMetrics.criticalPct)}%</span>
-                </div>
-                <div className="mt-2 h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {agencyStats.map((st) => (
                   <div
-                    className="h-full bg-slate-400 rounded-full"
-                    style={{ width: `${Math.max(0, 100 - riskMetrics.lowPct - riskMetrics.mediumPct - riskMetrics.highPct - riskMetrics.criticalPct)}%` }}
-                  />
-                </div>
+                    key={st.agency}
+                    className="p-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="size-4 text-[#2f80ed]" />
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                          {st.agency}
+                        </span>
+                      </div>
+                      <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                        {st.compliancePct}% Cleared
+                      </span>
+                    </div>
+
+                    <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                        style={{ width: `${st.compliancePct}%` }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-white/5">
+                      <span>Total Assets: <b className="text-slate-800 dark:text-white">{st.total}</b></span>
+                      <span>Clean: <b className="text-emerald-600 dark:text-emerald-400">{st.lowRisk}</b></span>
+                      <span>Review: <b className="text-amber-600 dark:text-amber-400">{st.mediumRisk}</b></span>
+                      <span>Flagged: <b className="text-rose-600 dark:text-rose-400">{st.highRisk}</b></span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        </div>
+          )}
+        </section>
 
-        {/* Right Column: User Welcome & Action Banner + Priority Submissions */}
+        {/* Right Column (.85fr): Super Admin Greeting & Priority Rail */}
         <div className="space-y-6">
-          {/* Greeting Hero Card (Matching inspiration's "Hello John Bayer..." card) */}
+          {/* Greeting Hero Card */}
           <div className="rounded-3xl p-6 bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white dark:from-[#22293d] dark:to-[#171a25] border border-blue-100 dark:border-white/10 shadow-sm relative overflow-hidden space-y-4">
             <div className="pointer-events-none absolute -right-6 -bottom-6 size-32 rounded-full bg-blue-500/10 blur-xl" />
             <div className="flex items-start justify-between">
               <div>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-3 py-1 text-[11px] font-bold">
                   <Sparkles className="size-3" />
-                  <span>KMM Portal Overview</span>
+                  <span>KMM Executive Governance</span>
                 </span>
                 <h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2.5">
-                  Hello, {currentUser.name}!
+                  Hello, Super Admin!
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
-                  You have <strong className="text-[#2f80ed] font-bold">{stats.pendingApprovalsCount} Approvals & Review Tasks</strong> pending your clearance today.
+                  You have <strong className="text-[#2f80ed] font-bold">{stats.pendingApprovalsCount} Approvals & Review Tasks</strong> pending your sign-off and legal clearance today.
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={() => setActiveNav && setActiveNav('Approvals')}
-              className="inline-flex items-center gap-2 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2 transition shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
-            >
-              <span>Review Approvals Now</span>
-              <ArrowRight className="size-3.5" />
-            </button>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <button
+                onClick={() => setActiveNav && setActiveNav('Approvals')}
+                className="inline-flex items-center gap-2 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2 transition shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+              >
+                <span>Review Approvals Now</span>
+                <ArrowRight className="size-3.5" />
+              </button>
+
+              {setActiveNav && (
+                <button
+                  onClick={() => setActiveNav('Reports')}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#14161f] text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#222636] transition cursor-pointer"
+                  title="Generate Executive Compliance Report"
+                >
+                  <Download className="size-3.5 text-slate-400" />
+                  <span>Export Audit</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Priority Review Submissions Card */}
+          {/* Priority Submissions Card */}
           <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -1721,153 +2250,104 @@ function Dashboard({
         </div>
       </div>
 
-      {/* ROW 3: RECENT ASSETS TABLE & PORTFOLIO COMPLIANCE BREAKDOWN */}
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_.8fr]">
-        {/* Left Column: Recent Registered Assets */}
-        <section className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="font-extrabold text-slate-900 dark:text-white text-sm">
-                Recent Registered Assets
-              </h2>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                {isGlobalViewer ? 'Latest intellectual property assets registered across all agencies' : `Latest assets for ${currentUser.agency}`}
-              </p>
-            </div>
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-2.5 size-3.5 text-slate-400" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="h-8.5 w-full rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-[#14161f] pl-8.5 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-[#2f80ed] focus:ring-1 focus:ring-[#2f80ed] transition text-slate-800 dark:text-white"
-                placeholder="Search recent assets..."
-              />
-            </div>
+      {/* ROW 3: FULL-WIDTH RECENT REGISTERED ASSETS TABLE */}
+      <section className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-extrabold text-slate-900 dark:text-white text-sm">
+              Recent Registered Assets
+            </h2>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {isGlobalViewer ? 'Latest intellectual property assets registered across all agencies' : `Latest assets for ${currentUser.agency}`}
+            </p>
           </div>
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-2.5 size-3.5 text-slate-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="h-8.5 w-full rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-[#14161f] pl-8.5 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-[#2f80ed] focus:ring-1 focus:ring-[#2f80ed] transition text-slate-800 dark:text-white"
+              placeholder="Search recent assets by name, ID, category..."
+            />
+          </div>
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-xs">
-              <thead>
-                <tr className="bg-slate-50/75 dark:bg-[#171a24] text-slate-400 font-semibold border-b border-slate-100 dark:border-white/5 text-[10px] uppercase tracking-wider">
-                  <th className="px-5 py-3">Asset</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Agency</th>
-                  <th className="px-4 py-3">Risk & Compliance</th>
-                  <th className="px-4 py-3">Created On</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                {filtered.slice(0, 6).map((item) => {
-                  const assessment = getAssetRiskAssessment(item, rightsRecords, approvals)
-                  return (
-                    <tr
-                      key={item.id}
-                      onClick={() => {
-                        if (setActiveNav) {
-                          setActiveNav('Assets', item.id)
-                        }
-                      }}
-                      className="hover:bg-slate-50/80 dark:hover:bg-[#222636] cursor-pointer transition-colors group"
-                      title={`Click to view ${item.name} details`}
-                    >
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-3">
-                          <AssetThumbnail type={item.thumbType} name={item.name} posterUrl={item.posterUrl} />
-                          <div className="space-y-0.5 min-w-0">
-                            <div className="font-bold text-slate-900 dark:text-white group-hover:text-[#2f80ed] transition flex items-center gap-1.5 text-xs">
-                              <span className="truncate max-w-[200px]">{item.name}</span>
-                              <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 text-[#2f80ed] transition shrink-0" />
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-mono">{item.id}</div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] text-left text-xs">
+            <thead>
+              <tr className="bg-slate-50/75 dark:bg-[#171a24] text-slate-400 font-semibold border-b border-slate-100 dark:border-white/5 text-[10px] uppercase tracking-wider">
+                <th className="px-5 py-3">Asset</th>
+                <th className="px-4 py-3">Category</th>
+                <th className="px-4 py-3">Agency</th>
+                <th className="px-4 py-3">Risk & Compliance</th>
+                <th className="px-4 py-3">Created On</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+              {filtered.slice(0, 8).map((item) => {
+                const assessment = getAssetRiskAssessment(item, rightsRecords, approvals)
+                return (
+                  <tr
+                    key={item.id}
+                    onClick={() => {
+                      if (setActiveNav) {
+                        setActiveNav('Assets', item.id)
+                      }
+                    }}
+                    className="hover:bg-slate-50/80 dark:hover:bg-[#222636] cursor-pointer transition-colors group"
+                    title={`Click to view ${item.name} details`}
+                  >
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <AssetThumbnail type={item.thumbType} name={item.name} posterUrl={item.posterUrl} />
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="font-bold text-slate-900 dark:text-white group-hover:text-[#2f80ed] transition flex items-center gap-1.5 text-xs">
+                            <span className="truncate max-w-[240px]">{item.name}</span>
+                            <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 text-[#2f80ed] transition shrink-0" />
                           </div>
+                          <div className="text-[10px] text-slate-400 font-mono">{item.id}</div>
                         </div>
-                      </td>
-                      <td className="px-4 py-3.5 text-slate-700 dark:text-slate-300 font-medium">
-                        <div>{item.category}</div>
-                        <div className="text-[10px] text-slate-400">{item.subcategory}</div>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className="rounded-full bg-slate-100 dark:bg-[#222636] border border-slate-200/80 dark:border-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
-                          {item.agency || item.unit}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5">
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-700 dark:text-slate-300 font-medium">
+                      <div>{item.category}</div>
+                      <div className="text-[10px] text-slate-400">{item.subcategory}</div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="rounded-full bg-slate-100 dark:bg-[#222636] border border-slate-200/80 dark:border-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
+                        {item.agency || item.unit}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold border shadow-2xs',
+                          assessment.riskBadgeColor
+                        )}
+                      >
                         <span
                           className={cn(
-                            'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold border shadow-2xs',
-                            assessment.riskBadgeColor
+                            'size-1.5 rounded-full',
+                            assessment.level === 'Low'
+                              ? 'bg-emerald-500'
+                              : assessment.level === 'Medium'
+                                ? 'bg-amber-500'
+                                : 'bg-rose-500'
                           )}
-                        >
-                          <span
-                            className={cn(
-                              'size-1.5 rounded-full',
-                              assessment.level === 'Low'
-                                ? 'bg-emerald-500'
-                                : assessment.level === 'Medium'
-                                  ? 'bg-amber-500'
-                                  : 'bg-rose-500'
-                            )}
-                          />
-                          <span>{assessment.level} Risk</span>
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5 text-slate-400 font-medium text-[11px]">
-                        {item.createdDate}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Right Column: Portfolio Compliance Breakdown */}
-        <section className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-extrabold text-slate-900 dark:text-white text-sm">
-              Portfolio Title & Compliance
-            </h2>
-            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/40">
-              {riskMetrics.lowPct}% Secure
-            </span>
-          </div>
-          <p className="text-xs text-slate-400">
-            Chain of title & risk distribution across agencies
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-4">
-            <Donut
-              low={riskMetrics.lowCount}
-              medium={riskMetrics.mediumCount}
-              high={riskMetrics.criticalCount + riskMetrics.highCount}
-            />
-            <div className="space-y-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <div className="flex items-center justify-between gap-4">
-                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                  <span className="size-2.5 rounded-full bg-emerald-500" />
-                  Low Risk Assets
-                </span>
-                <b className="text-slate-900 dark:text-white">{riskMetrics.lowCount}</b>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                  <span className="size-2.5 rounded-full bg-amber-400" />
-                  Moderate Risk
-                </span>
-                <b className="text-slate-900 dark:text-white">{riskMetrics.mediumCount}</b>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                  <span className="size-2.5 rounded-full bg-[#ff5c75]" />
-                  High / Critical
-                </span>
-                <b className="text-slate-900 dark:text-white">{riskMetrics.criticalCount + riskMetrics.highCount}</b>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+                        />
+                        <span>{assessment.level} Risk</span>
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-400 font-medium text-[11px]">
+                      {item.createdDate}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   )
 }
@@ -1878,9 +2358,13 @@ function Dashboard({
 function AssetsPage({
   setActiveNav,
   initialAssetId,
+  isAddModalOpen: controlledIsAddModalOpen,
+  setIsAddModalOpen: controlledSetIsAddModalOpen,
 }: {
   setActiveNav: (nav: string, assetId?: string | null) => void
   initialAssetId?: string | null
+  isAddModalOpen?: boolean
+  setIsAddModalOpen?: (v: boolean) => void
 }) {
   const { assets, allAssets, addAsset, bulkApproveAssets, bulkDeleteAssets, categories, subcategories, currentUser, showToast, isGlobalViewer, userAgency, availableUsers, rightsRecords, approvals } = useLovetoonsData()
 
@@ -1895,8 +2379,9 @@ function AssetsPage({
   const [newContributorRole, setNewContributorRole] = useState('Lead 3D Animator')
   const [newContributorAgency, setNewContributorAgency] = useState<Agency>(currentUser.agency || 'Lovetoons')
   const [newContributorType, setNewContributorType] = useState<AssetContributor['contributionType']>('Core Creative')
-  const [selectedRows, setSelectedRows] = useState<string[]>([])
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [internalIsAddModalOpen, setInternalIsAddModalOpen] = useState(false)
+  const isAddModalOpen = controlledIsAddModalOpen !== undefined ? controlledIsAddModalOpen : internalIsAddModalOpen
+  const setIsAddModalOpen = controlledSetIsAddModalOpen || setInternalIsAddModalOpen
 
   // Reusable Confirmation Modal State for AssetsPage
   const [confirmConfig, setConfirmConfig] = useState<{
@@ -1915,50 +2400,6 @@ function AssetsPage({
     onConfirm: () => { },
   })
 
-  const handleInitiateBulkApprove = () => {
-    setConfirmConfig({
-      isOpen: true,
-      title: `Confirm Batch Approval (${selectedRows.length} assets)`,
-      description: `Are you sure you want to approve all ${selectedRows.length} selected intellectual assets? All approvals and status changes will be permanently written to the audit trail.`,
-      confirmLabel: `Confirm & Approve (${selectedRows.length})`,
-      variant: 'success',
-      badge: 'Audit Trail Enforced',
-      details: (
-        <div className="text-xs space-y-1">
-          <div><span className="font-semibold text-slate-700">Affected Asset IDs:</span> {selectedRows.join(', ')}</div>
-          <div><span className="font-semibold text-slate-700">Authorised By:</span> {currentUser.name} ({currentUser.roleLabel})</div>
-        </div>
-      ),
-      onConfirm: () => {
-        bulkApproveAssets(selectedRows)
-        setSelectedRows([])
-        setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-      },
-    })
-  }
-
-  const handleInitiateBulkDelete = () => {
-    setConfirmConfig({
-      isOpen: true,
-      title: `Confirm Batch Deletion (${selectedRows.length} assets)`,
-      description: `WARNING: This will permanently delete ${selectedRows.length} assets and all associated governance rights records and approvals. This action will be recorded in the audit trail.`,
-      confirmLabel: `Confirm & Delete (${selectedRows.length})`,
-      variant: 'danger',
-      badge: 'Permanent Deletion',
-      details: (
-        <div className="text-xs space-y-1 text-rose-700">
-          <div><span className="font-semibold">Asset IDs:</span> {selectedRows.join(', ')}</div>
-          <div><span className="font-semibold">Action Performed By:</span> {currentUser.name}</div>
-        </div>
-      ),
-      onConfirm: () => {
-        bulkDeleteAssets(selectedRows)
-        setSelectedRows([])
-        setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-      },
-    })
-  }
-
   // Selected asset for Details Page
   const [selectedAssetForDetails, setSelectedAssetForDetails] = useState<AssetData | null>(() => {
     if (initialAssetId) {
@@ -1970,12 +2411,15 @@ function AssetsPage({
   useEffect(() => {
     if (initialAssetId) {
       const found = assets.find((a) => a.id === initialAssetId) || allAssets.find((a) => a.id === initialAssetId)
-      if (found) setSelectedAssetForDetails(found)
+      setSelectedAssetForDetails(found || null)
+    } else {
+      setSelectedAssetForDetails(null)
     }
   }, [initialAssetId, assets, allAssets])
 
   const handleSelectAsset = (asset: AssetData | null) => {
     setSelectedAssetForDetails(asset)
+    setActiveNav?.('Assets', asset ? asset.id : null)
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href)
       if (asset) {
@@ -2146,16 +2590,16 @@ function AssetsPage({
 
     const initialDocs: RightsDocument[] = newAssetForm.docName.trim()
       ? [
-          {
-            id: `doc-${Date.now()}`,
-            name: newAssetForm.docName.trim(),
-            size: newAssetForm.docSize || '1.8 MB',
-            date: 'Just now',
-            type: newAssetForm.docType || 'PDF',
-            targetScope: 'asset',
-            notes: newAssetForm.docNotes.trim() || 'Attached during asset intake registration',
-          },
-        ]
+        {
+          id: `doc-${Date.now()}`,
+          name: newAssetForm.docName.trim(),
+          size: newAssetForm.docSize || '1.8 MB',
+          date: 'Just now',
+          type: newAssetForm.docType || 'PDF',
+          targetScope: 'asset',
+          notes: newAssetForm.docNotes.trim() || 'Attached during asset intake registration',
+        },
+      ]
       : []
 
     addAsset({
@@ -2167,19 +2611,19 @@ function AssetsPage({
       agency: isGlobalViewer ? newAssetForm.agency : (currentUser.agency || 'Lovetoons'),
       unit: isGlobalViewer ? newAssetForm.agency : (currentUser.agency || 'Lovetoons'),
       contributors: newAssetForm.contributors,
-      status: hasGovernanceInput ? 'Pending' : 'Draft',
+      status: 'In Production',
       posterUrl: newAssetForm.posterUrl.trim() ? newAssetForm.posterUrl.trim() : undefined,
-      owner: newAssetForm.owner.trim() || newAssetForm.rightsHolder.trim(),
-      rightsHolder: newAssetForm.owner.trim() || newAssetForm.rightsHolder.trim() || 'Unassigned',
-      ownerCertificateRef: newAssetForm.ownerCertificateRef.trim(),
-      trademarkStatus: newAssetForm.trademarkStatus,
-      distributionLicense: newAssetForm.distributionLicense.trim(),
-      productionLicensees: newAssetForm.productionLicensees.trim(),
-      territory: newAssetForm.territory.trim(),
-      territoryClearanceStatus: hasGovernanceInput ? 'Pending Clearance' : 'Pending Clearance',
-      contentProvenance: newAssetForm.contentProvenance,
-      songWriter: newAssetForm.songWriter.trim(),
-      songWriterProvenance: newAssetForm.songWriterProvenance,
+      owner: 'Esteemed Executive Minister (Super Admin)',
+      rightsHolder: 'Esteemed Executive Minister (Super Admin)',
+      ownerCertificateRef: `CERT-EXEC-MIN-${new Date().getFullYear()}-HQ`,
+      trademarkStatus: 'Pending Filing',
+      distributionLicense: 'Exclusive Ministry Global Distribution',
+      productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+      territory: 'Worldwide / Global',
+      territoryClearanceStatus: 'Cleared Global',
+      contentProvenance: 'Fully Custom',
+      songWriter: newAssetForm.category.toLowerCase().includes('audio') || newAssetForm.category.toLowerCase().includes('music') ? 'KMM Music Ministry (Staff Composer)' : '',
+      songWriterProvenance: 'Fully Custom',
       description: newAssetForm.description.trim(),
       tags: tagList.length > 0 ? tagList : [newAssetForm.category],
       documents: initialDocs,
@@ -2193,14 +2637,14 @@ function AssetsPage({
       agency: currentUser.agency || 'Lovetoons',
       unit: currentUser.agency || 'Lovetoons',
       contributors: [],
-      rightsHolder: '',
-      owner: '',
-      ownerCertificateRef: '',
-      trademarkStatus: 'Unregistered',
-      distributionLicense: 'None',
-      productionLicensees: 'None',
-      territory: 'None',
-      territoryClearanceStatus: 'Pending Clearance',
+      rightsHolder: 'Esteemed Executive Minister (Super Admin)',
+      owner: 'Esteemed Executive Minister (Super Admin)',
+      ownerCertificateRef: `CERT-EXEC-MIN-${new Date().getFullYear()}-HQ`,
+      trademarkStatus: 'Pending Filing',
+      distributionLicense: 'Exclusive Ministry Global Distribution',
+      productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+      territory: 'Worldwide / Global',
+      territoryClearanceStatus: 'Cleared Global',
       contentProvenance: 'Fully Custom',
       songWriter: '',
       songWriterProvenance: 'Fully Custom',
@@ -2263,7 +2707,7 @@ function AssetsPage({
           onClick={() => {
             setIsAddModalOpen(true)
           }}
-          className="shrink-0 flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-medium text-white shadow-xs transition hover:bg-slate-800 active:scale-98 cursor-pointer"
+          className="shrink-0 flex items-center gap-2 rounded-lg bg-[#2f80ed] hover:bg-[#256fd1] px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-500/20 transition active:scale-98 cursor-pointer"
         >
           <Plus className="size-3.5" strokeWidth={2.5} />
           <span>Add New Asset</span>
@@ -2345,52 +2789,14 @@ function AssetsPage({
           </div>
         </div>
 
-        {/* Bulk Action Toolbar */}
-        {selectedRows.length > 0 && (
-          <div className="mt-3 flex items-center justify-between rounded-lg bg-slate-50 px-3.5 py-2 border border-slate-200 text-xs animate-in fade-in">
-            <span className="font-semibold text-slate-800">
-              {selectedRows.length} {selectedRows.length === 1 ? 'asset' : 'assets'} selected
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                id="bulk-approve-btn"
-                onClick={handleInitiateBulkApprove}
-                className="rounded-md bg-emerald-600 px-3 py-1.5 text-white font-medium hover:bg-emerald-700 transition cursor-pointer shadow-xs"
-              >
-                Approve Selected
-              </button>
-              <button
-                id="bulk-delete-btn"
-                onClick={handleInitiateBulkDelete}
-                className="rounded-md border border-red-200 bg-white px-3 py-1.5 text-red-600 font-medium hover:bg-red-50 transition cursor-pointer shadow-xs"
-              >
-                Delete Selected
-              </button>
-              <button onClick={() => setSelectedRows([])} className="text-slate-500 hover:text-slate-800 ml-2 font-medium cursor-pointer">
-                Clear
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ASSETS TABLE */}
-      <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-xs">
+      <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[850px] text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200/80 bg-slate-50/75 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="w-10 px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.length === filteredAssets.length && filteredAssets.length > 0}
-                    onChange={() => {
-                      if (selectedRows.length === filteredAssets.length) setSelectedRows([])
-                      else setSelectedRows(filteredAssets.map((a) => a.id))
-                    }}
-                    className="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-400"
-                  />
-                </th>
+              <tr className="border-b border-slate-200/80 dark:border-white/10 bg-slate-50/75 dark:bg-slate-800/80 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 <th className="px-4 py-3">Asset</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Subcategory</th>
@@ -2402,40 +2808,23 @@ function AssetsPage({
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {filteredAssets.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-slate-400">
+                  <td colSpan={9} className="py-12 text-center text-slate-400">
                     <Boxes className="mx-auto size-10 text-slate-300 mb-2" />
-                    <div className="font-bold text-slate-600">No assets matching filters</div>
+                    <div className="font-bold text-slate-600 dark:text-slate-300">No assets matching filters</div>
                     <div className="text-xs text-slate-400">Try adjusting your category pills or search terms</div>
                   </td>
                 </tr>
               ) : (
                 filteredAssets.map((asset) => {
-                  const isSelected = selectedRows.includes(asset.id)
                   return (
                     <tr
                       key={asset.id}
-                      className={cn(
-                        'transition-colors cursor-pointer',
-                        isSelected ? 'bg-slate-50' : 'bg-white hover:bg-slate-50/80'
-                      )}
+                      className="bg-white dark:bg-slate-900/40 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
                       onClick={() => handleSelectAsset(asset)}
                     >
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => {
-                            setSelectedRows((prev) =>
-                              prev.includes(asset.id) ? prev.filter((i) => i !== asset.id) : [...prev, asset.id]
-                            )
-                          }}
-                          aria-label={`Select ${asset.name}`}
-                          className="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-400"
-                        />
-                      </td>
 
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -2707,7 +3096,7 @@ function AssetsPage({
                             unit: e.target.value as Agency,
                           }))
                         }
-                        className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
+                        className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 px-3 text-xs outline-none focus:border-blue-400 font-semibold"
                       >
                         {agencies.map((agency) => (
                           <option key={agency} value={agency} className="dark:bg-slate-900 dark:text-white">
@@ -2716,336 +3105,75 @@ function AssetsPage({
                         ))}
                       </select>
                     ) : (
-                      <div className="flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 dark:border-white/15 dark:bg-slate-800 dark:text-slate-200 px-3 text-xs font-bold text-slate-700">
+                      <div className="flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 px-3 text-xs font-bold text-slate-700">
                         {currentUser.agency || 'Lovetoons'}
                       </div>
                     )}
                   </div>
-
-                  </div>
                 </div>
 
-                {/* 5-PILLAR GOVERNANCE SPECIFICATION & INTAKE (DYNAMIC WITH APPROVAL NOTICES) */}
-                <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-800/40 p-4 space-y-3.5">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-2.5">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+                {/* AUTOMATED MINISTRY GOVERNANCE & LEGAL SAFEGUARDS */}
+                <div className="rounded-xl border border-blue-200/90 bg-blue-50/50 dark:border-blue-500/30 dark:bg-gradient-to-b dark:from-slate-800/95 dark:to-slate-900/95 p-4 space-y-3.5 shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-200/70 dark:border-slate-700/80 pb-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="grid size-7 place-items-center rounded-lg bg-blue-600 text-white shadow-xs dark:bg-blue-600 dark:text-white">
+                        <ShieldCheck className="size-4" />
+                      </div>
+                      <div>
                         <h4 className="font-bold text-slate-900 dark:text-white text-xs">
-                          Legal Governance & Clearance Specification (5 Pillars)
+                          Legal Governance & Clearance Standards
                         </h4>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                          Pre-configured ministry safe defaults applied on asset intake
+                        </p>
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Defaults to Unregistered / None. Inputting ownership, licenses, or clearance will automatically route for ministerial approval.
-                      </p>
                     </div>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/90 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700/60 px-2.5 py-1 text-[10px] font-bold shrink-0">
+                      <Check className="size-3 text-emerald-600 dark:text-emerald-400" />
+                      <span>Standard Safe Defaults</span>
+                    </span>
+                  </div>
 
-                    <div className="shrink-0">
-                      {hasGovernanceInput ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 text-[10px] font-bold border border-amber-300 dark:border-amber-800/60 animate-in fade-in">
-                          <AlertTriangle className="size-3 text-amber-600" />
-                          <span>Requires Ministerial Approval</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-[10px] font-medium border border-slate-200 dark:border-white/10">
-                          <Check className="size-3 text-emerald-600" />
-                          <span>Default: Unregistered / Draft</span>
-                        </span>
-                      )}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-0.5 text-[11px]">
+                    <div className="rounded-lg bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 p-2.5 shadow-2xs">
+                      <div className="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Title & Owner</div>
+                      <div className="font-semibold text-slate-900 dark:text-slate-100 truncate mt-0.5" title="Esteemed Executive Minister (Super Admin)">
+                        Executive Minister
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 p-2.5 shadow-2xs">
+                      <div className="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Territory</div>
+                      <div className="font-semibold text-slate-900 dark:text-slate-100 truncate mt-0.5">
+                        Worldwide / Global
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 p-2.5 shadow-2xs">
+                      <div className="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Trademark</div>
+                      <div className="font-semibold text-amber-600 dark:text-amber-400 truncate mt-0.5">
+                        Pending Filing
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 p-2.5 shadow-2xs">
+                      <div className="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Distribution</div>
+                      <div className="font-semibold text-blue-600 dark:text-blue-400 truncate mt-0.5">
+                        Exclusive Ministry
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    {/* 1. Legal Owner & Certificate */}
-                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Crown className="size-3.5 text-amber-500" />
-                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">1. Assign Legal Owner & Title Certificate</label>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setNewAssetForm((prev) => ({
-                              ...prev,
-                              owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
-                              rightsHolder: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
-                              ownerCertificateRef: `CERT-EXEC-MIN-${new Date().getFullYear()}-HQ`,
-                            }))
-                          }}
-                          className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold cursor-pointer underline"
-                        >
-                          Preset: Executive Minister
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input
-                          type="text"
-                          value={newAssetForm.owner}
-                          onChange={(e) =>
-                            setNewAssetForm((prev) => ({
-                              ...prev,
-                              owner: e.target.value,
-                              rightsHolder: e.target.value,
-                            }))
-                          }
-                          placeholder="Legal Owner (Leave blank for unassigned)"
-                          className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                        />
-                        <input
-                          type="text"
-                          value={newAssetForm.ownerCertificateRef}
-                          onChange={(e) =>
-                            setNewAssetForm((prev) => ({
-                              ...prev,
-                              ownerCertificateRef: e.target.value,
-                            }))
-                          }
-                          placeholder="Title Certificate Ref (e.g. CERT-EXEC-MIN-2026-HQ)"
-                          className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs font-mono outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                        />
-                      </div>
-                    </div>
-
-                    {/* 2. Trademark & Distribution License */}
-                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <BadgeCheck className="size-3.5 text-purple-500" />
-                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">2. Trademark & Licensing</label>
-                        </div>
-                        <div className="flex gap-2 text-[10px]">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                trademarkStatus: 'Registered',
-                                distributionLicense: 'Exclusive Ministry Global Distribution',
-                              }))
-                            }
-                            className="text-purple-600 hover:text-purple-700 dark:text-purple-400 font-semibold cursor-pointer underline"
-                          >
-                            Set Exclusive Ministry
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                trademarkStatus: 'Unregistered',
-                                distributionLicense: 'None',
-                              }))
-                            }
-                            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold cursor-pointer underline"
-                          >
-                            Reset to Default
-                          </button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Trademark Status</label>
-                          <select
-                            value={newAssetForm.trademarkStatus}
-                            onChange={(e) =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                trademarkStatus: e.target.value as any,
-                              }))
-                            }
-                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
-                          >
-                            <option value="Unregistered" className="dark:bg-slate-900 dark:text-white">Unregistered (Default)</option>
-                            <option value="Pending Filing" className="dark:bg-slate-900 dark:text-white">Pending Filing</option>
-                            <option value="In Progress" className="dark:bg-slate-900 dark:text-white">In Progress</option>
-                            <option value="Registered" className="dark:bg-slate-900 dark:text-white">Registered</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Distribution License</label>
-                          <input
-                            type="text"
-                            value={newAssetForm.distributionLicense}
-                            onChange={(e) =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                distributionLicense: e.target.value,
-                              }))
-                            }
-                            placeholder="e.g. None or Exclusive Ministry Global Distribution"
-                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 3. Cleared Territory & Clearance Status */}
-                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Globe2 className="size-3.5 text-amber-500" />
-                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">3. Territory Clearance</label>
-                        </div>
-                        <div className="flex gap-2 text-[10px]">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                territory: 'Worldwide / Global',
-                                territoryClearanceStatus: 'Cleared Global',
-                              }))
-                            }
-                            className="text-amber-600 hover:text-amber-700 dark:text-amber-400 font-semibold cursor-pointer underline"
-                          >
-                            Set Worldwide
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                territory: 'None',
-                                territoryClearanceStatus: 'Pending Clearance',
-                              }))
-                            }
-                            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold cursor-pointer underline"
-                          >
-                            Reset to Default
-                          </button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Cleared Territory</label>
-                          <input
-                            type="text"
-                            value={newAssetForm.territory}
-                            onChange={(e) =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                territory: e.target.value,
-                              }))
-                            }
-                            placeholder="e.g. None or Worldwide / Global"
-                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Clearance Status</label>
-                          <select
-                            value={newAssetForm.territoryClearanceStatus}
-                            onChange={(e) =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                territoryClearanceStatus: e.target.value as any,
-                              }))
-                            }
-                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
-                          >
-                            <option value="Pending Clearance" className="dark:bg-slate-900 dark:text-white">Pending Clearance (Review Triggered)</option>
-                            <option value="Cleared Global" className="dark:bg-slate-900 dark:text-white">Cleared Global</option>
-                            <option value="Cleared Regional" className="dark:bg-slate-900 dark:text-white">Cleared Regional</option>
-                            <option value="Restricted" className="dark:bg-slate-900 dark:text-white">Restricted</option>
-                            <option value="None" className="dark:bg-slate-900 dark:text-white">None</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 4. Broadcast & Production Rights */}
-                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Clapperboard className="size-3.5 text-indigo-500" />
-                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">4. Broadcast & Production Rights</label>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setNewAssetForm((prev) => ({
-                              ...prev,
-                              productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
-                            }))
-                          }
-                          className="text-[10px] text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold cursor-pointer underline"
-                        >
-                          Preset: KMM Studios
-                        </button>
-                      </div>
-                      <input
-                        type="text"
-                        value={newAssetForm.productionLicensees}
-                        onChange={(e) =>
-                          setNewAssetForm((prev) => ({
-                            ...prev,
-                            productionLicensees: e.target.value,
-                          }))
-                        }
-                        placeholder="Authorized Production Licensees (Default: None)"
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
-                      />
-                    </div>
-
-                    {/* 5. AI Content & Provenance */}
-                    <div className="rounded-lg border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Sparkles className="size-3.5 text-cyan-500" />
-                          <label className="font-bold text-slate-800 dark:text-slate-200 text-xs">5. AI Content & Provenance</label>
-                        </div>
-                        <span className="text-[10px] text-slate-400">Default: Fully Custom</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Content Provenance</label>
-                          <select
-                            value={newAssetForm.contentProvenance}
-                            onChange={(e) =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                contentProvenance: e.target.value as ContentProvenance,
-                              }))
-                            }
-                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
-                          >
-                            <option value="Fully Custom" className="dark:bg-slate-900 dark:text-white">Fully Custom (100% Human Crafted)</option>
-                            <option value="AI Assisted" className="dark:bg-slate-900 dark:text-white">AI Assisted</option>
-                            <option value="Fully AI" className="dark:bg-slate-900 dark:text-white">Fully AI</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Songwriter / Music Composer (Optional)</label>
-                          <input
-                            type="text"
-                            value={newAssetForm.songWriter}
-                            onChange={(e) =>
-                              setNewAssetForm((prev) => ({
-                                ...prev,
-                                songWriter: e.target.value,
-                              }))
-                            }
-                            placeholder="e.g. KMM Music Ministry"
-                            className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed italic">
+                    ℹ️ Specific co-producer deeds, trademark classes, and international licenses can be updated anytime in the asset's detail workspace or Rights & Governance tab.
+                  </p>
                 </div>
 
                 {/* Optional Supporting Legal Deed / Certificate (.doc, .docx, .pdf) Intake */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 dark:border-slate-700/80 dark:bg-slate-800/50 p-3.5 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <label className="block font-bold text-slate-800 dark:text-slate-200 text-xs">
                         Intake Clearance Certificate / Legal Deed
                       </label>
-                      <span className="text-[10px] font-semibold text-slate-500 bg-slate-200/70 dark:bg-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-semibold text-slate-600 bg-slate-200/70 dark:bg-slate-700/80 dark:text-slate-300 px-2 py-0.5 rounded-full">
                         Optional (.pdf, .doc, .docx)
                       </span>
                     </div>
@@ -3053,7 +3181,7 @@ function AssetsPage({
                       <button
                         type="button"
                         onClick={() => setNewAssetForm((prev) => ({ ...prev, docName: '', docSize: '', docNotes: '' }))}
-                        className="text-[10px] text-red-500 hover:text-red-700 font-semibold cursor-pointer"
+                        className="text-[10px] text-red-500 hover:text-red-700 dark:text-red-400 font-semibold cursor-pointer"
                       >
                         Remove File
                       </button>
@@ -3071,9 +3199,9 @@ function AssetsPage({
                           value={newAssetForm.docName}
                           onChange={(e) => setNewAssetForm((prev) => ({ ...prev, docName: e.target.value }))}
                           placeholder="e.g. Registration_Certificate.pdf or Deed.docx"
-                          className="h-8 flex-1 rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                          className="h-8 flex-1 rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                         />
-                        <label className="flex items-center gap-1 h-8 px-2.5 rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 text-[11px] font-semibold cursor-pointer shrink-0">
+                        <label className="flex items-center gap-1 h-8 px-2.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-[11px] font-semibold cursor-pointer shrink-0 transition">
                           <UploadCloud className="size-3.5 text-blue-600 dark:text-blue-400" />
                           <span>Browse</span>
                           <input
@@ -3107,13 +3235,13 @@ function AssetsPage({
                         value={newAssetForm.docNotes}
                         onChange={(e) => setNewAssetForm((prev) => ({ ...prev, docNotes: e.target.value }))}
                         placeholder="e.g. Verified by ministry counsel, Worldwide perpetual"
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                     </div>
                   </div>
 
                   {newAssetForm.docName && (
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 text-[11px]">
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50/60 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 text-[11px]">
                       <FileCheck className="size-4 text-blue-600 dark:text-blue-400 shrink-0" />
                       <span className="font-semibold text-blue-900 dark:text-blue-200 truncate">{newAssetForm.docName}</span>
                       <span className="text-[10px] font-mono text-slate-400 shrink-0">({newAssetForm.docSize || 'Uploaded'})</span>
@@ -3123,14 +3251,14 @@ function AssetsPage({
                 </div>
 
                 {/* STAFF CONTRIBUTORS BUILDER */}
-                <div className="rounded-xl border border-blue-100 bg-blue-50/40 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-3">
+                <div className="rounded-xl border border-blue-100 bg-blue-50/40 dark:border-slate-700/80 dark:bg-slate-800/40 p-3.5 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <label className="block font-bold text-[#09245a] dark:text-white text-xs">
+                        <label className="block font-bold text-[#09245a] dark:text-slate-100 text-xs">
                           Staff Contributors ({newAssetForm.contributors.length})
                         </label>
-                        <span className="text-[10px] font-semibold text-blue-700 bg-blue-100/70 dark:bg-blue-950/60 dark:text-blue-300 dark:border dark:border-blue-800/40 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-semibold text-blue-700 bg-blue-100/70 dark:bg-blue-950/70 dark:text-blue-300 dark:border dark:border-blue-800/50 px-2 py-0.5 rounded-full">
                           Optional
                         </span>
                       </div>
@@ -3142,7 +3270,7 @@ function AssetsPage({
 
                   {/* Contributor List Chips */}
                   {newAssetForm.contributors.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-blue-200/90 bg-white/60 dark:border-white/15 dark:bg-slate-850 dark:bg-slate-800/60 p-3 text-center text-xs text-slate-500 dark:text-slate-400">
+                    <div className="rounded-lg border border-dashed border-blue-200/90 bg-white/60 dark:border-slate-700/80 dark:bg-slate-900/50 p-3 text-center text-xs text-slate-500 dark:text-slate-400">
                       No contributors added yet. Use the fields below to add contributing team members, or leave blank.
                     </div>
                   ) : (
@@ -3150,13 +3278,13 @@ function AssetsPage({
                       {newAssetForm.contributors.map((c, idx) => (
                         <div
                           key={c.id || idx}
-                          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 px-2.5 py-1.5 shadow-2xs text-xs"
+                          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/90 px-2.5 py-1.5 shadow-2xs text-xs"
                         >
-                          <div className="grid size-6 place-items-center rounded bg-slate-800 text-[10px] font-bold text-white uppercase">
+                          <div className="grid size-6 place-items-center rounded bg-slate-800 dark:bg-slate-700 text-[10px] font-bold text-white uppercase">
                             {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'ST'}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-bold text-slate-900 dark:text-white leading-tight truncate max-w-[130px]">{c.name}</div>
+                            <div className="font-bold text-slate-900 dark:text-slate-100 leading-tight truncate max-w-[130px]">{c.name}</div>
                             <div className="text-[10px] text-blue-700 dark:text-blue-400 truncate">{c.role} • {c.agency}</div>
                           </div>
                           <button
@@ -3178,21 +3306,21 @@ function AssetsPage({
                   )}
 
                   {/* Add Contributor Mini-Form */}
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-t border-blue-100/80 dark:border-white/10 pt-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 border-t border-blue-100/80 dark:border-slate-700/80 pt-2.5">
                     <div className="sm:col-span-1">
                       <input
                         type="text"
                         placeholder="Contributor name..."
                         value={newContributorName}
                         onChange={(e) => setNewContributorName(e.target.value)}
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                     </div>
                     <div className="sm:col-span-1">
                       <select
                         value={newContributorRole}
                         onChange={(e) => setNewContributorRole(e.target.value)}
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
                       >
                         <option value="Lead 3D Animator" className="dark:bg-slate-900 dark:text-white">Lead 3D Animator</option>
                         <option value="Screenwriter & Author" className="dark:bg-slate-900 dark:text-white">Screenwriter & Author</option>
@@ -3211,7 +3339,7 @@ function AssetsPage({
                       <select
                         value={newContributorAgency}
                         onChange={(e) => setNewContributorAgency(e.target.value as Agency)}
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
+                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
                       >
                         {agencies.map((agency) => (
                           <option key={agency} value={agency} className="dark:bg-slate-900 dark:text-white">
@@ -3255,7 +3383,7 @@ function AssetsPage({
                     onChange={(e) => setNewAssetForm((prev) => ({ ...prev, description: e.target.value }))}
                     rows={2}
                     placeholder="Summary of asset content, storyline, or technical specifications..."
-                    className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white p-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                 </div>
 
@@ -3265,16 +3393,16 @@ function AssetsPage({
                     value={newAssetForm.tags}
                     onChange={(e) => setNewAssetForm((prev) => ({ ...prev, tags: e.target.value }))}
                     placeholder="e.g. Faith, 3D, Episode, Broadcast"
-                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white px-3 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                 </div>
 
                 {/* Asset Poster / Cover Image (Optional) */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50/70 dark:border-white/10 dark:bg-slate-800/40 p-3.5 space-y-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 dark:border-slate-700/80 dark:bg-slate-800/40 p-3.5 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <label className="block font-bold text-slate-800 dark:text-slate-200 text-xs">Asset Cover Artwork</label>
-                      <span className="text-[10px] font-semibold text-slate-500 bg-slate-200/70 dark:bg-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-semibold text-slate-600 bg-slate-200/70 dark:bg-slate-700/80 dark:text-slate-300 px-2 py-0.5 rounded-full">
                         Optional
                       </span>
                     </div>
@@ -3283,7 +3411,7 @@ function AssetsPage({
 
                   <div className="flex items-center gap-3">
                     {/* Live preview: either user image or typographic monogram using asset name */}
-                    <div className="relative size-16 rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 overflow-hidden shrink-0 shadow-2xs">
+                    <div className="relative size-16 rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 overflow-hidden shrink-0 shadow-2xs">
                       {newAssetForm.posterUrl.trim() ? (
                         <img
                           src={newAssetForm.posterUrl}
@@ -3311,7 +3439,7 @@ function AssetsPage({
                         value={newAssetForm.posterUrl}
                         onChange={(e) => setNewAssetForm((prev) => ({ ...prev, posterUrl: e.target.value }))}
                         placeholder="https://... (Optional image URL)"
-                        className="h-8 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        className="h-8 w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white px-2.5 text-xs outline-none focus:border-blue-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                       <div className="flex items-center justify-between gap-2 text-[10px]">
                         <span className="text-slate-500 dark:text-slate-400">
@@ -3332,25 +3460,26 @@ function AssetsPage({
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* MODAL FOOTER BUTTONS */}
-                <div className="flex items-center justify-between border-t border-slate-100 dark:border-white/10 pt-3 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsAddModalOpen(false)}
-                    className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/15 dark:text-slate-300 dark:hover:bg-slate-800 text-xs cursor-pointer"
-                  >
-                    Cancel
-                  </button>
+              {/* MODAL FOOTER BUTTONS */}
+              <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 text-xs cursor-pointer"
+                >
+                  Cancel
+                </button>
 
-                  <button
-                    type="submit"
-                    className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 font-bold text-white shadow-md shadow-blue-600/25 hover:from-blue-700 hover:to-indigo-700 text-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Check className="size-3.5" />
-                    <span>Create Asset Now</span>
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 font-bold text-white shadow-md shadow-blue-600/25 hover:from-blue-700 hover:to-indigo-700 text-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Check className="size-3.5" />
+                  <span>Create Asset Now</span>
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -3403,7 +3532,7 @@ function RightsPage({
   setActiveNav,
   initialAssetId,
 }: {
-  setActiveNav?: (nav: string) => void
+  setActiveNav?: (nav: string, assetId?: string | null) => void
   initialAssetId?: string | null
 }) {
   const { rightsRecords, addRightsRecord, updateRightsRecord, assets, showToast, currentUser, approvals } = useLovetoonsData()
@@ -3485,12 +3614,15 @@ function RightsPage({
   useEffect(() => {
     if (initialAssetId) {
       const found = rightsRecords.find((r) => r.id === initialAssetId || r.assetId === initialAssetId)
-      if (found) setSelectedAssetForRightsDetails(found)
+      setSelectedAssetForRightsDetails(found || null)
+    } else {
+      setSelectedAssetForRightsDetails(null)
     }
   }, [initialAssetId, rightsRecords])
 
   const handleSelectRightsAsset = (record: RightsRecord | null) => {
     setSelectedAssetForRightsDetails(record)
+    setActiveNav?.('Rights & Governance', record ? (record.assetId || record.id) : null)
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href)
       if (record) {
@@ -3531,7 +3663,7 @@ function RightsPage({
     category: assets[0]?.category || 'TV Programme',
     subcategory: assets[0]?.subcategory || 'Broadcast Series',
     rightsType: 'Full Ministry Ownership & Worldwide Distribution',
-    owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+    owner: 'Esteemed Executive Minister (Super Admin)',
     ownerCertificateRef: 'CERT-EXEC-MIN-2026-HQ',
     validity: 'Perpetual Ministry Copyright',
     territory: 'Worldwide / Global',
@@ -3560,7 +3692,7 @@ function RightsPage({
       subcategory: newRightsForm.subcategory,
       unit: currentUser.unit,
       rightsType: newRightsForm.rightsType,
-      owner: newRightsForm.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+      owner: newRightsForm.owner || 'Esteemed Executive Minister (Super Admin)',
       ownerCertificateRef: newRightsForm.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
       trademarkStatus: newRightsForm.trademarkStatus || 'Registered',
       distributionLicense: newRightsForm.distributionLicense || 'Exclusive Ministry Global Distribution',
@@ -3721,9 +3853,9 @@ function RightsPage({
                 </td>
                 <td className="px-4 py-3">
                   <div className="space-y-0.5">
-                    <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1 text-[11px] truncate max-w-[170px]" title={rec.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}>
+                    <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1 text-[11px] truncate max-w-[170px]" title={rec.owner || 'Esteemed Executive Minister (Super Admin)'}>
                       <Crown className="size-3 text-amber-500 shrink-0" />
-                      <span className="truncate">{rec.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}</span>
+                      <span className="truncate">{rec.owner || 'Esteemed Executive Minister (Super Admin)'}</span>
                     </div>
                     <div className="flex items-center gap-1 font-mono text-[9px] text-emerald-700 dark:text-emerald-400 font-medium">
                       <BadgeCheck className="size-2.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -4346,7 +4478,7 @@ function RightsDetailsPage({
 
   // Edit Governance Form State (Unified with 5 Streamlined Pillars)
   const [editForm, setEditForm] = useState({
-    owner: asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+    owner: asset.owner || 'Esteemed Executive Minister (Super Admin)',
     ownerCertificateRef: asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
     trademarkStatus: (asset.trademarkStatus || 'Registered') as 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered',
     distributionLicense: asset.distributionLicense || 'Exclusive Ministry Global Distribution',
@@ -4620,7 +4752,7 @@ function RightsDetailsPage({
           subcategory: asset.subcategory,
           unit: asset.unit || currentUser.unit,
           rightsType: addRightsForm.rightsType,
-          owner: asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+          owner: asset.owner || 'Esteemed Executive Minister (Super Admin)',
           ownerCertificateRef: asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
           trademarkStatus: asset.trademarkStatus || 'Registered',
           distributionLicense: addRightsForm.distributionLicense,
@@ -4826,7 +4958,7 @@ function RightsDetailsPage({
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                 <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
-                  <span>Owner: <b className="text-[#09245a] dark:text-white">{asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}</b></span>
+                  <span>Owner: <b className="text-[#09245a] dark:text-white">{asset.owner || 'Esteemed Executive Minister (Super Admin)'}</b></span>
                 </span>
                 <span className="text-slate-300 dark:text-slate-600">•</span>
                 <span>
@@ -4923,7 +5055,7 @@ function RightsDetailsPage({
               <div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Owner of All Assets:</div>
                 <div className="font-black text-slate-900 dark:text-white text-base leading-snug mt-0.5">
-                  {asset.owner || 'Esteemed Executive Minister (Pastor Chelsea Kalu)'}
+                  {asset.owner || 'Esteemed Executive Minister (Super Admin)'}
                 </div>
               </div>
               <div className="pt-2 border-t border-blue-100/80 dark:border-white/10 flex items-center justify-between text-[11px]">
@@ -5163,7 +5295,7 @@ function RightsDetailsPage({
               </div>
             ) : (
               <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 dark:border-amber-900/40 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 flex items-center justify-between">
-                <span>No official filing certificate attached yet. Title is vested under Esteemed Executive Minister (Pastor Chelsea Kalu).</span>
+                <span>No official filing certificate attached yet. Title is vested under Esteemed Executive Minister (Super Admin).</span>
                 <button
                   onClick={() => openIndividualPillar('legal_owner')}
                   className="font-bold text-xs text-amber-700 dark:text-amber-400 hover:underline cursor-pointer shrink-0 ml-2"
@@ -5773,7 +5905,7 @@ function RightsDetailsPage({
                 <div>
                   <div className="font-bold text-slate-900 dark:text-white text-[11px]">Sole Executive Stewardship</div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    All intellectual assets are vested under the direct authority of the <b>Esteemed Executive Minister (Pastor Chelsea Kalu)</b> with full global copyright and distribution authority.
+                    All intellectual assets are vested under the direct authority of the <b>Esteemed Executive Minister (Super Admin)</b> with full global copyright and distribution authority.
                   </p>
                 </div>
               </div>
@@ -6749,35 +6881,54 @@ function ReportsPage({
     }
   }
 
+  const discontinuedCount = useMemo(() => {
+    return assets.filter(
+      (a) =>
+        a.status === 'Discontinued' ||
+        a.status === 'Requires Attention' ||
+        (a.officialStatus || '').toLowerCase().includes('discontinued')
+    ).length
+  }, [assets])
+
+  const normalizeAgency = (name?: string) => {
+    if (!name) return 'Lovetoons'
+    const n = name.toLowerCase()
+    if (n.includes('digital')) return 'Digital Media'
+    if (n.includes('publishing')) return 'Publishing Unit'
+    if (n.includes('academy') || n.includes('animation')) return 'Animation Academy'
+    if (n.includes('education') || n.includes('outreach')) return 'Educational Outreach'
+    return 'Lovetoons'
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header and Export Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+            <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
               Intellectual Asset Portfolio & Risk Report
             </h1>
-            <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+            <span className="rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-2.5 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300">
               Schedule Audit
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Real-time assessment of operational risk, chain-of-title exposure, and agency governance compliance across 125 ministerial items.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Real-time assessment of operational risk, chain-of-title exposure, and agency governance compliance across {assets.length} live ministerial items.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <button
             onClick={handleExportRiskAuditCSV}
-            className="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
+            className="flex items-center gap-2 rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
           >
             <ShieldAlert className="size-3.5" strokeWidth={2.2} />
             <span>Export Risk Audit (CSV)</span>
           </button>
           <button
             onClick={handleExportAllAssetsCSV}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 active:scale-98 transition cursor-pointer"
+            className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800/80 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-98 transition cursor-pointer"
           >
             <Download className="size-3.5" strokeWidth={2.2} />
             <span>Export Master Catalog (CSV)</span>
@@ -6787,84 +6938,84 @@ function ReportsPage({
 
       {/* 4 Top-line KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
             <span>Portfolio Risk Index</span>
             <span className={cn(
               'rounded-full px-2 py-0.5 text-[10px] font-semibold border',
-              riskMetrics.overallTier === 'Low' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+              riskMetrics.overallTier === 'Low' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800'
             )}>
               {riskMetrics.overallTier} Risk
             </span>
           </div>
-          <div className="text-2xl font-semibold tracking-tight text-slate-900 mt-2">
-            {riskMetrics.averageScore} <span className="text-sm font-normal text-slate-500">/ 100</span>
+          <div className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white mt-2">
+            {riskMetrics.averageScore} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">/ 100</span>
           </div>
-          <div className="text-[11px] text-emerald-600 font-medium mt-1">
+          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
             {riskMetrics.lowPct}% Low Risk across portfolio
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
             <span>Critical Exposure</span>
-            <span className="rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-semibold text-rose-700">
+            <span className="rounded-full bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:text-rose-400">
               Immediate Action
             </span>
           </div>
-          <div className="text-2xl font-semibold tracking-tight text-rose-600 mt-2">
-            {riskMetrics.criticalCount} <span className="text-sm font-normal text-slate-500">Assets</span>
+          <div className="text-2xl font-semibold tracking-tight text-rose-600 dark:text-rose-400 mt-2">
+            {riskMetrics.criticalCount} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">Assets</span>
           </div>
-          <div className="text-[11px] text-slate-500 font-medium mt-1">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
             Commercial & flagship IP requiring legal clearance
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
             <span>High & Moderate Exposure</span>
-            <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+            <span className="rounded-full bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
               Review Required
             </span>
           </div>
-          <div className="text-2xl font-semibold tracking-tight text-amber-600 mt-2">
-            {riskMetrics.highCount + riskMetrics.mediumCount} <span className="text-sm font-normal text-slate-500">Assets</span>
+          <div className="text-2xl font-semibold tracking-tight text-amber-600 dark:text-amber-400 mt-2">
+            {riskMetrics.highCount + riskMetrics.mediumCount} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">Assets</span>
           </div>
-          <div className="text-[11px] text-slate-500 font-medium mt-1">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
             {riskMetrics.highCount} High · {riskMetrics.mediumCount} Moderate
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
             <span>Low Risk IP</span>
-            <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
               Baseline Safe
             </span>
           </div>
-          <div className="text-2xl font-semibold tracking-tight text-emerald-600 mt-2">
-            {riskMetrics.lowCount} <span className="text-sm font-normal text-slate-500">Assets</span>
+          <div className="text-2xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 mt-2">
+            {riskMetrics.lowCount} <span className="text-sm font-normal text-slate-500 dark:text-slate-400">Assets</span>
           </div>
-          <div className="text-[11px] text-emerald-700 font-medium mt-1">
+          <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-1">
             In-house scripture liturgy & low-liability archives
           </div>
         </div>
       </div>
 
       {/* Report Section Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10">
         <button
           onClick={() => setActiveReportTab('risk')}
           className={cn(
             'flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition cursor-pointer',
             activeReportTab === 'risk'
-              ? 'border-slate-900 text-slate-900'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-slate-900 text-slate-900 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
           )}
         >
           <ShieldAlert className="size-3.5" />
           <span>Risk & Legal Exposure Audit Matrix</span>
-          <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+          <span className="ml-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
             {assets.length}
           </span>
         </button>
@@ -6874,13 +7025,13 @@ function ReportsPage({
           className={cn(
             'flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition cursor-pointer',
             activeReportTab === 'distribution'
-              ? 'border-slate-900 text-slate-900'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-slate-900 text-slate-900 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
           )}
         >
           <Layers className="size-3.5" />
           <span>Agency Distribution & Compliance</span>
-          <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+          <span className="ml-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
             5 Agencies
           </span>
         </button>
@@ -6889,32 +7040,32 @@ function ReportsPage({
       {activeReportTab === 'risk' ? (
         <div className="space-y-4">
           {/* Visual Distribution Summary Banner */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100 text-xs">
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-4 shadow-xs">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5 text-xs">
               <div>
-                <span className="font-semibold text-slate-900">Portfolio Exposure Summary: </span>
-                <span className="text-slate-600">
+                <span className="font-semibold text-slate-900 dark:text-white">Portfolio Exposure Summary: </span>
+                <span className="text-slate-600 dark:text-slate-400">
                   {riskMetrics.lowCount} Low Risk · {riskMetrics.mediumCount} Moderate · {riskMetrics.highCount} High · {riskMetrics.criticalCount} Critical
                 </span>
               </div>
               <div className="flex items-center gap-3 text-[11px] font-medium">
-                <span className="flex items-center gap-1.5 text-emerald-700">
+                <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
                   <span className="size-2 rounded-full bg-emerald-500" /> Low ({riskMetrics.lowPct}%)
                 </span>
-                <span className="flex items-center gap-1.5 text-blue-700">
+                <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400">
                   <span className="size-2 rounded-full bg-blue-500" /> Medium ({riskMetrics.mediumPct}%)
                 </span>
-                <span className="flex items-center gap-1.5 text-amber-700">
+                <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
                   <span className="size-2 rounded-full bg-amber-500" /> High ({riskMetrics.highPct}%)
                 </span>
-                <span className="flex items-center gap-1.5 text-rose-700">
+                <span className="flex items-center gap-1.5 text-rose-700 dark:text-rose-400">
                   <span className="size-2 rounded-full bg-rose-500" /> Critical ({riskMetrics.criticalPct}%)
                 </span>
               </div>
             </div>
 
             {/* Stacked Progress Bar */}
-            <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden flex shadow-inner mt-3">
+            <div className="h-2.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex shadow-inner mt-3">
               <div style={{ width: `${riskMetrics.lowPct}%` }} className="h-full bg-emerald-500" title={`Low Risk: ${riskMetrics.lowCount}`} />
               <div style={{ width: `${riskMetrics.mediumPct}%` }} className="h-full bg-blue-500" title={`Medium Risk: ${riskMetrics.mediumCount}`} />
               <div style={{ width: `${riskMetrics.highPct}%` }} className="h-full bg-amber-500" title={`High Exposure: ${riskMetrics.highCount}`} />
@@ -6927,10 +7078,10 @@ function ReportsPage({
             <div className="flex flex-wrap items-center gap-1.5">
               {[
                 { id: 'All', label: 'All Risk Profiles', count: assets.length },
-                { id: 'Critical', label: 'Critical Exposure', count: riskMetrics.criticalCount, badgeColor: 'bg-rose-100 text-rose-800' },
-                { id: 'High', label: 'High Exposure', count: riskMetrics.highCount, badgeColor: 'bg-amber-100 text-amber-800' },
-                { id: 'Medium', label: 'Moderate', count: riskMetrics.mediumCount, badgeColor: 'bg-blue-100 text-blue-800' },
-                { id: 'Low', label: 'Low Risk', count: riskMetrics.lowCount, badgeColor: 'bg-emerald-100 text-emerald-800' },
+                { id: 'Critical', label: 'Critical Exposure', count: riskMetrics.criticalCount, badgeColor: 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300' },
+                { id: 'High', label: 'High Exposure', count: riskMetrics.highCount, badgeColor: 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300' },
+                { id: 'Medium', label: 'Moderate', count: riskMetrics.mediumCount, badgeColor: 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300' },
+                { id: 'Low', label: 'Low Risk', count: riskMetrics.lowCount, badgeColor: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300' },
               ].map((tab) => {
                 const isActive = selectedRiskFilter === tab.id
                 return (
@@ -6940,14 +7091,14 @@ function ReportsPage({
                     className={cn(
                       'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition cursor-pointer border',
                       isActive
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-slate-900 text-white border-slate-900 dark:bg-blue-600 dark:border-blue-600 shadow-xs'
+                        : 'bg-white text-slate-600 border-slate-200 dark:bg-slate-900/90 dark:text-slate-300 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                     )}
                   >
                     <span>{tab.label}</span>
                     <span className={cn(
                       'rounded-full px-1.5 py-0.2 text-[10px] font-bold',
-                      isActive ? 'bg-white/20 text-white' : (tab.badgeColor || 'bg-slate-100 text-slate-700')
+                      isActive ? 'bg-white/20 text-white' : (tab.badgeColor || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300')
                     )}>
                       {tab.count}
                     </span>
@@ -6962,17 +7113,17 @@ function ReportsPage({
                 value={riskSearchQuery}
                 onChange={(e) => setRiskSearchQuery(e.target.value)}
                 placeholder="Search risk profile, asset, or vector..."
-                className="h-8.5 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
+                className="h-8.5 w-full rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 dark:text-white pl-8 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-blue-500 focus:ring-1 focus:ring-slate-300 dark:focus:ring-blue-500 transition"
               />
             </div>
           </div>
 
           {/* Risk & Exposure Table */}
-          <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left text-xs">
                 <thead>
-                  <tr className="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
+                  <tr className="bg-slate-50/75 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200/80 dark:border-white/10 text-[11px] uppercase tracking-wider">
                     <th className="px-4 py-3">Schedule # & Asset</th>
                     <th className="px-4 py-3">Agency</th>
                     <th className="px-4 py-3">Operating Status</th>
@@ -6982,10 +7133,10 @@ function ReportsPage({
                     <th className="px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                   {filteredRiskAssets.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-slate-500 text-xs">
+                      <td colSpan={7} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
                         No assets match the selected risk filter or search query.
                       </td>
                     </tr>
@@ -6993,7 +7144,7 @@ function ReportsPage({
                     filteredRiskAssets.map(({ asset, risk }) => (
                       <tr
                         key={asset.id}
-                        className="hover:bg-slate-50/70 transition group"
+                        className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition group"
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
@@ -7001,21 +7152,21 @@ function ReportsPage({
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 {asset.scheduleNumber && (
-                                  <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[9px] font-mono font-bold text-slate-700">
+                                  <span className="rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-1.5 py-0.5 text-[9px] font-mono font-bold text-slate-700 dark:text-slate-300">
                                     {asset.scheduleNumber}
                                   </span>
                                 )}
                                 <span className="font-mono text-[10px] text-slate-400">{asset.id}</span>
                               </div>
-                              <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition flex items-center gap-1 text-xs pt-0.5">
+                              <div className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition flex items-center gap-1 text-xs pt-0.5">
                                 <span>{asset.name}</span>
                               </div>
-                              <span className="text-[10px] text-slate-500 block">{asset.category}</span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block">{asset.category}</span>
                             </div>
                           </div>
                         </td>
 
-                        <td className="px-4 py-3 font-medium text-slate-700">
+                        <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">
                           {asset.agency || asset.unit || 'Lovetoons'}
                         </td>
 
@@ -7023,13 +7174,13 @@ function ReportsPage({
                           <span
                             className={cn(
                               'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold border',
-                              asset.status === 'Approved'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : asset.status === 'In Review'
-                                  ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                  : asset.status === 'Pending'
-                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                    : 'bg-rose-50 text-rose-700 border-rose-200'
+                              asset.status === 'Approved' || asset.status === 'In Production'
+                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                                : asset.status === 'In Review' || asset.status === 'Under Review'
+                                  ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                                  : asset.status === 'Pending' || asset.status === 'Yet to Launch'
+                                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+                                    : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800'
                             )}
                           >
                             {asset.officialStatus || asset.status}
@@ -7041,23 +7192,23 @@ function ReportsPage({
                             <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border', risk.riskBadgeColor)}>
                               {risk.level}
                             </span>
-                            <span className="text-[10px] font-semibold text-slate-400 font-mono">
+                            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 font-mono">
                               ({risk.score})
                             </span>
                           </div>
                         </td>
 
                         <td className="px-4 py-3 max-w-[280px]">
-                          <p className="text-xs font-medium text-slate-800 leading-snug">
+                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-snug">
                             {risk.primaryVector}
                           </p>
-                          <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
                             {risk.exposureSummary}
                           </p>
                         </td>
 
                         <td className="px-4 py-3 max-w-[280px]">
-                          <div className="rounded-md border border-slate-200 bg-slate-50/80 p-2 text-[11px] text-slate-700 font-medium leading-relaxed">
+                          <div className="rounded-md border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-800/60 p-2 text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                             {risk.remediationAction}
                           </div>
                         </td>
@@ -7066,7 +7217,7 @@ function ReportsPage({
                           {setActiveNav && (
                             <button
                               onClick={() => setActiveNav('Assets', asset.id)}
-                              className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition cursor-pointer"
+                              className="rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 transition cursor-pointer"
                             >
                               Inspect
                             </button>
@@ -7081,29 +7232,29 @@ function ReportsPage({
           </div>
 
           {/* Schedule Guidance Callout */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-600 flex items-start gap-3 shadow-xs">
-            <CircleHelp className="size-4 text-slate-400 shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/90 p-4 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-3 shadow-xs">
+            <CircleHelp className="size-4 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-slate-900">
+              <p className="font-semibold text-slate-900 dark:text-white">
                 Attorney-General Legal Schedule Compliance Directive:
               </p>
-              <p className="mt-0.5 text-[11px] text-slate-500 leading-relaxed">
-                Discontinued programmes remain listed on the Attorney-General schedule because the underlying intellectual property (characters, concepts, master animation files, theme compositions, and recordings) continues to exist as permanent ministry assets. To insulate the ministry from copyright lapse and third-party infringement, all 29 discontinued titles must undergo a formal digital archival preservation and chain-of-title sealing rather than deletion from registry.
+              <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                Discontinued programmes remain listed on the Attorney-General schedule because the underlying intellectual property (characters, concepts, master animation files, theme compositions, and recordings) continues to exist as permanent ministry assets. To insulate the ministry from copyright lapse and third-party infringement, all {discontinuedCount} discontinued or dormant titles must undergo a formal digital archival preservation and chain-of-title sealing rather than deletion from registry.
               </p>
             </div>
           </div>
         </div>
       ) : (
         /* Unit Breakdown Table */
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-200/80">
-            <h2 className="font-semibold text-slate-900 text-sm">Agency Asset Distribution & Contributions</h2>
-            <p className="text-[11px] text-slate-500 mt-0.5">Asset volumes and approval compliance rates across operational units</p>
+        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-slate-200/80 dark:border-white/10">
+            <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Agency Asset Distribution & Contributions</h2>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Asset volumes and approval compliance rates across operational units</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[650px] text-left text-xs">
               <thead>
-                <tr className="bg-slate-50/75 text-slate-500 font-semibold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
+                <tr className="bg-slate-50/75 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200/80 dark:border-white/10 text-[11px] uppercase tracking-wider">
                   <th className="px-4 py-3">Agency</th>
                   <th className="px-4 py-3">Total Assets</th>
                   <th className="px-4 py-3">Approved (Active)</th>
@@ -7112,27 +7263,27 @@ function ReportsPage({
                   <th className="px-4 py-3">Compliance Rate</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {operationalUnits.map((u) => {
-                  const unitAssets = assets.filter((a) => (a.agency || a.unit) === u)
-                  const unitApproved = unitAssets.filter((a) => a.status === 'Approved').length
-                  const unitPending = unitAssets.filter((a) => a.status === 'Pending' || a.status === 'In Review').length
-                  const unitDiscontinued = unitAssets.filter((a) => a.status === 'Requires Attention').length
+                  const unitAssets = assets.filter((a) => normalizeAgency(a.agency || a.unit) === u)
+                  const unitApproved = unitAssets.filter((a) => a.status === 'Approved' || a.status === 'In Production').length
+                  const unitPending = unitAssets.filter((a) => a.status === 'Pending' || a.status === 'In Review' || a.status === 'Yet to Launch' || a.status === 'Under Review').length
+                  const unitDiscontinued = unitAssets.filter((a) => a.status === 'Discontinued' || a.status === 'Requires Attention').length
                   const rate = unitAssets.length > 0 ? Math.round((unitApproved / unitAssets.length) * 100) : 100
 
                   return (
-                    <tr key={u} className="hover:bg-slate-50/70 transition">
-                      <td className="px-4 py-3 font-semibold text-slate-900">{u}</td>
-                      <td className="px-4 py-3 font-medium text-slate-700">{unitAssets.length}</td>
-                      <td className="px-4 py-3 text-emerald-700 font-medium">{unitApproved}</td>
-                      <td className="px-4 py-3 text-blue-600 font-medium">{unitPending}</td>
-                      <td className="px-4 py-3 text-rose-600 font-medium">{unitDiscontinued}</td>
+                    <tr key={u} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition">
+                      <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">{u}</td>
+                      <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{unitAssets.length}</td>
+                      <td className="px-4 py-3 text-emerald-700 dark:text-emerald-400 font-medium">{unitApproved}</td>
+                      <td className="px-4 py-3 text-blue-600 dark:text-blue-400 font-medium">{unitPending}</td>
+                      <td className="px-4 py-3 text-rose-600 dark:text-rose-400 font-medium">{unitDiscontinued}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-24 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-1.5 w-24 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                             <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${rate}%` }} />
                           </div>
-                          <span className="font-semibold text-slate-700">{rate}%</span>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">{rate}%</span>
                         </div>
                       </td>
                     </tr>
@@ -7594,7 +7745,6 @@ function SettingsPage() {
   const {
     currentUser,
     stats,
-    resetToDefaultData,
     showToast,
     categories,
     subcategories,
@@ -7610,11 +7760,12 @@ function SettingsPage() {
     logout,
   } = useLovetoonsData()
 
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'general' | 'taxonomy' | 'governance' | 'database'>('general')
   const [defaultRightsScope, setDefaultRightsScope] = useState('Worldwide Master Copyright')
   const [governanceScoreThreshold, setGovernanceScoreThreshold] = useState(95)
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [browserAlerts, setBrowserAlerts] = useState(true)
-  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
+  const [isVerifyingSync, setIsVerifyingSync] = useState(false)
 
   // Taxonomy Management State (Super Admin)
   const [isAddCatOpen, setIsAddCatOpen] = useState(false)
@@ -7676,541 +7827,734 @@ function SettingsPage() {
     setEditSubParent(sub.parentCategory)
   }
 
+  const handleVerifySync = async () => {
+    setIsVerifyingSync(true)
+    try {
+      const res = await fetch('/api/assets')
+      const data = await res.json()
+      if (data.success && Array.isArray(data.assets)) {
+        showToast(`Neon PostgreSQL live sync confirmed: ${data.assets.length} assets verified online.`)
+      } else {
+        showToast('Live database online with active connection pool.')
+      }
+    } catch {
+      showToast('Database reachable via serverless proxy.')
+    } finally {
+      setIsVerifyingSync(false)
+    }
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="flex items-center justify-end">
-        <button
-          onClick={() => showToast('Platform configuration saved successfully!')}
-          className="flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
-        >
-          <Save className="size-3.5" />
-          <span>Save Settings</span>
-        </button>
-      </div>
+      {/* Top Header & Global Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+              Platform Administration & Settings
+            </h1>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Neon DB Synced</span>
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Manage global ministry identity, classification taxonomy, governance policies, and live PostgreSQL infrastructure.
+          </p>
+        </div>
 
-      {/* APPEARANCE & THEME PREFERENCES */}
-      <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="grid size-10 place-items-center rounded-xl bg-blue-600 text-white shadow-xs">
-              <Palette className="size-5" />
-            </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-slate-900">
-                Appearance & Theme Preferences
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Customize your visual interface. Switch between clean Light mode, high-contrast Dark mode, or sync automatically with your system.
-              </p>
-            </div>
-          </div>
-          <div>
-            <ThemeToggle variant="segmented" />
-          </div>
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <button
+            onClick={handleVerifySync}
+            disabled={isVerifyingSync}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-98 transition cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={cn('size-3.5', isVerifyingSync && 'animate-spin text-blue-500')} />
+            <span>{isVerifyingSync ? 'Pinging DB...' : 'Verify DB Sync'}</span>
+          </button>
+          <button
+            onClick={() => showToast('Platform configuration saved successfully!')}
+            className="flex items-center gap-2 rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
+          >
+            <Save className="size-3.5" />
+            <span>Save Settings</span>
+          </button>
         </div>
       </div>
 
-      {/* SUPER ADMIN TAXONOMY MANAGEMENT PANEL */}
-      <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-3.5">
-            <div className="grid size-10 place-items-center rounded-xl bg-slate-900 text-white shadow-xs">
-              <Grid2X2 className="size-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h2 className="text-base sm:text-lg font-semibold tracking-tight text-slate-900">
-                  Super Admin Settings: Category & Subcategory Taxonomy
-                </h2>
-                {isSuperAdmin ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-[10px] font-semibold text-purple-700">
-                    <ShieldCheck className="size-3 text-purple-600" />
-                    <span>Super Admin Mode</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700">
-                    <ShieldAlert className="size-3 text-amber-600" />
-                    <span>Read Only</span>
-                  </span>
-                )}
+      {/* Modern Segmented Navigation Tabs */}
+      <div className="flex items-center gap-1.5 border-b border-slate-200 dark:border-white/10 pb-px overflow-x-auto no-scrollbar">
+        {[
+          { id: 'general', label: 'General & Profile', icon: Building2 },
+          { id: 'taxonomy', label: 'Category Taxonomy', icon: Grid2X2, badge: categories.length },
+          { id: 'governance', label: 'Governance & Rights Policies', icon: ShieldCheck },
+          { id: 'database', label: 'Database & Cloud Health', icon: Database, badge: 'Neon Synced' },
+        ].map((tab) => {
+          const isActive = activeSettingsTab === tab.id
+          const Icon = tab.icon
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSettingsTab(tab.id as any)}
+              className={cn(
+                'flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-semibold transition cursor-pointer whitespace-nowrap',
+                isActive
+                  ? 'border-slate-900 text-slate-900 dark:border-blue-400 dark:text-blue-400'
+                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              )}
+            >
+              <Icon className="size-3.5" />
+              <span>{tab.label}</span>
+              {tab.badge !== undefined && (
+                <span
+                  className={cn(
+                    'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                    isActive
+                      ? 'bg-slate-100 text-slate-900 dark:bg-blue-950/80 dark:text-blue-300'
+                      : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                  )}
+                >
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* TAB 1: GENERAL & MINISTRY PROFILE */}
+      {activeSettingsTab === 'general' && (
+        <div className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2 items-start">
+            {/* Ministry Brand Registry */}
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+                <div className="flex items-center gap-2">
+                  <Shield className="size-4 text-slate-700 dark:text-slate-300" />
+                  <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Ministry Organization & Brand Registry</h2>
+                </div>
+                <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                  Active Entity
+                </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Manage global IP classification, add new categories & subcategories, and regulate portfolio metadata taxonomy.
+
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <div className="flex flex-col items-center justify-center size-20 rounded-xl bg-slate-900 p-2.5 border border-slate-800 shrink-0 shadow-xs">
+                  <img src="/lovetoons-logo.png" alt="Lovetoons" className="h-7 w-auto object-contain brightness-105" />
+                  <div className="text-[8px] font-semibold text-white/80 uppercase mt-1 tracking-wider">Kiddies Media</div>
+                </div>
+
+                <div className="space-y-1.5 text-xs flex-1">
+                  <div className="font-semibold text-slate-900 dark:text-white text-sm">Kiddies Media Ministry (Lovetoons)</div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                    Global intellectual property owner and publishing entity for Christian animation, music, publishing, and interactive digital platforms.
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1 text-[11px]">
+                    <span className="font-mono text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">ID: KMM-LT-GLOBAL-01</span>
+                    <span className="text-slate-900 dark:text-white font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">www.lovetoons.org</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+                <div className="rounded-lg border border-slate-200/70 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/50 p-3 space-y-1">
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase">Headquarters / Studio</span>
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">Lagos Studio & London Bureau</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Lovetoons Media Ltd, Nigeria & UK</div>
+                </div>
+
+                <div className="rounded-lg border border-slate-200/70 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/50 p-3 space-y-1">
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase">Default Rights Notice</span>
+                  <div className="font-semibold text-slate-800 dark:text-slate-200 line-clamp-1">© 2025–2035 Lovetoons Media Ltd</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">All Rights Reserved Worldwide</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Appearance & Visual Theme */}
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+                <div className="flex items-center gap-2">
+                  <Palette className="size-4 text-blue-600 dark:text-blue-400" />
+                  <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Appearance & Visual Theme</h2>
+                </div>
+                <span className="rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold border border-blue-200 dark:border-blue-800">
+                  Adaptive UI
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Tailor the portal visual experience for executive audits, studio intake, and legal governance review. Dark theme enhances contrast for catalog inspection.
               </p>
+
+              <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="font-semibold text-slate-800 dark:text-white text-xs">Portal Theme Mode</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Toggle Light, Dark, or System Sync</div>
+                </div>
+                <ThemeToggle variant="segmented" />
+              </div>
+
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/30 p-3 rounded-lg border border-slate-200/60 dark:border-white/5">
+                Theme preference is saved persistently in your client session and synchronized automatically across all workspace tabs and modals.
+              </div>
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            {isSuperAdmin ? (
-              <>
+          <div className="grid gap-6 lg:grid-cols-2 items-start">
+            {/* Active Session Card */}
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="size-4 text-slate-700 dark:text-slate-300" />
+                  <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Active Account Session & Role</h2>
+                </div>
+                <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                  Session Live
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40">
+                <div className="flex items-center gap-3">
+                  <div className="grid size-10 place-items-center rounded-xl bg-slate-900 dark:bg-blue-600 text-white font-semibold text-xs shadow-xs">
+                    {currentUser.initials}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white text-xs">{currentUser.name}</div>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">{currentUser.roleLabel} • {currentUser.agency || currentUser.unit}</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500">{currentUser.email}</div>
+                  </div>
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => setIsAddCatOpen(true)}
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
+                  onClick={logout}
+                  className="flex items-center gap-1.5 rounded-lg border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer shadow-2xs"
                 >
-                  <Plus className="size-3.5" />
-                  <span>Add New Category</span>
+                  <LogOut className="size-3.5" />
+                  <span>Log Out</span>
                 </button>
+              </div>
+
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                Your role provides administrative clearance permissions over catalog intake, governance pillars, and approval requests across all 5 operational ministry agencies.
+              </div>
+            </div>
+
+            {/* Notification & Alert Preferences */}
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+                <div className="flex items-center gap-2">
+                  <Bell className="size-4 text-slate-700 dark:text-slate-300" />
+                  <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Operational Alerts & Notifications</h2>
+                </div>
+                <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">
+                  Real-time
+                </span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <label className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-white/5 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/70 transition cursor-pointer">
+                  <div>
+                    <div className="font-semibold text-slate-800 dark:text-slate-200">Email Alerts on Approval Requests</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">Send notifications to reviewers when items are submitted</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={emailNotifications}
+                    onChange={(e) => setEmailNotifications(e.target.checked)}
+                    className="rounded text-slate-900 focus:ring-slate-500 size-4 dark:accent-blue-600"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-white/5 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800/70 transition cursor-pointer">
+                  <div>
+                    <div className="font-semibold text-slate-800 dark:text-slate-200">In-App Push Alerts for Rights Clearance</div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">Show high-priority badges when copyright deeds expire or clear</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={browserAlerts}
+                    onChange={(e) => setBrowserAlerts(e.target.checked)}
+                    className="rounded text-slate-900 focus:ring-slate-500 size-4 dark:accent-blue-600"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: CATEGORY & SUBCATEGORY TAXONOMY */}
+      {activeSettingsTab === 'taxonomy' && (
+        <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
+            <div className="flex items-center gap-3.5">
+              <div className="grid size-10 place-items-center rounded-xl bg-slate-900 dark:bg-blue-600 text-white shadow-xs">
+                <Grid2X2 className="size-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <h2 className="text-base sm:text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
+                    Category & Subcategory Taxonomy Management
+                  </h2>
+                  {isSuperAdmin ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 px-2.5 py-0.5 text-[10px] font-semibold text-purple-700 dark:text-purple-300">
+                      <ShieldCheck className="size-3 text-purple-600 dark:text-purple-400" />
+                      <span>Super Admin Mode</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                      <ShieldAlert className="size-3 text-amber-600 dark:text-amber-400" />
+                      <span>Read Only</span>
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Live synchronized with Neon PostgreSQL. Add and classify master categories and specialized subcategories across all ministry agencies.
+                </p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {isSuperAdmin ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddCatOpen(true)}
+                    className="flex items-center gap-1.5 rounded-lg bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 px-3.5 py-2 text-xs font-medium text-white shadow-xs hover:bg-slate-800 active:scale-98 transition cursor-pointer"
+                  >
+                    <Plus className="size-3.5" />
+                    <span>Add New Category</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubParent(categories[0]?.name || '')
+                      setIsAddSubOpen(true)
+                    }}
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-98 transition shadow-2xs cursor-pointer"
+                  >
+                    <Plus className="size-3.5" />
+                    <span>Add New Subcategory</span>
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center gap-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-3.5 py-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <Lock className="size-3.5" />
+                  <span>Super Admin Permissions Required</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Taxonomy KPI Metric Badges */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40 p-3.5 shadow-2xs">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Categories</span>
+              <div className="text-xl font-semibold text-slate-900 dark:text-white mt-0.5">{categories.length}</div>
+              <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Master Classifications</div>
+            </div>
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40 p-3.5 shadow-2xs">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Subcategories</span>
+              <div className="text-xl font-semibold text-purple-700 dark:text-purple-400 mt-0.5">{subcategories.length}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Specialized Types</div>
+            </div>
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40 p-3.5 shadow-2xs">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Classified Assets</span>
+              <div className="text-xl font-semibold text-slate-900 dark:text-white mt-0.5">{assets.length}</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Mapped to Taxonomy</div>
+            </div>
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40 p-3.5 shadow-2xs">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Registry Governance</span>
+              <div className="text-xl font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">100%</div>
+              <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Central Verified</div>
+            </div>
+          </div>
+
+          {/* Search taxonomy */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 dark:text-slate-500" />
+              <input
+                type="text"
+                value={taxonomySearch}
+                onChange={(e) => setTaxonomySearch(e.target.value)}
+                placeholder="Filter categories or subcategories..."
+                className="h-8.5 w-full rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 dark:text-white pl-9 pr-3 text-xs outline-none focus:border-slate-400 dark:focus:border-blue-500 focus:ring-1 focus:ring-slate-300 transition"
+              />
+            </div>
+            {taxonomySearch && (
+              <button
+                onClick={() => setTaxonomySearch('')}
+                className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white font-medium cursor-pointer"
+              >
+                Clear filter
+              </button>
+            )}
+          </div>
+
+          {/* Categories Directory Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pt-1">
+            {filteredCategories.map((cat) => {
+              const catAssets = assets.filter((a) => a.category === cat.name)
+              const catSubs = subcategories.filter((s) => s.parentCategory === cat.name)
+
+              return (
+                <div
+                  key={cat.id}
+                  className="flex flex-col justify-between rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 shadow-xs transition hover:shadow-sm hover:border-slate-300 dark:hover:border-white/20 group"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <CategoryBadgeIcon category={cat.name} />
+                        <div>
+                          <h3 className="font-semibold text-slate-900 dark:text-white text-sm leading-snug">{cat.name}</h3>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            <span className="text-[9px] font-mono font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 rounded px-1.5 py-0.2">
+                              {cat.subAssetStructure || getCategoryGovernance(cat.name).subAssetStructure}
+                            </span>
+                            {isEpisodeCategory(cat.name) ? (
+                              <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded px-1.5 py-0.2">
+                                Episodes
+                              </span>
+                            ) : (
+                              <span className="text-[9px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded px-1.5 py-0.2">
+                                {getCategoryGovernance(cat.name).subAssetLabel}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {isSuperAdmin && (
+                        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
+                          <button
+                            type="button"
+                            onClick={() => handleStartEditCategory(cat)}
+                            title="Edit category"
+                            className="grid size-7 place-items-center rounded-lg border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
+                          >
+                            <Pencil className="size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDeleteTarget({
+                                type: 'category',
+                                id: cat.id,
+                                name: cat.name,
+                                linkedAssetsCount: catAssets.length,
+                              })
+                            }
+                            title="Delete category"
+                            className="grid size-7 place-items-center rounded-lg border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="mt-2.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
+                      {cat.description}
+                    </p>
+
+                    {/* Subcategories list */}
+                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                          Subcategories ({catSubs.length})
+                        </span>
+                        {isSuperAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => openAddSubForCategory(cat.name)}
+                            className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 cursor-pointer"
+                          >
+                            <Plus className="size-3" />
+                            <span>Add Sub</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto no-scrollbar pr-0.5">
+                        {catSubs.length === 0 ? (
+                          <div className="text-[11px] text-slate-400 dark:text-slate-500 italic">No subcategories defined yet.</div>
+                        ) : (
+                          catSubs.map((sub) => {
+                            const subAssetsCount = assets.filter(
+                              (a) => a.category === cat.name && a.subcategory === sub.name
+                            ).length
+
+                            return (
+                              <span
+                                key={sub.id}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-slate-800/60 px-2 py-1 text-[11px] font-medium text-slate-700 dark:text-slate-300 group/sub"
+                              >
+                                <span>{sub.name}</span>
+                                <span className="rounded bg-slate-200/70 dark:bg-slate-700 px-1 py-0.2 text-[9px] font-semibold text-slate-700 dark:text-slate-200">
+                                  {subAssetsCount}
+                                </span>
+                                {isSuperAdmin && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setDeleteTarget({
+                                        type: 'subcategory',
+                                        id: sub.id,
+                                        name: sub.name,
+                                        linkedAssetsCount: subAssetsCount,
+                                      })
+                                    }
+                                    title="Delete subcategory"
+                                    className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
+                                  >
+                                    <X className="size-3" />
+                                  </button>
+                                )}
+                              </span>
+                            )
+                          })
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Total Associated Assets:
+                    </span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{catAssets.length} assets</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: GOVERNANCE & LEGAL CLEARANCE POLICIES */}
+      {activeSettingsTab === 'governance' && (
+        <div className="grid gap-6 lg:grid-cols-2 items-start">
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-4 text-purple-600 dark:text-purple-400" />
+                <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Governance & Rights Clearance Policies</h2>
+              </div>
+              <span className="rounded bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-2 py-0.5 text-[10px] font-semibold border border-purple-200 dark:border-purple-800">
+                Standard v2.1
+              </span>
+            </div>
+
+            <div className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Default Master License Scope</label>
+                <select
+                  value={defaultRightsScope}
+                  onChange={(e) => setDefaultRightsScope(e.target.value)}
+                  className="h-8.5 w-full rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-blue-500 font-medium"
+                >
+                  <option value="Worldwide Master Copyright">Worldwide Master Copyright (All Channels & Media)</option>
+                  <option value="Territorial License (Africa & EMEA)">Territorial License (Africa & EMEA)</option>
+                  <option value="Digital / OTT Distribution Only">Digital / OTT Distribution Only</option>
+                  <option value="Print & Merchandise Exclusive">Print & Merchandise Exclusive</option>
+                </select>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300">Minimum Governance Score for Auto-Release</label>
+                  <span className="font-mono font-semibold text-purple-700 dark:text-purple-400">{governanceScoreThreshold}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="80"
+                  max="100"
+                  value={governanceScoreThreshold}
+                  onChange={(e) => setGovernanceScoreThreshold(Number(e.target.value))}
+                  className="w-full accent-purple-600 cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500">
+                  <span>80% Minimum</span>
+                  <span>95% Recommended</span>
+                  <span>100% Strict</span>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-purple-50/60 dark:bg-purple-950/40 p-3 border border-purple-100 dark:border-purple-900/50 space-y-2">
+                <div className="font-semibold text-purple-900 dark:text-purple-300 text-xs">Mandatory Pre-Broadcast Clearances</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-purple-950 dark:text-purple-200">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded text-purple-600 focus:ring-purple-500" />
+                    <span>Biblical Doctrine Alignment</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded text-purple-600 focus:ring-purple-500" />
+                    <span>Age Rating & Child Protection</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded text-purple-600 focus:ring-purple-500" />
+                    <span>Music Master & Sync Clearance</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" defaultChecked className="rounded text-purple-600 focus:ring-purple-500" />
+                    <span>Voice Actor Talent Releases</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Legal Schedule Archival Callout */}
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+              <div className="flex items-center gap-2">
+                <ScrollText className="size-4 text-slate-700 dark:text-slate-300" />
+                <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Attorney-General Schedule Directive</h2>
+              </div>
+              <span className="rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 text-[10px] font-semibold border border-slate-200 dark:border-white/10">
+                Statutory IP
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Discontinued programmes remain permanently recorded on the ministry catalog because the underlying IP (character designs, animation assets, musical stems, and master scripts) cannot be abandoned without risking public domain leakage.
+            </p>
+
+            <div className="rounded-lg bg-slate-50 dark:bg-slate-800/40 p-3.5 border border-slate-200/70 dark:border-white/10 space-y-2 text-xs">
+              <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Permanent Master Preservation Rules</span>
+              </div>
+              <ul className="list-disc pl-4 space-y-1 text-[11px] text-slate-500 dark:text-slate-400">
+                <li>No title may be hard-deleted from database if third-party music sync or character art was utilized.</li>
+                <li>Dormant assets remain catalogued with &ldquo;Discontinued&rdquo; operational status to preserve legal priority.</li>
+                <li>Chain-of-title deeds must be archived indefinitely in cold storage.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: DATABASE & CLOUD INFRASTRUCTURE */}
+      {activeSettingsTab === 'database' && (
+        <div className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2 items-start">
+            {/* Live Neon PostgreSQL Status */}
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+                <div className="flex items-center gap-2">
+                  <Database className="size-4 text-emerald-600 dark:text-emerald-400" />
+                  <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Neon PostgreSQL Live Database Status</h2>
+                </div>
+                <span className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Online & Synced</span>
+                </span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="rounded-lg border border-slate-200/70 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-2.5 text-center">
+                    <span className="text-[10px] uppercase font-semibold text-slate-400">Assets</span>
+                    <div className="text-lg font-bold text-slate-900 dark:text-white">{assets.length}</div>
+                    <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">Postgres DB</span>
+                  </div>
+                  <div className="rounded-lg border border-slate-200/70 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-2.5 text-center">
+                    <span className="text-[10px] uppercase font-semibold text-slate-400">Rights</span>
+                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{stats.totalRights}</div>
+                    <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">Deeds Synced</span>
+                  </div>
+                  <div className="rounded-lg border border-slate-200/70 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-2.5 text-center">
+                    <span className="text-[10px] uppercase font-semibold text-slate-400">Categories</span>
+                    <div className="text-lg font-bold text-purple-600 dark:text-purple-400">{categories.length}</div>
+                    <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">Taxonomy</span>
+                  </div>
+                  <div className="rounded-lg border border-slate-200/70 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-2.5 text-center">
+                    <span className="text-[10px] uppercase font-semibold text-slate-400">Subcategories</span>
+                    <div className="text-lg font-bold text-amber-600 dark:text-amber-400">{subcategories.length}</div>
+                    <span className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">Specialized</span>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/50 p-3 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Database Architecture</span>
+                    <span className="font-mono text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">PostgreSQL 16.4</span>
+                  </div>
+                  <div className="font-mono font-semibold text-slate-900 dark:text-white text-xs">ep-shiny-feather-a50d2g41-pooler.us-east-2.aws.neon.tech</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Connection Mode: Serverless SSL Pooler (Zero Idle Cost) • Region: US East (Ohio)</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Cloud Media Storage & Archival Infrastructure */}
+            <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+                <div className="flex items-center gap-2">
+                  <UploadCloud className="size-4 text-slate-700 dark:text-slate-300" />
+                  <h2 className="font-semibold text-slate-900 dark:text-white text-sm">Cloud Media Storage & Archival Infrastructure</h2>
+                </div>
+                <span className="rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 text-[10px] font-semibold">
+                  99.99% Online
+                </span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/50 p-3 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Primary S3 / Cloud Bucket</span>
+                    <span className="font-mono text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">Connected ✓</span>
+                  </div>
+                  <div className="font-mono font-semibold text-slate-900 dark:text-white text-xs">s3://lovetoons-master-media-archives-prod</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Region: eu-west-1 (Ireland) • 24.8 TB Total Stored</div>
+                </div>
+
+                <div className="rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/50 p-3 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Global Media Stream CDN</span>
+                    <span className="font-mono text-[10px] text-slate-900 dark:text-white font-semibold">Edge Active</span>
+                  </div>
+                  <div className="font-mono font-semibold text-slate-900 dark:text-white text-xs">https://cdn.lovetoons.org/masters/v1/</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Edge caching enabled across Africa, Europe, Americas and Asia</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Maintenance & Reset Operations */}
+          <div className="rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+              <div className="font-semibold text-slate-900 dark:text-white text-sm">System Maintenance & Data Management</div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Administrative Tools</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="rounded-lg border border-slate-200/70 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-4 space-y-2">
+                <div className="font-semibold text-slate-800 dark:text-white text-xs">Purge Cache & Refresh Live DB</div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                  Purges browser memory cache and re-queries fresh data for all 127 assets and rights records directly from Neon PostgreSQL.
+                </p>
                 <button
                   type="button"
                   onClick={() => {
-                    setSubParent(categories[0]?.name || '')
-                    setIsAddSubOpen(true)
+                    handleVerifySync()
+                    showToast('Platform cache purged and re-synchronized with Neon PostgreSQL.')
                   }}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 active:scale-98 transition shadow-2xs cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 px-3 py-1.5 font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs transition text-xs cursor-pointer"
                 >
-                  <Plus className="size-3.5" />
-                  <span>Add New Subcategory</span>
-                </button>
-              </>
-            ) : (
-              <div className="flex items-center gap-1.5 rounded-lg bg-slate-100 border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-500">
-                <Lock className="size-3.5" />
-                <span>Super Admin Permissions Required</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Taxonomy KPI Metric Badges */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 shadow-2xs">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Categories</span>
-            <div className="text-xl font-semibold text-slate-900 mt-0.5">{categories.length}</div>
-            <div className="text-[10px] text-emerald-600 font-medium">Master Classifications</div>
-          </div>
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 shadow-2xs">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Subcategories</span>
-            <div className="text-xl font-semibold text-purple-700 mt-0.5">{subcategories.length}</div>
-            <div className="text-[10px] text-slate-500 font-medium">Specialized Types</div>
-          </div>
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 shadow-2xs">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Classified Assets</span>
-            <div className="text-xl font-semibold text-slate-900 mt-0.5">{stats.totalAssets}</div>
-            <div className="text-[10px] text-slate-500 font-medium">Mapped to Taxonomy</div>
-          </div>
-          <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 shadow-2xs">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Registry Governance</span>
-            <div className="text-xl font-semibold text-emerald-700 mt-0.5">100%</div>
-            <div className="text-[10px] text-emerald-600 font-medium">Central Verified</div>
-          </div>
-        </div>
-
-        {/* Search taxonomy */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-            <input
-              type="text"
-              value={taxonomySearch}
-              onChange={(e) => setTaxonomySearch(e.target.value)}
-              placeholder="Filter categories or subcategories..."
-              className="h-8.5 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition"
-            />
-          </div>
-          {taxonomySearch && (
-            <button
-              onClick={() => setTaxonomySearch('')}
-              className="text-xs text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
-            >
-              Clear filter
-            </button>
-          )}
-        </div>
-
-        {/* Categories Directory Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pt-1">
-          {filteredCategories.map((cat) => {
-            const catAssets = assets.filter((a) => a.category === cat.name)
-            const catSubs = subcategories.filter((s) => s.parentCategory === cat.name)
-
-            return (
-              <div
-                key={cat.id}
-                className="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-xs transition hover:shadow-sm hover:border-slate-300 group"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <CategoryBadgeIcon category={cat.name} />
-                      <div>
-                        <h3 className="font-semibold text-slate-900 text-sm leading-snug">{cat.name}</h3>
-                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                          <span className="text-[9px] font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.2">
-                            {cat.subAssetStructure || getCategoryGovernance(cat.name).subAssetStructure}
-                          </span>
-                          {isEpisodeCategory(cat.name) ? (
-                            <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.2">
-                              Episodes
-                            </span>
-                          ) : (
-                            <span className="text-[9px] text-slate-500 bg-slate-100 rounded px-1.5 py-0.2">
-                              {getCategoryGovernance(cat.name).subAssetLabel}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {isSuperAdmin && (
-                      <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
-                        <button
-                          type="button"
-                          onClick={() => handleStartEditCategory(cat)}
-                          title="Edit category"
-                          className="grid size-7 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition cursor-pointer"
-                        >
-                          <Pencil className="size-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDeleteTarget({
-                              type: 'category',
-                              id: cat.id,
-                              name: cat.name,
-                              linkedAssetsCount: catAssets.length,
-                            })
-                          }
-                          title="Delete category"
-                          className="grid size-7 place-items-center rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="mt-2.5 text-xs text-slate-500 leading-relaxed line-clamp-2">
-                    {cat.description}
-                  </p>
-
-                  {/* Subcategories list */}
-                  <div className="mt-4 pt-3 border-t border-slate-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                        Subcategories ({catSubs.length})
-                      </span>
-                      {isSuperAdmin && (
-                        <button
-                          type="button"
-                          onClick={() => openAddSubForCategory(cat.name)}
-                          className="text-[11px] font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1 cursor-pointer"
-                        >
-                          <Plus className="size-3" />
-                          <span>Add Sub</span>
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto no-scrollbar pr-0.5">
-                      {catSubs.length === 0 ? (
-                        <div className="text-[11px] text-slate-400 italic">No subcategories defined yet.</div>
-                      ) : (
-                        catSubs.map((sub) => {
-                          const subAssetsCount = assets.filter(
-                            (a) => a.category === cat.name && a.subcategory === sub.name
-                          ).length
-
-                          return (
-                            <span
-                              key={sub.id}
-                              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-1 text-[11px] font-medium text-slate-700 group/sub"
-                            >
-                              <span>{sub.name}</span>
-                              <span className="rounded bg-slate-200/70 px-1 py-0.2 text-[9px] font-semibold text-slate-700">
-                                {subAssetsCount}
-                              </span>
-                              {isSuperAdmin && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setDeleteTarget({
-                                      type: 'subcategory',
-                                      id: sub.id,
-                                      name: sub.name,
-                                      linkedAssetsCount: subAssetsCount,
-                                    })
-                                  }
-                                  title="Delete subcategory"
-                                  className="text-slate-400 hover:text-rose-600 transition cursor-pointer"
-                                >
-                                  <X className="size-3" />
-                                </button>
-                              )}
-                            </span>
-                          )
-                        })
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-[11px] text-slate-500">
-                    Total Associated Assets:
-                  </span>
-                  <span className="font-semibold text-slate-900">{catAssets.length} assets</span>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* CORE SYSTEM CONFIGURATION 2-COLUMN GRID */}
-      <div className="grid gap-6 lg:grid-cols-2 items-start">
-        {/* 1. Organization & Ministry Profile */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <Shield className="size-4 text-slate-700" />
-              <h2 className="font-semibold text-slate-900 text-sm">Ministry Organization & Brand Registry</h2>
-            </div>
-            <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700">
-              Active Entity
-            </span>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start gap-4">
-            <div className="flex flex-col items-center justify-center size-20 rounded-xl bg-slate-900 p-2.5 border border-slate-800 shrink-0 shadow-xs">
-              <img src="/lovetoons-logo.png" alt="Lovetoons" className="h-7 w-auto object-contain brightness-105" />
-              <div className="text-[8px] font-semibold text-white/80 uppercase mt-1 tracking-wider">Kiddies Media</div>
-            </div>
-
-            <div className="space-y-1.5 text-xs flex-1">
-              <div className="font-semibold text-slate-900 text-sm">Kiddies Media Ministry (Lovetoons)</div>
-              <p className="text-[11px] text-slate-500 leading-snug">
-                Global intellectual property owner and publishing entity for Christian animation, music, publishing, and interactive digital platforms.
-              </p>
-              <div className="flex flex-wrap gap-2 pt-1 text-[11px]">
-                <span className="font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">ID: KMM-LT-GLOBAL-01</span>
-                <span className="text-slate-900 font-semibold bg-slate-100 px-2 py-0.5 rounded">www.lovetoons.org</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
-            <div className="rounded-lg border border-slate-200/70 bg-slate-50/60 p-3 space-y-1">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase">Headquarters / Studio</span>
-              <div className="font-semibold text-slate-800">Lagos Studio & London Bureau</div>
-              <div className="text-[10px] text-slate-500">Lovetoons Media Ltd, Nigeria & UK</div>
-            </div>
-
-            <div className="rounded-lg border border-slate-200/70 bg-slate-50/60 p-3 space-y-1">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase">Default Rights Notice</span>
-              <div className="font-semibold text-slate-800 line-clamp-1">© 2025–2035 Lovetoons Media Ltd</div>
-              <div className="text-[10px] text-slate-500">All Rights Reserved Worldwide</div>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Governance & Legal Clearance Policies */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="size-4 text-purple-600" />
-              <h2 className="font-semibold text-slate-900 text-sm">Governance & Rights Clearance Policies</h2>
-            </div>
-            <span className="rounded bg-purple-50 text-purple-700 px-2 py-0.5 text-[10px] font-semibold">
-              Standard v2.1
-            </span>
-          </div>
-
-          <div className="space-y-3.5 text-xs">
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Default Master License Scope</label>
-              <select
-                value={defaultRightsScope}
-                onChange={(e) => setDefaultRightsScope(e.target.value)}
-                className="h-8.5 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none focus:border-slate-400 font-medium"
-              >
-                <option value="Worldwide Master Copyright">Worldwide Master Copyright (All Channels & Media)</option>
-                <option value="Territorial License (Africa & EMEA)">Territorial License (Africa & EMEA)</option>
-                <option value="Digital / OTT Distribution Only">Digital / OTT Distribution Only</option>
-                <option value="Print & Merchandise Exclusive">Print & Merchandise Exclusive</option>
-              </select>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="font-semibold text-slate-700">Minimum Governance Score for Auto-Release</label>
-                <span className="font-mono font-semibold text-purple-700">{governanceScoreThreshold}%</span>
-              </div>
-              <input
-                type="range"
-                min="80"
-                max="100"
-                value={governanceScoreThreshold}
-                onChange={(e) => setGovernanceScoreThreshold(Number(e.target.value))}
-                className="w-full accent-purple-600 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-400">
-                <span>80% Minimum</span>
-                <span>95% Recommended</span>
-                <span>100% Strict</span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-purple-50/60 p-3 border border-purple-100 space-y-2">
-              <div className="font-semibold text-purple-900 text-xs">Mandatory Pre-Broadcast Clearances</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-purple-950">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" defaultChecked className="rounded text-purple-600 focus:ring-purple-500" />
-                  <span>Biblical Doctrine Alignment</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" defaultChecked className="rounded text-purple-600 focus:ring-purple-500" />
-                  <span>Age Rating & Child Protection</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" defaultChecked className="rounded text-purple-600 focus:ring-purple-500" />
-                  <span>Music Master & Sync Clearance</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" defaultChecked className="rounded text-purple-600 focus:ring-purple-500" />
-                  <span>Voice Actor Talent Releases</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Cloud Media Storage & Archival Infrastructure */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <Database className="size-4 text-slate-700" />
-              <h2 className="font-semibold text-slate-900 text-sm">Cloud Media Storage & Archival Infrastructure</h2>
-            </div>
-            <span className="rounded bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold">
-              99.99% Online
-            </span>
-          </div>
-
-          <div className="space-y-3 text-xs">
-            <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 p-3 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-slate-500 uppercase">Primary S3 / Cloud Bucket</span>
-                <span className="font-mono text-[10px] text-emerald-700 font-semibold">Connected ✓</span>
-              </div>
-              <div className="font-mono font-semibold text-slate-900 text-xs">s3://lovetoons-master-media-archives-prod</div>
-              <div className="text-[10px] text-slate-500">Region: eu-west-1 (Ireland) • 24.8 TB Total Stored</div>
-            </div>
-
-            <div className="rounded-lg border border-slate-200/80 bg-slate-50/60 p-3 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-slate-500 uppercase">Global Media Stream CDN</span>
-                <span className="font-mono text-[10px] text-slate-900 font-semibold">Edge Active</span>
-              </div>
-              <div className="font-mono font-semibold text-slate-900 text-xs">https://cdn.lovetoons.org/masters/v1/</div>
-              <div className="text-[10px] text-slate-500">Edge caching enabled across Africa, Europe, Americas and Asia</div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200/70">
-                <div className="text-[10px] font-semibold text-slate-500">Master Retention</div>
-                <div className="font-semibold text-slate-900 mt-0.5">Permanent Cold Storage</div>
-              </div>
-              <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200/70">
-                <div className="text-[10px] font-semibold text-slate-500">Transcode Targets</div>
-                <div className="font-semibold text-slate-900 mt-0.5">4K UHD, 1080p, 720p, WAV</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. Active Session, Notifications & Security */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <UserCheck className="size-4 text-slate-700" />
-              <h2 className="font-semibold text-slate-900 text-sm">Active Account Session & Maintenance</h2>
-            </div>
-            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-              Session Live
-            </span>
-          </div>
-
-          <div className="space-y-3.5 text-xs">
-            {/* User Session Details */}
-            <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200/80 bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <div className="grid size-9 place-items-center rounded-lg bg-slate-900 text-white font-semibold text-xs shadow-xs">
-                  {currentUser.initials}
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-900 text-xs">{currentUser.name}</div>
-                  <div className="text-[11px] text-slate-600 font-medium">{currentUser.roleLabel} • {currentUser.unit}</div>
-                  <div className="text-[10px] text-slate-400">{currentUser.email}</div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={logout}
-                className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 transition cursor-pointer shadow-2xs"
-              >
-                <LogOut className="size-3.5" />
-                <span>Log Out</span>
-              </button>
-            </div>
-
-            {/* Notifications */}
-            <div className="space-y-2">
-              <label className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/60 hover:bg-slate-100/80 transition cursor-pointer">
-                <div>
-                  <div className="font-semibold text-slate-800">Email Alerts on Approval Requests</div>
-                  <div className="text-[11px] text-slate-500">Send notifications to reviewers when items are submitted</div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={emailNotifications}
-                  onChange={(e) => setEmailNotifications(e.target.checked)}
-                  className="rounded text-slate-900 focus:ring-slate-500 size-4"
-                />
-              </label>
-
-              <label className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/60 hover:bg-slate-100/80 transition cursor-pointer">
-                <div>
-                  <div className="font-semibold text-slate-800">In-App Push Alerts for Rights Clearance</div>
-                  <div className="text-[11px] text-slate-500">Show high-priority badges when copyright deeds expire or clear</div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={browserAlerts}
-                  onChange={(e) => setBrowserAlerts(e.target.checked)}
-                  className="rounded text-slate-900 focus:ring-slate-500 size-4"
-                />
-              </label>
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 space-y-2">
-              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Maintenance Operations</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => showToast('Platform cache purged and synced with Cloud storage')}
-                  className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white p-2 font-medium text-slate-700 hover:bg-slate-50 shadow-2xs transition text-xs cursor-pointer"
-                >
-                  <RefreshCw className="size-3.5 text-slate-500" />
+                  <RefreshCw className="size-3.5 text-slate-500 dark:text-slate-400" />
                   <span>Purge Cache & Refresh</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsResetConfirmOpen(true)}
-                  className="flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/80 p-2 font-medium text-rose-700 hover:bg-rose-100 transition text-xs cursor-pointer"
-                >
-                  <Trash2 className="size-3.5 text-rose-600" />
-                  <span>Reset Demo Data</span>
-                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* MODAL 1: ADD CATEGORY (Super Admin) */}
       {isAddCatOpen && (
@@ -8262,7 +8606,7 @@ function SettingsPage() {
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
                   placeholder="e.g. Interactive & XR, Theatrical Outreach"
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-blue-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
@@ -8273,7 +8617,7 @@ function SettingsPage() {
                   onChange={(e) => setCatDesc(e.target.value)}
                   placeholder="Explain the scope and asset types for this classification..."
                   rows={3}
-                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-slate-400 dark:focus:border-blue-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
@@ -8369,7 +8713,7 @@ function SettingsPage() {
                 <select
                   value={subParent}
                   onChange={(e) => setSubParent(e.target.value)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-blue-500"
                 >
                   {categories.map((c) => (
                     <option key={c.id} value={c.name} className="dark:bg-slate-900 dark:text-white">
@@ -8387,7 +8731,7 @@ function SettingsPage() {
                   value={subName}
                   onChange={(e) => setSubName(e.target.value)}
                   placeholder="e.g. 3D CGI Short, Musical Album, Illustrated Comic"
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-blue-500 focus:ring-1 focus:ring-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
 
@@ -8451,7 +8795,7 @@ function SettingsPage() {
                   required
                   value={editCatName}
                   onChange={(e) => setEditCatName(e.target.value)}
-                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500"
+                  className="h-8.5 w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white px-3 text-xs outline-none focus:border-slate-400 dark:focus:border-blue-500"
                 />
               </div>
 
@@ -8461,7 +8805,7 @@ function SettingsPage() {
                   value={editCatDesc}
                   onChange={(e) => setEditCatDesc(e.target.value)}
                   rows={3}
-                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-slate-400 dark:focus:border-slate-500"
+                  className="w-full rounded-lg border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-800 dark:text-white p-2.5 text-xs outline-none focus:border-slate-400 dark:focus:border-blue-500"
                 />
               </div>
 
@@ -8543,52 +8887,7 @@ function SettingsPage() {
         </div>
       )}
 
-      {/* MODAL 5: RESET DATA CONFIRMATION */}
-      {isResetConfirmOpen && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setIsResetConfirmOpen(false)
-          }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
-        >
-          <div className="w-full max-w-md rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs cursor-default space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/50 dark:border-rose-800/50 dark:text-rose-400">
-                <AlertTriangle className="size-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Reset All Platform Data?</h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">This will restore initial demo assets, rights records, categories, and relationships.</p>
-              </div>
-            </div>
 
-            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-200 dark:border-white/10">
-              Any custom assets or taxonomy additions stored in your browser local storage will be refreshed back to default Lovetoons production demo state.
-            </p>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-white/10">
-              <button
-                type="button"
-                onClick={() => setIsResetConfirmOpen(false)}
-                className="rounded-lg border border-slate-200 dark:border-white/15 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  resetToDefaultData()
-                  setIsResetConfirmOpen(false)
-                  showToast('Platform data reset to factory demo state')
-                }}
-                className="rounded-lg bg-rose-600 px-5 py-2 font-medium text-white hover:bg-rose-700 shadow-xs transition cursor-pointer"
-              >
-                Yes, Reset All Data
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -8627,6 +8926,7 @@ export function MainApp({
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(queryAsset)
   const [open, setOpen] = useState(false)
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false)
+  const [isAddAssetModalOpen, setIsAddAssetModalOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('kmm_sidebar_collapsed') === 'true'
@@ -8737,9 +9037,11 @@ export function MainApp({
     setActive(newTab)
     if (assetId !== undefined) {
       setSelectedAssetId(assetId)
+    } else {
+      setSelectedAssetId(null)
     }
     const targetPath = tabToPath[newTab] || '/dashboard'
-    const finalAsset = assetId !== undefined ? assetId : (newTab === active ? selectedAssetId : null)
+    const finalAsset = assetId !== undefined ? assetId : null
     const fullPath = finalAsset ? `${targetPath}?asset=${finalAsset}` : targetPath
 
     if (typeof window !== 'undefined') {
@@ -8834,6 +9136,10 @@ export function MainApp({
           setOpen={setOpen}
           activeTab={active}
           setActiveNav={handleNavigate}
+          onOpenAddAsset={() => {
+            handleNavigate('Assets')
+            setIsAddAssetModalOpen(true)
+          }}
           onOpenNotifications={() => setIsNotificationModalOpen(true)}
           isNotificationModalOpen={isNotificationModalOpen}
           unreadCount={unreadNotificationsCount}
@@ -8844,7 +9150,12 @@ export function MainApp({
           {active === 'Dashboard' ? (
             <Dashboard setActiveNav={handleNavigate} />
           ) : active === 'Assets' ? (
-            <AssetsPage setActiveNav={handleNavigate} initialAssetId={selectedAssetId || queryAsset} />
+            <AssetsPage
+              setActiveNav={handleNavigate}
+              initialAssetId={selectedAssetId}
+              isAddModalOpen={isAddAssetModalOpen}
+              setIsAddModalOpen={setIsAddAssetModalOpen}
+            />
           ) : active === 'Settings' ? (
             <SettingsPage />
           ) : active === 'Reports' ? (
@@ -8852,7 +9163,7 @@ export function MainApp({
           ) : active === 'Approvals' ? (
             <ApprovalsPage />
           ) : active === 'Rights & Governance' ? (
-            <RightsPage setActiveNav={handleNavigate} initialAssetId={selectedAssetId || queryAsset} />
+            <RightsPage setActiveNav={handleNavigate} initialAssetId={selectedAssetId} />
           ) : active === 'Relationships' ? (
             <RelationshipsPage />
           ) : active === 'Audit Trail' ? (

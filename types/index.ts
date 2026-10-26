@@ -307,7 +307,7 @@ export interface RightsRecord {
   governanceChecks?: GovernanceChecksMap
 
   // 1. Owner & Certificate
-  owner: string // Esteemed Executive Minister (Pastor Chelsea Kalu)
+  owner: string // Esteemed Executive Minister (Super Admin)
   ownerCertificateRef?: string
 
   // 2. Trademark & Distribution License

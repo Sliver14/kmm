@@ -410,7 +410,7 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
     createdTime: '09:00 AM',
     thumbType,
     posterUrl,
-    rightsHolder: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     ownerCertificateRef: 'CERT-EXEC-MIN-2026-HQ',
     trademarkStatus: 'Registered',
     distributionLicense: 'Exclusive Ministry Global Distribution',

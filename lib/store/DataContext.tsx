@@ -227,7 +227,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Current User & Auth
   const [currentUser, setCurrentUserState] = useState<UserProfile>(initialUsers[0])
   const [availableUsers] = useState<UserProfile[]>(initialUsers)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
   // Core Data Stores (Master Global Collections)
   const [masterAssets, setMasterAssets] = useState<AssetData[]>(initialAssetsData)
@@ -253,94 +253,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }, 4000)
   }, [])
 
-  // Load from LocalStorage
+  // Load session from LocalStorage and sync with live Neon DB as Single Source of Truth
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        const storedData = localStorage.getItem(STORAGE_KEY)
-        if (storedData) {
-          const parsed = JSON.parse(storedData)
-          if (parsed.assets && Array.isArray(parsed.assets)) {
-            // Preserve official status from Schedule / DB
-            const migrated = parsed.assets.map((a: any) => {
-              const defaultAsset = initialAssetsData.find((init) => init.id === a.id)
-              return {
-                ...a,
-                status: a.status || 'In Production',
-                agency: a.agency || a.unit || 'Lovetoons',
-                unit: a.agency || a.unit || 'Lovetoons',
-                contributors: a.contributors || [],
-                rightsHolder: a.rightsHolder || 'Lovetoons / KMM Network',
-                attributes: {
-                  ...(defaultAsset?.attributes || {}),
-                  ...(a.attributes || {}),
-                  episodes: (a.attributes?.episodes && a.attributes.episodes.length > 0)
-                    ? a.attributes.episodes
-                    : (defaultAsset?.attributes?.episodes || []),
-                },
-              }
-            })
-            // If stored assets is missing newly catalogued items, fallback to full initialAssetsData
-            if (migrated.length < initialAssetsData.length) {
-              setMasterAssets(initialAssetsData)
-            } else {
-              setMasterAssets(migrated)
-            }
-          }
-          if (parsed.categories && Array.isArray(parsed.categories)) {
-            const mergedCategories = parsed.categories.map((c: any) => {
-              const defCat = initialCategories.find((init) => init.id === c.id || init.name === c.name)
-              return {
-                ...c,
-                subAssetStructure: c.subAssetStructure || defCat?.subAssetStructure,
-                supportsEpisodes: typeof c.supportsEpisodes === 'boolean' ? c.supportsEpisodes : defCat?.supportsEpisodes,
-                subAssetType: c.subAssetType || defCat?.subAssetType,
-              }
-            })
-            setCategories(mergedCategories)
-          }
-          if (parsed.subcategories) setSubcategories(parsed.subcategories)
-            // Sanitize rights records: strip legacy demo placeholders if unfiled
-            setMasterRightsRecords(
-              parsed.rightsRecords.map((r: any) => {
-                const docs = Array.isArray(r.documents) ? r.documents : []
-                const hasDocs = docs.length > 0
-                const isAudio = r.category?.toLowerCase().includes('audio') || r.category?.toLowerCase().includes('music')
-
-                return {
-                  ...r,
-                  agency: r.agency || r.unit || 'Lovetoons',
-                  unit: r.agency || r.unit || 'Lovetoons',
-                  documents: docs,
-                  status: r.status || 'Cleared',
-                  governanceScore: r.governanceScore ?? (hasDocs ? 92 : 80),
-                  owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
-                  ownerCertificateRef: r.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
-                  trademarkStatus: r.trademarkStatus || 'Registered',
-                  distributionLicense: r.distributionLicense || 'Exclusive Ministry Global Distribution',
-                  productionLicensees: r.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
-                  territory: r.territory || 'Worldwide / Global',
-                  territoryClearanceStatus: r.territoryClearanceStatus || 'Cleared Global',
-                  contentProvenance: r.contentProvenance || (isAudio ? 'Fully Custom' : 'AI Assisted'),
-                  songWriter: r.songWriter || (isAudio ? 'KMM Music Ministry (Staff Composer)' : undefined),
-                  songWriterProvenance: r.songWriterProvenance || (isAudio ? 'Fully Custom' : undefined),
-                  governanceChecks: r.governanceChecks || {},
-                }
-              })
-            )
-          if (parsed.relationships) setMasterRelationships(parsed.relationships)
-          if (parsed.approvals) {
-            setMasterApprovals(
-              parsed.approvals.map((app: any) => ({
-                ...app,
-                agency: app.agency || app.unit || 'Lovetoons',
-                unit: app.agency || app.unit || 'Lovetoons',
-                documents: app.documents || [],
-              }))
-            )
-          }
-          if (parsed.activities) setMasterActivities(parsed.activities)
-        }
+        // Clean up legacy local asset copy so Neon DB is the sole source of truth
+        localStorage.removeItem(STORAGE_KEY)
 
         const storedNotifs = localStorage.getItem(NOTIF_KEY)
         if (storedNotifs) {
@@ -357,63 +275,53 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         const storedUserId = localStorage.getItem(USER_KEY)
         if (storedUserId) {
           const foundUser = initialUsers.find((u) => u.id === storedUserId)
-          if (foundUser) setCurrentUserState(foundUser)
+          if (foundUser) {
+            if (foundUser.role === 'super_admin' || foundUser.id === 'usr-1') {
+              setCurrentUserState({
+                ...foundUser,
+                name: 'Super Admin',
+                initials: 'SA',
+                email: 'superadmin@kiddiesmedia.org',
+              })
+            } else {
+              setCurrentUserState(foundUser)
+            }
+          }
         }
 
         const storedAuth = localStorage.getItem(AUTH_KEY)
-        if (storedAuth === 'false') {
-          setIsAuthenticated(false)
-        } else {
+        if (storedAuth === 'true') {
           setIsAuthenticated(true)
+        } else {
+          setIsAuthenticated(false)
         }
       }
     } catch (e) {
-      console.error('Failed to load storage data', e)
-    } finally {
-      setIsInitialized(true)
+      console.error('Failed to load session data', e)
     }
 
-    // Connect to live Neon DB APIs
+    // Connect to live Neon DB APIs (Single Source of Truth)
     const syncWithBackend = async () => {
       try {
-        const [assetsRes, rightsRes, approvalsRes, relsRes] = await Promise.all([
+        const [assetsRes, rightsRes, approvalsRes, relsRes, catsRes, actsRes] = await Promise.all([
           fetch('/api/assets').then((r) => r.json()).catch(() => null),
           fetch('/api/rights').then((r) => r.json()).catch(() => null),
           fetch('/api/approvals').then((r) => r.json()).catch(() => null),
           fetch('/api/relationships').then((r) => r.json()).catch(() => null),
+          fetch('/api/categories').then((r) => r.json()).catch(() => null),
+          fetch('/api/activities').then((r) => r.json()).catch(() => null),
         ])
 
         if (assetsRes?.success && Array.isArray(assetsRes.assets) && assetsRes.assets.length > 0) {
-          const cleanAssets = assetsRes.assets.map((a: any) => ({
-            ...a,
-            status: a.status || 'Pending',
-          }))
-          setMasterAssets(cleanAssets)
+          setMasterAssets(assetsRes.assets)
         }
         if (rightsRes?.success && Array.isArray(rightsRes.records) && rightsRes.records.length > 0) {
-          const sanitizedRecords = rightsRes.records.map((r: any) => {
-            const docs = Array.isArray(r.documents) ? r.documents : []
-            const hasDocs = docs.length > 0
-            const isAudio = r.category?.toLowerCase().includes('audio') || r.category?.toLowerCase().includes('music')
-
-            return {
-              ...r,
-              documents: docs,
-              status: r.status || 'Cleared',
-              governanceScore: r.governanceScore ?? (hasDocs ? 92 : 80),
-              owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
-              ownerCertificateRef: r.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
-              trademarkStatus: r.trademarkStatus || 'Registered',
-              distributionLicense: r.distributionLicense || 'Exclusive Ministry Global Distribution',
-              productionLicensees: r.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
-              territory: r.territory || 'Worldwide / Global',
-              territoryClearanceStatus: r.territoryClearanceStatus || 'Cleared Global',
-              contentProvenance: r.contentProvenance || (isAudio ? 'Fully Custom' : 'AI Assisted'),
-              songWriter: r.songWriter || (isAudio ? 'KMM Music Ministry (Staff Composer)' : undefined),
-              songWriterProvenance: r.songWriterProvenance || (isAudio ? 'Fully Custom' : undefined),
-              governanceChecks: r.governanceChecks || {},
-            }
-          })
+          const sanitizedRecords = rightsRes.records.map((r: any) => ({
+            ...r,
+            documents: Array.isArray(r.documents) ? r.documents : [],
+            governanceChecks: typeof r.governanceChecks === 'object' && r.governanceChecks !== null ? r.governanceChecks : {},
+            governanceScore: typeof r.governanceScore === 'number' ? r.governanceScore : (r.governance_score ?? 0),
+          }))
           setMasterRightsRecords(sanitizedRecords)
         }
         if (approvalsRes?.success && Array.isArray(approvalsRes.approvals) && approvalsRes.approvals.length > 0) {
@@ -422,35 +330,36 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (relsRes?.success && Array.isArray(relsRes.relationships) && relsRes.relationships.length > 0) {
           setMasterRelationships(relsRes.relationships)
         }
+        if (catsRes?.success && Array.isArray(catsRes.categories) && catsRes.categories.length > 0) {
+          setCategories(catsRes.categories)
+        }
+        if (catsRes?.success && Array.isArray(catsRes.subcategories) && catsRes.subcategories.length > 0) {
+          setSubcategories(catsRes.subcategories)
+        }
+        if (actsRes?.success && Array.isArray(actsRes.activities) && actsRes.activities.length > 0) {
+          setMasterActivities(actsRes.activities)
+        }
       } catch (err) {
         console.warn('Backend live sync warning:', err)
+      } finally {
+        setIsInitialized(true)
       }
     }
 
     syncWithBackend()
   }, [])
 
-  // Save to LocalStorage
+  // Only persist notifications and UI state to LocalStorage (assets/rights are strictly DB-backed)
   useEffect(() => {
     if (!isInitialized) return
     try {
       if (typeof window !== 'undefined') {
-        const payload = {
-          assets: masterAssets,
-          categories,
-          subcategories,
-          rightsRecords: masterRightsRecords,
-          relationships: masterRelationships,
-          approvals: masterApprovals,
-          activities: masterActivities,
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
         localStorage.setItem(NOTIF_KEY, JSON.stringify(masterNotifications))
       }
     } catch (e) {
-      console.error('Failed to persist storage data', e)
+      console.error('Failed to persist notification data', e)
     }
-  }, [masterAssets, categories, subcategories, masterRightsRecords, masterRelationships, masterApprovals, masterActivities, masterNotifications, isInitialized])
+  }, [masterNotifications, isInitialized])
 
   // Change User
   const setCurrentUser = useCallback((user: UserProfile) => {
@@ -504,13 +413,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               return false
             }
           } catch (err) {
-            console.warn('API login error, checking local profiles:', err)
+            console.warn('API login error:', err)
+            showToast('Unable to connect to authentication server. Please try again.')
+            return false
           }
         }
 
-        targetUser = availableUsers.find(
-          (u) => u.email.toLowerCase() === email.toLowerCase() || u.name.toLowerCase() === email.toLowerCase()
-        )
+        showToast('Password is required for authentication.')
+        return false
       } else {
         targetUser = emailOrUser
       }
@@ -529,7 +439,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       showToast(`Welcome back, ${targetUser.name}! Logged in as ${targetUser.roleLabel}.`)
       return true
     },
-    [availableUsers, showToast]
+    [showToast]
   )
 
   // Logout handler
@@ -537,6 +447,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(false)
     if (typeof window !== 'undefined') {
       localStorage.setItem(AUTH_KEY, 'false')
+      localStorage.removeItem(USER_KEY)
+      window.location.href = '/signin'
     }
     showToast('Signed out of Kiddies Media Ministries platform.')
   }, [showToast])
@@ -583,6 +495,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         details: meta?.details,
       }
       setMasterActivities((prev) => [newAct, ...prev.slice(0, 499)])
+
+      // Asynchronously persist to Neon DB
+      fetch('/api/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          subtitle,
+          time: 'Just now',
+          user: currentUser.name,
+          agency: targetAgency,
+          unit: targetAgency,
+          type: meta?.actionType || 'file',
+          color,
+          iconType,
+          timestamp: Date.now(),
+        }),
+      }).catch(console.error)
     },
     [currentUser]
   )
@@ -1416,6 +1346,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
       setCategories((prev) => [newCat, ...prev])
       addActivity(`Created category: ${newCat.name}`, `Added by ${currentUser.name}`)
+
+      fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'category',
+          name: newCat.name,
+          description: newCat.description,
+          iconType: newCat.iconType,
+          color: newCat.color,
+          subAssetStructure: newCat.subAssetStructure,
+          supportsEpisodes: newCat.supportsEpisodes,
+          subAssetType: newCat.subAssetType,
+        }),
+      }).catch(console.error)
+
       showToast(`Category "${newCat.name}" created.`)
       return newCat
     },
@@ -1451,6 +1397,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setCategories((prev) =>
         prev.map((c) => (c.name === sub.parentCategory ? { ...c, subcategoriesCount: c.subcategoriesCount + 1 } : c))
       )
+
+      fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'subcategory',
+          name: newSub.name,
+          parentCategory: newSub.parentCategory,
+          iconType: newSub.iconType,
+          color: newSub.color,
+        }),
+      }).catch(console.error)
+
       showToast(`Subcategory "${newSub.name}" added.`)
       return newSub
     },

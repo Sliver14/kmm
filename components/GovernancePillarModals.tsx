@@ -307,7 +307,7 @@ export function GovernancePillarModal({
                   </label>
                   <button
                     type="button"
-                    onClick={() => setOwner('Esteemed Executive Minister (Pastor Chelsea Kalu)')}
+                    onClick={() => setOwner('Esteemed Executive Minister (Super Admin)')}
                     className="text-[10px] text-blue-600 hover:text-blue-700 dark:text-[#2f80ed] dark:hover:text-blue-300 font-semibold cursor-pointer underline"
                   >
                     Preset: Executive Minister
@@ -317,7 +317,7 @@ export function GovernancePillarModal({
                   type="text"
                   value={owner}
                   onChange={(e) => setOwner(e.target.value)}
-                  placeholder="e.g. Esteemed Executive Minister (Pastor Chelsea Kalu)"
+                  placeholder="e.g. Esteemed Executive Minister (Super Admin)"
                   className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] font-medium shadow-2xs"
                   required
                 />

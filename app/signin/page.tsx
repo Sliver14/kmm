@@ -23,20 +23,23 @@ function SignInContent() {
   const returnTab = searchParams?.get('tab') || 'dashboard'
   const returnAsset = searchParams?.get('asset')
 
-  const { isAuthenticated, isInitialized, login, availableUsers } = useLovetoonsData()
+  const { isAuthenticated, isInitialized, login } = useLovetoonsData()
 
-  const [email, setEmail] = useState('chelsea.kalu@kiddiesmedia.org')
-  const [password, setPassword] = useState('kmm2025')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [selectedDemoUser, setSelectedDemoUser] = useState<string>('usr-1')
 
   // If already authenticated and initialized, redirect to dashboard or return target
   useEffect(() => {
     if (isInitialized && isAuthenticated) {
-      const destination = returnAsset ? `/assets?asset=${returnAsset}` : `/${returnTab}`
+      const destination = returnAsset
+        ? `/assets?asset=${returnAsset}`
+        : (returnTab && returnTab !== 'signin' && returnTab !== 'login')
+        ? `/${returnTab}`
+        : '/dashboard'
       router.replace(destination)
     }
   }, [isInitialized, isAuthenticated, returnTab, returnAsset, router])
@@ -50,15 +53,24 @@ function SignInContent() {
       return
     }
 
+    if (!password) {
+      setErrorMessage('Please enter your password.')
+      return
+    }
+
     setIsLoading(true)
 
     try {
       const success = await login(email, password)
       if (success) {
-        const destination = returnAsset ? `/assets?asset=${returnAsset}` : `/${returnTab}`
+        const destination = returnAsset
+          ? `/assets?asset=${returnAsset}`
+          : (returnTab && returnTab !== 'signin' && returnTab !== 'login')
+          ? `/${returnTab}`
+          : '/dashboard'
         router.replace(destination)
       } else {
-        setErrorMessage('Invalid credentials. Please verify your email and password, or select a role below.')
+        setErrorMessage('Invalid credentials. Please verify your email and password.')
         setIsLoading(false)
       }
     } catch (err: any) {
@@ -67,28 +79,13 @@ function SignInContent() {
     }
   }
 
-  const handleQuickDemoLogin = (userId: string) => {
-    const user = availableUsers.find((u) => u.id === userId)
-    if (!user) return
-    setSelectedDemoUser(userId)
-    setEmail(user.email)
-    setIsLoading(true)
-    setErrorMessage(null)
-
-    setTimeout(() => {
-      login(user)
-      const destination = returnAsset ? `/assets?asset=${returnAsset}` : `/${returnTab}`
-      router.replace(destination)
-    }, 350)
-  }
-
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-slate-950 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       {/* Ambient background glows */}
       <div className="pointer-events-none absolute -top-40 -left-40 size-[550px] rounded-full bg-blue-600/10 blur-[120px]" />
       <div className="pointer-events-none absolute -bottom-40 -right-40 size-[550px] rounded-full bg-slate-800/20 blur-[120px]" />
 
-      <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-12 rounded-3xl border border-slate-800/80 bg-slate-900/90 backdrop-blur-2xl shadow-2xl overflow-hidden">
+      <div className="relative z-10 w-full max-w-4xl grid lg:grid-cols-12 rounded-3xl border border-slate-800/80 bg-slate-900/90 backdrop-blur-2xl shadow-2xl overflow-hidden">
         {/* Left Brand Panel */}
         <div className="lg:col-span-5 relative flex flex-col justify-between p-8 sm:p-10 bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-800 text-white">
           <div>
@@ -125,7 +122,7 @@ function SignInContent() {
             <div className="mt-6 space-y-2.5 text-xs text-slate-300 font-medium">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
-                <span>125 Registered Ministry Assets</span>
+                <span>125+ Registered Ministry Assets</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
@@ -149,32 +146,32 @@ function SignInContent() {
         </div>
 
         {/* Right Form Panel */}
-        <div className="lg:col-span-7 p-6 sm:p-10 bg-white flex flex-col justify-between">
+        <div className="lg:col-span-7 p-6 sm:p-10 bg-white dark:bg-[#14161f] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Sign In</h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Enter your credentials or choose a role below.
+                <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">Sign In</h2>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Enter your credentials to access the platform.
                 </p>
               </div>
-              <div className="grid size-10 place-items-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
+              <div className="grid size-10 place-items-center rounded-xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 shadow-2xs">
                 <LogIn className="size-5" />
               </div>
             </div>
 
             {/* Error Message */}
             {errorMessage && (
-              <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700 animate-in fade-in">
-                <AlertCircle className="size-4 shrink-0 text-rose-600" />
+              <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-700 dark:text-rose-300 animate-in fade-in">
+                <AlertCircle className="size-4 shrink-0 text-rose-600 dark:text-rose-400" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
@@ -185,18 +182,15 @@ function SignInContent() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="name@kiddiesmedia.org"
-                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-10 pr-3 text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100 transition"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#1c202c] pl-10 pr-3 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#2f80ed] focus:bg-white dark:focus:bg-[#1c202c] focus:ring-2 focus:ring-[#2f80ed]/20 transition"
                   />
                 </div>
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-medium text-slate-700">Password</label>
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    Default: kmm2025
-                  </span>
-                </div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Password
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                   <input
@@ -205,35 +199,35 @@ function SignInContent() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="••••••••••••"
-                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-10 pr-10 text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100 transition"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#1c202c] pl-10 pr-10 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#2f80ed] focus:bg-white dark:focus:bg-[#1c202c] focus:ring-2 focus:ring-[#2f80ed]/20 transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <label className="flex items-center gap-2 cursor-pointer text-slate-600">
+              <div className="flex items-center justify-between text-xs pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-slate-300 text-slate-900 focus:ring-slate-400 size-3.5"
+                    className="rounded border-slate-300 dark:border-white/20 text-[#2f80ed] focus:ring-[#2f80ed] size-3.5"
                   />
                   <span>Remember this device</span>
                 </label>
-                <span className="text-[11px] text-slate-400">KMM Platform</span>
+                <span className="text-[11px] text-slate-400 font-medium">KMM Cloud Auth</span>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 px-4 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 active:scale-98 transition disabled:opacity-70 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#2f80ed] hover:bg-[#256fd1] py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-blue-500/20 active:scale-98 transition disabled:opacity-70 cursor-pointer mt-2"
               >
                 {isLoading ? (
                   <div className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -246,63 +240,21 @@ function SignInContent() {
               </button>
             </form>
 
-            {/* Quick Demo One-Click Access Across Agencies */}
-            <div className="mt-6 pt-5 border-t border-slate-100">
-              <div className="flex items-center justify-between mb-2.5">
-                <span className="text-xs font-semibold text-slate-700">
-                  Quick Access
-                </span>
-                <span className="text-[11px] text-slate-400">Select role to review</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                {availableUsers.map((user) => {
-                  const isSelected = selectedDemoUser === user.id
-                  return (
-                    <button
-                      key={user.id}
-                      type="button"
-                      onClick={() => handleQuickDemoLogin(user.id)}
-                      className={cn(
-                        'flex items-center gap-2.5 rounded-lg border p-2 text-left transition cursor-pointer',
-                        isSelected
-                          ? 'border-slate-900 bg-slate-50 ring-1 ring-slate-900/10'
-                          : 'border-slate-200 bg-slate-50/60 hover:bg-white hover:border-slate-300 shadow-2xs'
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          'grid size-8 shrink-0 place-items-center rounded-md text-xs font-semibold text-white shadow-2xs',
-                          user.role === 'super_admin'
-                            ? 'bg-purple-600'
-                            : user.role === 'reviewer'
-                              ? 'bg-emerald-600'
-                              : 'bg-slate-900'
-                        )}
-                      >
-                        {user.initials}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-semibold text-slate-900 truncate">
-                            {user.name}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-slate-600 font-medium truncate">
-                          {user.roleLabel}
-                        </div>
-                        <div className="text-[9px] text-slate-400 truncate">
-                          {user.agency}
-                        </div>
-                      </div>
-                    </button>
-                  )
-                })}
+            {/* Security Notice */}
+            <div className="mt-8 pt-5 border-t border-slate-100 dark:border-white/10">
+              <div className="flex items-start gap-2.5 rounded-xl bg-slate-50 dark:bg-white/5 p-3.5 border border-slate-100 dark:border-white/5 text-slate-500 dark:text-slate-400">
+                <ShieldCheck className="size-4 text-[#2f80ed] shrink-0 mt-0.5" />
+                <div className="text-[11px] leading-relaxed">
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">Authorized Personnel Only</span>
+                  <p className="mt-0.5 text-slate-500 dark:text-slate-400">
+                    Access to this intellectual property registry is strictly restricted to verified ministry staff and designated agency administrators.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
             <span>Kiddies Media Ministries</span>
             <span>Intellectual Asset Portal</span>
           </div>

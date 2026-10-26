@@ -19,10 +19,10 @@ import { sortDiscontinuedToBottom } from '@/lib/risk'
 export const initialUsers: UserProfile[] = [
   {
     id: 'usr-1',
-    name: 'Pastor Chelsea Kalu',
-    email: 'chelsea.kalu@kiddiesmedia.org',
+    name: 'Super Admin',
+    email: 'superadmin@kiddiesmedia.org',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    initials: 'PCK',
+    initials: 'SA',
     role: 'super_admin',
     roleLabel: 'Super Admin (KMM Network)',
     agency: 'Lovetoons',
@@ -375,10 +375,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-AP-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -390,7 +390,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '10:15 AM',
     thumbType: 'tv_series',
     posterUrl: '/tv_series_poster.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'Flagship animated daily devotional series bringing scripture truths and inspirational character lessons to young children.',
     tags: ['Devotional', 'Animation', 'Early Readers', 'Faith'],
     fileSize: '6.4 GB',
@@ -440,10 +440,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-AP-002-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -455,7 +455,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '11:30 AM',
     thumbType: 'character_tilly',
     posterUrl: '/tv_series_showcase.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'Dynamic animated clock character teaching children time management, scripture memory and daily prayer habits.',
     tags: ['Tick Talks', 'Animation', 'Values'],
     fileSize: '3.8 GB',
@@ -504,10 +504,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-AN-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -519,7 +519,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '03:40 PM',
     thumbType: 'brave_boy',
     posterUrl: '/tv_series_poster.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'Exciting 3D animated adventure following a young boy who relies on biblical courage to conquer giant challenges.',
     tags: ['Courage', '3D Animation', 'Short'],
     fileSize: '1.4 GB',
@@ -569,10 +569,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-TS-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -584,7 +584,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '10:24 AM',
     thumbType: 'tv_series',
     posterUrl: '/tv_series_poster.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'A faith-based animated and live broadcast series for children, filled with values, godly teachings and musical fun.',
     tags: ['Broadcast', 'Children', 'Faith', 'Season 1'],
     fileSize: '4.8 GB',
@@ -636,10 +636,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-TV-002-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -651,7 +651,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '01:10 PM',
     thumbType: 'theme_song',
     posterUrl: '/tv_series_showcase.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'High-energy sing-along television show with lyric cards, dance steps and children praise choruses.',
     tags: ['Music', 'TV Show', 'Sing-Along'],
     fileSize: '3.2 GB',
@@ -700,10 +700,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-TV-003-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -715,7 +715,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '09:45 AM',
     thumbType: 'tv_series',
     posterUrl: '/tv_series_poster.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'Heartwarming lifestyle and faith diary series exploring everyday school life and godly friendships.',
     tags: ['Diary', 'Values', 'Live Action'],
     fileSize: '2.9 GB',
@@ -763,10 +763,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-EP-003-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -778,7 +778,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '02:15 PM',
     thumbType: 'tv_series',
     posterUrl: '/tv_series_showcase.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'Master broadcast episode with multilingual audio tracks and surround sound mix.',
     tags: ['Broadcast', 'Episode', '4K'],
     fileSize: '2.1 GB',
@@ -822,7 +822,7 @@ const rawAssetsData: AssetData[] = [
                 "contributionType": "Technical Specialist"
           }
     ],
-    creatorName: 'Pastor Chelsea Kalu',
+    creatorName: 'Super Admin',
     
     creatorSkill: 'legal_counsel',
     status: 'Approved',
@@ -830,7 +830,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '04:20 PM',
     thumbType: 'tv_series',
     posterUrl: '/tv_series_showcase.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'In-depth research documentary evaluating the psychological and spiritual impact of mainstream children media and presenting godly alternatives.',
     tags: ['Documentary', 'Research', 'Child Protection'],
     fileSize: '4.1 GB',
@@ -877,7 +877,7 @@ const rawAssetsData: AssetData[] = [
                 "contributionType": "Technical Specialist"
           }
     ],
-    creatorName: 'Pastor Chelsea Kalu',
+    creatorName: 'Super Admin',
     
     creatorSkill: 'video_editor',
     status: 'Approved',
@@ -885,7 +885,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '01:50 PM',
     thumbType: 'brave_boy',
     posterUrl: '/tv_series_poster.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'Child-friendly animated public health video explaining malaria prevention and healthy habits.',
     tags: ['Health', 'Educational', 'Short Video'],
     fileSize: '850 MB',
@@ -930,10 +930,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-FLM-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -945,7 +945,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '11:05 AM',
     thumbType: 'tv_series',
     posterUrl: '/tv_series_showcase.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'Award-winning short dramatic film capturing a child heartfelt questions about prayer, answered through miraculous events.',
     tags: ['Short Film', 'Drama', 'Faith'],
     fileSize: '2.8 GB',
@@ -993,10 +993,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-FLM-002-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1008,7 +1008,7 @@ const rawAssetsData: AssetData[] = [
     createdTime: '05:30 PM',
     thumbType: 'tv_series',
     posterUrl: '/tv_series_poster.jpg',
-    rightsHolder: 'Pastor Kalu Chelsea (Executive Minister)',
+    rightsHolder: 'Esteemed Executive Minister (Super Admin)',
     description: 'Inspiring children faith movie chronicling biblical trust in barren times and God unfailing provision.',
     tags: ['Film', 'Miracles', 'Faith'],
     fileSize: '3.6 GB',
@@ -1029,7 +1029,7 @@ const rawAssetsData: AssetData[] = [
     contributors: [
           {
                 "id": "c-LT-CP-001-1",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Lead 3D Animator & Director",
                 "agency": "Lovetoons",
                 "email": "david.k@kiddiesmedia.org",
@@ -1053,14 +1053,14 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CP-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
-    creatorName: 'Pastor Chelsea Kalu',
+    creatorName: 'Super Admin',
     
     creatorSkill: 'designer',
     status: 'Approved',
@@ -1092,7 +1092,7 @@ const rawAssetsData: AssetData[] = [
     contributors: [
           {
                 "id": "c-LT-CP-002-1",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Lead 3D Animator & Director",
                 "agency": "Lovetoons",
                 "email": "david.k@kiddiesmedia.org",
@@ -1116,14 +1116,14 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CP-002-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
-    creatorName: 'Pastor Chelsea Kalu',
+    creatorName: 'Super Admin',
     
     creatorSkill: 'designer',
     status: 'In Review',
@@ -1155,7 +1155,7 @@ const rawAssetsData: AssetData[] = [
     contributors: [
           {
                 "id": "c-LT-CP-003-1",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Lead 3D Animator & Director",
                 "agency": "Lovetoons",
                 "email": "david.k@kiddiesmedia.org",
@@ -1179,14 +1179,14 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CP-003-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
-    creatorName: 'Pastor Chelsea Kalu',
+    creatorName: 'Super Admin',
     
     creatorSkill: 'designer',
     status: 'Approved',
@@ -1492,10 +1492,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-DGT-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Data Privacy & COPPA Officer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1555,10 +1555,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-DGT-002-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Data Privacy & COPPA Officer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1613,10 +1613,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-DGT-003-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Data Privacy & COPPA Officer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1671,10 +1671,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-GM-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Data Privacy & COPPA Officer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1790,7 +1790,7 @@ const rawAssetsData: AssetData[] = [
                 "contributionType": "Technical Specialist"
           }
     ],
-    creatorName: 'Pastor Chelsea Kalu',
+    creatorName: 'Super Admin',
     
     creatorSkill: 'admin',
     status: 'Approved',
@@ -1893,10 +1893,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CH-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -1957,10 +1957,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CH-002-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -2015,10 +2015,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-CH-003-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -2161,7 +2161,7 @@ const rawAssetsData: AssetData[] = [
     contributors: [
           {
                 "id": "c-LT-BR-001-1",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Lead 3D Animator & Director",
                 "agency": "Lovetoons",
                 "email": "david.k@kiddiesmedia.org",
@@ -2185,14 +2185,14 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-BR-001-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
-    creatorName: 'Pastor Chelsea Kalu',
+    creatorName: 'Super Admin',
     
     creatorSkill: 'designer',
     status: 'Approved',
@@ -2247,10 +2247,10 @@ const rawAssetsData: AssetData[] = [
           },
           {
                 "id": "c-LT-BR-002-4",
-                "name": "Pastor Chelsea Kalu",
+                "name": "Super Admin",
                 "role": "Executive Producer",
                 "agency": "Lovetoons",
-                "email": "chelsea.kalu@kiddiesmedia.org",
+                "email": "superadmin@kiddiesmedia.org",
                 "contributionType": "Reviewer"
           }
     ],
@@ -2292,7 +2292,7 @@ export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.ma
     agency: a.agency,
     unit: a.agency,
     contributors: a.contributors || [],
-    owner: 'Esteemed Executive Minister (Pastor Chelsea Kalu)',
+    owner: 'Esteemed Executive Minister (Super Admin)',
     ownerCertificateRef: 'CERT-EXEC-MIN-2026-HQ',
     trademarkStatus: 'Registered',
     distributionLicense: 'Exclusive Ministry Global Distribution',
@@ -2314,7 +2314,7 @@ export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.ma
         date: 'Jan 15, 2026',
         type: 'CERT',
         targetScope: 'asset',
-        notes: 'Official Title Certificate vested in Esteemed Executive Minister (Pastor Chelsea Kalu)',
+        notes: 'Official Title Certificate vested in Esteemed Executive Minister (Super Admin)',
       },
       {
         id: `lic-${a.id}-dist`,
@@ -2535,9 +2535,9 @@ export const initialActivityLogs: ActivityLog[] = [
   {
     id: 'act-4',
     title: 'Merchandise clearance submitted: Zobo Drink (Special Edition)',
-    subtitle: 'Submitted by Pastor Chelsea Kalu for reviewer quality & trademark audit',
+    subtitle: 'Submitted by Super Admin for reviewer quality & trademark audit',
     time: '1 day ago',
-    user: 'Pastor Chelsea Kalu',
+    user: 'Super Admin',
     agency: 'Lovetoons',
     unit: 'Lovetoons',
     iconType: 'alert',

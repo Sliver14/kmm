@@ -287,8 +287,8 @@ async function main() {
   const users = [
     {
       id: 'usr-1',
-      email: 'chelsea.kalu@kiddiesmedia.org',
-      name: 'Pastor Chelsea Kalu',
+      email: 'superadmin@kiddiesmedia.org',
+      name: 'Super Admin',
       role: 'super_admin',
       roleLabel: 'Super Admin (KMM Network)',
       agency: 'Lovetoons',
@@ -434,7 +434,7 @@ async function main() {
       subcategory: 'Food & Beverage',
       agency: 'Lovetoons',
       unit: 'Lovetoons',
-      creatorName: 'Pastor Chelsea Kalu',
+      creatorName: 'Super Admin',
       creatorRole: 'Super Admin',
       creatorSkill: 'admin',
       status: 'Pending',
@@ -562,7 +562,7 @@ async function main() {
       subcategory: 'Food & Beverage',
       agency: 'Lovetoons',
       unit: 'Lovetoons',
-      requesterName: 'Pastor Chelsea Kalu',
+      requesterName: 'Super Admin',
       requesterRole: 'Super Admin',
       requesterSkill: 'admin',
       reviewerName: 'Faith Daniel',
