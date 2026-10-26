@@ -9067,51 +9067,68 @@ export function MainApp({
 
   return (
     <div className="min-h-screen bg-[#f5f6fa] dark:bg-[#14161f] text-slate-900 dark:text-slate-100 selection:bg-[#2f80ed] selection:text-white">
-      {/* Glossy System Toast Notification */}
-      {toastMessage && (
-        <aside
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-3.5 rounded-2xl bg-slate-900/90 px-4 py-3.5 text-xs text-white shadow-[0_20px_50px_rgba(0,0,0,0.4),0_0_20px_rgba(59,130,246,0.25)] backdrop-blur-2xl border border-white/20 animate-in fade-in slide-in-from-bottom-5 duration-300 max-w-md overflow-hidden group"
-        >
-          {/* Ambient Specular Glow */}
-          <div className="pointer-events-none absolute -left-6 -top-6 size-24 rounded-full bg-blue-500/30 blur-xl" />
+      {/* Sleek & Simple System Toast Notification */}
+      {toastMessage && (() => {
+        const isError = /fail|error|invalid|cannot|denied/i.test(toastMessage)
+        const isWarning = /warn|risk|alert|caution|missing|required/i.test(toastMessage)
 
-          {/* Luminous Icon Badge */}
-          <div className="relative grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 text-white shadow-md shadow-blue-500/30 border border-white/20">
-            <Sparkles className="size-4.5 text-yellow-300 animate-pulse" />
-          </div>
-
-          {/* Toast Message Body */}
-          <div className="relative flex-1 min-w-0 pr-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-blue-300">
-                KMM Notice
-              </span>
-              <span className="size-1 rounded-full bg-blue-400" />
-              <span className="text-[10px] font-medium text-slate-400">Just now</span>
+        return (
+          <aside
+            role="status"
+            aria-live="polite"
+            className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-3 rounded-xl bg-slate-900/95 dark:bg-[#111420]/95 text-slate-100 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs shadow-xl shadow-black/25 backdrop-blur-xl border border-slate-700/60 dark:border-slate-800/80 max-w-sm sm:max-w-md animate-in fade-in slide-in-from-bottom-3 duration-200 overflow-hidden"
+          >
+            {/* Status Micro-Badge */}
+            <div
+              className={cn(
+                'size-6 shrink-0 rounded-lg flex items-center justify-center border',
+                isError
+                  ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                  : isWarning
+                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                  : 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+              )}
+            >
+              {isError ? (
+                <AlertCircle className="size-3.5" />
+              ) : isWarning ? (
+                <AlertTriangle className="size-3.5" />
+              ) : (
+                <CheckCircle2 className="size-3.5 text-blue-400" />
+              )}
             </div>
-            <p className="mt-0.5 text-xs font-semibold text-slate-100 leading-snug break-words">
+
+            {/* Message Body */}
+            <p className="flex-1 min-w-0 text-xs font-medium text-slate-200 dark:text-slate-200 leading-snug break-words">
               {toastMessage}
             </p>
-          </div>
 
-          {/* Quick Dismiss Button */}
-          <button
-            onClick={dismissToast}
-            title="Dismiss notification"
-            className="relative size-7 shrink-0 grid place-items-center rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
-            aria-label="Dismiss notification"
-          >
-            <X className="size-3.5" />
-          </button>
+            {/* Quick Dismiss Button */}
+            <button
+              onClick={dismissToast}
+              title="Dismiss notification"
+              className="size-6 -mr-1 shrink-0 flex items-center justify-center rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              aria-label="Dismiss notification"
+            >
+              <X className="size-3.5" />
+            </button>
 
-          {/* Auto-Dismiss Countdown Bar */}
-          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10 overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 animate-toast-progress" />
-          </div>
-        </aside>
-      )}
+            {/* Ultra-subtle Hairline Progress Bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5 overflow-hidden">
+              <div
+                className={cn(
+                  'h-full animate-toast-progress',
+                  isError
+                    ? 'bg-rose-500/70'
+                    : isWarning
+                    ? 'bg-amber-500/70'
+                    : 'bg-[#2f80ed]'
+                )}
+              />
+            </div>
+          </aside>
+        )
+      })()}
 
       {/* Standalone Full-Viewport Notification Modal */}
       <NotificationModal
