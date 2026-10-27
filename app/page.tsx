@@ -239,8 +239,16 @@ function Sidebar({
       )}
     >
       {/* Header / Logo */}
-      <div className="flex h-16 items-center border-b border-slate-200/80 dark:border-white/[0.08] px-4 relative shrink-0">
+      <div className="flex h-16 items-center justify-between border-b border-slate-200/80 dark:border-white/[0.08] px-4 relative shrink-0">
         <Logo collapsed={isCollapsed} />
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
+          aria-label="Close navigation"
+        >
+          <X className="size-5" />
+        </button>
       </div>
 
       {/* Quick Search Shortcut Bar */}
@@ -736,7 +744,7 @@ function NotificationModal({
                       </p>
 
                       {/* Bottom metadata & Action */}
-                      <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-100 dark:border-white/10 text-[11px]">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 mt-2 border-t border-slate-100 dark:border-white/10 text-[11px]">
                         <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 font-medium">
                           <Clock className="size-3 text-slate-400 dark:text-slate-500" />
                           <span>{item.time}</span>
@@ -908,7 +916,7 @@ function Header({
       </div>
 
       {/* Pill Search Input (Matching Inspiration) */}
-      <div className="relative max-w-sm sm:max-w-md flex-1 ml-1 sm:ml-4">
+      <div className="relative max-w-sm sm:max-w-md flex-1 min-w-0 ml-1 sm:ml-4">
         <div className="relative flex items-center">
           <Search className="absolute left-3.5 size-3.5 text-slate-400 pointer-events-none" />
           <input
@@ -916,7 +924,7 @@ function Header({
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
             className="h-9 w-full rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-50/90 dark:bg-[#1c202c] pl-9.5 pr-10 text-xs text-slate-800 dark:text-white outline-none placeholder:text-slate-400 focus:border-[#2f80ed] focus:bg-white dark:focus:bg-[#1c202c] focus:ring-2 focus:ring-[#2f80ed]/20 transition"
-            placeholder="Search for Application, Asset or Rights..."
+            placeholder="Search for Asset or Rights..."
           />
           {searchFilter && (
             <button
@@ -994,7 +1002,7 @@ function Header({
           </button>
 
           {profileDropdownOpen && (
-            <div className="absolute right-0 top-full mt-1.5 z-40 w-72 sm:w-80 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900 p-4 shadow-xl dark:shadow-2xl animate-in fade-in">
+            <div className="absolute right-0 top-full mt-1.5 z-40 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900 p-4 shadow-xl dark:shadow-2xl animate-in fade-in">
               {/* User Profile Header Card */}
               <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-white/10">
                 <div className={cn(
@@ -2274,7 +2282,7 @@ function Dashboard({
               {isGlobalViewer ? 'Latest intellectual property assets registered across all agencies' : `Latest assets for ${currentUser.agency}`}
             </p>
           </div>
-          <div className="relative w-72">
+          <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-2.5 size-3.5 text-slate-400" />
             <input
               value={query}
@@ -3010,7 +3018,7 @@ function AssetsPage({
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 p-4 sm:p-6 shadow-2xl text-xs max-h-[92vh] overflow-y-auto cursor-default">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3.5">
               <div>
@@ -3056,7 +3064,7 @@ function AssetsPage({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Category *</label>
                     <select
@@ -3476,18 +3484,18 @@ function AssetsPage({
               </div>
 
               {/* MODAL FOOTER BUTTONS */}
-              <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3 mt-4">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-slate-100 dark:border-slate-800 pt-3 mt-4">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-lg border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 text-xs cursor-pointer"
+                  className="rounded-lg border border-slate-200 px-4 py-2.5 sm:py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 text-xs cursor-pointer text-center justify-center"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 font-bold text-white shadow-md shadow-blue-600/25 hover:from-blue-700 hover:to-indigo-700 text-xs flex items-center gap-1.5 cursor-pointer"
+                  className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 sm:py-2 font-bold text-white shadow-md shadow-blue-600/25 hover:from-blue-700 hover:to-indigo-700 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Check className="size-3.5" />
                   <span>Create Asset Now</span>
@@ -3809,7 +3817,8 @@ function RightsPage({
 
       {/* RECORDS TABLE */}
       <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 shadow-xs">
-        <table className="w-full min-w-[760px] text-left text-xs">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] text-left text-xs">
           <thead>
             <tr className="bg-slate-50/75 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400 dark:border-white/10 font-semibold border-b border-slate-200/80 text-[11px] uppercase tracking-wider">
               <th className="px-4 py-3">Asset / Title</th>
@@ -3977,6 +3986,7 @@ function RightsPage({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* DYNAMIC ADD RIGHTS RECORD MODAL */}
@@ -3987,7 +3997,7 @@ function RightsPage({
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
+          <div className="w-full max-w-xl rounded-2xl sm:rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-4 sm:p-6 shadow-2xl text-xs max-h-[92vh] overflow-y-auto cursor-default">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white text-sm">
                 <ShieldCheck className="size-4 text-slate-700 dark:text-slate-300" />
@@ -4116,17 +4126,17 @@ function RightsPage({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3.5 py-2.5 sm:py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer text-center justify-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 font-medium text-xs text-white shadow-xs transition active:scale-98 cursor-pointer"
+                  className="rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2.5 sm:py-2 font-medium text-xs text-white shadow-xs transition active:scale-98 cursor-pointer text-center justify-center"
                 >
                   Save Rights Record
                 </button>
@@ -4144,7 +4154,7 @@ function RightsPage({
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in cursor-pointer"
         >
-          <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-6 shadow-2xl text-xs max-h-[90vh] overflow-y-auto cursor-default">
+          <div className="w-full max-w-lg rounded-2xl sm:rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900 p-4 sm:p-6 shadow-2xl text-xs max-h-[92vh] overflow-y-auto cursor-default">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -4359,17 +4369,17 @@ function RightsPage({
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIndividualDocRecord(null)}
-                  className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3.5 py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  className="rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-3.5 py-2.5 sm:py-2 font-medium text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer text-center justify-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 font-semibold text-xs text-white shadow-xs transition active:scale-98 cursor-pointer"
+                  className="rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2.5 sm:py-2 font-semibold text-xs text-white shadow-xs transition active:scale-98 cursor-pointer text-center justify-center"
                 >
                   Attach Document
                 </button>
@@ -9001,6 +9011,7 @@ export function MainApp({
 
   const {
     currentUser,
+    stats,
     toastMessage,
     dismissToast,
     unreadNotificationsCount,
@@ -9223,7 +9234,7 @@ export function MainApp({
           isCollapsed={isCollapsed}
           setIsCollapsed={handleSetCollapsed}
         />
-        <main className="flex-1 mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
           {active === 'Dashboard' ? (
             <Dashboard setActiveNav={handleNavigate} />
           ) : active === 'Assets' ? (
@@ -9250,6 +9261,80 @@ export function MainApp({
           )}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar (Visible on phones & portrait tablets <1024px) */}
+      <nav
+        aria-label="Mobile Navigation Bar"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around bg-white/95 dark:bg-[#14161f]/95 border-t border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md px-1.5 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
+      >
+        <button
+          onClick={() => handleNavigate('Dashboard')}
+          className={cn(
+            'flex flex-col items-center justify-center py-1 px-2 rounded-xl transition cursor-pointer min-w-[56px]',
+            active === 'Dashboard'
+              ? 'text-[#2f80ed] font-bold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+          )}
+        >
+          <Home className="size-5" strokeWidth={active === 'Dashboard' ? 2.4 : 1.8} />
+          <span className="text-[10px] mt-0.5 leading-tight">Home</span>
+        </button>
+
+        <button
+          onClick={() => handleNavigate('Assets')}
+          className={cn(
+            'flex flex-col items-center justify-center py-1 px-2 rounded-xl transition cursor-pointer min-w-[56px]',
+            active === 'Assets'
+              ? 'text-[#2f80ed] font-bold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+          )}
+        >
+          <Boxes className="size-5" strokeWidth={active === 'Assets' ? 2.4 : 1.8} />
+          <span className="text-[10px] mt-0.5 leading-tight">Assets</span>
+        </button>
+
+        {/* Approvals tab for Super Admin / Reviewer */}
+        {(currentUser.role === 'super_admin' || currentUser.role === 'reviewer') && (
+          <button
+            onClick={() => handleNavigate('Approvals')}
+            className={cn(
+              'relative flex flex-col items-center justify-center py-1 px-2 rounded-xl transition cursor-pointer min-w-[56px]',
+              active === 'Approvals'
+                ? 'text-[#2f80ed] font-bold'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+            )}
+          >
+            <CheckSquare className="size-5" strokeWidth={active === 'Approvals' ? 2.4 : 1.8} />
+            <span className="text-[10px] mt-0.5 leading-tight">Approvals</span>
+            {stats.pendingApprovalsCount > 0 && (
+              <span className="absolute top-1 right-2.5 size-2 rounded-full bg-[#ff5c75] ring-2 ring-white dark:ring-[#14161f]" />
+            )}
+          </button>
+        )}
+
+        <button
+          onClick={() => handleNavigate('Rights & Governance')}
+          className={cn(
+            'flex flex-col items-center justify-center py-1 px-2 rounded-xl transition cursor-pointer min-w-[56px]',
+            active === 'Rights & Governance'
+              ? 'text-[#2f80ed] font-bold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+          )}
+        >
+          <ShieldCheck className="size-5" strokeWidth={active === 'Rights & Governance' ? 2.4 : 1.8} />
+          <span className="text-[10px] mt-0.5 leading-tight">Rights</span>
+        </button>
+
+        <button
+          onClick={() => setOpen(true)}
+          className="flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer min-w-[56px]"
+          aria-label="Open full menu"
+        >
+          <Menu className="size-5" strokeWidth={1.8} />
+          <span className="text-[10px] mt-0.5 leading-tight">Menu</span>
+        </button>
+      </nav>
+
       {open && (
         <button
           aria-label="Close menu"

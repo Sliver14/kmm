@@ -1161,7 +1161,7 @@ export function AssetDetailsView({
 
               {episodes.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full min-w-[580px] text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-100 text-[10px] uppercase tracking-wider text-slate-400">
                         <th className="pb-2.5 font-bold">Ep #</th>

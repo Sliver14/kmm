@@ -88,7 +88,7 @@ export function ConfirmActionModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md rounded-3xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-[#1c202c] p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 cursor-default space-y-4"
+        className="relative w-full max-w-md rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white dark:border-white/10 dark:bg-[#1c202c] p-4 sm:p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 cursor-default space-y-4"
       >
         {/* Header Icon + Title */}
         <div className="flex items-start gap-3.5">
@@ -130,12 +130,12 @@ export function ConfirmActionModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-white/10">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-white/10">
           <button
             type="button"
             disabled={isLoading}
             onClick={onClose}
-            className="rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-[#1c202c] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 hover:border-slate-300 dark:hover:border-white/20 transition cursor-pointer disabled:opacity-50"
+            className="rounded-full border border-slate-200 dark:border-white/15 bg-white dark:bg-[#1c202c] px-4 py-2.5 sm:py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 hover:border-slate-300 dark:hover:border-white/20 transition cursor-pointer disabled:opacity-50 text-center justify-center"
           >
             {cancelLabel}
           </button>
@@ -144,7 +144,7 @@ export function ConfirmActionModal({
             disabled={isLoading}
             onClick={onConfirm}
             className={cn(
-              'rounded-full px-5 py-2 text-xs font-bold shadow-md transition active:scale-98 cursor-pointer disabled:opacity-50 flex items-center gap-1.5',
+              'rounded-full px-5 py-2.5 sm:py-2 text-xs font-bold shadow-md transition active:scale-98 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5',
               vStyles.confirmBtn
             )}
           >

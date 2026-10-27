@@ -219,7 +219,7 @@ export function AssetArchiveHub({ asset, showToast }: AssetArchiveHubProps) {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full min-w-[620px] text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
                 <th className="py-3 px-3">File Name & Description</th>
