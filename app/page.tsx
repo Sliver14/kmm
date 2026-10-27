@@ -1654,7 +1654,7 @@ function Dashboard({
 
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-in fade-in duration-200 min-w-0 w-full overflow-hidden">
       {/* ROW 1: TOP 4 EXECUTIVE METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
         {/* Card 1: Total Assets Registered */}
@@ -1740,12 +1740,12 @@ function Dashboard({
       </div>
 
       {/* ROW 2: ELEVATED PORTFOLIO TITLE & COMPLIANCE COMMAND CENTER & SUPER ADMIN RAIL */}
-      <div className="grid gap-5 sm:gap-6 xl:grid-cols-[1.72fr_.78fr]">
+      <div className="grid gap-5 sm:gap-6 xl:grid-cols-[1.72fr_.78fr] min-w-0 w-full">
         {/* Left Column (1.72fr): Elevated Portfolio Title & Compliance Command Center */}
-        <section className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-6 shadow-sm space-y-5 sm:space-y-6">
+        <section className="min-w-0 w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-6 shadow-sm space-y-5 sm:space-y-6">
           {/* Card Header with View Switcher */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 pb-2 border-b border-slate-100 dark:border-white/5">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 pb-2 border-b border-slate-100 dark:border-white/5 min-w-0 w-full">
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-2.5 py-0.5 text-[10px] font-bold shrink-0">
                   <ShieldCheck className="size-3" />
@@ -1755,20 +1755,20 @@ function Dashboard({
                   {riskMetrics.lowPct}% Secure Title
                 </span>
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight mt-1 truncate">
                 Portfolio Title & Compliance
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
                 Master intellectual property chain of title, ministry vesting, and legal risk governance
               </p>
             </div>
 
-            {/* Tab Pills - horizontally scrollable without breaking on narrow mobile screens */}
-            <div className="flex items-center overflow-x-auto max-w-full bg-slate-100 dark:bg-[#14161f] p-1 rounded-xl sm:rounded-full border border-slate-200/80 dark:border-white/10 text-xs no-scrollbar shrink-0">
+            {/* Tab Pills - fully constrained horizontal scroll container that never forces parent expansion */}
+            <div className="flex items-center overflow-x-auto w-full sm:w-auto max-w-full min-w-0 bg-slate-100 dark:bg-[#14161f] p-1 rounded-xl sm:rounded-full border border-slate-200/80 dark:border-white/10 text-xs no-scrollbar">
               <button
                 onClick={() => setComplianceTab('overview')}
                 className={cn(
-                  'px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-xs cursor-pointer shrink-0 whitespace-nowrap',
+                  'px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-[11px] sm:text-xs cursor-pointer shrink-0 whitespace-nowrap',
                   complianceTab === 'overview'
                     ? 'bg-[#2f80ed] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1779,7 +1779,7 @@ function Dashboard({
               <button
                 onClick={() => setComplianceTab('watchlist')}
                 className={cn(
-                  'px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-xs cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap',
+                  'px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-[11px] sm:text-xs cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap',
                   complianceTab === 'watchlist'
                     ? 'bg-[#2f80ed] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1800,7 +1800,7 @@ function Dashboard({
               <button
                 onClick={() => setComplianceTab('agencies')}
                 className={cn(
-                  'px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-xs cursor-pointer shrink-0 whitespace-nowrap',
+                  'px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-[11px] sm:text-xs cursor-pointer shrink-0 whitespace-nowrap',
                   complianceTab === 'agencies'
                     ? 'bg-[#2f80ed] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1812,11 +1812,11 @@ function Dashboard({
           </div>
 
           {/* Centerpiece: Media Category Distribution & Legal Asset Health */}
-          <div className="grid grid-cols-1 md:grid-cols-[130px_1fr] items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-slate-50/70 dark:bg-[#14161f]/60 border border-slate-100 dark:border-white/5 overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-[130px_1fr] items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-slate-50/70 dark:bg-[#14161f]/60 border border-slate-100 dark:border-white/5 overflow-hidden min-w-0 w-full">
             {/* Left: Compact Category Donut & Vertical Category Share */}
-            <div className="flex flex-col sm:flex-row md:flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-white/10 pb-3 md:pb-0 sm:pb-3 md:pr-3.5 shrink-0 w-full md:w-[130px] gap-2 sm:gap-3 md:gap-0">
+            <div className="flex flex-col sm:flex-row md:flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-white/10 pb-3 md:pb-0 sm:pb-3 md:pr-3.5 shrink-0 w-full md:w-[130px] gap-2 sm:gap-3 md:gap-0 min-w-0">
               <CategoryDonut segments={mediaCategorySegments} total={assets.length} />
-              <div className="w-full mt-2 space-y-1">
+              <div className="w-full mt-2 space-y-1 min-w-0">
                 <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center">
                   Media Formats
                 </div>
@@ -1877,7 +1877,7 @@ function Dashboard({
                     />
                   </div>
                 </div>
-                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight">
+                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight truncate">
                   Contracts & deeds on file
                 </div>
               </div>
@@ -1912,7 +1912,7 @@ function Dashboard({
                     />
                   </div>
                 </div>
-                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight">
+                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight truncate">
                   Global streaming & OTT
                 </div>
               </div>
@@ -1947,7 +1947,7 @@ function Dashboard({
                     />
                   </div>
                 </div>
-                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight">
+                <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight truncate">
                   Classes 9, 16, 28/41 protected
                 </div>
               </div>
@@ -1956,18 +1956,18 @@ function Dashboard({
 
           {/* TAB CONTENT: 1. OVERVIEW & GOVERNANCE PILLARS */}
           {complianceTab === 'overview' && (
-            <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-150">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+            <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-150 min-w-0 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0 w-full">
+                <div className="min-w-0">
+                  <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider truncate">
                     Core IP Governance Pillars
                   </h3>
-                  <p className="text-[11px] text-slate-400">Essential legal criteria monitored across all agencies</p>
+                  <p className="text-[11px] text-slate-400 truncate">Essential legal criteria monitored across all agencies</p>
                 </div>
                 {setActiveNav && (
                   <button
                     onClick={() => setActiveNav('Rights & Governance')}
-                    className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer flex items-center gap-1 self-start sm:self-auto"
+                    className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer flex items-center gap-1 self-start sm:self-auto shrink-0"
                   >
                     <span>Open Rights Registry</span>
                     <ChevronRight className="size-3" />
@@ -1976,15 +1976,15 @@ function Dashboard({
               </div>
 
               {/* 4 Pillars Progress Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 min-w-0 w-full">
                 {governancePillars.map((pillar) => {
                   const Icon = pillar.icon
                   return (
                     <div
                       key={pillar.label}
-                      className="p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-2.5"
+                      className="p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-2.5 min-w-0 overflow-hidden"
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start justify-between gap-3 min-w-0">
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <div className={cn('grid size-7.5 place-items-center rounded-lg border text-xs shrink-0', pillar.badgeColor)}>
                             <Icon className="size-4" />
@@ -2012,9 +2012,9 @@ function Dashboard({
               </div>
 
               {/* Compact Immediate Red-Flags Preview */}
-              <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                  <div className="flex items-center gap-2 min-w-0">
+              <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-3 min-w-0 w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 min-w-0 w-full">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
                     <AlertTriangle className="size-3.5 text-[#ff5c75] shrink-0" />
                     <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
                       Priority Compliance Watchlist ({adminWatchlist.length} Items Needing Action)
@@ -2028,18 +2028,18 @@ function Dashboard({
                   </button>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 min-w-0 w-full">
                   {adminWatchlist.slice(0, 3).map(({ asset, assessment }) => (
                     <div
                       key={asset.id}
                       onClick={() => setActiveNav && setActiveNav('Assets', asset.id)}
-                      className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-2.5 sm:gap-3 cursor-pointer group"
+                      className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-2.5 sm:gap-3 cursor-pointer group min-w-0 w-full overflow-hidden"
                     >
                       <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                         <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={asset.posterUrl} />
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                            <span className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#2f80ed] transition max-w-[150px] sm:max-w-none">
+                            <span className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#2f80ed] transition max-w-[130px] sm:max-w-none">
                               {asset.name}
                             </span>
                             <span className={cn('text-[9px] font-semibold px-2 py-0.5 rounded-full border shrink-0', assessment.riskBadgeColor)}>
@@ -2070,13 +2070,13 @@ function Dashboard({
 
           {/* TAB CONTENT: 2. FULL ADMIN WATCHLIST */}
           {complianceTab === 'watchlist' && (
-            <div className="space-y-3 animate-in fade-in duration-150">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                <div>
-                  <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+            <div className="space-y-3 animate-in fade-in duration-150 min-w-0 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 min-w-0 w-full">
+                <div className="min-w-0">
+                  <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider truncate">
                     Admin Risk & Clearance Radar
                   </h3>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-400 truncate">
                     Assets with missing title deeds, unsigned talent releases, or pending legal approvals
                   </p>
                 </div>
@@ -2085,12 +2085,12 @@ function Dashboard({
                 </span>
               </div>
 
-              <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+              <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1 min-w-0 w-full">
                 {adminWatchlist.map(({ asset, assessment }) => (
                   <div
                     key={asset.id}
                     onClick={() => setActiveNav && setActiveNav('Assets', asset.id)}
-                    className="p-3 sm:p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer group"
+                    className="p-3 sm:p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer group min-w-0 w-full overflow-hidden"
                   >
                     <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                       <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={asset.posterUrl} />
@@ -2110,7 +2110,7 @@ function Dashboard({
                         <div className="text-[11px] text-slate-600 dark:text-slate-300 font-medium mt-1">
                           {assessment.primaryVector}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-0.5 italic">
+                        <div className="text-[10px] text-slate-400 mt-0.5 italic truncate">
                           Action: {assessment.remediationAction}
                         </div>
                       </div>
@@ -2136,23 +2136,23 @@ function Dashboard({
 
           {/* TAB CONTENT: 3. AGENCY & STUDIO BREAKDOWN */}
           {complianceTab === 'agencies' && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <div>
-                <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+            <div className="space-y-4 animate-in fade-in duration-150 min-w-0 w-full">
+              <div className="min-w-0">
+                <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider truncate">
                   Agency & Studio Title Distribution
                 </h3>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-400 truncate">
                   Compliance rate and title clearance status across all ministry production arms
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 min-w-0 w-full">
                 {agencyStats.map((st) => (
                   <div
                     key={st.agency}
-                    className="p-3.5 sm:p-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-3"
+                    className="p-3.5 sm:p-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-3 min-w-0 w-full overflow-hidden"
                   >
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
                       <div className="flex items-center gap-2 min-w-0">
                         <Building2 className="size-4 text-[#2f80ed] shrink-0" />
                         <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
@@ -2171,7 +2171,7 @@ function Dashboard({
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-1.5 sm:gap-0 text-[10.5px] sm:text-[11px] text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-100 dark:border-white/5">
+                    <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-1.5 sm:gap-0 text-[10.5px] sm:text-[11px] text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-100 dark:border-white/5 min-w-0">
                       <span>Total: <b className="text-slate-800 dark:text-white">{st.total}</b></span>
                       <span>Clean: <b className="text-emerald-600 dark:text-emerald-400">{st.lowRisk}</b></span>
                       <span>Review: <b className="text-amber-600 dark:text-amber-400">{st.mediumRisk}</b></span>
@@ -2185,17 +2185,17 @@ function Dashboard({
         </section>
 
         {/* Right Column (.78fr): Super Admin Greeting & Priority Rail */}
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-6 min-w-0 w-full">
           {/* Greeting Hero Card */}
-          <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white dark:from-[#22293d] dark:to-[#171a25] border border-blue-100 dark:border-white/10 shadow-sm relative overflow-hidden space-y-3.5 sm:space-y-4">
+          <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white dark:from-[#22293d] dark:to-[#171a25] border border-blue-100 dark:border-white/10 shadow-sm relative overflow-hidden space-y-3.5 sm:space-y-4 min-w-0 w-full">
             <div className="pointer-events-none absolute -right-6 -bottom-6 size-32 rounded-full bg-blue-500/10 blur-xl" />
-            <div className="flex items-start justify-between">
-              <div>
+            <div className="flex items-start justify-between min-w-0">
+              <div className="min-w-0">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-bold">
                   <Sparkles className="size-3" />
                   <span>KMM Executive Governance</span>
                 </span>
-                <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2.5">
+                <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2.5 truncate">
                   Hello, Super Admin!
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
@@ -2204,7 +2204,7 @@ function Dashboard({
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1 min-w-0 w-full">
               <button
                 onClick={() => setActiveNav && setActiveNav('Approvals')}
                 className="w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2.5 sm:py-2 transition shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
@@ -2227,30 +2227,30 @@ function Dashboard({
           </div>
 
           {/* Priority Submissions Card */}
-          <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-6 shadow-sm space-y-3.5 sm:space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+          <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-6 shadow-sm space-y-3.5 sm:space-y-4 min-w-0 w-full overflow-hidden">
+            <div className="flex items-center justify-between min-w-0">
+              <div className="min-w-0">
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white truncate">
                   Priority Submissions
                 </h3>
-                <p className="text-[11px] text-slate-400">Queue awaiting clearance</p>
+                <p className="text-[11px] text-slate-400 truncate">Queue awaiting clearance</p>
               </div>
               {setActiveNav && (
                 <button
                   onClick={() => setActiveNav('Approvals')}
-                  className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer"
+                  className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer shrink-0"
                 >
                   View All
                 </button>
               )}
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 min-w-0 w-full">
               {filtered.slice(0, 4).map((item) => (
                 <div
                   key={item.id}
                   onClick={() => setActiveNav && setActiveNav('Assets', item.id)}
-                  className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-3 cursor-pointer group"
+                  className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-3 cursor-pointer group min-w-0 w-full overflow-hidden"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <AssetThumbnail type={item.thumbType} name={item.name} posterUrl={item.posterUrl} />
@@ -9217,7 +9217,7 @@ export function MainApp({
         setIsCollapsed={handleSetCollapsed}
       />
       <div className={cn(
-        'transition-all duration-300 ease-in-out min-h-screen flex flex-col',
+        'transition-all duration-300 ease-in-out min-h-screen flex flex-col min-w-0 w-full overflow-x-hidden',
         isCollapsed ? 'lg:pl-[76px]' : 'lg:pl-[248px]'
       )}>
         <Header
@@ -9234,7 +9234,7 @@ export function MainApp({
           isCollapsed={isCollapsed}
           setIsCollapsed={handleSetCollapsed}
         />
-        <main className="flex-1 mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
+        <main className="flex-1 mx-auto w-full max-w-[1600px] min-w-0 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
           {active === 'Dashboard' ? (
             <Dashboard setActiveNav={handleNavigate} />
           ) : active === 'Assets' ? (
