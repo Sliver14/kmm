@@ -1656,14 +1656,14 @@ function Dashboard({
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* ROW 1: TOP 4 EXECUTIVE METRIC CARDS */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
         {/* Card 1: Total Assets Registered */}
-        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between overflow-hidden min-w-0">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between overflow-hidden min-w-0">
           <div className="space-y-1 min-w-0 flex-1 pr-2">
             <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">
               Total Assets Registered
             </div>
-            <div className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+            <div className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
               {stats.totalAssets}
             </div>
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 min-w-0">
@@ -1677,13 +1677,13 @@ function Dashboard({
         </div>
 
         {/* Card 2: Active & Cleared IP (Hero Solid Blue Card) */}
-        <div className="rounded-3xl bg-gradient-to-br from-[#2f80ed] to-[#1c6bd9] text-white p-5 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between relative overflow-hidden min-w-0">
+        <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#2f80ed] to-[#1c6bd9] text-white p-4 sm:p-5 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between relative overflow-hidden min-w-0">
           <div className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full bg-white/10 blur-xl" />
           <div className="space-y-1 relative z-10 min-w-0 flex-1 pr-2">
             <div className="text-[10px] font-bold text-blue-100 uppercase tracking-wider truncate">
               Title Cleared & Vested IP
             </div>
-            <div className="text-3xl font-black tracking-tight text-white">
+            <div className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               {riskMetrics.lowCount}
             </div>
             <div className="flex items-center gap-1.5 text-[11px] font-medium text-blue-100 min-w-0">
@@ -1699,14 +1699,14 @@ function Dashboard({
         {/* Card 3: Medium Risk Assets Report */}
         <div
           onClick={() => setComplianceTab('agencies')}
-          className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between cursor-pointer group overflow-hidden min-w-0"
+          className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between cursor-pointer group overflow-hidden min-w-0"
           title="Click to view Medium Risk / Under Audit assets"
         >
           <div className="space-y-1 min-w-0 flex-1 pr-2">
             <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider group-hover:text-amber-500 transition truncate">
               Medium Risk Assets
             </div>
-            <div className="text-3xl font-black tracking-tight text-amber-500 dark:text-amber-400">
+            <div className="text-2xl sm:text-3xl font-black tracking-tight text-amber-500 dark:text-amber-400">
               {riskMetrics.mediumCount}
             </div>
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400 min-w-0">
@@ -1720,12 +1720,12 @@ function Dashboard({
         </div>
 
         {/* Card 4: Critical & High Legal Exposure Alert */}
-        <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between overflow-hidden min-w-0">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between overflow-hidden min-w-0">
           <div className="space-y-1 min-w-0 flex-1 pr-2">
             <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">
               Critical & High Exposure
             </div>
-            <div className="text-3xl font-black tracking-tight text-[#ff5c75]">
+            <div className="text-2xl sm:text-3xl font-black tracking-tight text-[#ff5c75]">
               {riskMetrics.criticalCount + riskMetrics.highCount}
             </div>
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-600 dark:text-rose-400 min-w-0">
@@ -1740,22 +1740,22 @@ function Dashboard({
       </div>
 
       {/* ROW 2: ELEVATED PORTFOLIO TITLE & COMPLIANCE COMMAND CENTER & SUPER ADMIN RAIL */}
-      <div className="grid gap-6 xl:grid-cols-[1.72fr_.78fr]">
+      <div className="grid gap-5 sm:gap-6 xl:grid-cols-[1.72fr_.78fr]">
         {/* Left Column (1.72fr): Elevated Portfolio Title & Compliance Command Center */}
-        <section className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-6">
+        <section className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-6 shadow-sm space-y-5 sm:space-y-6">
           {/* Card Header with View Switcher */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-white/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 pb-2 border-b border-slate-100 dark:border-white/5">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-2.5 py-0.5 text-[10px] font-bold">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-2.5 py-0.5 text-[10px] font-bold shrink-0">
                   <ShieldCheck className="size-3" />
                   <span>Executive Governance Center</span>
                 </span>
-                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/40">
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/40 shrink-0">
                   {riskMetrics.lowPct}% Secure Title
                 </span>
               </div>
-              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
                 Portfolio Title & Compliance
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -1763,12 +1763,12 @@ function Dashboard({
               </p>
             </div>
 
-            {/* Tab Pills */}
-            <div className="flex items-center bg-slate-100 dark:bg-[#14161f] p-1 rounded-full border border-slate-200/80 dark:border-white/10 text-xs">
+            {/* Tab Pills - horizontally scrollable without breaking on narrow mobile screens */}
+            <div className="flex items-center overflow-x-auto max-w-full bg-slate-100 dark:bg-[#14161f] p-1 rounded-xl sm:rounded-full border border-slate-200/80 dark:border-white/10 text-xs no-scrollbar shrink-0">
               <button
                 onClick={() => setComplianceTab('overview')}
                 className={cn(
-                  'px-3 py-1 rounded-full font-semibold transition text-xs cursor-pointer',
+                  'px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-xs cursor-pointer shrink-0 whitespace-nowrap',
                   complianceTab === 'overview'
                     ? 'bg-[#2f80ed] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1779,7 +1779,7 @@ function Dashboard({
               <button
                 onClick={() => setComplianceTab('watchlist')}
                 className={cn(
-                  'px-3 py-1 rounded-full font-semibold transition text-xs cursor-pointer flex items-center gap-1.5',
+                  'px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-xs cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap',
                   complianceTab === 'watchlist'
                     ? 'bg-[#2f80ed] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1800,7 +1800,7 @@ function Dashboard({
               <button
                 onClick={() => setComplianceTab('agencies')}
                 className={cn(
-                  'px-3 py-1 rounded-full font-semibold transition text-xs cursor-pointer',
+                  'px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-xs cursor-pointer shrink-0 whitespace-nowrap',
                   complianceTab === 'agencies'
                     ? 'bg-[#2f80ed] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1812,15 +1812,15 @@ function Dashboard({
           </div>
 
           {/* Centerpiece: Media Category Distribution & Legal Asset Health */}
-          <div className="grid grid-cols-1 md:grid-cols-[125px_1fr] items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-slate-50/70 dark:bg-[#14161f]/60 border border-slate-100 dark:border-white/5 overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-[130px_1fr] items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-slate-50/70 dark:bg-[#14161f]/60 border border-slate-100 dark:border-white/5 overflow-hidden">
             {/* Left: Compact Category Donut & Vertical Category Share */}
-            <div className="flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-white/10 pb-3 md:pb-0 md:pr-3.5 shrink-0 w-full md:w-[125px]">
+            <div className="flex flex-col sm:flex-row md:flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-white/10 pb-3 md:pb-0 sm:pb-3 md:pr-3.5 shrink-0 w-full md:w-[130px] gap-2 sm:gap-3 md:gap-0">
               <CategoryDonut segments={mediaCategorySegments} total={assets.length} />
               <div className="w-full mt-2 space-y-1">
                 <div className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center">
                   Media Formats
                 </div>
-                <div className="grid grid-cols-2 gap-x-1.5 gap-y-0.5 text-[9px]">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px]">
                   {mediaCategorySegments.slice(0, 4).map((seg) => {
                     const shortName = seg.label.includes('Anim')
                       ? 'Anim'
@@ -1835,7 +1835,7 @@ function Dashboard({
                       <div key={seg.label} className="flex items-center justify-between min-w-0" title={`${seg.label}: ${seg.count}`}>
                         <div className="flex items-center gap-1 min-w-0">
                           <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
-                          <span className="text-slate-600 dark:text-slate-300 text-[9px] font-medium">{shortName}</span>
+                          <span className="text-slate-600 dark:text-slate-300 text-[9px] font-medium truncate">{shortName}</span>
                         </div>
                         <span className="font-bold text-slate-900 dark:text-white shrink-0 pl-0.5 text-[9px]">{seg.count}</span>
                       </div>
@@ -1850,7 +1850,7 @@ function Dashboard({
               {/* Card 1: Attached Legal Documents & Deeds */}
               <div
                 onClick={() => setComplianceTab('overview')}
-                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-blue-100 dark:border-blue-500/20 shadow-2xs hover:border-blue-300 dark:hover:border-blue-500/40 transition cursor-pointer flex flex-col justify-between min-h-[118px] min-w-0 w-full group overflow-hidden"
+                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-blue-100 dark:border-blue-500/20 shadow-2xs hover:border-blue-300 dark:hover:border-blue-500/40 transition cursor-pointer flex flex-col justify-between min-h-[110px] sm:min-h-[118px] min-w-0 w-full group overflow-hidden"
                 title="View attached deeds and chain-of-title documents"
               >
                 <div className="space-y-1.5 min-w-0 w-full">
@@ -1885,7 +1885,7 @@ function Dashboard({
               {/* Card 2: Worldwide Broadcast Rights */}
               <div
                 onClick={() => setComplianceTab('overview')}
-                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-cyan-100 dark:border-cyan-500/20 shadow-2xs hover:border-cyan-300 dark:hover:border-cyan-500/40 transition cursor-pointer flex flex-col justify-between min-h-[118px] min-w-0 w-full group overflow-hidden"
+                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-cyan-100 dark:border-cyan-500/20 shadow-2xs hover:border-cyan-300 dark:hover:border-cyan-500/40 transition cursor-pointer flex flex-col justify-between min-h-[110px] sm:min-h-[118px] min-w-0 w-full group overflow-hidden"
                 title="View worldwide broadcast & territory clearances"
               >
                 <div className="space-y-1.5 min-w-0 w-full">
@@ -1920,7 +1920,7 @@ function Dashboard({
               {/* Card 3: Trademark & Brand Classes */}
               <div
                 onClick={() => setComplianceTab('overview')}
-                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-purple-100 dark:border-purple-500/20 shadow-2xs hover:border-purple-300 dark:hover:border-purple-500/40 transition cursor-pointer flex flex-col justify-between min-h-[118px] min-w-0 w-full group overflow-hidden"
+                className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-[#1c202c] border border-purple-100 dark:border-purple-500/20 shadow-2xs hover:border-purple-300 dark:hover:border-purple-500/40 transition cursor-pointer flex flex-col justify-between min-h-[110px] sm:min-h-[118px] min-w-0 w-full group overflow-hidden"
                 title="View trademark & brand classes protection"
               >
                 <div className="space-y-1.5 min-w-0 w-full">
@@ -1956,8 +1956,8 @@ function Dashboard({
 
           {/* TAB CONTENT: 1. OVERVIEW & GOVERNANCE PILLARS */}
           {complianceTab === 'overview' && (
-            <div className="space-y-5 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between">
+            <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-150">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
                     Core IP Governance Pillars
@@ -1967,7 +1967,7 @@ function Dashboard({
                 {setActiveNav && (
                   <button
                     onClick={() => setActiveNav('Rights & Governance')}
-                    className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer flex items-center gap-1"
+                    className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer flex items-center gap-1 self-start sm:self-auto"
                   >
                     <span>Open Rights Registry</span>
                     <ChevronRight className="size-3" />
@@ -1976,7 +1976,7 @@ function Dashboard({
               </div>
 
               {/* 4 Pillars Progress Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                 {governancePillars.map((pillar) => {
                   const Icon = pillar.icon
                   return (
@@ -1985,11 +1985,11 @@ function Dashboard({
                       className="p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-2.5"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <div className={cn('grid size-7.5 place-items-center rounded-lg border text-xs shrink-0', pillar.badgeColor)}>
                             <Icon className="size-4" />
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
                               {pillar.label}
                             </div>
@@ -2013,16 +2013,16 @@ function Dashboard({
 
               {/* Compact Immediate Red-Flags Preview */}
               <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="size-3.5 text-[#ff5c75]" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <AlertTriangle className="size-3.5 text-[#ff5c75] shrink-0" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
                       Priority Compliance Watchlist ({adminWatchlist.length} Items Needing Action)
                     </span>
                   </div>
                   <button
                     onClick={() => setComplianceTab('watchlist')}
-                    className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer"
+                    className="text-xs font-semibold text-[#2f80ed] hover:underline cursor-pointer shrink-0 self-start sm:self-auto"
                   >
                     View All {adminWatchlist.length}
                   </button>
@@ -2033,13 +2033,13 @@ function Dashboard({
                     <div
                       key={asset.id}
                       onClick={() => setActiveNav && setActiveNav('Assets', asset.id)}
-                      className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-3 cursor-pointer group"
+                      className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-2.5 sm:gap-3 cursor-pointer group"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                         <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={asset.posterUrl} />
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#2f80ed] transition">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <span className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#2f80ed] transition max-w-[150px] sm:max-w-none">
                               {asset.name}
                             </span>
                             <span className={cn('text-[9px] font-semibold px-2 py-0.5 rounded-full border shrink-0', assessment.riskBadgeColor)}>
@@ -2057,7 +2057,7 @@ function Dashboard({
                           e.stopPropagation()
                           setActiveNav && setActiveNav('Assets', asset.id)
                         }}
-                        className="text-[11px] font-semibold text-[#2f80ed] hover:underline shrink-0 group-hover:translate-x-0.5 transition"
+                        className="text-[11px] font-semibold text-[#2f80ed] hover:underline shrink-0 group-hover:translate-x-0.5 transition px-1 py-1"
                       >
                         Inspect
                       </button>
@@ -2071,7 +2071,7 @@ function Dashboard({
           {/* TAB CONTENT: 2. FULL ADMIN WATCHLIST */}
           {complianceTab === 'watchlist' && (
             <div className="space-y-3 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <div>
                   <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
                     Admin Risk & Clearance Radar
@@ -2080,7 +2080,7 @@ function Dashboard({
                     Assets with missing title deeds, unsigned talent releases, or pending legal approvals
                   </p>
                 </div>
-                <span className="text-xs font-bold text-slate-500">
+                <span className="text-xs font-bold text-slate-500 shrink-0 self-start sm:self-auto">
                   {adminWatchlist.length} Items Flagged
                 </span>
               </div>
@@ -2090,20 +2090,20 @@ function Dashboard({
                   <div
                     key={asset.id}
                     onClick={() => setActiveNav && setActiveNav('Assets', asset.id)}
-                    className="p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer group"
+                    className="p-3 sm:p-3.5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer group"
                   >
-                    <div className="flex items-start sm:items-center gap-3 min-w-0">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
                       <AssetThumbnail type={asset.thumbType} name={asset.name} posterUrl={asset.posterUrl} />
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                           <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#2f80ed] transition">
                             {asset.name}
                           </span>
                           <span className="text-[10px] text-slate-400 font-mono">({asset.id})</span>
-                          <span className={cn('text-[9px] font-semibold px-2 py-0.2 rounded-full border', assessment.riskBadgeColor)}>
+                          <span className={cn('text-[9px] font-semibold px-2 py-0.5 rounded-full border', assessment.riskBadgeColor)}>
                             {assessment.level} Risk
                           </span>
-                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-white/5 px-2 py-0.2 rounded-full">
+                          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-full">
                             {asset.agency || asset.unit}
                           </span>
                         </div>
@@ -2116,13 +2116,13 @@ function Dashboard({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-center">
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           setActiveNav && setActiveNav('Assets', asset.id)
                         }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-[11px] font-semibold transition cursor-pointer shadow-xs"
+                        className="w-full sm:w-auto justify-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-[11px] font-semibold transition cursor-pointer shadow-xs"
                       >
                         <span>Resolve</span>
                         <ArrowRight className="size-3" />
@@ -2146,20 +2146,20 @@ function Dashboard({
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                 {agencyStats.map((st) => (
                   <div
                     key={st.agency}
-                    className="p-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-3"
+                    className="p-3.5 sm:p-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-3"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="size-4 text-[#2f80ed]" />
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Building2 className="size-4 text-[#2f80ed] shrink-0" />
+                        <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
                           {st.agency}
                         </span>
                       </div>
-                      <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                      <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 shrink-0">
                         {st.compliancePct}% Cleared
                       </span>
                     </div>
@@ -2171,8 +2171,8 @@ function Dashboard({
                       />
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-white/5">
-                      <span>Total Assets: <b className="text-slate-800 dark:text-white">{st.total}</b></span>
+                    <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-1.5 sm:gap-0 text-[10.5px] sm:text-[11px] text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-100 dark:border-white/5">
+                      <span>Total: <b className="text-slate-800 dark:text-white">{st.total}</b></span>
                       <span>Clean: <b className="text-emerald-600 dark:text-emerald-400">{st.lowRisk}</b></span>
                       <span>Review: <b className="text-amber-600 dark:text-amber-400">{st.mediumRisk}</b></span>
                       <span>Flagged: <b className="text-rose-600 dark:text-rose-400">{st.highRisk}</b></span>
@@ -2184,18 +2184,18 @@ function Dashboard({
           )}
         </section>
 
-        {/* Right Column (.85fr): Super Admin Greeting & Priority Rail */}
-        <div className="space-y-6">
+        {/* Right Column (.78fr): Super Admin Greeting & Priority Rail */}
+        <div className="space-y-4 sm:space-y-6">
           {/* Greeting Hero Card */}
-          <div className="rounded-3xl p-6 bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white dark:from-[#22293d] dark:to-[#171a25] border border-blue-100 dark:border-white/10 shadow-sm relative overflow-hidden space-y-4">
+          <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-white dark:from-[#22293d] dark:to-[#171a25] border border-blue-100 dark:border-white/10 shadow-sm relative overflow-hidden space-y-3.5 sm:space-y-4">
             <div className="pointer-events-none absolute -right-6 -bottom-6 size-32 rounded-full bg-blue-500/10 blur-xl" />
             <div className="flex items-start justify-between">
               <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-3 py-1 text-[11px] font-bold">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-bold">
                   <Sparkles className="size-3" />
                   <span>KMM Executive Governance</span>
                 </span>
-                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2.5">
+                <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2.5">
                   Hello, Super Admin!
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
@@ -2204,10 +2204,10 @@ function Dashboard({
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1">
               <button
                 onClick={() => setActiveNav && setActiveNav('Approvals')}
-                className="inline-flex items-center gap-2 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2 transition shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
+                className="w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-full bg-[#2f80ed] hover:bg-[#256fd1] text-white text-xs font-semibold px-4 py-2.5 sm:py-2 transition shadow-md shadow-blue-500/20 active:scale-98 cursor-pointer"
               >
                 <span>Review Approvals Now</span>
                 <ArrowRight className="size-3.5" />
@@ -2216,7 +2216,7 @@ function Dashboard({
               {setActiveNav && (
                 <button
                   onClick={() => setActiveNav('Reports')}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#14161f] text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#222636] transition cursor-pointer"
+                  className="w-full sm:w-auto justify-center inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#14161f] text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#222636] transition cursor-pointer"
                   title="Generate Executive Compliance Report"
                 >
                   <Download className="size-3.5 text-slate-400" />
@@ -2227,7 +2227,7 @@ function Dashboard({
           </div>
 
           {/* Priority Submissions Card */}
-          <div className="rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-6 shadow-sm space-y-4">
+          <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-[#1c202c] p-4 sm:p-6 shadow-sm space-y-3.5 sm:space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
@@ -2252,7 +2252,7 @@ function Dashboard({
                   onClick={() => setActiveNav && setActiveNav('Assets', item.id)}
                   className="p-3 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 hover:bg-slate-100/70 dark:hover:bg-[#222636] transition flex items-center justify-between gap-3 cursor-pointer group"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <AssetThumbnail type={item.thumbType} name={item.name} posterUrl={item.posterUrl} />
                     <div className="min-w-0 flex-1">
                       <div className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#2f80ed] transition">
