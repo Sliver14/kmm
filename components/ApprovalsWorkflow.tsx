@@ -186,17 +186,10 @@ export function ApprovalsWorkflow() {
   }, [approvals])
 
   // Summary Metrics & Eligible Approvals:
-  // Rule: Asset should not pop in approvals until documents are uploaded before it can be scheduled for Approval request
+  // All active approval requests in the pipeline are displayed with their document verification status
   const eligibleApprovals = useMemo(() => {
-    return approvals.filter((app) => {
-      const matchedRights = rightsRecords.find((r) => r.assetId === app.assetId || r.id === app.assetId)
-      const hasDocs =
-        (Array.isArray(app.documents) && app.documents.length > 0) ||
-        (Array.isArray(matchedRights?.documents) && matchedRights.documents.length > 0)
-      // Only show if it has documents attached or was already approved
-      return hasDocs || app.status === 'Approved'
-    })
-  }, [approvals, rightsRecords])
+    return approvals
+  }, [approvals])
 
   const metrics = useMemo(() => {
     const total = eligibleApprovals.length

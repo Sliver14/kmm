@@ -162,13 +162,13 @@ const defaultInitialNotifications: NotificationItem[] = [
   {
     id: 'notif-init-1',
     type: 'approval',
-    title: 'Approval Scheduled: Super Book Adventures',
-    subtitle: 'Submitted for Review with legal deeds & talent release attached',
+    title: 'Approval Scheduled: Recipes on the Go',
+    subtitle: 'Governance Pillar [Trademark & Licensing] submitted for ministerial clearance',
     time: 'Today, 10:45 AM',
     timestamp: Date.now() - 3600000,
     read: false,
     targetTab: 'Approvals',
-    assetId: 'KMP-TV-001',
+    assetId: 'KMP-125',
     priority: 'High',
     badge: 'High Priority',
     badgeColor: 'bg-amber-100 text-amber-800',
@@ -343,6 +343,34 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         }
         if (approvalsRes?.success && Array.isArray(approvalsRes.approvals) && approvalsRes.approvals.length > 0) {
           setMasterApprovals(approvalsRes.approvals)
+
+          // Live sync notifications for pending approvals from database
+          const pendingApps = approvalsRes.approvals.filter((a: any) => a.status === 'Pending')
+          if (pendingApps.length > 0) {
+            setMasterNotifications((prev) => {
+              const liveAppNotifs: NotificationItem[] = pendingApps.map((a: any) => ({
+                id: `notif-app-${a.id}`,
+                type: 'approval',
+                title: `Pending Approval: ${a.assetName}`,
+                subtitle: a.feedbackNotes || `${a.stage} • ${a.agency}`,
+                time: a.submittedTime ? `${a.submittedDate}, ${a.submittedTime}` : 'Today',
+                timestamp: a.createdAt ? new Date(a.createdAt).getTime() : Date.now(),
+                read: false,
+                targetTab: 'Approvals',
+                assetId: a.assetId,
+                priority: (a.priority || 'High') as any,
+                badge: `${a.priority || 'High'} Priority`,
+                badgeColor: 'bg-amber-100 text-amber-800',
+                agency: a.agency,
+              }))
+
+              // Retain other notifications, discarding outdated placeholder approval notifications
+              const otherNotifs = prev.filter(
+                (n) => n.id !== 'notif-init-1' && !n.id.startsWith('notif-app-')
+              )
+              return [...liveAppNotifs, ...otherNotifs]
+            })
+          }
         }
         if (relsRes?.success && Array.isArray(relsRes.relationships) && relsRes.relationships.length > 0) {
           setMasterRelationships(relsRes.relationships)
