@@ -100,6 +100,11 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+    // Delete dependent records first to satisfy FK constraints
+    await sql`DELETE FROM approvals WHERE asset_id = ${id}`
+    await sql`DELETE FROM rights_records WHERE asset_id = ${id}`
+    await sql`DELETE FROM relationships WHERE source_id = ${id} OR target_id = ${id}`
+    await sql`DELETE FROM asset_files WHERE asset_id = ${id}`
     await sql`DELETE FROM assets WHERE id = ${id}`
     return NextResponse.json({ success: true, message: 'Asset deleted successfully' })
   } catch (error: any) {
