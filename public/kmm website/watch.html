@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch &middot; KMM Policy & Governance Video Portal</title>
+  <script>
+    // Seamless routing to Full-Page Watch View
+    const params = new URLSearchParams(window.location.search);
+    const videoId = params.get('v') || params.get('id') || 'vid-1';
+    window.location.replace(`training-portal.html#watch-${videoId}`);
+  </script>
+</head>
+<body style="background: #0B1120; color: #FFFFFF; font-family: sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0;">
+  <p>Loading full-page cinema video player...</p>
+</body>
+</html>

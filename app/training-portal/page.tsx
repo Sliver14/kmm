@@ -1,0 +1,962 @@
+'use client'
+
+import React, { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+
+interface VideoItem {
+  id: string
+  code: string
+  title: string
+  category: string
+  categoryLabel: string
+  duration: string
+  speaker: string
+  speakerRole: string
+  initials: string
+  avatarBg: string
+  res: string
+  desc: string
+  gradient: string
+  glow: string
+  points: string[]
+  citations: string[]
+}
+
+const VIDEOS: VideoItem[] = [
+  {
+    id: 'vid-1',
+    code: 'GOV-101',
+    title: 'Statutory Broadcast Content Standards & Pre-Release Clearances',
+    category: 'broadcast',
+    categoryLabel: 'Broadcast Standards',
+    duration: '18:45',
+    speaker: 'Barrister Lillian Okoye',
+    speakerRole: 'Head of Legal & Policy Directorate',
+    initials: 'LO',
+    avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
+    res: '4K ULTRA HD',
+    desc: 'Comprehensive breakdown of pre-release legal scrutiny, technical defect logs, and broadcast compliance checklists for Loveworld children animations. Learn how directors and editorial leads audit cuts before satellite uplink.',
+    gradient: 'linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%)',
+    glow: 'radial-gradient(circle at 50% 40%, rgba(245, 158, 11, 0.35) 0%, rgba(56, 189, 248, 0.2) 40%, transparent 75%)',
+    points: [
+      'Pre-flight screening protocol for all episode cuts prior to master delivery.',
+      'Separation of critical defects (audio clipping, strobe flashes) vs minor visual notes.',
+      'Mandatory legal sign-off threshold before publishing to satellite networks and digital apps.',
+      'Statutory broadcast compliance filing requirements for international partner territories.',
+    ],
+    citations: ['NBC Broadcast Code § 4.2.1', 'ITU-R BT.1702 Strobing Threshold', 'KMM Charter Art. IX'],
+  },
+  {
+    id: 'vid-2',
+    code: 'DAT-603',
+    title: 'COPPA & Digital Child Data Safeguards in Mobile Apps',
+    category: 'protection',
+    categoryLabel: 'Child Protection & Safety',
+    duration: '14:10',
+    speaker: 'Dr. Stephanie Cole',
+    speakerRole: 'Child Cognitive Safety Board',
+    initials: 'SC',
+    avatarBg: 'linear-gradient(135deg, #10B981, #059669)',
+    res: '1080p 60fps',
+    desc: 'Mandatory guidelines for kid-facing mobile apps, voice logging prohibitions, parental consent walls, and zero-tracking architectures across Lovetoons digital experiences.',
+    gradient: 'linear-gradient(135deg, #065F46 0%, #064E3B 100%)',
+    glow: 'radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.35) 0%, rgba(6, 95, 70, 0.25) 40%, transparent 75%)',
+    points: [
+      'Zero third-party advertising or behavioral tracking SDKs permitted in children apps.',
+      'Enforced verifiable parental consent gates prior to collecting usernames or cloud saves.',
+      'Strict compliance with international child privacy acts (COPPA Rule 312 & GDPR-K).',
+      'Automated data purges on inactive child gamer records after 90 days.',
+    ],
+    citations: ['COPPA Rule 16 C.F.R. Part 312', 'GDPR Article 8 (Children)', 'CARU Mobile App Guidelines'],
+  },
+  {
+    id: 'vid-3',
+    code: 'LAW-204',
+    title: 'Copyright Clearances: Original Music, Voiceovers & Character Likeness',
+    category: 'copyright',
+    categoryLabel: 'Copyright & IP',
+    duration: '22:30',
+    speaker: 'Barrister Lillian Okoye',
+    speakerRole: 'IP & Contracts Lead Counsel',
+    initials: 'LO',
+    avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
+    res: '4K MASTER',
+    desc: 'Legal covenants for composers, voiceover contracts, worldwide distribution licenses, and character likeness copyright protection for all characters in the Lovetoons universe.',
+    gradient: 'linear-gradient(135deg, #7C2D12 0%, #431407 100%)',
+    glow: 'radial-gradient(circle at 50% 40%, rgba(249, 115, 22, 0.35) 0%, rgba(124, 45, 18, 0.25) 40%, transparent 75%)',
+    points: [
+      'Requirement for fully executed Work-for-Hire releases for all musical compositions and stems.',
+      'Registered trademark protections for Lovetoons character silhouettes, voices, and names.',
+      'Anti-infringement screening procedures for sound effects, foley, and sample libraries.',
+      'International assignment of copyright transfers across multi-territory co-productions.',
+    ],
+    citations: ['WIPO Copyright Treaty Art. 6', 'Berne Convention Section 7', 'US Copyright Circular 9'],
+  },
+  {
+    id: 'vid-4',
+    code: 'DEF-401',
+    title: 'Animation Defect Classification: Critical vs. Minor Quality Errors',
+    category: 'broadcast',
+    categoryLabel: 'Broadcast Standards',
+    duration: '16:15',
+    speaker: 'Deacon Tunde Adebayo',
+    speakerRole: 'Broadcast Quality Assurance Lead',
+    initials: 'TA',
+    avatarBg: 'linear-gradient(135deg, #6366F1, #4338CA)',
+    res: '1080p HD',
+    desc: 'Practical defect diagnosis: identifying strobe flicker hazards, audio dialogue masking, character rig clipping, and framerate jitters before master sign-off.',
+    gradient: 'linear-gradient(135deg, #3730A3 0%, #1E1B4B 100%)',
+    glow: 'radial-gradient(circle at 50% 40%, rgba(99, 102, 241, 0.35) 0%, rgba(55, 48, 163, 0.25) 40%, transparent 75%)',
+    points: [
+      'Epilepsy protection standards: Maximum 3 flashes per second on screen.',
+      'Audio loudness balancing: Normalization strictly to -24 LKFS broadcast threshold.',
+      'Color gamut limits to ensure visual safety on high-luminance HDR displays.',
+      'Lip-sync tolerances: Maximum 1 frame ahead or 2 frames behind dialogue audio.',
+    ],
+    citations: ['EBU R128 Loudness Normalisation', 'Ofcom Guidance Section 2.14', 'ATSC A/85 Audio Code'],
+  },
+  {
+    id: 'vid-5',
+    code: 'DOC-102',
+    title: 'Scriptural Fidelity & Biblical Accuracy in Kids Storytelling',
+    category: 'doctrinal',
+    categoryLabel: 'Scriptural Review',
+    duration: '19:50',
+    speaker: 'Pastor Victor Chidi',
+    speakerRole: 'KMM Editorial & Pastoral Director',
+    initials: 'VC',
+    avatarBg: 'linear-gradient(135deg, #EC4899, #BE185D)',
+    res: '4K ULTRA HD',
+    desc: 'Preserving theological integrity while adapting biblical narratives into dynamic animated stories that anchor young hearts in the Word without distortion.',
+    gradient: 'linear-gradient(135deg, #831843 0%, #500724 100%)',
+    glow: 'radial-gradient(circle at 50% 40%, rgba(236, 72, 153, 0.35) 0%, rgba(131, 24, 67, 0.25) 40%, transparent 75%)',
+    points: [
+      'Ensuring scripture passages are quoted and referenced with literal fidelity.',
+      'Age-appropriate portrayal of miracles, faith declarations, and victorious prayer.',
+      'Rigorous editorial clearance loop between writers room and the pastoral review council.',
+      'Prohibition of theological caricatures or fear-inducing behavioral tropes.',
+    ],
+    citations: ['KMM Doctrinal Canon 2026', 'King James Bible Concordance', 'Loveworld Editorial Policy'],
+  },
+  {
+    id: 'vid-6',
+    code: 'MER-502',
+    title: 'Global Merchandising, Toy Safety Standards & Territorial Covenants',
+    category: 'merchandising',
+    categoryLabel: 'Merchandising & Contracts',
+    duration: '12:20',
+    speaker: 'Sarah Jenkins, Esq.',
+    speakerRole: 'Commercial & Legal Affairs Counsel',
+    initials: 'SJ',
+    avatarBg: 'linear-gradient(135deg, #14B8A6, #0F766E)',
+    res: '1080p HD',
+    desc: 'Legal parameters for physical Lovetoons plushies, coloring books, apparel, and non-hazardous toy manufacturing covenants for overseas export.',
+    gradient: 'linear-gradient(135deg, #0F766E 0%, #134E4A 100%)',
+    glow: 'radial-gradient(circle at 50% 40%, rgba(20, 184, 166, 0.35) 0%, rgba(15, 118, 110, 0.25) 40%, transparent 75%)',
+    points: [
+      'Mandatory EN-71 and ASTM F963 non-toxic certifications for all physical merchandise.',
+      'Strict exclusivity and territory definitions in overseas franchise deals.',
+      'Proper packaging trademark notices: Registered (R) and Copyright (C) placement.',
+      'Child choke hazard warning labels and age-grading verification audits.',
+    ],
+    citations: ['EN-71 Toy Safety Directive', 'ASTM F963-17 Standard', 'ISO 8124 Toy Safety'],
+  },
+  {
+    id: 'vid-7',
+    code: 'TAL-305',
+    title: 'Child Voice Actor Safeguards & Talent Welfare Guidelines',
+    category: 'protection',
+    categoryLabel: 'Child Protection & Safety',
+    duration: '15:05',
+    speaker: 'Barrister Lillian Okoye',
+    speakerRole: 'Legal Counsel',
+    initials: 'LO',
+    avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
+    res: '1080p HD',
+    desc: 'Studio recording regulations, maximum work windows, mandatory certified chaperone attendance, and psychological comfort protocols for young voice talents.',
+    gradient: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
+    glow: 'radial-gradient(circle at 50% 40%, rgba(56, 189, 248, 0.35) 0%, rgba(30, 41, 59, 0.25) 40%, transparent 75%)',
+    points: [
+      'Maximum continuous recording session of 90 minutes with mandatory rest pauses.',
+      'Parental or certified legal chaperone presence required inside studio control rooms.',
+      'Guaranteed privacy covenants prohibiting release of minors personal details.',
+      'Ergonomic studio adjustments (height-adjustable mic arms, acoustic comfort).',
+    ],
+    citations: ['SAG-AFTRA Young Performer Rules', 'UK Child Performance Regulations', 'ILO Convention 138'],
+  },
+  {
+    id: 'vid-8',
+    code: 'INT-702',
+    title: 'International Subtitling, Dubbing & Multi-Language Harmonization',
+    category: 'copyright',
+    categoryLabel: 'Copyright & IP',
+    duration: '11:40',
+    speaker: 'Emmanuel Kalu',
+    speakerRole: 'International Distribution Lead',
+    initials: 'EK',
+    avatarBg: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+    res: '4K MASTER',
+    desc: 'Managing multilingual audio stems, dubbing synch standards, and cross-cultural translation reviews across French, Spanish, Swahili, and Arabic Lovetoons networks.',
+    gradient: 'linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)',
+    glow: 'radial-gradient(circle at 50% 40%, rgba(139, 92, 246, 0.35) 0%, rgba(76, 29, 149, 0.25) 40%, transparent 75%)',
+    points: [
+      'Phonetic synchronization standards for Spanish, French, and Swahili dub tracks.',
+      'Strict compliance with regional cultural sensitivities and local idioms.',
+      'Storage and version-control protocol for multi-channel 5.1 and stereo audio stems.',
+      'Automated closed-caption timing checks against broadcast playout servers.',
+    ],
+    citations: ['SMPTE ST 2052 Timed Text', 'EBU Tech 3264 Subtitling', 'WIPO Phonograms Treaty'],
+  },
+]
+
+const CATEGORIES = [
+  { id: 'all', label: 'All Videos' },
+  { id: 'broadcast', label: 'Broadcast Standards' },
+  { id: 'protection', label: 'Child Protection' },
+  { id: 'copyright', label: 'Copyright & IP' },
+  { id: 'doctrinal', label: 'Scriptural Review' },
+  { id: 'merchandising', label: 'Merchandising' },
+]
+
+export default function TrainingPortalPage() {
+  const [isDark, setIsDark] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
+  const [officerEmail, setOfficerEmail] = useState('Barrister Lillian')
+  const [activeFilter, setActiveFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentVideo, setCurrentVideo] = useState<VideoItem>(VIDEOS[0])
+  const [viewMode, setViewMode] = useState<'catalog' | 'watch'>('catalog')
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [progressPercent, setProgressPercent] = useState(15)
+  const [isCaptionsOn, setIsCaptionsOn] = useState(false)
+  const [isTheaterExpanded, setIsTheaterExpanded] = useState(false)
+  const [isAutoplayOn, setIsAutoplayOn] = useState(true)
+  const [toastMessage, setToastMessage] = useState('')
+
+  const playTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    setIsMounted(true)
+    const savedTheme = localStorage.getItem('kmm_theme') || 'dark'
+    setIsDark(savedTheme === 'dark')
+
+    const auth = localStorage.getItem('kmm_auth_officer')
+    if (auth) {
+      const name = auth.split('@')[0]
+      setOfficerEmail(name.charAt(0).toUpperCase() + name.slice(1))
+    }
+
+    // Check hash for direct watch link
+    if (window.location.hash.startsWith('#watch-')) {
+      const vidId = window.location.hash.replace('#watch-', '')
+      const found = VIDEOS.find((v) => v.id === vidId)
+      if (found) {
+        startPlayingVideo(found)
+      }
+    }
+  }, [])
+
+  // Auto playback simulation
+  useEffect(() => {
+    if (isPlaying) {
+      playTimerRef.current = setInterval(() => {
+        setProgressPercent((prev) => {
+          if (prev >= 100) {
+            setIsPlaying(false)
+            if (isAutoplayOn) {
+              handlePlayNext()
+            }
+            return 0
+          }
+          return prev + 1
+        })
+      }, 500)
+    } else {
+      if (playTimerRef.current) clearInterval(playTimerRef.current)
+    }
+    return () => {
+      if (playTimerRef.current) clearInterval(playTimerRef.current)
+    }
+  }, [isPlaying, isAutoplayOn])
+
+  const toggleTheme = () => {
+    const next = !isDark
+    setIsDark(next)
+    localStorage.setItem('kmm_theme', next ? 'dark' : 'light')
+  }
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg)
+    setTimeout(() => setToastMessage(''), 3000)
+  }
+
+  const startPlayingVideo = (video: VideoItem) => {
+    setCurrentVideo(video)
+    setViewMode('watch')
+    setIsPlaying(true)
+    setProgressPercent(0)
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      window.location.hash = `watch-${video.id}`
+    }
+  }
+
+  const handlePlayNext = () => {
+    const currentIndex = VIDEOS.findIndex((v) => v.id === currentVideo.id)
+    const nextIndex = (currentIndex + 1) % VIDEOS.length
+    startPlayingVideo(VIDEOS[nextIndex])
+    showToast(`Autoplaying next: ${VIDEOS[nextIndex].title}`)
+  }
+
+  const filteredVideos = VIDEOS.filter((v) => {
+    const matchesCategory = activeFilter === 'all' || v.category === activeFilter
+    const matchesSearch =
+      v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      v.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      v.speaker.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      v.code.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
+
+  return (
+    <div
+      className={`min-h-screen transition-colors duration-300 font-sans ${
+        isDark ? 'bg-[#0B1120] text-[#F1F5F9]' : 'bg-[#F8FAFC] text-[#1E293B]'
+      }`}
+      style={{ fontFamily: 'Figtree, -apple-system, sans-serif' }}
+    >
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-full bg-slate-900 border border-amber-400 text-white text-xs font-bold shadow-2xl flex items-center gap-2 animate-in slide-in-from-bottom-4">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Sticky Header */}
+      <header
+        className={`sticky top-0 z-40 border-b backdrop-blur-md transition-colors ${
+          isDark ? 'bg-[#0B1120]/90 border-white/10' : 'bg-white/90 border-slate-200'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
+          {/* Brand */}
+          <div
+            onClick={() => setViewMode('catalog')}
+            className="flex items-center gap-3 cursor-pointer group shrink-0"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-md group-hover:scale-105 transition-transform">
+              ▶
+            </div>
+            <div>
+              <div
+                className="font-extrabold text-sm sm:text-base leading-tight tracking-tight"
+                style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+              >
+                KMM Policy & Governance
+              </div>
+              <div className="text-[11px] font-semibold text-amber-500 tracking-wide uppercase">
+                Videos On Demand
+              </div>
+            </div>
+          </div>
+
+          {/* Search Box */}
+          <div className="hidden md:flex flex-1 max-w-md mx-4 relative">
+            <svg
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by topic, speaker, or legal citation..."
+              className={`w-full pl-10 pr-4 py-2 rounded-full text-xs font-medium border outline-hidden transition-all ${
+                isDark
+                  ? 'bg-slate-900 border-white/10 text-white placeholder-slate-400 focus:border-amber-400'
+                  : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-500 focus:border-amber-500'
+              }`}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Navigation Actions */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button
+              onClick={() => {
+                setViewMode('catalog')
+                if (typeof window !== 'undefined') window.location.hash = ''
+              }}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                viewMode === 'catalog'
+                  ? 'bg-amber-500/15 text-amber-500 border border-amber-500/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              All Videos
+            </button>
+
+            <Link
+              href="/"
+              className="hidden lg:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition-colors"
+            >
+              &larr; KMM Home
+            </Link>
+
+            <Link
+              href="/ip-portal"
+              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-xs"
+            >
+              <span>IP Portal</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+
+            {/* Dark/Light toggle */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className={`size-8.5 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
+                isDark
+                  ? 'bg-slate-800/80 border-white/10 text-amber-400 hover:scale-105'
+                  : 'bg-white border-slate-200 text-slate-700 hover:scale-105 shadow-xs'
+              }`}
+            >
+              {isMounted && isDark ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="5" />
+                  <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Officer status pill */}
+            <div
+              className={`hidden sm:flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border text-xs font-semibold ${
+                isDark ? 'bg-slate-800/80 border-white/10 text-slate-200' : 'bg-slate-100 border-slate-300 text-slate-800'
+              }`}
+            >
+              <div className="size-6 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black text-[10px] flex items-center justify-center">
+                LO
+              </div>
+              <span className="truncate max-w-[100px]">{officerEmail}</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        {/* =========================================================================
+            WATCH VIEW: Full Theater Mode
+            ========================================================================= */}
+        {viewMode === 'watch' && (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            {/* Back to library banner */}
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <button
+                onClick={() => {
+                  setViewMode('catalog')
+                  if (typeof window !== 'undefined') window.location.hash = ''
+                }}
+                className="inline-flex items-center gap-2 text-xs font-bold text-amber-500 hover:text-amber-400 cursor-pointer"
+              >
+                &larr; Back to Complete Video Library
+              </button>
+              <span className="text-xs font-medium text-slate-400">
+                Playing: <b className="text-white">{currentVideo.code}</b> &middot; {currentVideo.res}
+              </span>
+            </div>
+
+            {/* Video Player + Recommended Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left 2 Columns: Video Cinema & Details */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Cinema Screen Box */}
+                <div
+                  className={`relative rounded-3xl overflow-hidden border shadow-2xl transition-all ${
+                    isTheaterExpanded ? 'lg:col-span-3' : ''
+                  } ${isDark ? 'bg-slate-950 border-white/10 shadow-black/80' : 'bg-slate-900 border-slate-800'}`}
+                  style={{
+                    background: currentVideo.gradient,
+                  }}
+                >
+                  {/* Atmospheric Glow */}
+                  <div
+                    className="absolute inset-0 pointer-events-none opacity-40"
+                    style={{ background: currentVideo.glow }}
+                  />
+
+                  {/* Stage Area */}
+                  <div className="relative aspect-video flex flex-col items-center justify-center p-8 select-none">
+                    {/* Big Center Play / Pause Button */}
+                    <button
+                      onClick={() => setIsPlaying(!isPlaying)}
+                      className="size-20 sm:size-24 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer z-10 border-4 border-white/30"
+                      aria-label={isPlaying ? 'Pause video' : 'Play video'}
+                    >
+                      {isPlaying ? (
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                          <rect x="6" y="4" width="4" height="16" rx="1" />
+                          <rect x="14" y="4" width="4" height="16" rx="1" />
+                        </svg>
+                      ) : (
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" className="ml-1">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                      )}
+                    </button>
+
+                    {/* Animated Soundwave Visualizer */}
+                    {isPlaying && (
+                      <div className="absolute bottom-20 flex items-end gap-1.5 h-10 opacity-60 pointer-events-none">
+                        <span className="w-1 bg-amber-400 rounded-full animate-pulse h-6" />
+                        <span className="w-1 bg-amber-400 rounded-full animate-bounce h-9" />
+                        <span className="w-1 bg-amber-400 rounded-full animate-pulse h-4" />
+                        <span className="w-1 bg-amber-400 rounded-full animate-bounce h-8" />
+                        <span className="w-1 bg-amber-400 rounded-full animate-pulse h-5" />
+                        <span className="w-1 bg-amber-400 rounded-full animate-bounce h-7" />
+                      </div>
+                    )}
+
+                    {/* Captions Overlay */}
+                    {isCaptionsOn && (
+                      <div className="absolute bottom-20 px-4 py-2 rounded-lg bg-black/80 text-white font-medium text-xs sm:text-sm text-center max-w-xl backdrop-blur-xs">
+                        [AUDIO]: Statutory clearance protocols must be verified before satellite release...
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Player Controls Bar */}
+                  <div className="relative bg-slate-950/90 border-t border-white/10 px-5 py-3 flex flex-col gap-2.5 z-20">
+                    {/* Scrub Progress Bar */}
+                    <div
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect()
+                        const clickX = e.clientX - rect.left
+                        const newPercent = Math.min(100, Math.max(0, (clickX / rect.width) * 100))
+                        setProgressPercent(newPercent)
+                      }}
+                      className="relative w-full h-2 bg-white/20 hover:h-2.5 rounded-full cursor-pointer transition-all overflow-hidden"
+                    >
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+
+                    {/* Buttons row */}
+                    <div className="flex items-center justify-between text-xs text-white">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setIsPlaying(!isPlaying)}
+                          className="hover:text-amber-400 cursor-pointer font-bold"
+                        >
+                          {isPlaying ? 'Pause' : 'Play'}
+                        </button>
+                        <button
+                          onClick={() => setIsMuted(!isMuted)}
+                          className="hover:text-amber-400 cursor-pointer text-slate-300"
+                        >
+                          {isMuted ? 'Unmute' : 'Mute'}
+                        </button>
+                        <span className="text-slate-400 text-[11px]">
+                          {Math.floor((progressPercent / 100) * 18)}:
+                          {Math.floor(((progressPercent / 100) * 45) % 60)
+                            .toString()
+                            .padStart(2, '0')}{' '}
+                          / {currentVideo.duration}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setIsCaptionsOn(!isCaptionsOn)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-colors cursor-pointer ${
+                            isCaptionsOn
+                              ? 'bg-amber-500 text-slate-950 border-amber-400'
+                              : 'border-white/30 text-white/70 hover:text-white'
+                          }`}
+                        >
+                          CC
+                        </button>
+
+                        <button
+                          onClick={() => setIsTheaterExpanded(!isTheaterExpanded)}
+                          className="text-slate-400 hover:text-white text-xs cursor-pointer"
+                        >
+                          {isTheaterExpanded ? 'Normal' : 'Expand'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Video Info Header */}
+                <div
+                  className={`p-6 sm:p-8 rounded-3xl border transition-colors ${
+                    isDark ? 'bg-slate-900/60 border-white/10' : 'bg-white border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-black uppercase bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                      {currentVideo.code}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-400">{currentVideo.categoryLabel}</span>
+                    <span className="text-xs font-bold text-emerald-400 ml-auto">{currentVideo.res}</span>
+                  </div>
+
+                  <h1
+                    className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-4 leading-snug"
+                    style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                  >
+                    {currentVideo.title}
+                  </h1>
+
+                  <div className="flex items-center gap-3 pb-6 mb-6 border-b border-white/10">
+                    <div
+                      className="size-10 rounded-full flex items-center justify-center font-bold text-xs text-white shadow-md"
+                      style={{ background: currentVideo.avatarBg }}
+                    >
+                      {currentVideo.initials}
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm">{currentVideo.speaker}</div>
+                      <div className="text-xs text-slate-400">{currentVideo.speakerRole}</div>
+                    </div>
+                  </div>
+
+                  <p className="text-sm leading-relaxed text-slate-300 dark:text-slate-300 mb-6">
+                    {currentVideo.desc}
+                  </p>
+
+                  {/* Key Compliance Directives */}
+                  <div className="mb-6">
+                    <h3
+                      className="text-sm font-bold uppercase tracking-wider text-amber-500 mb-3"
+                      style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                    >
+                      Key Compliance Directives
+                    </h3>
+                    <ul className="space-y-2.5">
+                      {currentVideo.points.map((pt, i) => (
+                        <li
+                          key={i}
+                          className={`flex items-start gap-3 p-3 rounded-xl border text-xs leading-relaxed ${
+                            isDark ? 'bg-slate-800/40 border-white/5' : 'bg-slate-50 border-slate-200'
+                          }`}
+                        >
+                          <span className="size-5 rounded-full bg-amber-500/15 text-amber-500 font-bold flex items-center justify-center shrink-0 mt-0.5">
+                            ✓
+                          </span>
+                          <span>{pt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Legal Citations */}
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                      Statutory Citations & Frameworks
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {currentVideo.citations.map((c, i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                        >
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Up Next Recommended Videos */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-2">
+                  <h2
+                    className="font-extrabold text-base tracking-tight"
+                    style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                  >
+                    Up Next in Governance
+                  </h2>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-400 cursor-pointer">
+                    <span>Autoplay</span>
+                    <input
+                      type="checkbox"
+                      checked={isAutoplayOn}
+                      onChange={(e) => setIsAutoplayOn(e.target.checked)}
+                      className="rounded accent-amber-500"
+                    />
+                  </label>
+                </div>
+
+                <div className="space-y-3">
+                  {VIDEOS.filter((v) => v.id !== currentVideo.id).map((vid) => (
+                    <div
+                      key={vid.id}
+                      onClick={() => startPlayingVideo(vid)}
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer group flex gap-3 ${
+                        isDark
+                          ? 'bg-slate-900/50 border-white/5 hover:border-amber-400/40 hover:bg-slate-800/50'
+                          : 'bg-white border-slate-200 hover:border-amber-500/40 hover:bg-slate-50'
+                      }`}
+                    >
+                      {/* Mini Thumbnail */}
+                      <div
+                        className="w-24 h-16 rounded-xl flex items-center justify-center shrink-0 relative overflow-hidden text-xs font-bold shadow-xs group-hover:scale-102 transition-transform"
+                        style={{ background: vid.gradient }}
+                      >
+                        <span className="size-6 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-[10px] shadow-md">
+                          ▶
+                        </span>
+                        <span className="absolute bottom-1 right-1 text-[9px] font-mono bg-black/70 px-1 rounded text-white">
+                          {vid.duration}
+                        </span>
+                      </div>
+
+                      {/* Info */}
+                      <div className="min-w-0 flex-1 flex flex-col justify-center">
+                        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">
+                          {vid.code}
+                        </span>
+                        <h4 className="text-xs font-bold leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">
+                          {vid.title}
+                        </h4>
+                        <span className="text-[11px] text-slate-400 mt-1 truncate">{vid.speaker}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            CATALOG VIEW: Hero Masterclass + Filter Pills + Video Grid
+            ========================================================================= */}
+        {viewMode === 'catalog' && (
+          <div className="space-y-12 animate-in fade-in duration-300">
+            {/* Featured Spotlight Masterclass Hero Banner */}
+            <section
+              className={`rounded-3xl border overflow-hidden p-8 sm:p-12 relative shadow-2xl transition-all ${
+                isDark
+                  ? 'bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-950/60 border-white/10'
+                  : 'bg-gradient-to-r from-white via-slate-50 to-amber-50/50 border-slate-200'
+              }`}
+            >
+              <div className="max-w-3xl relative z-10 space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-500">
+                  <span>⭐</span> Featured Masterclass
+                </div>
+
+                <h1
+                  className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight"
+                  style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                >
+                  Statutory Broadcast Content Standards & Pre-Release Clearances
+                </h1>
+
+                <p className="text-sm sm:text-base leading-relaxed text-slate-400 dark:text-slate-300">
+                  Complete executive briefing for production heads, animation leads, and directors. Learn how to audit scripts, character depictions, and audio mixes against international children's television covenants.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-400 pt-2">
+                  <div className="flex items-center gap-1.5">
+                    <span>⏱️</span> 18:45 mins
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span>👤</span> Barrister Lillian Okoye
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span>🏅</span> 4K Ultra HD Master
+                  </div>
+                </div>
+
+                <div className="pt-4 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => startPlayingVideo(VIDEOS[0])}
+                    className="px-6 py-3.5 rounded-full font-extrabold text-sm flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-lg hover:scale-102 active:scale-98 transition-all cursor-pointer"
+                    style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    <span>Watch Full Masterclass</span>
+                  </button>
+
+                  <Link
+                    href="/ip-portal"
+                    className={`px-5 py-3.5 rounded-full font-bold text-xs border transition-colors ${
+                      isDark
+                        ? 'border-white/20 text-white hover:bg-white/10'
+                        : 'border-slate-300 text-slate-800 hover:bg-slate-100'
+                    }`}
+                  >
+                    Open IP Rights Management &rarr;
+                  </Link>
+                </div>
+              </div>
+            </section>
+
+            {/* Category Filter Pills & Search */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+              <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveFilter(cat.id)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                      activeFilter === cat.id
+                        ? 'bg-amber-500 text-slate-950 shadow-md scale-102'
+                        : isDark
+                        ? 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white hover:border-white/20'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-xs font-bold text-slate-400 shrink-0">
+                Showing {filteredVideos.length} of {VIDEOS.length} Masterclasses
+              </div>
+            </div>
+
+            {/* Video Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredVideos.map((vid) => (
+                <div
+                  key={vid.id}
+                  onClick={() => startPlayingVideo(vid)}
+                  className={`rounded-2xl border overflow-hidden flex flex-col transition-all cursor-pointer group hover:-translate-y-1 hover:shadow-2xl ${
+                    isDark
+                      ? 'bg-slate-900/60 border-white/10 hover:border-amber-400/50 shadow-black/40'
+                      : 'bg-white border-slate-200 hover:border-amber-500/50 shadow-slate-200/50'
+                  }`}
+                >
+                  {/* Card Thumbnail */}
+                  <div
+                    className="h-48 relative flex items-center justify-center p-4 overflow-hidden"
+                    style={{ background: vid.gradient }}
+                  >
+                    {/* Play circle */}
+                    <div className="size-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-115 transition-transform z-10">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    </div>
+
+                    {/* Tags overlay */}
+                    <span className="absolute top-3 left-3 text-[10px] font-mono font-bold bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded text-amber-400 border border-amber-400/30">
+                      {vid.code}
+                    </span>
+
+                    <span className="absolute bottom-3 right-3 text-[10px] font-mono font-bold bg-black/70 px-2 py-0.5 rounded text-white">
+                      {vid.duration}
+                    </span>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-black uppercase text-amber-500 tracking-wider">
+                          {vid.categoryLabel}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-semibold ml-auto">{vid.res}</span>
+                      </div>
+
+                      <h3
+                        className="text-base font-extrabold leading-snug group-hover:text-amber-500 transition-colors line-clamp-2 mb-2"
+                        style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                      >
+                        {vid.title}
+                      </h3>
+
+                      <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">{vid.desc}</p>
+                    </div>
+
+                    {/* Speaker footer */}
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="size-6 rounded-full flex items-center justify-center font-bold text-[10px] text-white"
+                          style={{ background: vid.avatarBg }}
+                        >
+                          {vid.initials}
+                        </div>
+                        <span className="font-semibold text-slate-300 truncate max-w-[140px]">
+                          {vid.speaker}
+                        </span>
+                      </div>
+
+                      <span className="font-bold text-amber-500 group-hover:translate-x-1 transition-transform">
+                        Watch &rarr;
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer
+        className={`border-t py-12 mt-16 transition-colors ${
+          isDark ? 'bg-slate-950 border-white/10 text-slate-400' : 'bg-white border-slate-200 text-slate-600'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs">
+          <div>
+            <div className="font-bold text-sm text-white mb-1">
+              Kiddies Media Ministry (KMM) Academy
+            </div>
+            <p className="text-slate-400">
+              Official institutional training & broadcast compliance video repository.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-6 font-bold">
+            <Link href="/" className="hover:text-amber-400 transition-colors">
+              KMM Home
+            </Link>
+            <Link href="/auth" className="hover:text-amber-400 transition-colors">
+              Officer Sign In
+            </Link>
+            <Link href="/ip-portal" className="text-amber-500 hover:text-amber-400 transition-colors">
+              Launch IP Portal
+            </Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}

@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Governance & Legal Videos on Demand | KMM Academy</title>
+  <meta name="description" content="Kiddies Media Ministry on-demand video library for governance, child media protection, broadcast standards, and legal compliance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B1120;
+      --bg-surface: #131E35;
+      --surface-card: #182747;
+      --surface-elevated: #1F335C;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(245, 158, 11, 0.4);
+      --fg: #F1F5F9;
+      --fg-heading: #FFFFFF;
+      --muted: #94A3B8;
+      
+      --gold: #F59E0B;
+      --gold-hover: #D97706;
+      --gold-light: rgba(245, 158, 11, 0.15);
+      --orange: #F97316;
+      --blue: #38BDF8;
+      --blue-light: rgba(56, 189, 248, 0.15);
+      --green: #10B981;
+      --green-light: rgba(16, 185, 129, 0.15);
+      
+      --font-display: "Bricolage Grotesque", -apple-system, sans-serif;
+      --font-body: "Figtree", -apple-system, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-pill: 9999px;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 20px 45px -10px rgba(0, 0, 0, 0.45);
+      --shadow-glow: 0 0 50px -10px rgba(245, 158, 11, 0.3);
+      --transition: all 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      --bg: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --surface-card: #F1F5F9;
+      --surface-elevated: #E2E8F0;
+      --border: rgba(15, 23, 42, 0.08);
+      --border-hover: rgba(217, 119, 6, 0.5);
+      --fg: #1E293B;
+      --fg-heading: #0F172A;
+      --muted: #64748B;
+      --gold: #D97706;
+      --gold-hover: #B45309;
+      --gold-light: rgba(217, 119, 6, 0.12);
+      --orange: #EA580C;
+      --blue: #0284C7;
+      --blue-light: rgba(2, 132, 199, 0.12);
+      --green: #059669;
+      --green-light: rgba(5, 150, 105, 0.12);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 40px -10px rgba(15, 23, 42, 0.12);
+      --shadow-glow: 0 0 40px -10px rgba(217, 119, 6, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Sticky Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(11, 17, 32, 0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    [data-theme="light"] .site-header {
+      background: rgba(248, 250, 252, 0.9);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      gap: 20px;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      color: #0B1120;
+      display: grid;
+      place-items: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+    .brand-wrap:hover .brand-icon {
+      transform: scale(1.05);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--fg-heading);
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+    }
+
+    .brand-subtitle {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+    }
+
+    /* Live Search */
+    .search-box-wrap {
+      flex: 1;
+      max-width: 460px;
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 16px 10px 42px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-light);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-link {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-link:hover {
+      color: var(--fg-heading);
+      background: var(--bg-surface);
+    }
+
+    .theme-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .theme-btn:hover {
+      transform: scale(1.06);
+      border-color: var(--gold);
+    }
+
+    .officer-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+    }
+    .officer-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #38BDF8, #1E40AF);
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+    }
+    .officer-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--fg-heading);
+    }
+
+    /* ==========================================================================
+       VIEW 1: CATALOG VIEW (BILLBOARD & VIDEO GRID)
+       ========================================================================== */
+    .view-section {
+      display: none;
+      animation: fadeInView 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeInView {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Featured Billboard */
+    .featured-hero {
+      padding: 32px 0 24px;
+    }
+
+    .featured-card {
+      position: relative;
+      background: linear-gradient(135deg, #131E35 0%, #1A2B4C 60%, #0F172A 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+    }
+    [data-theme="light"] .featured-card {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%);
+    }
+
+    .featured-content {
+      padding: 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .featured-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--gold-light);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--gold);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+      width: fit-content;
+    }
+
+    .featured-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--fg-heading);
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+
+    .featured-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .featured-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .featured-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-play-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 26px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      color: #0B1120;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+      transition: var(--transition);
+    }
+    .btn-play-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 22px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-card);
+      border-color: var(--border-hover);
+    }
+
+    .featured-media {
+      position: relative;
+      min-height: 340px;
+      background: radial-gradient(circle at 70% 30%, #1E3A8A 0%, #0F172A 80%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .featured-media:hover .play-circle-lg {
+      transform: scale(1.12);
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.6);
+    }
+
+    .cinema-backdrop {
+      position: absolute;
+      inset: 0;
+      opacity: 0.45;
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.5) 0%, transparent 60%);
+    }
+
+    .play-circle-lg {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.95);
+      color: #0B1120;
+      display: grid;
+      place-items: center;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      transition: var(--transition);
+    }
+
+    .time-stamp-chip {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      z-index: 2;
+    }
+
+    /* Filter Chips Bar */
+    .filter-section {
+      padding: 16px 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .category-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .category-pills::-webkit-scrollbar {
+      display: none;
+    }
+
+    .pill-btn {
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+    .pill-btn:hover {
+      color: var(--fg-heading);
+      border-color: var(--border-hover);
+    }
+    .pill-btn.active {
+      background: var(--gold);
+      color: #0B1120;
+      border-color: var(--gold);
+      font-weight: 800;
+      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+    }
+
+    .video-count-info {
+      font-size: 0.85rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Video Library Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 28px;
+      padding-bottom: 64px;
+    }
+
+    .video-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    .video-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-thumb {
+      position: relative;
+      height: 200px;
+      background: #0F172A;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .play-overlay {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.95);
+      color: #0B1120;
+      display: grid;
+      place-items: center;
+      opacity: 0.9;
+      transform: scale(0.95);
+      transition: var(--transition);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+    .video-card:hover .play-overlay {
+      opacity: 1;
+      transform: scale(1.1);
+      background: var(--gold);
+    }
+
+    .duration-badge {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(11, 17, 32, 0.85);
+      backdrop-filter: blur(6px);
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+    }
+
+    .card-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--fg-heading);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .card-speaker {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--blue);
+      margin-bottom: 12px;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: auto;
+    }
+
+    .watch-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      transition: var(--transition);
+    }
+    .video-card:hover .watch-cta {
+      transform: translateX(4px);
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--border);
+    }
+
+    /* ==========================================================================
+       VIEW 2: FULL-PAGE CINEMA WATCH VIEW (PLAYER + DETAILS + RECOMMENDED)
+       ========================================================================== */
+    .watch-page-container {
+      padding: 24px 0 64px;
+    }
+
+    /* Breadcrumbs navigation */
+    .watch-breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .back-btn-pill:hover {
+      background: var(--surface-card);
+      border-color: var(--gold);
+      transform: translateX(-3px);
+    }
+
+    .crumb-sep {
+      color: var(--border);
+    }
+
+    .crumb-active {
+      color: var(--gold);
+      font-weight: 600;
+      max-width: 480px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Ambient Cinema Wrapper */
+    .cinema-wrapper {
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    /* Dynamic Ambient Glow Behind Player */
+    .ambient-glow-backdrop {
+      position: absolute;
+      inset: -30px -10px -30px -10px;
+      border-radius: var(--radius-lg);
+      background: radial-gradient(circle at 50% 40%, rgba(245, 158, 11, 0.28) 0%, rgba(56, 189, 248, 0.16) 40%, transparent 75%);
+      filter: blur(55px);
+      z-index: 0;
+      pointer-events: none;
+      transition: background 0.6s ease;
+    }
+
+    /* Cinema Screen Player */
+    .stunning-theater-player {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 720px;
+      background: #000000;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    .stunning-theater-player.theater-expanded {
+      max-height: 840px;
+      border-color: var(--gold);
+      box-shadow: 0 0 70px rgba(245, 158, 11, 0.35);
+    }
+
+    /* Top Video Watermark & Status */
+    .theater-top-bar {
+      position: relative;
+      z-index: 5;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .theater-watermark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.75);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .pulse-live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #EF4444;
+      box-shadow: 0 0 10px #EF4444;
+      animation: livePulse 1.6s infinite;
+    }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+
+    .resolution-badge {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: 0.05em;
+    }
+
+    /* Screen Canvas & Visualizer */
+    .theater-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background-size: cover;
+      background-position: center;
+      transition: background 0.5s ease;
+    }
+
+    /* Soundwave Audio Visualizer in player */
+    .audio-visualizer-bars {
+      position: absolute;
+      bottom: 80px;
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 36px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .audio-bar {
+      width: 4px;
+      background: var(--gold);
+      border-radius: 2px;
+      animation: barJump 1.2s infinite ease-in-out;
+    }
+    .audio-bar:nth-child(2) { animation-delay: 0.2s; }
+    .audio-bar:nth-child(3) { animation-delay: 0.4s; }
+    .audio-bar:nth-child(4) { animation-delay: 0.1s; }
+    .audio-bar:nth-child(5) { animation-delay: 0.5s; }
+    .audio-bar:nth-child(6) { animation-delay: 0.3s; }
+    @keyframes barJump {
+      0%, 100% { height: 6px; }
+      50% { height: 32px; }
+    }
+
+    /* Big Center Play Button Overlay */
+    .center-play-button {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.95);
+      color: #0B1120;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      z-index: 4;
+      transition: var(--transition);
+      border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+    .center-play-button:hover {
+      transform: scale(1.12);
+      background: #FBBF24;
+      box-shadow: 0 0 50px rgba(245, 158, 11, 0.8);
+    }
+
+    /* Closed Captions Display */
+    .captions-overlay {
+      position: absolute;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(6px);
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      text-align: center;
+      max-width: 80%;
+      z-index: 4;
+      pointer-events: none;
+      display: none;
+    }
+    .captions-overlay.active {
+      display: block;
+    }
+
+    /* Video Player Controls Bar */
+    .theater-controls-bar {
+      position: relative;
+      z-index: 6;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 65%, transparent 100%);
+      padding: 24px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .timeline-scrubber {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      position: relative;
+      transition: height 0.15s ease;
+    }
+    .timeline-scrubber:hover {
+      height: 9px;
+    }
+    .scrubber-progress {
+      height: 100%;
+      width: 24%;
+      background: linear-gradient(90deg, var(--orange), var(--gold));
+      border-radius: var(--radius-pill);
+      position: relative;
+    }
+    .scrubber-handle {
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      transform: translateY(-50%) scale(0);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+      transition: transform 0.15s ease;
+    }
+    .timeline-scrubber:hover .scrubber-handle {
+      transform: translateY(-50%) scale(1);
+    }
+
+    .controls-inner-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #FFFFFF;
+      gap: 16px;
+    }
+
+    .player-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .icon-ctrl-btn {
+      background: none;
+      border: none;
+      color: #FFFFFF;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: var(--transition);
+      opacity: 0.9;
+    }
+    .icon-ctrl-btn:hover {
+      opacity: 1;
+      transform: scale(1.12);
+      color: var(--gold);
+    }
+
+    .time-stamp-display {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+    }
+
+    .volume-slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .volume-range {
+      width: 70px;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .speed-pill-btn {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #FFFFFF;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .speed-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .cc-btn {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 3px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: none;
+      color: #FFFFFF;
+      cursor: pointer;
+    }
+    .cc-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #0B1120;
+    }
+
+    /* Watch Page Layout Grid (2 Columns: Left Details, Right Recommended) */
+    .watch-layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 36px;
+      align-items: start;
+    }
+
+    /* Left Details Area */
+    .watch-main-details {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .watch-header-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .watch-category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      background: var(--gold-light);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: var(--gold);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+    }
+
+    .watch-video-title {
+      font-family: var(--font-display);
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--fg-heading);
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+      margin-bottom: 16px;
+    }
+
+    /* Speaker Profile Row */
+    .speaker-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .speaker-info-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .speaker-photo-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      color: #0B1120;
+      font-weight: 800;
+      font-size: 1.1rem;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      flex-shrink: 0;
+    }
+
+    .speaker-name-title b {
+      display: block;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--fg-heading);
+    }
+    .speaker-name-title span {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .video-action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .action-btn-sm:hover {
+      background: var(--surface-elevated);
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
+    }
+    .action-btn-sm.primary-accent {
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      color: #0B1120;
+      font-weight: 800;
+      border: none;
+    }
+    .action-btn-sm.primary-accent:hover {
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    }
+
+    .video-description-text {
+      font-size: 0.98rem;
+      line-height: 1.68;
+      color: var(--fg);
+    }
+
+    /* Core Directives Checklist Card */
+    .directives-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px 32px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-headline {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--fg-heading);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .directives-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .directive-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      padding: 12px 16px;
+      background: var(--surface-card);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .check-icon-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--gold-light);
+      color: var(--gold);
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Statutory Citations Tag Cloud */
+    .citations-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .citation-tag {
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      color: var(--blue);
+    }
+
+    /* Right Sidebar: Recommended Videos */
+    .recommended-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .up-next-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+    }
+
+    .up-next-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--fg-heading);
+    }
+
+    .autoplay-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .toggle-switch {
+      width: 36px;
+      height: 20px;
+      background: var(--gold);
+      border-radius: 20px;
+      position: relative;
+      transition: background 0.2s;
+    }
+    .toggle-switch::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 16px;
+      height: 16px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    /* Recommended Video Card */
+    .rec-video-card {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      padding: 8px;
+      transition: var(--transition);
+      position: relative;
+    }
+    .rec-video-card:hover {
+      border-color: var(--border-hover);
+      transform: translateX(4px);
+      box-shadow: var(--shadow-sm);
+      background: var(--surface-card);
+    }
+    .rec-video-card.active-now {
+      border-color: var(--gold);
+      background: var(--surface-card);
+    }
+
+    .rec-thumb-box {
+      position: relative;
+      width: 100%;
+      height: 86px;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0B1120;
+    }
+
+    .rec-duration {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.85);
+      color: #FFFFFF;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .rec-details-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .rec-category-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .rec-card-title {
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--fg-heading);
+      line-height: 1.3;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .rec-speaker-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Toast Notification */
+    .toast-box {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-surface);
+      color: var(--fg-heading);
+      border: 1px solid var(--gold);
+      padding: 12px 20px;
+      border-radius: var(--radius-pill);
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+    .toast-box.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      background: var(--bg-surface);
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Responsive Queries */
+    @media (max-width: 1080px) {
+      .watch-layout-grid {
+        grid-template-columns: 1fr;
+      }
+      .recommended-sidebar {
+        margin-top: 12px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .featured-card {
+        grid-template-columns: 1fr;
+      }
+      .featured-content {
+        padding: 32px 24px;
+      }
+      .featured-media {
+        min-height: 260px;
+      }
+      .featured-title {
+        font-size: 1.7rem;
+      }
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+      .search-box-wrap {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="brand-wrap" onclick="navigateToCatalog()">
+          <div class="brand-icon">▶</div>
+          <div class="brand-text">
+            <span class="brand-title">KMM Policy & Governance</span>
+            <span class="brand-subtitle">Videos On Demand</span>
+          </div>
+        </div>
+
+        <!-- Live Instant Search -->
+        <div class="search-box-wrap">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="videoSearchInput" class="search-input" placeholder="Search by topic, speaker, or keyword..." aria-label="Search on-demand videos">
+        </div>
+
+        <div class="header-actions">
+          <button id="browseCatalogBtn" class="header-link" style="background: none; border: none; cursor: pointer;" onclick="navigateToCatalog()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            All Videos
+          </button>
+          <a href="Kiddies%20Media%20Ministry.html" class="header-link">
+            &larr; KMM Home
+          </a>
+          <button id="themeToggleBtn" class="theme-btn" title="Toggle Theme" aria-label="Toggle dark/light theme">
+            <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+          </button>
+          <div class="officer-pill">
+            <div class="officer-avatar">LO</div>
+            <span class="officer-name">Barrister Lillian</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="container">
+
+    <!-- ==========================================================================
+         VIEW 1: CATALOG OVERVIEW
+         ========================================================================== -->
+    <div id="catalogView" class="view-section active">
+
+      <!-- Featured Spotlight Masterclass -->
+      <section class="featured-hero">
+        <div class="featured-card">
+          <div class="featured-content">
+            <div class="featured-badge">
+              <span>⭐</span> Featured Masterclass
+            </div>
+            <h1 class="featured-title">Statutory Broadcast Content Standards & Pre-Release Clearances</h1>
+            <p class="featured-desc">
+              Complete executive briefing for production heads, animation leads, and directors. Learn how to audit scripts, character depictions, and audio mixes against international children's television covenants.
+            </p>
+            <div class="featured-meta">
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>18:45</span>
+              </div>
+              <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Barrister Lillian Okoye &middot; Legal Counsel</span>
+              </div>
+            </div>
+            <div class="featured-actions">
+              <button class="btn-play-primary" onclick="openWatchPage('vid-1')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Watch Full Video Now</span>
+              </button>
+              <button class="btn-secondary" onclick="openWatchPage('vid-1')">
+                <span>View Directives & Brief</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="featured-media" onclick="openWatchPage('vid-1')" title="Watch Featured Masterclass">
+            <div class="cinema-backdrop"></div>
+            <div class="play-circle-lg">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            </div>
+            <div class="time-stamp-chip">18:45 HD</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filter Pills & Header -->
+      <section class="filter-section">
+        <div class="category-pills" id="categoryPills">
+          <button class="pill-btn active" data-category="all">All Videos (8)</button>
+          <button class="pill-btn" data-category="protection">Child Protection & Safety</button>
+          <button class="pill-btn" data-category="copyright">Copyright & IP</button>
+          <button class="pill-btn" data-category="broadcast">Broadcast Standards</button>
+          <button class="pill-btn" data-category="doctrinal">Scriptural Review</button>
+          <button class="pill-btn" data-category="merchandising">Merchandising & Contracts</button>
+        </div>
+        <div class="video-count-info" id="videoCountDisplay">Showing 8 on-demand videos</div>
+      </section>
+
+      <!-- Video Grid -->
+      <section class="video-grid" id="videoGrid">
+        <!-- Dynamically injected via JavaScript -->
+      </section>
+
+    </div>
+
+
+    <!-- ==========================================================================
+         VIEW 2: FULL-PAGE CINEMA WATCH VIEW
+         ========================================================================== -->
+    <div id="watchPageView" class="view-section">
+      <div class="watch-page-container">
+
+        <!-- Breadcrumb Bar -->
+        <nav class="watch-breadcrumbs" aria-label="Breadcrumb">
+          <button class="back-btn-pill" onclick="navigateToCatalog()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            <span>Back to Video Library</span>
+          </button>
+          <span class="crumb-sep">/</span>
+          <span id="crumbCategory">Broadcast Standards</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-active" id="crumbTitle">Video Title</span>
+        </nav>
+
+        <!-- Ambient Theater Player Container -->
+        <div class="cinema-wrapper">
+          <div class="ambient-glow-backdrop" id="ambientBackdrop"></div>
+
+          <div class="stunning-theater-player" id="theaterPlayerBox">
+            
+            <!-- Top Overlay Bar -->
+            <div class="theater-top-bar">
+              <div class="theater-watermark">
+                <span class="pulse-live-dot"></span>
+                <span>KMM Directorate of Legal & Broadcast Standards</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="resolution-badge" id="playerResBadge">4K ULTRA HD</span>
+                <span class="resolution-badge" style="background: rgba(245, 158, 11, 0.3); color: var(--gold);" id="playerVideoIdBadge">LAW-204</span>
+              </div>
+            </div>
+
+            <!-- Screen Canvas with Center Play Button -->
+            <div class="theater-canvas" id="playerCanvas" onclick="togglePlayState()">
+              <!-- Simulated sound wave visualizer -->
+              <div class="audio-visualizer-bars" id="audioVisualizer">
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+              </div>
+
+              <!-- Big Central Play Button -->
+              <div class="center-play-button" id="centerPlayBtn">
+                <svg id="centerPlaySvg" width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+              </div>
+
+              <!-- Closed Captions Overlay -->
+              <div class="captions-overlay" id="captionsBox">
+                [CC] "All children's broadcast masters require mandatory pre-release legal certification."
+              </div>
+            </div>
+
+            <!-- Cinema Glassmorphism Controls Bar -->
+            <div class="theater-controls-bar">
+              <!-- Timeline Scrubber Track -->
+              <div class="timeline-scrubber" id="timelineScrubber" onclick="scrubVideo(event)">
+                <div class="scrubber-progress" id="scrubberFill">
+                  <div class="scrubber-handle"></div>
+                </div>
+              </div>
+
+              <div class="controls-inner-row">
+                <!-- Left Controls: Play, Skip, Volume, Timestamp -->
+                <div class="player-btn-group">
+                  <button class="icon-ctrl-btn" id="playBtn" onclick="togglePlayState()" title="Play/Pause (Space)">
+                    <svg id="playIconSvg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                  </button>
+                  <button class="icon-ctrl-btn" onclick="skipTime(-10)" title="Rewind 10s (J)">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                  </button>
+                  <button class="icon-ctrl-btn" onclick="skipTime(10)" title="Forward 10s (L)">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  </button>
+
+                  <div class="volume-slider-wrap">
+                    <button class="icon-ctrl-btn" onclick="toggleMute()" title="Mute/Unmute (M)">
+                      <svg id="volumeIcon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                    </button>
+                    <input type="range" class="volume-range" id="volumeSlider" min="0" max="1" step="0.05" value="0.85" onchange="adjustVolume(this.value)">
+                  </div>
+
+                  <span class="time-stamp-display" id="timeDisplay">04:15 / 18:45</span>
+                </div>
+
+                <!-- Right Controls: Speed, CC, Theater, Fullscreen -->
+                <div class="player-btn-group">
+                  <button class="cc-btn" id="ccToggleBtn" onclick="toggleCaptions()" title="Toggle Subtitles [CC]">
+                    CC
+                  </button>
+
+                  <select class="speed-pill-btn" id="speedSelect" onchange="changeSpeed(this.value)" title="Playback Speed">
+                    <option value="0.75">0.75x</option>
+                    <option value="1" selected>1.0x Normal</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2.0x</option>
+                  </select>
+
+                  <button class="icon-ctrl-btn" onclick="toggleTheaterMode()" title="Toggle Theater Mode (T)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
+                  </button>
+
+                  <button class="icon-ctrl-btn" onclick="toggleFullScreen()" title="Full Screen (F)">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Two-Column Layout: Left Video Details, Right Up Next / Recommended -->
+        <div class="watch-layout-grid">
+          
+          <!-- LEFT: Main Video Details & Directives -->
+          <div class="watch-main-details">
+            
+            <div class="watch-header-card">
+              <span class="watch-category-badge" id="watchCategoryBadge">Broadcast Standards</span>
+              <h1 class="watch-video-title" id="watchVideoTitle">Video Title</h1>
+
+              <div class="speaker-meta-bar">
+                <div class="speaker-info-block">
+                  <div class="speaker-photo-avatar" id="watchSpeakerAvatar">LO</div>
+                  <div class="speaker-name-title">
+                    <b id="watchSpeakerName">Barrister Lillian Okoye</b>
+                    <span id="watchSpeakerRole">Head of Legal & Policy Directorate</span>
+                  </div>
+                </div>
+
+                <div class="video-action-buttons">
+                  <button class="action-btn-sm" onclick="toggleLike(this)" title="Mark as helpful">
+                    <span>❤️</span>
+                    <span id="likeCount">142</span>
+                  </button>
+                  <button class="action-btn-sm primary-accent" onclick="downloadPolicyPdf()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Download Policy Brief (PDF)</span>
+                  </button>
+                  <button class="action-btn-sm" onclick="copyShareUrl()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    <span>Share</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="video-description-text" id="watchVideoDesc">
+                Comprehensive breakdown of pre-release legal scrutiny, technical defect logs, and broadcast compliance checklists for Loveworld children animations.
+              </div>
+            </div>
+
+            <!-- Core Institutional Directives Card -->
+            <div class="directives-card">
+              <h3 class="section-headline">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Statutory Compliance Directives & Checkpoints</span>
+              </h3>
+
+              <ul class="directives-list" id="watchDirectivesList">
+                <!-- Dynamically populated -->
+              </ul>
+
+              <div class="citations-row">
+                <span style="font-size: 0.8rem; font-weight: 700; color: var(--muted);">Statutory Citations:</span>
+                <span class="citation-tag" id="tagCitation1">NBC Broadcasting Code § 4.2.1</span>
+                <span class="citation-tag" id="tagCitation2">COPPA Rule 16 C.F.R. Part 312</span>
+                <span class="citation-tag" id="tagCitation3">WIPO Copyright Treaty Art. 6</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT: Sticky Recommended Videos Sidebar -->
+          <aside class="recommended-sidebar">
+            <div class="up-next-header">
+              <h3 class="up-next-title">Recommended Videos</h3>
+              <div class="autoplay-toggle-wrap" onclick="toggleAutoplay()" title="Automatically play next video">
+                <span>Autoplay</span>
+                <div class="toggle-switch" id="autoplaySwitch"></div>
+              </div>
+            </div>
+
+            <!-- List of Recommended Video Cards -->
+            <div id="recommendedList" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Populated via JavaScript -->
+            </div>
+          </aside>
+
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast Notification Box -->
+  <div id="toastBox" class="toast-box">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toastMsg">Action completed successfully</span>
+  </div>
+
+  <!-- Minimal Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>&copy; 2026 Kiddies Media Ministry &middot; Legal, Governance & Policy Directorate.</p>
+      <div style="display: flex; gap: 18px;">
+        <a href="Kiddies%20Media%20Ministry.html">KMM Official Website</a>
+        <a href="auth.html">Switch Officer Sign In</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Complete Institutional On-Demand Video Catalog Data
+    const VIDEOS = [
+      {
+        id: 'vid-1',
+        code: 'GOV-101',
+        title: 'Statutory Broadcast Content Standards & Pre-Release Clearances',
+        category: 'broadcast',
+        categoryLabel: 'Broadcast Standards',
+        duration: '18:45',
+        speaker: 'Barrister Lillian Okoye',
+        speakerRole: 'Head of Legal & Policy Directorate',
+        initials: 'LO',
+        avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
+        res: '4K ULTRA HD',
+        desc: 'Comprehensive breakdown of pre-release legal scrutiny, technical defect logs, and broadcast compliance checklists for Loveworld children animations. Learn how directors and editorial leads audit cuts before satellite uplink.',
+        gradient: 'linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%)',
+        glow: 'radial-gradient(circle at 50% 40%, rgba(245, 158, 11, 0.35) 0%, rgba(56, 189, 248, 0.2) 40%, transparent 75%)',
+        points: [
+          'Pre-flight screening protocol for all episode cuts prior to master delivery.',
+          'Separation of critical defects (audio clipping, strobe flashes) vs minor visual notes.',
+          'Mandatory legal sign-off threshold before publishing to satellite networks and digital apps.',
+          'Statutory broadcast compliance filing requirements for international partner territories.'
+        ],
+        citations: ['NBC Broadcast Code § 4.2.1', 'ITU-R BT.1702 Strobing Threshold', 'KMM Charter Art. IX']
+      },
+      {
+        id: 'vid-2',
+        code: 'DAT-603',
+        title: 'COPPA & Digital Child Data Safeguards in Mobile Apps',
+        category: 'protection',
+        categoryLabel: 'Child Protection & Safety',
+        duration: '14:10',
+        speaker: 'Dr. Stephanie Cole',
+        speakerRole: 'Child Cognitive Safety Board',
+        initials: 'SC',
+        avatarBg: 'linear-gradient(135deg, #10B981, #059669)',
+        res: '1080p 60fps',
+        desc: 'Mandatory guidelines for kid-facing mobile apps, voice logging prohibitions, parental consent walls, and zero-tracking architectures across Lovetoons digital experiences.',
+        gradient: 'linear-gradient(135deg, #065F46 0%, #064E3B 100%)',
+        glow: 'radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.35) 0%, rgba(6, 95, 70, 0.25) 40%, transparent 75%)',
+        points: [
+          'Zero third-party advertising or behavioral tracking SDKs permitted in children apps.',
+          'Enforced verifiable parental consent gates prior to collecting usernames or cloud saves.',
+          'Strict compliance with international child privacy acts (COPPA Rule 312 & GDPR-K).',
+          'Automated data purges on inactive child gamer records after 90 days.'
+        ],
+        citations: ['COPPA Rule 16 C.F.R. Part 312', 'GDPR Article 8 (Children)', 'CARU Mobile App Guidelines']
+      },
+      {
+        id: 'vid-3',
+        code: 'LAW-204',
+        title: 'Copyright Clearances: Original Music, Voiceovers & Character Likeness',
+        category: 'copyright',
+        categoryLabel: 'Copyright & IP',
+        duration: '22:30',
+        speaker: 'Barrister Lillian Okoye',
+        speakerRole: 'IP & Contracts Lead Counsel',
+        initials: 'LO',
+        avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
+        res: '4K MASTER',
+        desc: 'Legal covenants for composers, voiceover contracts, worldwide distribution licenses, and character likeness copyright protection for all characters in the Lovetoons universe.',
+        gradient: 'linear-gradient(135deg, #7C2D12 0%, #431407 100%)',
+        glow: 'radial-gradient(circle at 50% 40%, rgba(249, 115, 22, 0.35) 0%, rgba(124, 45, 18, 0.25) 40%, transparent 75%)',
+        points: [
+          'Requirement for fully executed Work-for-Hire releases for all musical compositions and stems.',
+          'Registered trademark protections for Lovetoons character silhouettes, voices, and names.',
+          'Anti-infringement screening procedures for sound effects, foley, and sample libraries.',
+          'International assignment of copyright transfers across multi-territory co-productions.'
+        ],
+        citations: ['WIPO Copyright Treaty Art. 6', 'Berne Convention Section 7', 'US Copyright Circular 9']
+      },
+      {
+        id: 'vid-4',
+        code: 'DEF-401',
+        title: 'Animation Defect Classification: Critical vs. Minor Quality Errors',
+        category: 'broadcast',
+        categoryLabel: 'Broadcast Standards',
+        duration: '16:15',
+        speaker: 'Deacon Tunde Adebayo',
+        speakerRole: 'Broadcast Quality Assurance Lead',
+        initials: 'TA',
+        avatarBg: 'linear-gradient(135deg, #6366F1, #4338CA)',
+        res: '1080p HD',
+        desc: 'Practical defect diagnosis: identifying strobe flicker hazards, audio dialogue masking, character rig clipping, and framerate jitters before master sign-off.',
+        gradient: 'linear-gradient(135deg, #3730A3 0%, #1E1B4B 100%)',
+        glow: 'radial-gradient(circle at 50% 40%, rgba(99, 102, 241, 0.35) 0%, rgba(55, 48, 163, 0.25) 40%, transparent 75%)',
+        points: [
+          'Epilepsy protection standards: Maximum 3 flashes per second on screen.',
+          'Audio loudness balancing: Normalization strictly to -24 LKFS broadcast threshold.',
+          'Color gamut limits to ensure visual safety on high-luminance HDR displays.',
+          'Lip-sync tolerances: Maximum 1 frame ahead or 2 frames behind dialogue audio.'
+        ],
+        citations: ['EBU R128 Loudness Normalisation', 'Ofcom Guidance Section 2.14', 'ATSC A/85 Audio Code']
+      },
+      {
+        id: 'vid-5',
+        code: 'DOC-102',
+        title: 'Scriptural Fidelity & Biblical Accuracy in Kids Storytelling',
+        category: 'doctrinal',
+        categoryLabel: 'Scriptural Review',
+        duration: '19:50',
+        speaker: 'Pastor Victor Chidi',
+        speakerRole: 'KMM Editorial & Pastoral Director',
+        initials: 'VC',
+        avatarBg: 'linear-gradient(135deg, #EC4899, #BE185D)',
+        res: '4K ULTRA HD',
+        desc: 'Preserving theological integrity while adapting biblical narratives into dynamic animated stories that anchor young hearts in the Word without distortion.',
+        gradient: 'linear-gradient(135deg, #831843 0%, #500724 100%)',
+        glow: 'radial-gradient(circle at 50% 40%, rgba(236, 72, 153, 0.35) 0%, rgba(131, 24, 67, 0.25) 40%, transparent 75%)',
+        points: [
+          'Ensuring scripture passages are quoted and referenced with literal fidelity.',
+          'Age-appropriate portrayal of miracles, faith declarations, and victorious prayer.',
+          'Rigorous editorial clearance loop between writers room and the pastoral review council.',
+          'Prohibition of theological caricatures or fear-inducing behavioral tropes.'
+        ],
+        citations: ['KMM Doctrinal Canon 2026', 'King James Bible Concordance', 'Loveworld Editorial Policy']
+      },
+      {
+        id: 'vid-6',
+        code: 'MER-502',
+        title: 'Global Merchandising, Toy Safety Standards & Territorial Covenants',
+        category: 'merchandising',
+        categoryLabel: 'Merchandising & Contracts',
+        duration: '12:20',
+        speaker: 'Sarah Jenkins, Esq.',
+        speakerRole: 'Commercial & Legal Affairs Counsel',
+        initials: 'SJ',
+        avatarBg: 'linear-gradient(135deg, #14B8A6, #0F766E)',
+        res: '1080p HD',
+        desc: 'Legal parameters for physical Lovetoons plushies, coloring books, apparel, and non-hazardous toy manufacturing covenants for overseas export.',
+        gradient: 'linear-gradient(135deg, #0F766E 0%, #134E4A 100%)',
+        glow: 'radial-gradient(circle at 50% 40%, rgba(20, 184, 166, 0.35) 0%, rgba(15, 118, 110, 0.25) 40%, transparent 75%)',
+        points: [
+          'Mandatory EN-71 and ASTM F963 non-toxic certifications for all physical merchandise.',
+          'Strict exclusivity and territory definitions in overseas franchise deals.',
+          'Proper packaging trademark notices: Registered (R) and Copyright (C) placement.',
+          'Child choke hazard warning labels and age-grading verification audits.'
+        ],
+        citations: ['EN-71 Toy Safety Directive', 'ASTM F963-17 Standard', 'ISO 8124 Toy Safety']
+      },
+      {
+        id: 'vid-7',
+        code: 'TAL-305',
+        title: 'Child Voice Actor Safeguards & Talent Welfare Guidelines',
+        category: 'protection',
+        categoryLabel: 'Child Protection & Safety',
+        duration: '15:05',
+        speaker: 'Barrister Lillian Okoye',
+        speakerRole: 'Legal Counsel',
+        initials: 'LO',
+        avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
+        res: '1080p HD',
+        desc: 'Studio recording regulations, maximum work windows, mandatory certified chaperone attendance, and psychological comfort protocols for young voice talents.',
+        gradient: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
+        glow: 'radial-gradient(circle at 50% 40%, rgba(56, 189, 248, 0.35) 0%, rgba(30, 41, 59, 0.25) 40%, transparent 75%)',
+        points: [
+          'Maximum continuous recording session of 90 minutes with mandatory rest pauses.',
+          'Parental or certified legal chaperone presence required inside studio control rooms.',
+          'Guaranteed privacy covenants prohibiting release of minors personal details.',
+          'Ergonomic studio adjustments (height-adjustable mic arms, acoustic comfort).'
+        ],
+        citations: ['SAG-AFTRA Young Performer Rules', 'UK Child Performance Regulations', 'ILO Convention 138']
+      },
+      {
+        id: 'vid-8',
+        code: 'INT-702',
+        title: 'International Subtitling, Dubbing & Multi-Language Harmonization',
+        category: 'copyright',
+        categoryLabel: 'Copyright & IP',
+        duration: '11:40',
+        speaker: 'Emmanuel Kalu',
+        speakerRole: 'International Distribution Lead',
+        initials: 'EK',
+        avatarBg: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+        res: '4K MASTER',
+        desc: 'Managing multilingual audio stems, dubbing synch standards, and cross-cultural translation reviews across French, Spanish, Swahili, and Arabic Lovetoons networks.',
+        gradient: 'linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)',
+        glow: 'radial-gradient(circle at 50% 40%, rgba(139, 92, 246, 0.35) 0%, rgba(76, 29, 149, 0.25) 40%, transparent 75%)',
+        points: [
+          'Phonetic synchronization standards for Spanish, French, and Swahili dub tracks.',
+          'Strict compliance with regional cultural sensitivities and local idioms.',
+          'Storage and version-control protocol for multi-channel 5.1 and stereo audio stems.',
+          'Automated closed-caption timing checks against broadcast playout servers.'
+        ],
+        citations: ['SMPTE ST 2052 Timed Text', 'EBU Tech 3264 Subtitling', 'WIPO Phonograms Treaty']
+      }
+    ];
+
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let currentVideo = VIDEOS[0];
+    let isPlaying = false;
+    let isMuted = false;
+    let isCaptionsOn = false;
+    let isTheaterExpanded = false;
+    let isAutoplayOn = true;
+
+    // View Switching Engine
+    function navigateToCatalog() {
+      document.getElementById('catalogView').classList.add('active');
+      document.getElementById('watchPageView').classList.remove('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      history.pushState(null, '', '#catalog');
+      pauseVideo();
+    }
+
+    function openWatchPage(videoId) {
+      const video = VIDEOS.find(v => v.id === videoId) || VIDEOS[0];
+      currentVideo = video;
+
+      // Populate Breadcrumbs & Titles
+      document.getElementById('crumbCategory').textContent = video.categoryLabel;
+      document.getElementById('crumbTitle').textContent = video.title;
+      document.getElementById('watchCategoryBadge').textContent = video.categoryLabel;
+      document.getElementById('watchVideoTitle').textContent = video.title;
+      document.getElementById('playerVideoIdBadge').textContent = video.code;
+      document.getElementById('playerResBadge').textContent = video.res;
+
+      // Populate Speaker Details
+      document.getElementById('watchSpeakerAvatar').textContent = video.initials;
+      document.getElementById('watchSpeakerAvatar').style.background = video.avatarBg;
+      document.getElementById('watchSpeakerName').textContent = video.speaker;
+      document.getElementById('watchSpeakerRole').textContent = video.speakerRole;
+      document.getElementById('watchVideoDesc').textContent = video.desc;
+
+      // Ambient Glow and Canvas Backdrop
+      document.getElementById('ambientBackdrop').style.background = video.glow;
+      document.getElementById('playerCanvas').style.background = video.gradient;
+
+      // Populate Directives
+      document.getElementById('watchDirectivesList').innerHTML = video.points.map(pt => `
+        <li class="directive-item">
+          <div class="check-icon-circle">&check;</div>
+          <span>${pt}</span>
+        </li>
+      `).join('');
+
+      // Populate Citations
+      if (video.citations && video.citations.length >= 3) {
+        document.getElementById('tagCitation1').textContent = video.citations[0];
+        document.getElementById('tagCitation2').textContent = video.citations[1];
+        document.getElementById('tagCitation3').textContent = video.citations[2];
+      }
+
+      // Reset Scrubber and Play State
+      document.getElementById('scrubberFill').style.width = '0%';
+      document.getElementById('timeDisplay').textContent = `00:00 / ${video.duration}`;
+
+      // Populate Recommended Videos Sidebar
+      renderRecommendedList(video.id);
+
+      // Switch View
+      document.getElementById('catalogView').classList.remove('active');
+      document.getElementById('watchPageView').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      history.pushState(null, '', `#watch-${video.id}`);
+
+      // Start playing
+      playVideo();
+    }
+
+    // Render Recommended Sidebar Videos
+    function renderRecommendedList(currentId) {
+      const recList = document.getElementById('recommendedList');
+      // Other videos, prioritizing same category
+      const others = VIDEOS.filter(v => v.id !== currentId);
+      
+      recList.innerHTML = others.map(vid => `
+        <article class="rec-video-card ${vid.id === currentId ? 'active-now' : ''}" onclick="openWatchPage('${vid.id}')" title="Play ${vid.title}">
+          <div class="rec-thumb-box" style="background: ${vid.gradient};">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(245, 158, 11, 0.9)"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            <span class="rec-duration">${vid.duration}</span>
+          </div>
+          <div class="rec-details-col">
+            <span class="rec-category-tag">${vid.categoryLabel}</span>
+            <h4 class="rec-card-title">${vid.title}</h4>
+            <span class="rec-speaker-label">${vid.speaker}</span>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // Render Catalog Grid
+    function renderVideos() {
+      const grid = document.getElementById('videoGrid');
+      const filtered = VIDEOS.filter(vid => {
+        const matchesCategory = currentFilter === 'all' || vid.category === currentFilter;
+        const matchesSearch = currentSearch === '' || 
+          vid.title.toLowerCase().includes(currentSearch.toLowerCase()) ||
+          vid.speaker.toLowerCase().includes(currentSearch.toLowerCase()) ||
+          vid.desc.toLowerCase().includes(currentSearch.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+
+      document.getElementById('videoCountDisplay').textContent = `Showing ${filtered.length} on-demand video${filtered.length === 1 ? '' : 's'}`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <h3 style="font-size: 1.3rem; margin-bottom: 8px;">No videos match your query</h3>
+            <p style="color: var(--muted); margin-bottom: 16px;">Try adjusting your keyword or selecting "All Videos".</p>
+            <button class="pill-btn active" onclick="resetFilter()">Reset Filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(vid => `
+        <article class="video-card" onclick="openWatchPage('${vid.id}')" title="Watch ${vid.title}">
+          <div class="card-thumb" style="background: ${vid.gradient};">
+            <div class="play-overlay">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            </div>
+            <span class="duration-badge">${vid.duration}</span>
+          </div>
+          <div class="card-body">
+            <span class="card-tag">${vid.categoryLabel}</span>
+            <h3 class="card-title">${vid.title}</h3>
+            <div class="card-speaker">${vid.speaker} &middot; ${vid.code}</div>
+            <p class="card-desc">${vid.desc}</p>
+            <div class="card-footer">
+              <span class="watch-cta">
+                Watch Full Video
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // Filter Chips
+    document.getElementById('categoryPills').addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill-btn');
+      if (!btn) return;
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.category;
+      renderVideos();
+    });
+
+    // Search Input
+    document.getElementById('videoSearchInput').addEventListener('input', (e) => {
+      currentSearch = e.target.value.trim();
+      renderVideos();
+      if (document.getElementById('watchPageView').classList.contains('active')) {
+        navigateToCatalog();
+      }
+    });
+
+    function resetFilter() {
+      currentFilter = 'all';
+      currentSearch = '';
+      document.getElementById('videoSearchInput').value = '';
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.pill-btn[data-category="all"]').classList.add('active');
+      renderVideos();
+    }
+
+    // Theater Video Playback Controls
+    function togglePlayState() {
+      if (isPlaying) {
+        pauseVideo();
+      } else {
+        playVideo();
+      }
+    }
+
+    function playVideo() {
+      isPlaying = true;
+      updatePlayIcons();
+      document.getElementById('audioVisualizer').style.opacity = '1';
+      showToast(`Playing: ${currentVideo.title.substring(0, 30)}...`);
+    }
+
+    function pauseVideo() {
+      isPlaying = false;
+      updatePlayIcons();
+      document.getElementById('audioVisualizer').style.opacity = '0.2';
+      showToast('Video Paused');
+    }
+
+    function updatePlayIcons() {
+      const playIconSvg = document.getElementById('playIconSvg');
+      const centerPlaySvg = document.getElementById('centerPlaySvg');
+      const centerPlayBtn = document.getElementById('centerPlayBtn');
+
+      if (isPlaying) {
+        playIconSvg.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        centerPlaySvg.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        centerPlayBtn.style.opacity = '0';
+        centerPlayBtn.style.pointerEvents = 'none';
+      } else {
+        playIconSvg.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"/>';
+        centerPlaySvg.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"/>';
+        centerPlayBtn.style.opacity = '1';
+        centerPlayBtn.style.pointerEvents = 'all';
+      }
+    }
+
+    function scrubVideo(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      document.getElementById('scrubberFill').style.width = pct + '%';
+      showToast(`Seeked to ${Math.round(pct)}%`);
+    }
+
+    function skipTime(seconds) {
+      showToast(`${seconds > 0 ? '+10s' : '-10s'}`);
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      const volIcon = document.getElementById('volumeIcon');
+      if (isMuted) {
+        volIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>';
+        showToast('Muted');
+      } else {
+        volIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+        showToast('Unmuted');
+      }
+    }
+
+    function adjustVolume(val) {
+      showToast(`Volume: ${Math.round(val * 100)}%`);
+    }
+
+    function toggleCaptions() {
+      isCaptionsOn = !isCaptionsOn;
+      const btn = document.getElementById('ccToggleBtn');
+      const box = document.getElementById('captionsBox');
+      if (isCaptionsOn) {
+        btn.classList.add('active');
+        box.classList.add('active');
+        showToast('Subtitles Enabled [CC]');
+      } else {
+        btn.classList.remove('active');
+        box.classList.remove('active');
+        showToast('Subtitles Off');
+      }
+    }
+
+    function changeSpeed(val) {
+      showToast(`Playback speed: ${val}x`);
+    }
+
+    function toggleTheaterMode() {
+      isTheaterExpanded = !isTheaterExpanded;
+      const player = document.getElementById('theaterPlayerBox');
+      if (isTheaterExpanded) {
+        player.classList.add('theater-expanded');
+        showToast('Theater Mode Expanded');
+      } else {
+        player.classList.remove('theater-expanded');
+        showToast('Normal View');
+      }
+    }
+
+    function toggleFullScreen() {
+      const player = document.getElementById('theaterPlayerBox');
+      if (!document.fullscreenElement) {
+        player.requestFullscreen().catch(() => {
+          showToast('Fullscreen Mode Activated');
+        });
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function toggleAutoplay() {
+      isAutoplayOn = !isAutoplayOn;
+      const sw = document.getElementById('autoplaySwitch');
+      if (isAutoplayOn) {
+        sw.style.background = 'var(--gold)';
+        showToast('Autoplay On');
+      } else {
+        sw.style.background = 'var(--border)';
+        showToast('Autoplay Off');
+      }
+    }
+
+    let isLiked = false;
+    function toggleLike(btn) {
+      isLiked = !isLiked;
+      const countEl = document.getElementById('likeCount');
+      let count = parseInt(countEl.textContent, 10);
+      if (isLiked) {
+        countEl.textContent = count + 1;
+        btn.style.color = 'var(--gold)';
+        btn.style.borderColor = 'var(--gold)';
+        showToast('Marked as helpful');
+      } else {
+        countEl.textContent = count - 1;
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
+    }
+
+    function downloadPolicyPdf() {
+      showToast(`Generating Official Policy Brief: ${currentVideo.code}.pdf`);
+    }
+
+    function copyShareUrl() {
+      const url = `${window.location.origin}${window.location.pathname}#watch-${currentVideo.id}`;
+      navigator.clipboard?.writeText(url).then(() => {
+        showToast('Video URL copied to clipboard');
+      }).catch(() => {
+        showToast('Link ready to share');
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('watchPageView').classList.contains('active')) {
+        if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+          e.preventDefault();
+          togglePlayState();
+        } else if (e.key === 'j' || e.key === 'J') {
+          skipTime(-10);
+        } else if (e.key === 'l' || e.key === 'L') {
+          skipTime(10);
+        } else if (e.key === 'm' || e.key === 'M') {
+          toggleMute();
+        } else if (e.key === 't' || e.key === 'T') {
+          toggleTheaterMode();
+        } else if (e.key === 'f' || e.key === 'F') {
+          toggleFullScreen();
+        } else if (e.key === 'Escape') {
+          navigateToCatalog();
+        }
+      }
+    });
+
+    // Handle Browser Back/Forward buttons and deep links
+    window.addEventListener('popstate', () => {
+      checkHashRoute();
+    });
+
+    function checkHashRoute() {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#watch-')) {
+        const vidId = hash.replace('#watch-', '');
+        openWatchPage(vidId);
+      } else {
+        navigateToCatalog();
+      }
+    }
+
+    // Theme Switcher
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+
+    function applyTheme(isDark) {
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+    }
+
+    const savedTheme = localStorage.getItem('kmm_theme') || 'dark';
+    applyTheme(savedTheme === 'dark');
+
+    themeBtn.addEventListener('click', () => {
+      const isCurrentlyDark = !document.documentElement.hasAttribute('data-theme');
+      const nextDark = !isCurrentlyDark;
+      localStorage.setItem('kmm_theme', nextDark ? 'dark' : 'light');
+      applyTheme(nextDark);
+    });
+
+    // Initialize Page
+    renderVideos();
+    if (window.location.hash && window.location.hash.startsWith('#watch-')) {
+      checkHashRoute();
+    }
+  </script>
+</body>
+</html>
