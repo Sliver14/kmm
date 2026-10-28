@@ -233,6 +233,8 @@ export default function TrainingPortalPage() {
   const [isTheaterExpanded, setIsTheaterExpanded] = useState(false)
   const [isAutoplayOn, setIsAutoplayOn] = useState(true)
   const [toastMessage, setToastMessage] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
   const playTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -256,6 +258,18 @@ export default function TrainingPortalPage() {
       }
     }
   }, [])
+
+  // Prevent background scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
 
   // Auto playback simulation
   useEffect(() => {
@@ -337,32 +351,36 @@ export default function TrainingPortalPage() {
       {/* Sticky Header */}
       <header
         className={`sticky top-0 z-40 border-b backdrop-blur-md transition-colors ${
-          isDark ? 'bg-[#0B1120]/90 border-white/10' : 'bg-white/90 border-slate-200'
+          isDark ? 'bg-[#0B1120]/95 border-white/10' : 'bg-white/95 border-slate-200'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 h-16 sm:h-18 flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand */}
           <div
-            onClick={() => setViewMode('catalog')}
-            className="flex items-center gap-3 cursor-pointer group shrink-0"
+            onClick={() => {
+              setViewMode('catalog')
+              if (typeof window !== 'undefined') window.location.hash = ''
+            }}
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0 min-w-0"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-md group-hover:scale-105 transition-transform">
+            <div className="size-8 sm:size-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center font-black text-xs sm:text-sm shadow-md group-hover:scale-105 transition-transform shrink-0">
               ▶
             </div>
-            <div>
+            <div className="min-w-0">
               <div
-                className="font-extrabold text-sm sm:text-base leading-tight tracking-tight"
+                className="font-extrabold text-sm sm:text-base leading-tight tracking-tight truncate"
                 style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
               >
-                KMM Policy & Governance
+                <span className="hidden sm:inline">KMM Policy & Governance</span>
+                <span className="sm:hidden">KMM Academy</span>
               </div>
-              <div className="text-[11px] font-semibold text-amber-500 tracking-wide uppercase">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-amber-500 tracking-wide uppercase truncate">
                 Videos On Demand
               </div>
             </div>
           </div>
 
-          {/* Search Box */}
+          {/* Desktop Search Box (md+) */}
           <div className="hidden md:flex flex-1 max-w-md mx-4 relative">
             <svg
               className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400"
@@ -378,7 +396,7 @@ export default function TrainingPortalPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by topic, speaker, or legal citation..."
+              placeholder="Search by topic, speaker, or citation..."
               className={`w-full pl-10 pr-4 py-2 rounded-full text-xs font-medium border outline-hidden transition-all ${
                 isDark
                   ? 'bg-slate-900 border-white/10 text-white placeholder-slate-400 focus:border-amber-400'
@@ -388,15 +406,15 @@ export default function TrainingPortalPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold cursor-pointer"
               >
                 ✕
               </button>
             )}
           </div>
 
-          {/* Navigation Actions */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Desktop Navigation Actions (md+) */}
+          <div className="hidden md:flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => {
                 setViewMode('catalog')
@@ -408,12 +426,12 @@ export default function TrainingPortalPage() {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              All Videos
+              All Videos ({VIDEOS.length})
             </button>
 
             <Link
               href="/"
-              className="hidden lg:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition-colors"
             >
               &larr; KMM Home
             </Link>
@@ -452,7 +470,7 @@ export default function TrainingPortalPage() {
 
             {/* Officer status pill */}
             <div
-              className={`hidden sm:flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border text-xs font-semibold ${
+              className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border text-xs font-semibold ${
                 isDark ? 'bg-slate-800/80 border-white/10 text-slate-200' : 'bg-slate-100 border-slate-300 text-slate-800'
               }`}
             >
@@ -462,7 +480,214 @@ export default function TrainingPortalPage() {
               <span className="truncate max-w-[100px]">{officerEmail}</span>
             </div>
           </div>
+
+          {/* Mobile Action Controls (< md) */}
+          <div className="flex md:hidden items-center gap-1.5 shrink-0">
+            {/* Quick Search Toggle */}
+            <button
+              onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+              className={`size-9 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
+                mobileSearchOpen || searchQuery
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 font-bold'
+                  : isDark
+                  ? 'bg-slate-800/70 border-white/10 text-slate-300'
+                  : 'bg-slate-100 border-slate-300 text-slate-700'
+              }`}
+              aria-label="Toggle mobile video search"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </button>
+
+            {/* Dark/Light toggle */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className={`size-9 rounded-full flex items-center justify-center border transition-all cursor-pointer ${
+                isDark
+                  ? 'bg-slate-800/70 border-white/10 text-amber-400'
+                  : 'bg-white border-slate-200 text-slate-700 shadow-xs'
+              }`}
+            >
+              {isMounted && isDark ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="5" />
+                  <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Mobile Drawer Hamburger Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="size-9 rounded-full flex items-center justify-center bg-amber-500 text-slate-950 font-bold transition-all cursor-pointer shadow-xs"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <line x1="4" y1="17" x2="20" y2="17" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Search Input Bar Dropdown */}
+        {mobileSearchOpen && (
+          <div className="md:hidden border-t border-white/10 px-4 py-3 bg-[#0B1120] animate-in slide-in-from-top-2 duration-200">
+            <div className="relative">
+              <svg
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search masterclasses, topics, citations..."
+                className="w-full pl-10 pr-10 py-2.5 rounded-full text-xs font-medium border border-white/10 bg-slate-900 text-white placeholder-slate-400 focus:border-amber-400 outline-hidden"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Navigation Drawer Backdrop Overlay */}
+        {mobileMenuOpen && (
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 top-16 bg-slate-950/60 backdrop-blur-xs z-40 md:hidden animate-in fade-in duration-200"
+          />
+        )}
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <nav className="fixed top-16 left-0 right-0 z-50 max-h-[calc(100vh-64px)] overflow-y-auto border-b border-white/10 bg-[#0B1120] px-5 py-6 shadow-2xl animate-in slide-in-from-top-3 duration-250 md:hidden space-y-5">
+            {/* Mobile Officer Profile Pill */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/80 border border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black text-xs flex items-center justify-center">
+                  LO
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white">{officerEmail}</div>
+                  <div className="text-[10px] text-amber-400 font-semibold">Legal & Policy Directorate</div>
+                </div>
+              </div>
+              <Link
+                href="/auth"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[11px] font-bold text-slate-400 hover:text-white px-2.5 py-1 rounded-lg border border-white/10"
+              >
+                Switch
+              </Link>
+            </div>
+
+            {/* Quick Navigation Links */}
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  setViewMode('catalog')
+                  setMobileMenuOpen(false)
+                  if (typeof window !== 'undefined') window.location.hash = ''
+                }}
+                className={`w-full flex items-center justify-between p-3.5 rounded-2xl font-bold text-sm transition-colors cursor-pointer ${
+                  viewMode === 'catalog'
+                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                    : 'bg-slate-900/40 text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span>🎬</span>
+                  <span>All Masterclasses</span>
+                </div>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black">
+                  {VIDEOS.length}
+                </span>
+              </button>
+
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl font-bold text-sm bg-slate-900/40 text-slate-200 hover:bg-slate-800 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <span>🌐</span>
+                  <span>KMM Official Website</span>
+                </div>
+                <span className="text-xs text-slate-400">&rarr;</span>
+              </Link>
+
+              <Link
+                href="/ip-portal"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl font-bold text-sm bg-slate-900/40 text-amber-400 border border-amber-500/30 hover:bg-amber-500/10 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <span>🛡</span>
+                  <span>Launch IP Asset Portal</span>
+                </div>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black">
+                  IP
+                </span>
+              </Link>
+            </div>
+
+            {/* Category Quick Filter Grid */}
+            <div className="pt-3 border-t border-white/10">
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                Filter by Subject Matter
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setActiveFilter(cat.id)
+                      setViewMode('catalog')
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`p-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer truncate ${
+                      activeFilter === cat.id
+                        ? 'bg-amber-500 text-slate-950 shadow-md'
+                        : 'bg-slate-900/60 border border-white/10 text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </nav>
+        )}
       </header>
 
       {/* Main Content Area */}

@@ -19,6 +19,18 @@ export default function KmmLandingPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  // Prevent body scrolling when mobile menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [menuOpen])
+
   return (
     <div className="kmm-site-root">
       <style jsx global>{`
@@ -64,8 +76,14 @@ export default function KmmLandingPage() {
         .kmm-wrap {
           max-width: 1160px;
           margin: 0 auto;
-          padding-left: 20px;
-          padding-right: 20px;
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+        @media (min-width: 640px) {
+          .kmm-wrap {
+            padding-left: 20px;
+            padding-right: 20px;
+          }
         }
 
         .kmm-site-root h1,
@@ -187,10 +205,10 @@ export default function KmmLandingPage() {
 
       {/* Top Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md border-b transition-colors border-[var(--kmm-line)] bg-[var(--kmm-header)]">
-        <div className="kmm-wrap flex items-center justify-between min-h-[72px] gap-4">
+        <div className="kmm-wrap flex items-center justify-between min-h-[64px] sm:min-h-[72px] gap-2 sm:gap-4">
           {/* Brand */}
-          <Link href="#top" className="flex items-center gap-3 no-underline text-[var(--kmm-fg)] min-w-0 group">
-            <div className="relative size-12 shrink-0 rounded-full overflow-hidden shadow-[0_0_0_3px_var(--kmm-gold)] group-hover:scale-105 transition-transform bg-white flex items-center justify-center">
+          <Link href="#top" className="flex items-center gap-2.5 sm:gap-3 no-underline text-[var(--kmm-fg)] min-w-0 group">
+            <div className="relative size-10 sm:size-12 shrink-0 rounded-full overflow-hidden shadow-[0_0_0_2px_var(--kmm-gold)] sm:shadow-[0_0_0_3px_var(--kmm-gold)] group-hover:scale-105 transition-transform bg-white flex items-center justify-center">
               <Image
                 src="/kmm-logo.png"
                 alt="Kiddies Media Ministry"
@@ -200,11 +218,11 @@ export default function KmmLandingPage() {
                 className="object-contain"
               />
             </div>
-            <div>
-              <b className="font-extrabold text-base sm:text-lg leading-tight block" style={{ fontFamily: 'var(--kmm-display)' }}>
+            <div className="min-w-0">
+              <b className="font-extrabold text-sm sm:text-base lg:text-lg leading-tight block truncate" style={{ fontFamily: 'var(--kmm-display)' }}>
                 Kiddies Media Ministry
               </b>
-              <small className="text-[11px] font-bold tracking-widest uppercase block text-[var(--kmm-muted)]">
+              <small className="text-[10px] sm:text-[11px] font-bold tracking-widest uppercase block text-[var(--kmm-muted)] truncate">
                 Governance & Policy
               </small>
             </div>
@@ -263,91 +281,160 @@ export default function KmmLandingPage() {
             </ul>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden px-4 py-2 rounded-full font-bold text-sm bg-[var(--kmm-navy)] text-white hover:opacity-90 transition-opacity cursor-pointer"
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? 'Close' : 'Menu'}
-          </button>
+          {/* Mobile Menu Button with Animated Hamburger / X icon */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <Link
+              href="/ip-portal"
+              className="text-xs font-bold px-3 py-1.5 rounded-full bg-[var(--kmm-navy)] text-[var(--kmm-gold)] border border-[var(--kmm-gold)] sm:hidden"
+            >
+              IP Portal
+            </Link>
+
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="size-10 sm:size-11 rounded-full flex items-center justify-center bg-[var(--kmm-navy)] text-white hover:opacity-90 transition-all cursor-pointer shadow-sm relative z-50"
+              aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <line x1="4" y1="17" x2="20" y2="17" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Backdrop Overlay */}
+        {menuOpen && (
+          <div
+            onClick={() => setMenuOpen(false)}
+            className="fixed inset-0 top-[64px] sm:top-[72px] bg-slate-950/50 backdrop-blur-xs z-40 lg:hidden animate-in fade-in duration-200"
+          />
+        )}
 
         {/* Mobile Navigation Drawer */}
         {menuOpen && (
-          <nav className="lg:hidden border-t border-[var(--kmm-line)] bg-[var(--kmm-bg)] px-6 py-4 animate-in slide-in-from-top-2 duration-200">
-            <ul className="flex flex-col gap-2 list-none m-0 p-0">
-              <li>
-                <a
-                  href="#about"
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2.5 rounded-xl font-bold text-base hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)]"
-                >
-                  About
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#mandate"
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2.5 rounded-xl font-bold text-base hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)]"
-                >
-                  Mandate
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#governance"
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2.5 rounded-xl font-bold text-base hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)]"
-                >
-                  Governance
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#lovetoons"
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2.5 rounded-xl font-bold text-base hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)]"
-                >
-                  LoveToons
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#updates"
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2.5 rounded-xl font-bold text-base hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)]"
-                >
-                  Updates
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#contact"
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2.5 rounded-xl font-bold text-base hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)]"
-                >
-                  Contact
-                </a>
-              </li>
-              <li className="pt-2 flex flex-col gap-2">
+          <nav className="fixed top-[64px] sm:top-[72px] left-0 right-0 z-50 max-h-[calc(100vh-64px)] sm:max-h-[calc(100vh-72px)] overflow-y-auto border-b border-[var(--kmm-line)] bg-[var(--kmm-bg)] px-5 py-6 shadow-2xl animate-in slide-in-from-top-3 duration-250 lg:hidden">
+            <div className="flex flex-col gap-1.5 list-none m-0 p-0">
+              <a
+                href="#about"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+              >
+                <span className="size-8 rounded-xl bg-[var(--kmm-blue)]/15 text-[var(--kmm-blue)] flex items-center justify-center font-bold text-sm">
+                  ℹ
+                </span>
+                <span>About KMM</span>
+              </a>
+
+              <a
+                href="#mandate"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+              >
+                <span className="size-8 rounded-xl bg-[var(--kmm-orange)]/15 text-[var(--kmm-orange)] flex items-center justify-center font-bold text-sm">
+                  🛡
+                </span>
+                <span>Mandate & Responsibilities</span>
+              </a>
+
+              <a
+                href="#governance"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+              >
+                <span className="size-8 rounded-xl bg-[var(--kmm-gold)]/20 text-[#10233F] dark:text-[var(--kmm-gold)] flex items-center justify-center font-bold text-sm">
+                  ⚖
+                </span>
+                <span>Governance Framework</span>
+              </a>
+
+              <a
+                href="#lovetoons"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+              >
+                <span className="size-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm">
+                  📺
+                </span>
+                <span>LoveToons TV & Ecosystem</span>
+              </a>
+
+              <a
+                href="#updates"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+              >
+                <span className="size-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">
+                  📢
+                </span>
+                <span>Policy Updates & Gazettes</span>
+              </a>
+
+              <a
+                href="#contact"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+              >
+                <span className="size-8 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-sm">
+                  ✉
+                </span>
+                <span>Institutional Enquiries</span>
+              </a>
+
+              {/* Portal CTA Cards in Drawer */}
+              <div className="pt-4 mt-2 border-t border-[var(--kmm-line)] flex flex-col gap-3">
                 <Link
                   href="/auth"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full text-center py-3 rounded-full font-bold text-base bg-[var(--kmm-orange)] text-[#10233F]"
+                  className="flex items-center justify-between p-4 rounded-2xl font-bold bg-[var(--kmm-orange)] text-[#10233F] shadow-md hover:brightness-105 active:scale-98 transition-all"
                 >
-                  Training Portal
+                  <div className="flex items-center gap-3">
+                    <span className="size-9 rounded-xl bg-black/15 text-[#10233F] flex items-center justify-center font-black text-sm">
+                      ▶
+                    </span>
+                    <div className="text-left">
+                      <div className="text-sm font-extrabold" style={{ fontFamily: 'var(--kmm-display)' }}>
+                        Training Portal & Academy
+                      </div>
+                      <div className="text-[11px] font-semibold opacity-85">
+                        Officer accreditation & video modules
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black">&rarr;</span>
                 </Link>
+
                 <Link
                   href="/ip-portal"
                   onClick={() => setMenuOpen(false)}
-                  className="w-full text-center py-3 rounded-full font-bold text-base bg-[var(--kmm-navy)] text-[var(--kmm-gold)] border-2 border-[var(--kmm-gold)]"
+                  className="flex items-center justify-between p-4 rounded-2xl font-bold bg-[var(--kmm-navy)] text-[var(--kmm-gold)] border-2 border-[var(--kmm-gold)] shadow-md hover:bg-[var(--kmm-gold)] hover:text-[var(--kmm-navy)] active:scale-98 transition-all"
                 >
-                  Launch IP Portal
+                  <div className="flex items-center gap-3">
+                    <span className="size-9 rounded-xl bg-[var(--kmm-gold)]/20 text-[var(--kmm-gold)] flex items-center justify-center font-black text-sm">
+                      🛡
+                    </span>
+                    <div className="text-left">
+                      <div className="text-sm font-extrabold" style={{ fontFamily: 'var(--kmm-display)' }}>
+                        IP & Asset Management Portal
+                      </div>
+                      <div className="text-[11px] font-semibold opacity-85">
+                        Digital assets, approvals & governance
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black">&rarr;</span>
                 </Link>
-              </li>
-            </ul>
+              </div>
+            </div>
           </nav>
         )}
       </header>
