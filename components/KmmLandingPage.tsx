@@ -488,7 +488,7 @@ export default function KmmLandingPage() {
                   Governing the Future of Children's Media.
                 </em>
               </h1>
-              <p className="lead kmm-animate-rise">
+              <p className="lead kmm-animate-rise !text-white" style={{ color: '#ffffff' }}>
                 Kiddies Media Ministry provides the governance framework, policies, standards, and guidance that support responsible, consistent, and purpose-driven children's content across Loveworld Kingdom.
               </p>
 
