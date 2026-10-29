@@ -4,9 +4,66 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
+const agenciesList = [
+  {
+    name: 'Lovetoons',
+    tagline: 'Animation & Entertainment',
+    description: 'Animation series, TV broadcast, character IP & children entertainment.',
+    icon: '📺',
+    href: '#agencies-lovetoons',
+    badge: 'Flagship',
+  },
+  {
+    name: 'Publishing Agency',
+    tagline: 'Literature & Curriculum',
+    description: 'Comics, devotional books, storybooks, illustrated print & curriculum.',
+    icon: '📚',
+    href: '#agencies-publishing',
+    badge: 'Publishing',
+  },
+  {
+    name: 'Digital Agency',
+    tagline: 'Interactive & Apps',
+    description: 'Interactive games, educational mobile apps, AR/VR & online portals.',
+    icon: '💻',
+    href: '#agencies-digital',
+    badge: 'Technology',
+  },
+  {
+    name: 'Academy Agency',
+    tagline: 'Governance & Training',
+    description: 'Legal compliance, officer accreditation, policy auditing & safety covenants.',
+    icon: '⚖️',
+    href: '#training',
+    badge: 'Governance',
+  },
+  {
+    name: 'Educational Agency',
+    tagline: 'Foundational Learning',
+    description: 'School partnerships, foundational learning aids & global outreaches.',
+    icon: '🎓',
+    href: '#agencies-educational',
+    badge: 'Education',
+  },
+]
+
 export default function KmmLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [agenciesDropdownOpen, setAgenciesDropdownOpen] = useState(false)
+  const [mobileAgenciesOpen, setMobileAgenciesOpen] = useState(false)
+  const agenciesDropdownRef = React.useRef<HTMLLIElement>(null)
   const currentYear = new Date().getFullYear()
+
+  // Close agencies dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (agenciesDropdownRef.current && !agenciesDropdownRef.current.contains(e.target as Node)) {
+        setAgenciesDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Close menu on resize to desktop
   useEffect(() => {
@@ -260,10 +317,86 @@ export default function KmmLandingPage() {
                   Governance
                 </a>
               </li>
-              <li>
-                <a href="#lovetoons" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
-                  LoveToons
-                </a>
+              <li className="relative" ref={agenciesDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setAgenciesDropdownOpen((prev) => !prev)}
+                  onMouseEnter={() => setAgenciesDropdownOpen(true)}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full font-semibold text-sm transition-colors text-[var(--kmm-fg)] cursor-pointer ${
+                    agenciesDropdownOpen ? 'bg-[var(--kmm-band)]' : 'hover:bg-[var(--kmm-band)]'
+                  }`}
+                  aria-expanded={agenciesDropdownOpen}
+                  aria-haspopup="true"
+                >
+                  <span>Agencies</span>
+                  <svg
+                    className={`size-3.5 transition-transform duration-200 ${agenciesDropdownOpen ? 'rotate-180' : ''}`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                {agenciesDropdownOpen && (
+                  <div
+                    onMouseLeave={() => setAgenciesDropdownOpen(false)}
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[390px] rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-2xl p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                  >
+                    <div className="px-3 py-2 border-b border-[var(--kmm-line)] mb-1.5 flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--kmm-muted)]">
+                        Ministry Agencies
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
+                        5 Arms
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      {agenciesList.map((ag) => (
+                        <a
+                          key={ag.name}
+                          href={ag.href}
+                          onClick={() => setAgenciesDropdownOpen(false)}
+                          className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-[var(--kmm-band)] transition-colors group text-left"
+                        >
+                          <span className="size-9 rounded-xl bg-[var(--kmm-band)] flex items-center justify-center font-bold text-base shrink-0 group-hover:scale-105 transition-transform">
+                            {ag.icon}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-sm text-[var(--kmm-fg)] group-hover:text-[var(--kmm-orange)] transition-colors">
+                                {ag.name}
+                              </span>
+                              <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[var(--kmm-bg)] text-[var(--kmm-muted)] border border-[var(--kmm-line)]">
+                                {ag.badge}
+                              </span>
+                            </div>
+                            <p className="text-xs text-[var(--kmm-muted)] line-clamp-1 mt-0.5">
+                              {ag.description}
+                            </p>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+
+                    <div className="mt-2 pt-2 border-t border-[var(--kmm-line)] px-2.5 py-1 flex items-center justify-between">
+                      <span className="text-[11px] text-[var(--kmm-muted)] font-medium">Looking for IP records?</span>
+                      <Link
+                        href="/ip-portal"
+                        onClick={() => setAgenciesDropdownOpen(false)}
+                        className="text-[11px] font-bold text-[var(--kmm-link)] hover:underline flex items-center gap-1"
+                      >
+                        <span>Open IP Portal</span>
+                        <span>&rarr;</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </li>
               <li>
                 <a href="#updates" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
@@ -371,16 +504,63 @@ export default function KmmLandingPage() {
                 <span>Governance Framework</span>
               </a>
 
-              <a
-                href="#lovetoons"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
-              >
-                <span className="size-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm">
-                  📺
-                </span>
-                <span>LoveToons TV & Ecosystem</span>
-              </a>
+              {/* Agencies Dropdown Accordion */}
+              <div className="flex flex-col">
+                <button
+                  type="button"
+                  onClick={() => setMobileAgenciesOpen(!mobileAgenciesOpen)}
+                  className="flex items-center justify-between w-full px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors cursor-pointer"
+                  aria-expanded={mobileAgenciesOpen}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="size-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm">
+                      🏛
+                    </span>
+                    <span>Agencies</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-muted)]">
+                      5
+                    </span>
+                    <svg
+                      className={`size-4 transition-transform duration-200 text-[var(--kmm-muted)] ${mobileAgenciesOpen ? 'rotate-180' : ''}`}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </button>
+
+                {mobileAgenciesOpen && (
+                  <div className="ml-5 pl-4 border-l-2 border-[var(--kmm-line)] flex flex-col gap-1 py-1 my-1">
+                    {agenciesList.map((ag) => (
+                      <a
+                        key={ag.name}
+                        href={ag.href}
+                        onClick={() => {
+                          setMenuOpen(false)
+                          setMobileAgenciesOpen(false)
+                        }}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+                      >
+                        <span className="text-base">{ag.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-xs truncate">{ag.name}</span>
+                            <span className="text-[9px] font-semibold opacity-70 uppercase">{ag.badge}</span>
+                          </div>
+                          <p className="text-[10px] text-[var(--kmm-muted)] truncate">{ag.tagline}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <a
                 href="#updates"
@@ -728,23 +908,36 @@ export default function KmmLandingPage() {
         </section>
 
         {/* =========================================================================
-            LOVETOONS ECOSYSTEM SECTION
+            AGENCIES & LOVETOONS ECOSYSTEM SECTION
             ========================================================================= */}
-        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors" id="lovetoons">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors" id="agencies">
+          {/* Legacy anchor compatibility */}
+          <div id="lovetoons" className="relative -top-24 pointer-events-none" />
+
           <div className="kmm-wrap">
             <div className="max-w-2xl space-y-3 mb-12">
-              <p className="eyebrow">The LoveToons ecosystem</p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold">Where children's media reaches children</h2>
+              <p className="eyebrow">Operational Directorate & Agencies</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold">The specialized agencies powering children's media</h2>
+              <p className="text-sm leading-relaxed text-[var(--kmm-muted)]">
+                Kiddies Media Ministry operates across five dedicated specialized agencies governing creative animation, literature, interactive technology, institutional accreditation, and foundational schooling.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Lovetoons Anchor */}
+            <div id="agencies-lovetoons" className="relative -top-24 pointer-events-none" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
               {/* TV */}
               <article className="rounded-[40px] rounded-br-[120px] p-8 sm:p-10 bg-[var(--kmm-blue)] text-white shadow-xl flex flex-col justify-between">
                 <div>
-                  <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-                    <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7zM8 21h8M10 10l5 2.5-5 2.5V10z" />
-                    </svg>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center">
+                      <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7zM8 21h8M10 10l5 2.5-5 2.5V10z" />
+                      </svg>
+                    </div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-white/20 text-white">
+                      Lovetoons Agency
+                    </span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">LoveToons TV</h3>
                   <p className="text-sm leading-relaxed text-white/90 mb-8 max-w-md">
@@ -760,11 +953,16 @@ export default function KmmLandingPage() {
               {/* Website */}
               <article className="rounded-[40px] rounded-bl-[120px] p-8 sm:p-10 bg-[var(--kmm-gold)] text-[#10233F] shadow-xl flex flex-col justify-between">
                 <div>
-                  <div className="size-14 rounded-2xl bg-[#10233F]/15 flex items-center justify-center mb-6">
-                    <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="9" />
-                      <path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" />
-                    </svg>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="size-14 rounded-2xl bg-[#10233F]/15 flex items-center justify-center">
+                      <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" />
+                      </svg>
+                    </div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[#10233F]/15 text-[#10233F]">
+                      Lovetoons Agency
+                    </span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">LoveToons Website</h3>
                   <p className="text-sm leading-relaxed text-[#10233F]/90 mb-8 max-w-md">
@@ -775,6 +973,84 @@ export default function KmmLandingPage() {
                   <span className="kmm-btn kmm-btn-disabled text-xs">Visit website &middot; link coming soon</span>
                 </div>
               </article>
+            </div>
+
+            {/* Other Specialized Agencies Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+              <div id="agencies-publishing" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="size-11 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xl">
+                      📚
+                    </span>
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
+                      Publishing
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-bold mb-1.5" style={{ fontFamily: 'var(--kmm-display)' }}>
+                    Publishing Agency
+                  </h4>
+                  <p className="text-xs text-[var(--kmm-muted)] leading-relaxed mb-4">
+                    Comics, devotional books, storybooks, illustrated print, audio books, and foundational curriculum for children.
+                  </p>
+                </div>
+                <Link
+                  href="/ip-portal"
+                  className="text-xs font-bold text-[var(--kmm-link)] hover:underline inline-flex items-center gap-1"
+                >
+                  View Publishing Catalog &rarr;
+                </Link>
+              </div>
+
+              <div id="agencies-digital" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="size-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xl">
+                      💻
+                    </span>
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
+                      Technology
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-bold mb-1.5" style={{ fontFamily: 'var(--kmm-display)' }}>
+                    Digital Agency
+                  </h4>
+                  <p className="text-xs text-[var(--kmm-muted)] leading-relaxed mb-4">
+                    Interactive games, educational mobile apps, AR/VR experiences, web portals, and kid-safe digital architectures.
+                  </p>
+                </div>
+                <Link
+                  href="/ip-portal"
+                  className="text-xs font-bold text-[var(--kmm-link)] hover:underline inline-flex items-center gap-1"
+                >
+                  Explore Digital Assets &rarr;
+                </Link>
+              </div>
+
+              <div id="agencies-educational" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between sm:col-span-2 lg:col-span-1">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="size-11 rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-xl">
+                      🎓
+                    </span>
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
+                      Education
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-bold mb-1.5" style={{ fontFamily: 'var(--kmm-display)' }}>
+                    Educational Agency
+                  </h4>
+                  <p className="text-xs text-[var(--kmm-muted)] leading-relaxed mb-4">
+                    School outreach packages, Sunday school learning aids, teacher training resources, and moral education frameworks.
+                  </p>
+                </div>
+                <Link
+                  href="/auth"
+                  className="text-xs font-bold text-[var(--kmm-link)] hover:underline inline-flex items-center gap-1"
+                >
+                  Access Educational Tools &rarr;
+                </Link>
+              </div>
             </div>
 
             <p className="text-xs text-[var(--kmm-muted)] mt-8">
@@ -984,8 +1260,8 @@ export default function KmmLandingPage() {
               <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--kmm-gold)]">Platforms</h4>
               <ul className="list-none m-0 p-0 space-y-2 text-sm text-white/90">
                 <li><Link href="/ip-portal" className="text-[var(--kmm-gold)] font-bold hover:underline">Launch IP Portal &rarr;</Link></li>
-                <li><a href="#lovetoons" className="hover:text-[var(--kmm-gold)] transition-colors">LoveToons TV</a></li>
-                <li><a href="#lovetoons" className="hover:text-[var(--kmm-gold)] transition-colors">LoveToons Website</a></li>
+                <li><a href="#agencies" className="hover:text-[var(--kmm-gold)] transition-colors">Agencies & Directory</a></li>
+                <li><a href="#lovetoons" className="hover:text-[var(--kmm-gold)] transition-colors">LoveToons TV & Web</a></li>
                 <li><a href="#contact" className="hover:text-[var(--kmm-gold)] transition-colors">Contact Directorate</a></li>
               </ul>
             </div>
