@@ -174,11 +174,25 @@ export default function KmmLandingPage() {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-8px); }
         }
+        @keyframes kmmSlowSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
         .kmm-animate-rise {
           animation: kmmRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .kmm-chip-bob {
           animation: kmmBob 5s ease-in-out infinite;
+        }
+        .kmm-slow-spin {
+          animation: kmmSlowSpin 80s linear infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .kmm-slow-spin,
+          .kmm-chip-bob,
+          .kmm-animate-rise {
+            animation: none !important;
+          }
         }
 
         /* Governance spine line */
@@ -494,8 +508,8 @@ export default function KmmLandingPage() {
             {/* Stage Graphic Right */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-full max-w-[380px] sm:max-w-[440px] aspect-square flex items-center justify-center">
-                {/* Rotating SVG aura */}
-                <svg className="absolute -inset-[8%] w-[116%] h-[116%] overflow-visible animate-spin duration-[40000ms] linear infinite" viewBox="0 0 400 400" aria-hidden="true">
+                {/* Rotating SVG aura with calm, gentle speed */}
+                <svg className="absolute -inset-[8%] w-[116%] h-[116%] overflow-visible kmm-slow-spin" viewBox="0 0 400 400" aria-hidden="true">
                   <circle cx="200" cy="200" r="190" fill="none" stroke="var(--kmm-orange)" strokeWidth="3" strokeDasharray="3 14" strokeLinecap="round" />
                   <circle cx="352" cy="92" r="26" fill="var(--kmm-orange)" />
                   <rect x="14" y="296" width="52" height="52" rx="16" fill="var(--kmm-blue)" transform="rotate(14 40 322)" />
