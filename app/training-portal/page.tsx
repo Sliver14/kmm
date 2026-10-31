@@ -436,15 +436,6 @@ export default function TrainingPortalPage() {
               &larr; KMM Home
             </Link>
 
-            <Link
-              href="/ip-portal"
-              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-xs"
-            >
-              <span>IP Portal</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
 
             {/* Dark/Light toggle */}
             <button
@@ -644,20 +635,6 @@ export default function TrainingPortalPage() {
                   <span>KMM Official Website</span>
                 </div>
                 <span className="text-xs text-slate-400">&rarr;</span>
-              </Link>
-
-              <Link
-                href="/ip-portal"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl font-bold text-sm bg-slate-900/40 text-amber-400 border border-amber-500/30 hover:bg-amber-500/10 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span>🛡</span>
-                  <span>Launch IP Asset Portal</span>
-                </div>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black">
-                  IP
-                </span>
               </Link>
             </div>
 

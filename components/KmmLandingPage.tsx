@@ -322,9 +322,8 @@ export default function KmmLandingPage() {
                   type="button"
                   onClick={() => setAgenciesDropdownOpen((prev) => !prev)}
                   onMouseEnter={() => setAgenciesDropdownOpen(true)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full font-semibold text-sm transition-colors text-[var(--kmm-fg)] cursor-pointer ${
-                    agenciesDropdownOpen ? 'bg-[var(--kmm-band)]' : 'hover:bg-[var(--kmm-band)]'
-                  }`}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full font-semibold text-sm transition-colors text-[var(--kmm-fg)] cursor-pointer ${agenciesDropdownOpen ? 'bg-[var(--kmm-band)]' : 'hover:bg-[var(--kmm-band)]'
+                    }`}
                   aria-expanded={agenciesDropdownOpen}
                   aria-haspopup="true"
                 >
