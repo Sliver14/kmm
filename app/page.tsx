@@ -1098,19 +1098,7 @@ function Header({
               </div>
 
               {/* Actions */}
-              <div className="pt-3 space-y-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProfileDropdownOpen(false)
-                    openWelcomeSplash()
-                  }}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 py-2.5 px-3 text-xs font-bold border border-amber-500/20 transition cursor-pointer"
-                >
-                  <Sparkles className="size-3.5 text-amber-500 dark:text-amber-400" />
-                  <span>Play Welcome Animation</span>
-                </button>
-
+              <div className="pt-3">
                 <button
                   onClick={() => {
                     setProfileDropdownOpen(false)

@@ -2,6 +2,38 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import {
+  Play,
+  Pause,
+  Search,
+  X,
+  Sun,
+  Moon,
+  Menu,
+  ArrowLeft,
+  ChevronRight,
+  Home,
+  GraduationCap,
+  ShieldCheck,
+  Scroll,
+  FileText,
+  BookOpen,
+  Radio,
+  Tv,
+  Film,
+  ShoppingBag,
+  Scale,
+  CheckCircle2,
+  Volume2,
+  VolumeX,
+  Maximize2,
+  Minimize2,
+  Subtitles,
+  UserCheck,
+  ArrowRightLeft,
+  Clock,
+  Globe,
+} from 'lucide-react'
 
 interface VideoItem {
   id: string
@@ -26,12 +58,12 @@ interface VideoItem {
 const VIDEOS: VideoItem[] = []
 
 const CATEGORIES = [
-  { id: 'all', label: 'All Modules' },
-  { id: 'broadcast', label: 'Broadcast Standards' },
-  { id: 'protection', label: 'Child Protection' },
-  { id: 'copyright', label: 'Copyright & IP' },
-  { id: 'doctrinal', label: 'Scriptural Review' },
-  { id: 'merchandising', label: 'Merchandising' },
+  { id: 'all', label: 'All Modules', icon: Film },
+  { id: 'broadcast', label: 'Broadcast Standards', icon: Radio },
+  { id: 'protection', label: 'Child Protection', icon: ShieldCheck },
+  { id: 'copyright', label: 'Copyright & IP', icon: Scale },
+  { id: 'doctrinal', label: 'Scriptural Review', icon: BookOpen },
+  { id: 'merchandising', label: 'Merchandising', icon: ShoppingBag },
 ]
 
 export default function TrainingPortalPage() {
@@ -182,7 +214,7 @@ export default function TrainingPortalPage() {
             className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0 min-w-0"
           >
             <div className="size-8 sm:size-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center font-black text-xs sm:text-sm shadow-md group-hover:scale-105 transition-transform shrink-0">
-              ▶
+              <Play className="size-4 fill-current text-slate-950 ml-0.5" />
             </div>
             <div className="min-w-0">
               <div
@@ -200,22 +232,13 @@ export default function TrainingPortalPage() {
 
           {/* Desktop Search Box (md+) */}
           <div className="hidden md:flex flex-1 max-w-md mx-4 relative">
-            <svg
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by topic, speaker, or citation..."
-              className={`w-full pl-10 pr-4 py-2 rounded-full text-xs font-medium border outline-hidden transition-all ${
+              className={`w-full pl-10 pr-9 py-2 rounded-full text-xs font-medium border outline-hidden transition-all ${
                 isDark
                   ? 'bg-slate-900 border-white/10 text-white placeholder-slate-400 focus:border-amber-400'
                   : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-500 focus:border-amber-500'
@@ -224,9 +247,10 @@ export default function TrainingPortalPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                aria-label="Clear search"
               >
-                ✕
+                <X className="size-3.5" />
               </button>
             )}
           </div>
@@ -238,20 +262,22 @@ export default function TrainingPortalPage() {
                 setViewMode('catalog')
                 if (typeof window !== 'undefined') window.location.hash = ''
               }}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
                 viewMode === 'catalog'
                   ? 'bg-amber-500/15 text-amber-500 border border-amber-500/30'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              All Modules ({VIDEOS.length})
+              <Film className="size-3.5" />
+              <span>All Modules ({VIDEOS.length})</span>
             </button>
 
             <Link
               href="/"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-slate-400 hover:text-white transition-colors"
             >
-              &larr; KMM Home
+              <Home className="size-3.5" />
+              <span>KMM Home</span>
             </Link>
 
 
@@ -266,14 +292,9 @@ export default function TrainingPortalPage() {
               }`}
             >
               {isMounted && isDark ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="5" />
-                  <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" />
-                </svg>
+                <Sun className="size-4 text-amber-400" />
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
+                <Moon className="size-4 text-slate-700" />
               )}
             </button>
 
@@ -284,7 +305,7 @@ export default function TrainingPortalPage() {
               }`}
             >
               <div className="size-6 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black text-[10px] flex items-center justify-center">
-                LO
+                <UserCheck className="size-3 text-slate-950" />
               </div>
               <span className="truncate max-w-[100px]">{officerEmail}</span>
             </div>
@@ -304,10 +325,7 @@ export default function TrainingPortalPage() {
               }`}
               aria-label="Toggle mobile video search"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
+              <Search className="size-4" />
             </button>
 
             {/* Dark/Light toggle */}
@@ -321,14 +339,9 @@ export default function TrainingPortalPage() {
               }`}
             >
               {isMounted && isDark ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="5" />
-                  <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" />
-                </svg>
+                <Sun className="size-4 text-amber-400" />
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
+                <Moon className="size-4 text-slate-700" />
               )}
             </button>
 
@@ -339,18 +352,7 @@ export default function TrainingPortalPage() {
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="4" y1="7" x2="20" y2="7" />
-                  <line x1="4" y1="12" x2="20" y2="12" />
-                  <line x1="4" y1="17" x2="20" y2="17" />
-                </svg>
-              )}
+              {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
             </button>
           </div>
         </div>
@@ -359,16 +361,7 @@ export default function TrainingPortalPage() {
         {mobileSearchOpen && (
           <div className="md:hidden border-t border-white/10 px-4 py-3 bg-[#0B1120] animate-in slide-in-from-top-2 duration-200">
             <div className="relative">
-              <svg
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 autoFocus
@@ -380,9 +373,10 @@ export default function TrainingPortalPage() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  aria-label="Clear search"
                 >
-                  ✕
+                  <X className="size-3.5" />
                 </button>
               )}
             </div>
@@ -404,7 +398,7 @@ export default function TrainingPortalPage() {
             <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/80 border border-white/10">
               <div className="flex items-center gap-3">
                 <div className="size-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black text-xs flex items-center justify-center">
-                  LO
+                  <UserCheck className="size-4 text-slate-950" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white">{officerEmail}</div>
@@ -414,9 +408,10 @@ export default function TrainingPortalPage() {
               <Link
                 href="/auth"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-[11px] font-bold text-slate-400 hover:text-white px-2.5 py-1 rounded-lg border border-white/10"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-white px-2.5 py-1 rounded-lg border border-white/10 transition-colors"
               >
-                Switch
+                <ArrowRightLeft className="size-3" />
+                <span>Switch</span>
               </Link>
             </div>
 
@@ -435,7 +430,7 @@ export default function TrainingPortalPage() {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span>🎬</span>
+                  <Film className="size-4 text-amber-500" />
                   <span>All Modules</span>
                 </div>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black">
@@ -449,10 +444,10 @@ export default function TrainingPortalPage() {
                 className="w-full flex items-center justify-between p-3.5 rounded-2xl font-bold text-sm bg-slate-900/40 text-slate-200 hover:bg-slate-800 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span>🌐</span>
+                  <Globe className="size-4 text-sky-400" />
                   <span>KMM Official Website</span>
                 </div>
-                <span className="text-xs text-slate-400">&rarr;</span>
+                <ChevronRight className="size-4 text-slate-400" />
               </Link>
             </div>
 
@@ -462,23 +457,27 @@ export default function TrainingPortalPage() {
                 Filter by Subject Matter
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => {
-                      setActiveFilter(cat.id)
-                      setViewMode('catalog')
-                      setMobileMenuOpen(false)
-                    }}
-                    className={`p-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer truncate ${
-                      activeFilter === cat.id
-                        ? 'bg-amber-500 text-slate-950 shadow-md'
-                        : 'bg-slate-900/60 border border-white/10 text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+                {CATEGORIES.map((cat) => {
+                  const Icon = cat.icon
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        setActiveFilter(cat.id)
+                        setViewMode('catalog')
+                        setMobileMenuOpen(false)
+                      }}
+                      className={`inline-flex items-center gap-2 p-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer truncate ${
+                        activeFilter === cat.id
+                          ? 'bg-amber-500 text-slate-950 shadow-md'
+                          : 'bg-slate-900/60 border border-white/10 text-slate-300 hover:bg-slate-800'
+                      }`}
+                    >
+                      <Icon className="size-3.5 shrink-0" />
+                      <span className="truncate">{cat.label}</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
           </nav>
@@ -499,9 +498,10 @@ export default function TrainingPortalPage() {
                   setViewMode('catalog')
                   if (typeof window !== 'undefined') window.location.hash = ''
                 }}
-                className="inline-flex items-center gap-2 text-xs font-bold text-amber-500 hover:text-amber-400 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-500 hover:text-amber-400 cursor-pointer transition-colors"
               >
-                &larr; Back to Complete Video Library
+                <ArrowLeft className="size-3.5" />
+                <span>Back to Complete Video Library</span>
               </button>
               <span className="text-xs font-medium text-slate-400">
                 Playing: <b className="text-white">{currentVideo.code}</b> &middot; {currentVideo.res}
@@ -536,14 +536,9 @@ export default function TrainingPortalPage() {
                       aria-label={isPlaying ? 'Pause video' : 'Play video'}
                     >
                       {isPlaying ? (
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                          <rect x="6" y="4" width="4" height="16" rx="1" />
-                          <rect x="14" y="4" width="4" height="16" rx="1" />
-                        </svg>
+                        <Pause className="size-9 fill-current" />
                       ) : (
-                        <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" className="ml-1">
-                          <polygon points="5 3 19 12 5 21 5 3" />
-                        </svg>
+                        <Play className="size-9 fill-current ml-1" />
                       )}
                     </button>
 
@@ -590,17 +585,27 @@ export default function TrainingPortalPage() {
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => setIsPlaying(!isPlaying)}
-                          className="hover:text-amber-400 cursor-pointer font-bold"
+                          className="inline-flex items-center gap-1 hover:text-amber-400 cursor-pointer font-bold transition-colors"
                         >
-                          {isPlaying ? 'Pause' : 'Play'}
+                          {isPlaying ? (
+                            <Pause className="size-3.5 fill-current" />
+                          ) : (
+                            <Play className="size-3.5 fill-current" />
+                          )}
+                          <span>{isPlaying ? 'Pause' : 'Play'}</span>
                         </button>
                         <button
                           onClick={() => setIsMuted(!isMuted)}
-                          className="hover:text-amber-400 cursor-pointer text-slate-300"
+                          className="inline-flex items-center gap-1 hover:text-amber-400 cursor-pointer text-slate-300 transition-colors"
                         >
-                          {isMuted ? 'Unmute' : 'Mute'}
+                          {isMuted ? (
+                            <VolumeX className="size-3.5" />
+                          ) : (
+                            <Volume2 className="size-3.5" />
+                          )}
+                          <span>{isMuted ? 'Unmute' : 'Mute'}</span>
                         </button>
-                        <span className="text-slate-400 text-[11px]">
+                        <span className="text-slate-400 text-[11px] font-mono">
                           {Math.floor((progressPercent / 100) * 18)}:
                           {Math.floor(((progressPercent / 100) * 45) % 60)
                             .toString()
@@ -612,20 +617,26 @@ export default function TrainingPortalPage() {
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => setIsCaptionsOn(!isCaptionsOn)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-colors cursor-pointer ${
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
                             isCaptionsOn
                               ? 'bg-amber-500 text-slate-950 border-amber-400'
                               : 'border-white/30 text-white/70 hover:text-white'
                           }`}
                         >
-                          CC
+                          <Subtitles className="size-3" />
+                          <span>CC</span>
                         </button>
 
                         <button
                           onClick={() => setIsTheaterExpanded(!isTheaterExpanded)}
-                          className="text-slate-400 hover:text-white text-xs cursor-pointer"
+                          className="inline-flex items-center gap-1 text-slate-400 hover:text-white text-xs cursor-pointer transition-colors"
                         >
-                          {isTheaterExpanded ? 'Normal' : 'Expand'}
+                          {isTheaterExpanded ? (
+                            <Minimize2 className="size-3.5" />
+                          ) : (
+                            <Maximize2 className="size-3.5" />
+                          )}
+                          <span>{isTheaterExpanded ? 'Normal' : 'Expand'}</span>
                         </button>
                       </div>
                     </div>
@@ -686,9 +697,7 @@ export default function TrainingPortalPage() {
                             isDark ? 'bg-slate-800/40 border-white/5' : 'bg-slate-50 border-slate-200'
                           }`}
                         >
-                          <span className="size-5 rounded-full bg-amber-500/15 text-amber-500 font-bold flex items-center justify-center shrink-0 mt-0.5">
-                            ✓
-                          </span>
+                          <CheckCircle2 className="size-4 text-amber-500 shrink-0 mt-0.5" />
                           <span>{pt}</span>
                         </li>
                       ))}
@@ -704,9 +713,10 @@ export default function TrainingPortalPage() {
                       {currentVideo.citations.map((c, i) => (
                         <span
                           key={i}
-                          className="px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20"
                         >
-                          {c}
+                          <FileText className="size-3" />
+                          <span>{c}</span>
                         </span>
                       ))}
                     </div>
@@ -751,7 +761,7 @@ export default function TrainingPortalPage() {
                         style={{ background: vid.gradient }}
                       >
                         <span className="size-6 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-[10px] shadow-md">
-                          ▶
+                          <Play className="size-2.5 fill-current ml-0.5" />
                         </span>
                         <span className="absolute bottom-1 right-1 text-[9px] font-mono bg-black/70 px-1 rounded text-white">
                           {vid.duration}
@@ -790,8 +800,9 @@ export default function TrainingPortalPage() {
               }`}
             >
               <div className="max-w-3xl relative z-10 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-500">
-                  <span>🎓</span> Policy & Governance Academy
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-500">
+                  <GraduationCap className="size-3.5" />
+                  <span>Policy & Governance Academy</span>
                 </div>
 
                 <h1
@@ -807,27 +818,30 @@ export default function TrainingPortalPage() {
 
                 <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-400 pt-2">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <UserCheck className="size-3.5 text-emerald-400" />
                     <span>Officer Authenticated ({officerEmail})</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span>🛡️</span> Child Safeguarding Standards
+                    <ShieldCheck className="size-3.5 text-amber-400" />
+                    <span>Child Safeguarding Standards</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span>📜</span> Statutory Broadcasting Covenants
+                    <Scroll className="size-3.5 text-sky-400" />
+                    <span>Statutory Broadcasting Covenants</span>
                   </div>
                 </div>
 
                 <div className="pt-4 flex flex-wrap items-center gap-3">
                   <Link
                     href="/auth"
-                    className={`px-5 py-3 rounded-full font-bold text-xs border transition-colors ${
+                    className={`inline-flex items-center gap-1.5 px-5 py-3 rounded-full font-bold text-xs border transition-colors ${
                       isDark
                         ? 'border-white/20 text-white hover:bg-white/10'
                         : 'border-slate-300 text-slate-800 hover:bg-slate-100'
                     }`}
                   >
-                    Switch Officer Profile
+                    <ArrowRightLeft className="size-3.5 text-amber-500" />
+                    <span>Switch Officer Profile</span>
                   </Link>
                 </div>
               </div>
@@ -836,21 +850,25 @@ export default function TrainingPortalPage() {
             {/* Category Filter Pills & Search */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
               <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setActiveFilter(cat.id)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                      activeFilter === cat.id
-                        ? 'bg-amber-500 text-slate-950 shadow-md scale-102'
-                        : isDark
-                        ? 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white hover:border-white/20'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+                {CATEGORIES.map((cat) => {
+                  const Icon = cat.icon
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveFilter(cat.id)}
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                        activeFilter === cat.id
+                          ? 'bg-amber-500 text-slate-950 shadow-md scale-102'
+                          : isDark
+                          ? 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white hover:border-white/20'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Icon className="size-3.5 shrink-0" />
+                      <span>{cat.label}</span>
+                    </button>
+                  )
+                })}
               </div>
 
               <div className="text-xs font-bold text-slate-400 shrink-0">
@@ -880,9 +898,7 @@ export default function TrainingPortalPage() {
                     >
                       {/* Play circle */}
                       <div className="size-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-115 transition-transform z-10">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
-                          <polygon points="5 3 19 12 5 21 5 3" />
-                        </svg>
+                        <Play className="size-5 fill-current ml-0.5" />
                       </div>
 
                       {/* Tags overlay */}
@@ -929,8 +945,9 @@ export default function TrainingPortalPage() {
                           </span>
                         </div>
 
-                        <span className="font-bold text-amber-500 group-hover:translate-x-1 transition-transform">
-                          Watch &rarr;
+                        <span className="inline-flex items-center gap-1 font-bold text-amber-500 group-hover:translate-x-1 transition-transform">
+                          <span>Watch</span>
+                          <ChevronRight className="size-3.5" />
                         </span>
                       </div>
                     </div>
@@ -945,8 +962,8 @@ export default function TrainingPortalPage() {
                     : 'bg-slate-50 border-slate-300 text-slate-600'
                 }`}
               >
-                <div className="size-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-500 flex items-center justify-center mx-auto text-2xl font-black">
-                  🎬
+                <div className="size-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
+                  <Film className="size-7" />
                 </div>
                 <h3
                   className="text-xl sm:text-2xl font-extrabold text-white"
@@ -957,6 +974,10 @@ export default function TrainingPortalPage() {
                 <p className="text-sm max-w-md mx-auto leading-relaxed text-slate-400">
                   Institutional training modules and broadcast compliance masterclasses are currently being scheduled for publication. Check back soon for updated curriculum.
                 </p>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <Clock className="size-3.5" />
+                  <span>Curriculum in Preparation</span>
+                </div>
               </div>
             )}
           </div>
@@ -980,11 +1001,13 @@ export default function TrainingPortalPage() {
           </div>
 
           <div className="flex items-center gap-6 font-bold">
-            <Link href="/" className="hover:text-amber-400 transition-colors">
-              KMM Home
+            <Link href="/" className="inline-flex items-center gap-1.5 hover:text-amber-400 transition-colors">
+              <Home className="size-3.5" />
+              <span>KMM Home</span>
             </Link>
-            <Link href="/auth" className="hover:text-amber-400 transition-colors">
-              Officer Sign In
+            <Link href="/auth" className="inline-flex items-center gap-1.5 hover:text-amber-400 transition-colors">
+              <UserCheck className="size-3.5" />
+              <span>Officer Sign In</span>
             </Link>
           </div>
         </div>

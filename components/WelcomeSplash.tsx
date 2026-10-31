@@ -158,41 +158,36 @@ export function WelcomeSplash({
         </div>
 
         {/* Brand Titles */}
-        <div className="mt-8 space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/10 border border-amber-400/20 px-3.5 py-1 text-xs font-semibold text-amber-300">
-            <Sparkles className="size-3.5 text-amber-400" />
-            <span>Kiddies Media Ministries • Loveworld Nation</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
-            {userName ? `Welcome back, ${userName}` : 'Welcome to Kiddies Media Ministries'}
+        <div className="mt-6 space-y-1.5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+            {userName ? `Welcome, ${userName}` : 'Welcome to KMM'}
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-            Intellectual Asset Management & Worldwide Rights Governance Platform
+          <p className="text-xs sm:text-sm text-slate-300">
+            Lovetoons IP & Rights Platform
           </p>
         </div>
 
         {/* Enter Portal Action & Progress */}
-        <div className="mt-8 flex flex-col items-center gap-3 w-full max-w-xs">
+        <div className="mt-6 flex flex-col items-center gap-2.5 w-full max-w-xs">
           <button
             onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-xs sm:text-sm py-3 px-6 shadow-lg shadow-amber-500/25 active:scale-98 transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-xs sm:text-sm py-2.5 px-5 shadow-lg shadow-amber-500/25 active:scale-98 transition-all cursor-pointer"
           >
-            <span>Enter Governance Platform</span>
+            <span>Enter Portal</span>
             <ArrowRight className="size-4 stroke-[2.5]" />
           </button>
 
           {/* Progress bar representing animation duration */}
-          <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-1">
+          <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-amber-400 to-yellow-300 transition-all duration-100 ease-linear rounded-full"
               style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
             />
           </div>
 
-          <span className="text-[11px] text-slate-400 font-medium">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white text-[10px] font-mono">Esc</kbd> or click button to skip
+          <span className="text-[11px] text-slate-400">
+            Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white text-[10px] font-mono">Esc</kbd> to skip
           </span>
         </div>
       </div>
