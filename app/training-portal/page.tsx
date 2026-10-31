@@ -820,16 +820,8 @@ export default function TrainingPortalPage() {
 
                 <div className="pt-4 flex flex-wrap items-center gap-3">
                   <Link
-                    href="/"
-                    className="px-6 py-3.5 rounded-full font-extrabold text-sm flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-lg hover:scale-102 active:scale-98 transition-all cursor-pointer"
-                    style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
-                  >
-                    <span>&larr; Return to KMM Official Website</span>
-                  </Link>
-
-                  <Link
                     href="/auth"
-                    className={`px-5 py-3.5 rounded-full font-bold text-xs border transition-colors ${
+                    className={`px-5 py-3 rounded-full font-bold text-xs border transition-colors ${
                       isDark
                         ? 'border-white/20 text-white hover:bg-white/10'
                         : 'border-slate-300 text-slate-800 hover:bg-slate-100'
@@ -965,14 +957,6 @@ export default function TrainingPortalPage() {
                 <p className="text-sm max-w-md mx-auto leading-relaxed text-slate-400">
                   Institutional training modules and broadcast compliance masterclasses are currently being scheduled for publication. Check back soon for updated curriculum.
                 </p>
-                <div className="pt-2">
-                  <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors"
-                  >
-                    &larr; Return to KMM Official Website
-                  </Link>
-                </div>
               </div>
             )}
           </div>
