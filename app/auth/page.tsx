@@ -63,13 +63,14 @@ export default function AuthPage() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/ip-portal"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors border-amber-500/40 text-amber-500 hover:bg-amber-500/10"
+            href="/training-portal"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors border-amber-500/40 text-amber-500 hover:bg-amber-500/10"
           >
-            <span>IP Portal</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7" />
+              <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
+            <span className="hidden sm:inline">Back to </span>
+            <span>Training Portal</span>
           </Link>
 
           <button
@@ -161,18 +162,21 @@ export default function AuthPage() {
 
         <div className="mt-8 pt-6 border-t border-slate-200/20 flex flex-col gap-2.5">
           <Link
+            href="/training-portal"
+            className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors inline-flex items-center justify-center gap-1.5"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back to Training Portal</span>
+          </Link>
+          <Link
             href="/"
             className={`inline-flex items-center justify-center gap-1.5 text-xs font-bold transition-colors hover:underline ${
               isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            &larr; Return to KMM Official Website
-          </Link>
-          <Link
-            href="/ip-portal"
-            className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors"
-          >
-            Switch to Intellectual Property & Rights Portal &rarr;
+            Return to KMM Official Website
           </Link>
         </div>
       </main>

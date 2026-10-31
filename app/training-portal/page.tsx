@@ -22,195 +22,11 @@ interface VideoItem {
   citations: string[]
 }
 
-const VIDEOS: VideoItem[] = [
-  {
-    id: 'vid-1',
-    code: 'GOV-101',
-    title: 'Statutory Broadcast Content Standards & Pre-Release Clearances',
-    category: 'broadcast',
-    categoryLabel: 'Broadcast Standards',
-    duration: '18:45',
-    speaker: 'Barrister Lillian Okoye',
-    speakerRole: 'Head of Legal & Policy Directorate',
-    initials: 'LO',
-    avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
-    res: '4K ULTRA HD',
-    desc: 'Comprehensive breakdown of pre-release legal scrutiny, technical defect logs, and broadcast compliance checklists for Loveworld children animations. Learn how directors and editorial leads audit cuts before satellite uplink.',
-    gradient: 'linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%)',
-    glow: 'radial-gradient(circle at 50% 40%, rgba(245, 158, 11, 0.35) 0%, rgba(56, 189, 248, 0.2) 40%, transparent 75%)',
-    points: [
-      'Pre-flight screening protocol for all episode cuts prior to master delivery.',
-      'Separation of critical defects (audio clipping, strobe flashes) vs minor visual notes.',
-      'Mandatory legal sign-off threshold before publishing to satellite networks and digital apps.',
-      'Statutory broadcast compliance filing requirements for international partner territories.',
-    ],
-    citations: ['NBC Broadcast Code § 4.2.1', 'ITU-R BT.1702 Strobing Threshold', 'KMM Charter Art. IX'],
-  },
-  {
-    id: 'vid-2',
-    code: 'DAT-603',
-    title: 'COPPA & Digital Child Data Safeguards in Mobile Apps',
-    category: 'protection',
-    categoryLabel: 'Child Protection & Safety',
-    duration: '14:10',
-    speaker: 'Dr. Stephanie Cole',
-    speakerRole: 'Child Cognitive Safety Board',
-    initials: 'SC',
-    avatarBg: 'linear-gradient(135deg, #10B981, #059669)',
-    res: '1080p 60fps',
-    desc: 'Mandatory guidelines for kid-facing mobile apps, voice logging prohibitions, parental consent walls, and zero-tracking architectures across Lovetoons digital experiences.',
-    gradient: 'linear-gradient(135deg, #065F46 0%, #064E3B 100%)',
-    glow: 'radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.35) 0%, rgba(6, 95, 70, 0.25) 40%, transparent 75%)',
-    points: [
-      'Zero third-party advertising or behavioral tracking SDKs permitted in children apps.',
-      'Enforced verifiable parental consent gates prior to collecting usernames or cloud saves.',
-      'Strict compliance with international child privacy acts (COPPA Rule 312 & GDPR-K).',
-      'Automated data purges on inactive child gamer records after 90 days.',
-    ],
-    citations: ['COPPA Rule 16 C.F.R. Part 312', 'GDPR Article 8 (Children)', 'CARU Mobile App Guidelines'],
-  },
-  {
-    id: 'vid-3',
-    code: 'LAW-204',
-    title: 'Copyright Clearances: Original Music, Voiceovers & Character Likeness',
-    category: 'copyright',
-    categoryLabel: 'Copyright & IP',
-    duration: '22:30',
-    speaker: 'Barrister Lillian Okoye',
-    speakerRole: 'IP & Contracts Lead Counsel',
-    initials: 'LO',
-    avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
-    res: '4K MASTER',
-    desc: 'Legal covenants for composers, voiceover contracts, worldwide distribution licenses, and character likeness copyright protection for all characters in the Lovetoons universe.',
-    gradient: 'linear-gradient(135deg, #7C2D12 0%, #431407 100%)',
-    glow: 'radial-gradient(circle at 50% 40%, rgba(249, 115, 22, 0.35) 0%, rgba(124, 45, 18, 0.25) 40%, transparent 75%)',
-    points: [
-      'Requirement for fully executed Work-for-Hire releases for all musical compositions and stems.',
-      'Registered trademark protections for Lovetoons character silhouettes, voices, and names.',
-      'Anti-infringement screening procedures for sound effects, foley, and sample libraries.',
-      'International assignment of copyright transfers across multi-territory co-productions.',
-    ],
-    citations: ['WIPO Copyright Treaty Art. 6', 'Berne Convention Section 7', 'US Copyright Circular 9'],
-  },
-  {
-    id: 'vid-4',
-    code: 'DEF-401',
-    title: 'Animation Defect Classification: Critical vs. Minor Quality Errors',
-    category: 'broadcast',
-    categoryLabel: 'Broadcast Standards',
-    duration: '16:15',
-    speaker: 'Deacon Tunde Adebayo',
-    speakerRole: 'Broadcast Quality Assurance Lead',
-    initials: 'TA',
-    avatarBg: 'linear-gradient(135deg, #6366F1, #4338CA)',
-    res: '1080p HD',
-    desc: 'Practical defect diagnosis: identifying strobe flicker hazards, audio dialogue masking, character rig clipping, and framerate jitters before master sign-off.',
-    gradient: 'linear-gradient(135deg, #3730A3 0%, #1E1B4B 100%)',
-    glow: 'radial-gradient(circle at 50% 40%, rgba(99, 102, 241, 0.35) 0%, rgba(55, 48, 163, 0.25) 40%, transparent 75%)',
-    points: [
-      'Epilepsy protection standards: Maximum 3 flashes per second on screen.',
-      'Audio loudness balancing: Normalization strictly to -24 LKFS broadcast threshold.',
-      'Color gamut limits to ensure visual safety on high-luminance HDR displays.',
-      'Lip-sync tolerances: Maximum 1 frame ahead or 2 frames behind dialogue audio.',
-    ],
-    citations: ['EBU R128 Loudness Normalisation', 'Ofcom Guidance Section 2.14', 'ATSC A/85 Audio Code'],
-  },
-  {
-    id: 'vid-5',
-    code: 'DOC-102',
-    title: 'Scriptural Fidelity & Biblical Accuracy in Kids Storytelling',
-    category: 'doctrinal',
-    categoryLabel: 'Scriptural Review',
-    duration: '19:50',
-    speaker: 'Pastor Victor Chidi',
-    speakerRole: 'KMM Editorial & Pastoral Director',
-    initials: 'VC',
-    avatarBg: 'linear-gradient(135deg, #EC4899, #BE185D)',
-    res: '4K ULTRA HD',
-    desc: 'Preserving theological integrity while adapting biblical narratives into dynamic animated stories that anchor young hearts in the Word without distortion.',
-    gradient: 'linear-gradient(135deg, #831843 0%, #500724 100%)',
-    glow: 'radial-gradient(circle at 50% 40%, rgba(236, 72, 153, 0.35) 0%, rgba(131, 24, 67, 0.25) 40%, transparent 75%)',
-    points: [
-      'Ensuring scripture passages are quoted and referenced with literal fidelity.',
-      'Age-appropriate portrayal of miracles, faith declarations, and victorious prayer.',
-      'Rigorous editorial clearance loop between writers room and the pastoral review council.',
-      'Prohibition of theological caricatures or fear-inducing behavioral tropes.',
-    ],
-    citations: ['KMM Doctrinal Canon 2026', 'King James Bible Concordance', 'Loveworld Editorial Policy'],
-  },
-  {
-    id: 'vid-6',
-    code: 'MER-502',
-    title: 'Global Merchandising, Toy Safety Standards & Territorial Covenants',
-    category: 'merchandising',
-    categoryLabel: 'Merchandising & Contracts',
-    duration: '12:20',
-    speaker: 'Sarah Jenkins, Esq.',
-    speakerRole: 'Commercial & Legal Affairs Counsel',
-    initials: 'SJ',
-    avatarBg: 'linear-gradient(135deg, #14B8A6, #0F766E)',
-    res: '1080p HD',
-    desc: 'Legal parameters for physical Lovetoons plushies, coloring books, apparel, and non-hazardous toy manufacturing covenants for overseas export.',
-    gradient: 'linear-gradient(135deg, #0F766E 0%, #134E4A 100%)',
-    glow: 'radial-gradient(circle at 50% 40%, rgba(20, 184, 166, 0.35) 0%, rgba(15, 118, 110, 0.25) 40%, transparent 75%)',
-    points: [
-      'Mandatory EN-71 and ASTM F963 non-toxic certifications for all physical merchandise.',
-      'Strict exclusivity and territory definitions in overseas franchise deals.',
-      'Proper packaging trademark notices: Registered (R) and Copyright (C) placement.',
-      'Child choke hazard warning labels and age-grading verification audits.',
-    ],
-    citations: ['EN-71 Toy Safety Directive', 'ASTM F963-17 Standard', 'ISO 8124 Toy Safety'],
-  },
-  {
-    id: 'vid-7',
-    code: 'TAL-305',
-    title: 'Child Voice Actor Safeguards & Talent Welfare Guidelines',
-    category: 'protection',
-    categoryLabel: 'Child Protection & Safety',
-    duration: '15:05',
-    speaker: 'Barrister Lillian Okoye',
-    speakerRole: 'Legal Counsel',
-    initials: 'LO',
-    avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
-    res: '1080p HD',
-    desc: 'Studio recording regulations, maximum work windows, mandatory certified chaperone attendance, and psychological comfort protocols for young voice talents.',
-    gradient: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
-    glow: 'radial-gradient(circle at 50% 40%, rgba(56, 189, 248, 0.35) 0%, rgba(30, 41, 59, 0.25) 40%, transparent 75%)',
-    points: [
-      'Maximum continuous recording session of 90 minutes with mandatory rest pauses.',
-      'Parental or certified legal chaperone presence required inside studio control rooms.',
-      'Guaranteed privacy covenants prohibiting release of minors personal details.',
-      'Ergonomic studio adjustments (height-adjustable mic arms, acoustic comfort).',
-    ],
-    citations: ['SAG-AFTRA Young Performer Rules', 'UK Child Performance Regulations', 'ILO Convention 138'],
-  },
-  {
-    id: 'vid-8',
-    code: 'INT-702',
-    title: 'International Subtitling, Dubbing & Multi-Language Harmonization',
-    category: 'copyright',
-    categoryLabel: 'Copyright & IP',
-    duration: '11:40',
-    speaker: 'Emmanuel Kalu',
-    speakerRole: 'International Distribution Lead',
-    initials: 'EK',
-    avatarBg: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
-    res: '4K MASTER',
-    desc: 'Managing multilingual audio stems, dubbing synch standards, and cross-cultural translation reviews across French, Spanish, Swahili, and Arabic Lovetoons networks.',
-    gradient: 'linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)',
-    glow: 'radial-gradient(circle at 50% 40%, rgba(139, 92, 246, 0.35) 0%, rgba(76, 29, 149, 0.25) 40%, transparent 75%)',
-    points: [
-      'Phonetic synchronization standards for Spanish, French, and Swahili dub tracks.',
-      'Strict compliance with regional cultural sensitivities and local idioms.',
-      'Storage and version-control protocol for multi-channel 5.1 and stereo audio stems.',
-      'Automated closed-caption timing checks against broadcast playout servers.',
-    ],
-    citations: ['SMPTE ST 2052 Timed Text', 'EBU Tech 3264 Subtitling', 'WIPO Phonograms Treaty'],
-  },
-]
+// Course / video collection for Training Portal (archived copy preserved in @/lib/data/trainingVideosData)
+const VIDEOS: VideoItem[] = []
 
 const CATEGORIES = [
-  { id: 'all', label: 'All Videos' },
+  { id: 'all', label: 'All Modules' },
   { id: 'broadcast', label: 'Broadcast Standards' },
   { id: 'protection', label: 'Child Protection' },
   { id: 'copyright', label: 'Copyright & IP' },
@@ -224,7 +40,7 @@ export default function TrainingPortalPage() {
   const [officerEmail, setOfficerEmail] = useState('Barrister Lillian')
   const [activeFilter, setActiveFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [currentVideo, setCurrentVideo] = useState<VideoItem>(VIDEOS[0])
+  const [currentVideo, setCurrentVideo] = useState<VideoItem | null>(null)
   const [viewMode, setViewMode] = useState<'catalog' | 'watch'>('catalog')
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
@@ -317,7 +133,9 @@ export default function TrainingPortalPage() {
   }
 
   const handlePlayNext = () => {
+    if (!VIDEOS.length || !currentVideo) return
     const currentIndex = VIDEOS.findIndex((v) => v.id === currentVideo.id)
+    if (currentIndex === -1) return
     const nextIndex = (currentIndex + 1) % VIDEOS.length
     startPlayingVideo(VIDEOS[nextIndex])
     showToast(`Autoplaying next: ${VIDEOS[nextIndex].title}`)
@@ -426,7 +244,7 @@ export default function TrainingPortalPage() {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              All Videos ({VIDEOS.length})
+              All Modules ({VIDEOS.length})
             </button>
 
             <Link
@@ -618,7 +436,7 @@ export default function TrainingPortalPage() {
               >
                 <div className="flex items-center gap-3">
                   <span>🎬</span>
-                  <span>All Masterclasses</span>
+                  <span>All Modules</span>
                 </div>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black">
                   {VIDEOS.length}
@@ -672,7 +490,7 @@ export default function TrainingPortalPage() {
         {/* =========================================================================
             WATCH VIEW: Full Theater Mode
             ========================================================================= */}
-        {viewMode === 'watch' && (
+        {viewMode === 'watch' && currentVideo && (
           <div className="space-y-8 animate-in fade-in duration-300">
             {/* Back to library banner */}
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
@@ -963,7 +781,7 @@ export default function TrainingPortalPage() {
             ========================================================================= */}
         {viewMode === 'catalog' && (
           <div className="space-y-12 animate-in fade-in duration-300">
-            {/* Featured Spotlight Masterclass Hero Banner */}
+            {/* Overview Hero Banner */}
             <section
               className={`rounded-3xl border overflow-hidden p-8 sm:p-12 relative shadow-2xl transition-all ${
                 isDark
@@ -973,53 +791,51 @@ export default function TrainingPortalPage() {
             >
               <div className="max-w-3xl relative z-10 space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-500">
-                  <span>⭐</span> Featured Masterclass
+                  <span>🎓</span> Policy & Governance Academy
                 </div>
 
                 <h1
                   className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight"
                   style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
                 >
-                  Statutory Broadcast Content Standards & Pre-Release Clearances
+                  KMM Training & Governance Portal
                 </h1>
 
                 <p className="text-sm sm:text-base leading-relaxed text-slate-400 dark:text-slate-300">
-                  Complete executive briefing for production heads, animation leads, and directors. Learn how to audit scripts, character depictions, and audio mixes against international children's television covenants.
+                  Official on-demand institutional training repository for Kiddies Media Ministry officers, broadcast reviewers, and creative production heads.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-400 pt-2">
                   <div className="flex items-center gap-1.5">
-                    <span>⏱️</span> 18:45 mins
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Officer Authenticated ({officerEmail})</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span>👤</span> Barrister Lillian Okoye
+                    <span>🛡️</span> Child Safeguarding Standards
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span>🏅</span> 4K Ultra HD Master
+                    <span>📜</span> Statutory Broadcasting Covenants
                   </div>
                 </div>
 
                 <div className="pt-4 flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => startPlayingVideo(VIDEOS[0])}
+                  <Link
+                    href="/"
                     className="px-6 py-3.5 rounded-full font-extrabold text-sm flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-lg hover:scale-102 active:scale-98 transition-all cursor-pointer"
                     style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                    <span>Watch Full Masterclass</span>
-                  </button>
+                    <span>&larr; Return to KMM Official Website</span>
+                  </Link>
 
                   <Link
-                    href="/ip-portal"
+                    href="/auth"
                     className={`px-5 py-3.5 rounded-full font-bold text-xs border transition-colors ${
                       isDark
                         ? 'border-white/20 text-white hover:bg-white/10'
                         : 'border-slate-300 text-slate-800 hover:bg-slate-100'
                     }`}
                   >
-                    Open IP Rights Management &rarr;
+                    Switch Officer Profile
                   </Link>
                 </div>
               </div>
@@ -1046,86 +862,119 @@ export default function TrainingPortalPage() {
               </div>
 
               <div className="text-xs font-bold text-slate-400 shrink-0">
-                Showing {filteredVideos.length} of {VIDEOS.length} Masterclasses
+                {VIDEOS.length > 0
+                  ? `Showing ${filteredVideos.length} of ${VIDEOS.length} Masterclasses`
+                  : '0 Modules Available'}
               </div>
             </div>
 
-            {/* Video Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredVideos.map((vid) => (
-                <div
-                  key={vid.id}
-                  onClick={() => startPlayingVideo(vid)}
-                  className={`rounded-2xl border overflow-hidden flex flex-col transition-all cursor-pointer group hover:-translate-y-1 hover:shadow-2xl ${
-                    isDark
-                      ? 'bg-slate-900/60 border-white/10 hover:border-amber-400/50 shadow-black/40'
-                      : 'bg-white border-slate-200 hover:border-amber-500/50 shadow-slate-200/50'
-                  }`}
-                >
-                  {/* Card Thumbnail */}
+            {/* Video Cards Grid / Empty State */}
+            {filteredVideos.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredVideos.map((vid) => (
                   <div
-                    className="h-48 relative flex items-center justify-center p-4 overflow-hidden"
-                    style={{ background: vid.gradient }}
+                    key={vid.id}
+                    onClick={() => startPlayingVideo(vid)}
+                    className={`rounded-2xl border overflow-hidden flex flex-col transition-all cursor-pointer group hover:-translate-y-1 hover:shadow-2xl ${
+                      isDark
+                        ? 'bg-slate-900/60 border-white/10 hover:border-amber-400/50 shadow-black/40'
+                        : 'bg-white border-slate-200 hover:border-amber-500/50 shadow-slate-200/50'
+                    }`}
                   >
-                    {/* Play circle */}
-                    <div className="size-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-115 transition-transform z-10">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
-                        <polygon points="5 3 19 12 5 21 5 3" />
-                      </svg>
-                    </div>
-
-                    {/* Tags overlay */}
-                    <span className="absolute top-3 left-3 text-[10px] font-mono font-bold bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded text-amber-400 border border-amber-400/30">
-                      {vid.code}
-                    </span>
-
-                    <span className="absolute bottom-3 right-3 text-[10px] font-mono font-bold bg-black/70 px-2 py-0.5 rounded text-white">
-                      {vid.duration}
-                    </span>
-                  </div>
-
-                  {/* Card Content */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[10px] font-black uppercase text-amber-500 tracking-wider">
-                          {vid.categoryLabel}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-semibold ml-auto">{vid.res}</span>
+                    {/* Card Thumbnail */}
+                    <div
+                      className="h-48 relative flex items-center justify-center p-4 overflow-hidden"
+                      style={{ background: vid.gradient }}
+                    >
+                      {/* Play circle */}
+                      <div className="size-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-115 transition-transform z-10">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
                       </div>
 
-                      <h3
-                        className="text-base font-extrabold leading-snug group-hover:text-amber-500 transition-colors line-clamp-2 mb-2"
-                        style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
-                      >
-                        {vid.title}
-                      </h3>
+                      {/* Tags overlay */}
+                      <span className="absolute top-3 left-3 text-[10px] font-mono font-bold bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded text-amber-400 border border-amber-400/30">
+                        {vid.code}
+                      </span>
 
-                      <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">{vid.desc}</p>
-                    </div>
-
-                    {/* Speaker footer */}
-                    <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="size-6 rounded-full flex items-center justify-center font-bold text-[10px] text-white"
-                          style={{ background: vid.avatarBg }}
-                        >
-                          {vid.initials}
-                        </div>
-                        <span className="font-semibold text-slate-300 truncate max-w-[140px]">
-                          {vid.speaker}
-                        </span>
-                      </div>
-
-                      <span className="font-bold text-amber-500 group-hover:translate-x-1 transition-transform">
-                        Watch &rarr;
+                      <span className="absolute bottom-3 right-3 text-[10px] font-mono font-bold bg-black/70 px-2 py-0.5 rounded text-white">
+                        {vid.duration}
                       </span>
                     </div>
+
+                    {/* Card Content */}
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[10px] font-black uppercase text-amber-500 tracking-wider">
+                            {vid.categoryLabel}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-semibold ml-auto">{vid.res}</span>
+                        </div>
+
+                        <h3
+                          className="text-base font-extrabold leading-snug group-hover:text-amber-500 transition-colors line-clamp-2 mb-2"
+                          style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                        >
+                          {vid.title}
+                        </h3>
+
+                        <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">{vid.desc}</p>
+                      </div>
+
+                      {/* Speaker footer */}
+                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="size-6 rounded-full flex items-center justify-center font-bold text-[10px] text-white"
+                            style={{ background: vid.avatarBg }}
+                          >
+                            {vid.initials}
+                          </div>
+                          <span className="font-semibold text-slate-300 truncate max-w-[140px]">
+                            {vid.speaker}
+                          </span>
+                        </div>
+
+                        <span className="font-bold text-amber-500 group-hover:translate-x-1 transition-transform">
+                          Watch &rarr;
+                        </span>
+                      </div>
+                    </div>
                   </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                className={`rounded-3xl border border-dashed p-12 sm:p-16 text-center space-y-4 transition-all ${
+                  isDark
+                    ? 'bg-slate-900/40 border-white/10 text-slate-400'
+                    : 'bg-slate-50 border-slate-300 text-slate-600'
+                }`}
+              >
+                <div className="size-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-500 flex items-center justify-center mx-auto text-2xl font-black">
+                  🎬
                 </div>
-              ))}
-            </div>
+                <h3
+                  className="text-xl sm:text-2xl font-extrabold text-white"
+                  style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                >
+                  No Courses or Videos Available
+                </h3>
+                <p className="text-sm max-w-md mx-auto leading-relaxed text-slate-400">
+                  Institutional training modules and broadcast compliance masterclasses are currently being scheduled for publication. Check back soon for updated curriculum.
+                </p>
+                <div className="pt-2">
+                  <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors"
+                  >
+                    &larr; Return to KMM Official Website
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -1152,9 +1001,6 @@ export default function TrainingPortalPage() {
             </Link>
             <Link href="/auth" className="hover:text-amber-400 transition-colors">
               Officer Sign In
-            </Link>
-            <Link href="/ip-portal" className="text-amber-500 hover:text-amber-400 transition-colors">
-              Launch IP Portal
             </Link>
           </div>
         </div>
