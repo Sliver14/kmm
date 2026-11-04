@@ -139,10 +139,6 @@ export function ApkDownloadModal({
                 <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">{apkFileName}</span>
               </div>
               <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[11px]">
-                <span>File Size:</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200">~146.8 MB</span>
-              </div>
-              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[11px]">
                 <span>Confirmation Sent To:</span>
                 <span className="font-medium text-slate-800 dark:text-slate-200">{email}</span>
               </div>
@@ -188,12 +184,14 @@ export function ApkDownloadModal({
             </div>
 
             {/* Spec Pill */}
-            <div className="flex items-center justify-between rounded-xl bg-slate-100 dark:bg-slate-800 px-3 py-2 text-[11px] text-slate-600 dark:text-slate-300 font-mono">
-              <span className="flex items-center gap-1.5 font-sans font-semibold text-slate-800 dark:text-slate-100">
+            <div className="flex items-center justify-between rounded-xl bg-slate-100 dark:bg-slate-800 px-3.5 py-2 text-[11px] text-slate-600 dark:text-slate-300">
+              <span className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-slate-100">
                 <ShieldCheck className="size-3.5 text-emerald-500" />
-                <span>v5.0 Signed Release</span>
+                <span>Official v5.0 Signed Release</span>
               </span>
-              <span>146.8 MB</span>
+              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold text-slate-700 dark:text-slate-200">
+                Android APK
+              </span>
             </div>
 
             {/* Form */}
@@ -261,7 +259,7 @@ export function ApkDownloadModal({
                 ) : (
                   <>
                     <Download className="size-4" />
-                    <span>Download APK Now (146.8 MB)</span>
+                    <span>Download APK Now</span>
                   </>
                 )}
               </button>
