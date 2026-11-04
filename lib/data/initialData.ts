@@ -12,6 +12,7 @@ import {
   AssetStatus,
   ContentProvenance,
 } from '@/types'
+import type { MinistryOnboardingRequest } from '@/types'
 import { generateAssetArchive } from './assetArchiveData'
 import { attorneyGeneralAssetsData } from './scheduleAssets'
 import { sortDiscontinuedToBottom } from '@/lib/risk'
@@ -2546,3 +2547,54 @@ export const initialActivityLogs: ActivityLog[] = [
   },
 ]
 
+
+
+export const initialOnboardingRequests: MinistryOnboardingRequest[] = [
+  {
+    id: 'req-ob-101',
+    ministryName: "Loveworld Children's Church Ministry",
+    departmentName: 'Curriculum & Media Dept',
+    contactPerson: 'Pastor Grace Okafor',
+    email: 'grace.okafor@lwchildren.org',
+    phone: '+234 803 123 4567',
+    zoneRegion: 'Lagos Zone 1, Nigeria',
+    categoryInterest: 'Educational & Games',
+    estimatedAssetsCount: '10 - 50 assets',
+    intendedUsage: 'Curriculum & Church Distribution',
+    notes: 'We have 24 illustrated children bible story lesson plans and animated songs we would like to register for IP clearance and Lovetoons TV syndication.',
+    status: 'pending',
+    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+  },
+  {
+    id: 'req-ob-102',
+    ministryName: 'Teens Ministry International',
+    departmentName: 'Animation & Digital Comics Unit',
+    contactPerson: 'Brother Kelvin Adeyemi',
+    email: 'k.adeyemi@teensnation.tv',
+    phone: '+44 7911 123456',
+    zoneRegion: 'UK Region 2, London',
+    categoryInterest: 'Animation & Cartoons',
+    estimatedAssetsCount: '1 - 10 assets',
+    intendedUsage: 'Lovetoons TV Broadcast Syndication',
+    notes: 'Developing a 6-episode 3D youth evangelism anime series. Requesting technical onboarding and trademark coverage.',
+    status: 'contacted',
+    adminNotes: 'Spoke with Bro Kelvin on Monday; requested script treatment and pilot animatic.',
+    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
+  },
+  {
+    id: 'req-ob-103',
+    ministryName: 'Healing School Youth Directorate',
+    departmentName: 'Music & Audio Production',
+    contactPerson: 'Sister Deborah Vance',
+    email: 'deborah.vance@healingschool.org',
+    phone: '+1 404 555 0192',
+    zoneRegion: 'North America / Atlanta, USA',
+    categoryInterest: 'Music & Sound',
+    estimatedAssetsCount: '10 - 50 assets',
+    intendedUsage: 'Copyright & Rights Protection',
+    notes: 'Audio worship albums and children affirmation soundtracks looking for complete chain-of-title rights documentation.',
+    status: 'reviewed',
+    adminNotes: 'Good candidate for Digital Agency & Rights Registry.',
+    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+  },
+]

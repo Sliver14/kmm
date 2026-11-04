@@ -17,6 +17,7 @@ import {
   GovernancePillarKey,
   GovernancePillarUpdatePayload,
   RightsDocument,
+  MinistryOnboardingRequest,
 } from '@/types'
 import {
   initialUsers,
@@ -27,6 +28,7 @@ import {
   initialRelationships,
   initialApprovals,
   initialActivityLogs,
+  initialOnboardingRequests,
 } from '@/lib/data/initialData'
 import { sortDiscontinuedToBottom } from '@/lib/risk'
 
@@ -141,6 +143,16 @@ interface DataContextType {
   dismissNotification: (id: string) => void
   clearAllNotifications: () => void
 
+  // Ministry Onboarding Waitlist
+  onboardingRequests: MinistryOnboardingRequest[]
+  pendingOnboardingCount: number
+  addOnboardingRequest: (
+    req: Omit<MinistryOnboardingRequest, 'id' | 'submittedAt' | 'status'> & { id?: string }
+  ) => Promise<MinistryOnboardingRequest>
+  updateOnboardingRequest: (id: string, updates: Partial<MinistryOnboardingRequest>) => Promise<boolean>
+  deleteOnboardingRequest: (id: string) => Promise<boolean>
+  approveAndRegisterMinistry: (requestId: string) => Promise<{ success: boolean; message: string }>
+
   // Stats & Utilities
   stats: PlatformStats
   globalStats: PlatformStats
@@ -157,6 +169,7 @@ const STORAGE_KEY = 'kmp_platform_data_v10'
 const USER_KEY = 'kmp_current_user_v9'
 const AUTH_KEY = 'kmp_auth_state_v9'
 const NOTIF_KEY = 'kmp_notifications_v3'
+const ONBOARDING_KEY = 'kmp_onboarding_waitlist_v1'
 
 const defaultInitialNotifications: NotificationItem[] = [
   {
@@ -241,6 +254,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [masterApprovals, setMasterApprovals] = useState<ApprovalRequest[]>(initialApprovals)
   const [masterActivities, setMasterActivities] = useState<ActivityLog[]>(initialActivityLogs)
   const [masterNotifications, setMasterNotifications] = useState<NotificationItem[]>(defaultInitialNotifications)
+  const [onboardingRequests, setOnboardingRequests] = useState<MinistryOnboardingRequest[]>(initialOnboardingRequests)
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -289,6 +303,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
+        const storedOnboarding = localStorage.getItem(ONBOARDING_KEY)
+        if (storedOnboarding) {
+          try {
+            const parsedOnboarding = JSON.parse(storedOnboarding)
+            if (Array.isArray(parsedOnboarding) && parsedOnboarding.length > 0) {
+              setOnboardingRequests(parsedOnboarding)
+            }
+          } catch (e) {
+            console.error('Failed to parse stored onboarding requests', e)
+          }
+        }
+
         const storedUserId = localStorage.getItem(USER_KEY)
         if (storedUserId) {
           const foundUser = initialUsers.find((u) => u.id === storedUserId)
@@ -320,13 +346,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     // Connect to live Neon DB APIs (Single Source of Truth)
     const syncWithBackend = async () => {
       try {
-        const [assetsRes, rightsRes, approvalsRes, relsRes, catsRes, actsRes] = await Promise.all([
+        const [assetsRes, rightsRes, approvalsRes, relsRes, catsRes, actsRes, onboardRes] = await Promise.all([
           fetch('/api/assets').then((r) => r.json()).catch(() => null),
           fetch('/api/rights').then((r) => r.json()).catch(() => null),
           fetch('/api/approvals').then((r) => r.json()).catch(() => null),
           fetch('/api/relationships').then((r) => r.json()).catch(() => null),
           fetch('/api/categories').then((r) => r.json()).catch(() => null),
           fetch('/api/activities').then((r) => r.json()).catch(() => null),
+          fetch('/api/onboarding').then((r) => r.json()).catch(() => null),
         ])
 
         if (assetsRes?.success && Array.isArray(assetsRes.assets) && assetsRes.assets.length > 0) {
@@ -383,6 +410,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         }
         if (actsRes?.success && Array.isArray(actsRes.activities) && actsRes.activities.length > 0) {
           setMasterActivities(actsRes.activities)
+        }
+        if (onboardRes?.success && Array.isArray(onboardRes.requests) && onboardRes.requests.length > 0) {
+          setOnboardingRequests(onboardRes.requests)
         }
       } catch (err) {
         console.warn('Backend live sync warning:', err)
@@ -606,6 +636,179 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setMasterNotifications([])
     showToast('All notifications cleared.')
   }, [showToast])
+
+  // -------------------------------------------------------------
+  // MINISTRY ONBOARDING WAITLIST LOGIC
+  // -------------------------------------------------------------
+  const pendingOnboardingCount = useMemo(() => {
+    return onboardingRequests.filter((r) => r.status === 'pending').length
+  }, [onboardingRequests])
+
+  const addOnboardingRequest = useCallback(
+    async (
+      req: Omit<MinistryOnboardingRequest, 'id' | 'submittedAt' | 'status'> & { id?: string }
+    ): Promise<MinistryOnboardingRequest> => {
+      const id = req.id || `req-ob-${Date.now()}`
+      const submittedAt = new Date().toISOString()
+      const newRequest: MinistryOnboardingRequest = {
+        ...req,
+        id,
+        status: 'pending',
+        submittedAt,
+      }
+
+      setOnboardingRequests((prev) => {
+        const next = [newRequest, ...prev.filter((r) => r.id !== id)]
+        try {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(ONBOARDING_KEY, JSON.stringify(next))
+          }
+        } catch {}
+        return next
+      })
+
+      // Send to backend API
+      try {
+        fetch('/api/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newRequest),
+        }).catch((err) => console.warn('Onboarding API post warning:', err))
+      } catch {}
+
+      // Add to activities
+      addActivity(
+        'Ministry Onboarding Waitlist',
+        `${newRequest.ministryName} (${newRequest.contactPerson}) submitted expression of interest`,
+        'file',
+        'bg-amber-100 text-amber-800'
+      )
+
+      // Add notification for admins
+      addNotification({
+        type: 'governance',
+        title: `Waitlist: ${newRequest.ministryName}`,
+        subtitle: `${newRequest.contactPerson} • ${newRequest.categoryInterest || 'New Ministry'}`,
+        targetTab: 'Settings',
+        priority: 'High',
+        badge: 'Waitlist',
+        badgeColor: 'bg-purple-100 text-purple-800',
+        agency: 'Lovetoons',
+      })
+
+      showToast(`Onboarding application for ${newRequest.ministryName} registered on the waitlist!`)
+      return newRequest
+    },
+    [addActivity, addNotification, showToast]
+  )
+
+  const updateOnboardingRequest = useCallback(
+    async (id: string, updates: Partial<MinistryOnboardingRequest>): Promise<boolean> => {
+      setOnboardingRequests((prev) => {
+        const next = prev.map((r) =>
+          r.id === id ? { ...r, ...updates, reviewedAt: new Date().toISOString() } : r
+        )
+        try {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(ONBOARDING_KEY, JSON.stringify(next))
+          }
+        } catch {}
+        return next
+      })
+
+      try {
+        await fetch('/api/onboarding', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, ...updates, reviewedBy: currentUser.name }),
+        })
+      } catch (err) {
+        console.warn('Onboarding update API warning:', err)
+      }
+
+      showToast('Ministry waitlist status updated.')
+      return true
+    },
+    [currentUser.name, showToast]
+  )
+
+  const deleteOnboardingRequest = useCallback(
+    async (id: string): Promise<boolean> => {
+      setOnboardingRequests((prev) => {
+        const next = prev.filter((r) => r.id !== id)
+        try {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(ONBOARDING_KEY, JSON.stringify(next))
+          }
+        } catch {}
+        return next
+      })
+
+      try {
+        await fetch(`/api/onboarding?id=${id}`, {
+          method: 'DELETE',
+        })
+      } catch (err) {
+        console.warn('Onboarding delete API warning:', err)
+      }
+
+      showToast('Onboarding request removed from waitlist.')
+      return true
+    },
+    [showToast]
+  )
+
+  const approveAndRegisterMinistry = useCallback(
+    async (requestId: string): Promise<{ success: boolean; message: string }> => {
+      const target = onboardingRequests.find((r) => r.id === requestId)
+      if (!target) {
+        return { success: false, message: 'Request not found' }
+      }
+
+      // Generate a short code from ministry name (e.g. "LW Children Ministry" -> "LWCM")
+      const words = target.ministryName.trim().split(/\s+/)
+      let code = words.map((w) => w[0]?.toUpperCase() || '').join('')
+      if (code.length < 3) {
+        code = target.ministryName.replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase()
+      }
+
+      try {
+        const res = await fetch('/api/ministries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: target.ministryName,
+            code,
+            description: `${target.departmentName ? target.departmentName + ' • ' : ''}${
+              target.notes || 'Onboarded from waitlist.'
+            }`,
+          }),
+        })
+        const data = await res.json()
+
+        await updateOnboardingRequest(requestId, {
+          status: 'approved',
+          adminNotes: `Approved & registered into active architecture (Code: ${code}).`,
+          reviewedBy: currentUser.name,
+        })
+
+        showToast(`Ministry ${target.ministryName} approved & registered in architecture!`)
+        return {
+          success: true,
+          message: data?.message || `Ministry ${target.ministryName} successfully registered!`,
+        }
+      } catch (err: any) {
+        console.error('Failed to register ministry:', err)
+        await updateOnboardingRequest(requestId, {
+          status: 'approved',
+          adminNotes: 'Approved by Super Admin.',
+          reviewedBy: currentUser.name,
+        })
+        return { success: true, message: 'Ministry marked as approved.' }
+      }
+    },
+    [onboardingRequests, currentUser.name, updateOnboardingRequest, showToast]
+  )
 
   // -------------------------------------------------------------
   // ROLE SCOPING LOGIC:
@@ -2167,6 +2370,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     toggleNotificationRead,
     dismissNotification,
     clearAllNotifications,
+    onboardingRequests,
+    pendingOnboardingCount,
+    addOnboardingRequest,
+    updateOnboardingRequest,
+    deleteOnboardingRequest,
+    approveAndRegisterMinistry,
     stats,
     globalStats,
     resetToDefaultData,

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { MinistryOnboardingForm } from '@/components/MinistryOnboardingForm'
 
 const agenciesList = [
   {
@@ -409,6 +410,16 @@ export default function KmmLandingPage() {
               </li>
               <li>
                 <Link
+                  href="/onboarding"
+                  className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)] inline-flex items-center gap-1.5"
+                  title="Ministry & Department Onboarding Waitlist"
+                >
+                  <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span>Onboard</span>
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/auth"
                   className="px-4 py-2 rounded-full font-bold text-sm bg-[var(--kmm-orange)] text-[#10233F] hover:brightness-95 transition-all shadow-xs"
                 >
@@ -582,6 +593,23 @@ export default function KmmLandingPage() {
                 </span>
                 <span>Institutional Enquiries</span>
               </a>
+
+              <Link
+                href="/onboarding"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+              >
+                <span className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm">
+                  ✨
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold">Ministry Onboarding</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500">Waitlist</span>
+                  </div>
+                  <p className="text-[10px] text-[var(--kmm-muted)] truncate">Express interest for department content</p>
+                </div>
+              </Link>
 
               {/* Portal CTA Cards in Drawer */}
               <div className="pt-4 mt-2 border-t border-[var(--kmm-line)] flex flex-col gap-3">
@@ -1175,6 +1203,27 @@ export default function KmmLandingPage() {
         </section>
 
         {/* =========================================================================
+            MINISTRY & DEPARTMENT ONBOARDING WAITLIST SECTION
+            ========================================================================= */}
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors" id="onboarding">
+          <div className="kmm-wrap space-y-10">
+            <div className="max-w-3xl space-y-3">
+              <p className="eyebrow">Institutional Access & Waitlist</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Onboard your Ministry or Department
+              </h2>
+              <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
+                Whether you represent a Church Zone, Children's Ministry department, youth animation project, or media production unit, join the KMM ecosystem. Submit a simple expression of interest to join our onboarding waitlist.
+              </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto">
+              <MinistryOnboardingForm embedded />
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
             CONTACT / ENQUIRIES SECTION
             ========================================================================= */}
         <section className="py-20 scroll-mt-20" id="contact">
@@ -1259,6 +1308,7 @@ export default function KmmLandingPage() {
               <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--kmm-gold)]">Platforms</h4>
               <ul className="list-none m-0 p-0 space-y-2 text-sm text-white/90">
                 <li><Link href="/ip-portal" className="text-[var(--kmm-gold)] font-bold hover:underline">Launch IP Portal &rarr;</Link></li>
+                <li><Link href="/onboarding" className="hover:text-[var(--kmm-gold)] transition-colors">Ministry Onboarding (Waitlist)</Link></li>
                 <li><a href="#agencies" className="hover:text-[var(--kmm-gold)] transition-colors">Agencies & Directory</a></li>
                 <li><a href="#lovetoons" className="hover:text-[var(--kmm-gold)] transition-colors">LoveToons TV & Web</a></li>
                 <li><a href="#contact" className="hover:text-[var(--kmm-gold)] transition-colors">Contact Directorate</a></li>

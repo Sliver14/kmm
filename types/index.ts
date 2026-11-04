@@ -488,3 +488,25 @@ export interface GovernancePillarUpdatePayload {
   justification?: string
 }
 
+export type OnboardingStatus = 'pending' | 'reviewed' | 'contacted' | 'approved' | 'declined'
+
+export interface MinistryOnboardingRequest {
+  id: string
+  ministryName: string
+  departmentName?: string
+  contactPerson: string
+  email: string
+  phone?: string
+  zoneRegion?: string
+  categoryInterest?: string
+  estimatedAssetsCount?: string
+  intendedUsage?: string
+  notes?: string
+  status: OnboardingStatus
+  adminNotes?: string
+  submittedAt: string
+  reviewedAt?: string
+  reviewedBy?: string
+}
+
+

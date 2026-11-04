@@ -30,6 +30,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { WelcomeSplash } from '@/components/WelcomeSplash'
 import { GovernancePillarModal } from '@/components/GovernancePillarModals'
 import { AddContributorModal } from '@/components/AddContributorModal'
+import { MinistryWaitlistManager } from '@/components/MinistryWaitlistManager'
 import {
   getAssetRiskAssessment,
   getPortfolioRiskMetrics,
@@ -203,7 +204,7 @@ function Sidebar({
   isCollapsed?: boolean
   setIsCollapsed?: (v: boolean | ((prev: boolean) => boolean)) => void
 }) {
-  const { stats, currentUser, logout } = useLovetoonsData()
+  const { stats, currentUser, logout, pendingOnboardingCount } = useLovetoonsData()
 
   const visibleNav = useMemo(() => {
     const isSuperAdmin = currentUser.role === 'super_admin'
@@ -340,10 +341,18 @@ function Sidebar({
                     {stats.pendingApprovalsCount}
                   </span>
                 )}
+                {!isCollapsed && label === 'Settings' && currentUser.role === 'super_admin' && pendingOnboardingCount > 0 && (
+                  <span className="rounded-full bg-purple-600 text-[10px] font-bold text-white px-2 py-0.5 shadow-2xs">
+                    {pendingOnboardingCount}
+                  </span>
+                )}
 
                 {/* Collapsed floating indicator dot */}
                 {isCollapsed && label === 'Approvals' && stats.pendingApprovalsCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#ff5c75] ring-2 ring-white dark:ring-[#181a24]" />
+                )}
+                {isCollapsed && label === 'Settings' && currentUser.role === 'super_admin' && pendingOnboardingCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-purple-600 ring-2 ring-white dark:ring-[#181a24]" />
                 )}
 
                 {/* Tooltip for collapsed view */}
@@ -1489,7 +1498,7 @@ function Dashboard({
 }: {
   setActiveNav?: (nav: string, assetId?: string | null) => void
 }) {
-  const { assets, allAssets, stats, globalStats, categories, activities, currentUser, isGlobalViewer, userAgency, rightsRecords, approvals } = useLovetoonsData()
+  const { assets, allAssets, stats, globalStats, categories, activities, currentUser, isGlobalViewer, userAgency, rightsRecords, approvals, pendingOnboardingCount } = useLovetoonsData()
   const [query, setQuery] = useState('')
   const [complianceTab, setComplianceTab] = useState<'overview' | 'watchlist' | 'agencies'>('overview')
 
@@ -1687,6 +1696,41 @@ function Dashboard({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200 min-w-0 w-full overflow-hidden">
+      {/* Super Admin Notice: Pending Ministry Waitlist Applications */}
+      {currentUser.role === 'super_admin' && pendingOnboardingCount > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-purple-500/10 via-amber-500/10 to-transparent border border-purple-500/25 text-slate-900 dark:text-white shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+              <Users className="size-4" />
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-bold flex items-center gap-2">
+                <span>{pendingOnboardingCount} Ministry Onboarding {pendingOnboardingCount === 1 ? 'Application' : 'Applications'} Pending Review</span>
+                <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                New church zones and media departments have submitted expressions of interest to join the KMM ecosystem.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (setActiveNav) {
+                setActiveNav('Settings')
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('kmm_open_waitlist_tab'))
+                }
+              }
+            }}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition shadow-xs cursor-pointer shrink-0"
+          >
+            <span>Review Waitlist</span>
+            <ChevronRight className="size-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* ROW 1: TOP 4 EXECUTIVE METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
         {/* Card 1: Total Assets Registered */}
@@ -7814,9 +7858,17 @@ function SettingsPage() {
     availableUsers,
     logout,
     openWelcomeSplash,
+    onboardingRequests,
+    pendingOnboardingCount,
   } = useLovetoonsData()
 
-  const [activeSettingsTab, setActiveSettingsTab] = useState<'general' | 'taxonomy' | 'governance' | 'database'>('general')
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'general' | 'waitlist' | 'taxonomy' | 'governance' | 'database'>('general')
+
+  useEffect(() => {
+    const handler = () => setActiveSettingsTab('waitlist')
+    window.addEventListener('kmm_open_waitlist_tab', handler)
+    return () => window.removeEventListener('kmm_open_waitlist_tab', handler)
+  }, [])
   const [defaultRightsScope, setDefaultRightsScope] = useState('Worldwide Master Copyright')
   const [governanceScoreThreshold, setGovernanceScoreThreshold] = useState(95)
   const [emailNotifications, setEmailNotifications] = useState(true)
@@ -7942,6 +7994,16 @@ function SettingsPage() {
       <div className="flex items-center gap-1.5 border-b border-slate-200 dark:border-white/10 pb-px overflow-x-auto no-scrollbar">
         {[
           { id: 'general', label: 'General & Profile', icon: Building2 },
+          ...(isSuperAdmin
+            ? [
+                {
+                  id: 'waitlist',
+                  label: 'Ministry Waitlist',
+                  icon: Users,
+                  badge: pendingOnboardingCount > 0 ? `${pendingOnboardingCount} Pending` : onboardingRequests.length,
+                },
+              ]
+            : []),
           { id: 'taxonomy', label: 'Category Taxonomy', icon: Grid2X2, badge: categories.length },
           { id: 'governance', label: 'Governance & Rights Policies', icon: ShieldCheck },
           { id: 'database', label: 'Database & Cloud Health', icon: Database, badge: 'Neon Synced' },
@@ -7977,6 +8039,11 @@ function SettingsPage() {
           )
         })}
       </div>
+
+      {/* TAB: MINISTRY WAITLIST (SUPER ADMIN) */}
+      {activeSettingsTab === 'waitlist' && isSuperAdmin && (
+        <MinistryWaitlistManager />
+      )}
 
       {/* TAB 1: GENERAL & MINISTRY PROFILE */}
       {activeSettingsTab === 'general' && (
