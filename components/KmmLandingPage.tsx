@@ -787,9 +787,33 @@ export default function KmmLandingPage() {
                     Discover inspirational, character-building children's animated media through the LoveToons TV application.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <span className="kmm-btn kmm-btn-disabled text-xs">Google Play &middot; coming soon</span>
-                  <span className="kmm-btn kmm-btn-disabled text-xs">App Store &middot; coming soon</span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <a
+                    href="https://lovetoons.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kmm-btn text-xs bg-white text-[var(--kmm-blue)] hover:bg-white/95 font-bold shadow-md inline-flex items-center gap-1.5 transition-all"
+                  >
+                    Stream LoveToons TV
+                    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </a>
+                  <a
+                    href="https://lwappstore.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kmm-btn text-xs bg-white/20 hover:bg-white/30 text-white font-semibold inline-flex items-center gap-1.5 transition-all"
+                  >
+                    Loveworld App Store
+                    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </a>
                 </div>
               </article>
 
@@ -813,7 +837,18 @@ export default function KmmLandingPage() {
                   </p>
                 </div>
                 <div>
-                  <span className="kmm-btn kmm-btn-disabled text-xs">Visit website &middot; link coming soon</span>
+                  <a
+                    href="https://lovetoons.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kmm-btn text-xs bg-[#10233F] text-white hover:bg-[#10233F]/90 font-bold shadow-md inline-flex items-center gap-2 transition-all"
+                  >
+                    Visit lovetoons.org
+                    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </a>
                 </div>
               </article>
             </div>
@@ -1126,7 +1161,21 @@ export default function KmmLandingPage() {
                 <li><Link href="/ip-portal" className="text-[var(--kmm-gold)] font-bold hover:underline">Launch IP Portal &rarr;</Link></li>
                 <li><Link href="/onboarding" className="hover:text-[var(--kmm-gold)] transition-colors">Ministry Onboarding (Waitlist)</Link></li>
                 <li><a href="#agencies" className="hover:text-[var(--kmm-gold)] transition-colors">Agencies & Directory</a></li>
-                <li><a href="#lovetoons" className="hover:text-[var(--kmm-gold)] transition-colors">LoveToons TV & Web</a></li>
+                <li>
+                  <a
+                    href="https://lovetoons.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[var(--kmm-gold)] transition-colors inline-flex items-center gap-1.5"
+                  >
+                    LoveToons (lovetoons.org)
+                    <svg className="size-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </a>
+                </li>
                 <li><a href="#contact" className="hover:text-[var(--kmm-gold)] transition-colors">Contact Directorate</a></li>
               </ul>
             </div>

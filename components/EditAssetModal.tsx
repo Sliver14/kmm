@@ -624,7 +624,7 @@ export function EditAssetModal({
                     <label className="block text-slate-600 dark:text-slate-300 mb-0.5 text-[11px] font-semibold">Live Production URL</label>
                     <input
                       type="url"
-                      placeholder="https://tv.lovetoons.org"
+                      placeholder="https://lovetoons.org"
                       value={attributes.liveUrl ?? ''}
                       onChange={(e) =>
                         setAttributes((prev) => ({

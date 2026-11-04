@@ -17,7 +17,7 @@ export function generateAssetArchive(asset: {
     // -------------------------------------------------------------
     case 'Digital / Interactive Platform': {
       // Strictly use actual DB attributes; do NOT invent fallback URLs or repos
-      const liveUrl = attributes?.liveUrl || (id === 'LT-DGT-001' ? 'https://tv.lovetoons.org/app' : id === 'LT-DGT-002' ? 'https://tv.lovetoons.org' : id === 'LT-DGT-003' ? 'https://learn.lovetoons.tv' : undefined)
+      const liveUrl = attributes?.liveUrl || (id === 'LT-DGT-001' ? 'https://lovetoons.org/app' : id === 'LT-DGT-002' ? 'https://lovetoons.org' : id === 'LT-DGT-003' ? 'https://learn.lovetoons.tv' : undefined)
       const gitRepo = attributes?.gitRepoUrl || undefined
       const serverHost = attributes?.serverHost || undefined
       const isKnownSeededDemo = id === 'LT-DGT-001' || id === 'LT-DGT-002' || id === 'LT-DGT-003'
