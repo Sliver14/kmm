@@ -7,7 +7,6 @@ import {
   User,
   Mail,
   Phone,
-  MapPin,
   Sparkles,
   Layers,
   FileCheck2,
@@ -60,11 +59,9 @@ export function MinistryOnboardingForm({
   const { addOnboardingRequest } = useLovetoonsData()
 
   const [ministryName, setMinistryName] = useState('')
-  const [departmentName, setDepartmentName] = useState('')
   const [contactPerson, setContactPerson] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [zoneRegion, setZoneRegion] = useState('')
   const [categoryInterest, setCategoryInterest] = useState(CATEGORY_OPTIONS[0])
   const [estimatedAssetsCount, setEstimatedAssetsCount] = useState(SCOPE_OPTIONS[1])
   const [intendedUsage, setIntendedUsage] = useState(GOAL_OPTIONS[0])
@@ -98,11 +95,9 @@ export function MinistryOnboardingForm({
     try {
       const created = await addOnboardingRequest({
         ministryName: ministryName.trim(),
-        departmentName: departmentName.trim() || undefined,
         contactPerson: contactPerson.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim() || undefined,
-        zoneRegion: zoneRegion.trim() || undefined,
         categoryInterest,
         estimatedAssetsCount,
         intendedUsage,
@@ -122,11 +117,9 @@ export function MinistryOnboardingForm({
 
   const handleReset = () => {
     setMinistryName('')
-    setDepartmentName('')
     setContactPerson('')
     setEmail('')
     setPhone('')
-    setZoneRegion('')
     setCategoryInterest(CATEGORY_OPTIONS[0])
     setEstimatedAssetsCount(SCOPE_OPTIONS[1])
     setIntendedUsage(GOAL_OPTIONS[0])
@@ -239,28 +232,25 @@ export function MinistryOnboardingForm({
       )}
 
       <div className="space-y-5 text-left">
-        {/* Row 1: Ministry Name & Department Name */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              Ministry / Department Name <span className="text-amber-500">*</span>
-            </label>
-            <div className="relative">
-              <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-              <input
-                type="text"
-                required
-                value={ministryName}
-                onChange={(e) => setMinistryName(e.target.value)}
-                placeholder="e.g. Loveworld Children's Ministry UK"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm font-medium border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 outline-hidden focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
-              />
-            </div>
+        {/* Row 1: Ministry / Department Name (Prominent Full Width) */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            Ministry / Department Name <span className="text-amber-500">*</span>
+          </label>
+          <div className="relative">
+            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+            <input
+              type="text"
+              required
+              value={ministryName}
+              onChange={(e) => setMinistryName(e.target.value)}
+              placeholder="e.g. Loveworld Children's Ministry International"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm font-medium border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 outline-hidden focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
+            />
           </div>
-
         </div>
 
-        {/* Row 2: Contact Person & Official Email */}
+        {/* Row 2: Contact Person & Official Email (Paired 2-Columns) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -297,11 +287,11 @@ export function MinistryOnboardingForm({
           </div>
         </div>
 
-        {/* Row 3: Phone & Zone / Region */}
+        {/* Row 3: Phone & Primary Focus Area (Paired 2-Columns) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              Phone  <span className="text-slate-400 font-normal">(Optional)</span>
+              Phone Number <span className="text-slate-400 font-normal">(Optional)</span>
             </label>
             <div className="relative">
               <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -314,10 +304,7 @@ export function MinistryOnboardingForm({
               />
             </div>
           </div>
-        </div>
 
-        {/* Row 4: Primary Content Focus & Readiness Scope */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               Primary Media / Focus Area
@@ -334,7 +321,10 @@ export function MinistryOnboardingForm({
               ))}
             </select>
           </div>
+        </div>
 
+        {/* Row 4: Asset Readiness & Intended Collaboration Goal (Paired 2-Columns) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               Asset Readiness / Catalogue Size
@@ -351,27 +341,26 @@ export function MinistryOnboardingForm({
               ))}
             </select>
           </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              Intended Collaboration Goal
+            </label>
+            <select
+              value={intendedUsage}
+              onChange={(e) => setIntendedUsage(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white outline-hidden focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all cursor-pointer"
+            >
+              {GOAL_OPTIONS.map((opt) => (
+                <option key={opt} value={opt} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Row 5: Intended Collaboration Goal */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-            Intended Collaboration or Goal
-          </label>
-          <select
-            value={intendedUsage}
-            onChange={(e) => setIntendedUsage(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white outline-hidden focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all cursor-pointer"
-          >
-            {GOAL_OPTIONS.map((opt) => (
-              <option key={opt} value={opt} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                {opt}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Row 6: Notes / Special Requirements */}
+        {/* Row 5: Notes / Special Requirements (Full Width) */}
         <div>
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
             Brief Overview / Requirements <span className="text-slate-400 font-normal">(Optional)</span>
