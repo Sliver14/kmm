@@ -88,8 +88,8 @@ export function MinistryOnboardingForm({
       return
     }
 
-    if (!email.trim() || !email.includes('@')) {
-      setErrorMessage('Please provide a valid official email address.')
+    if (!email.trim()) {
+      setErrorMessage('Please provide an official contact email or Kingschat handle.')
       return
     }
 
@@ -243,7 +243,7 @@ export function MinistryOnboardingForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              Ministry / Entity Name <span className="text-amber-500">*</span>
+              Ministry / Department Name <span className="text-amber-500">*</span>
             </label>
             <div className="relative">
               <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -258,21 +258,6 @@ export function MinistryOnboardingForm({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              Department / Operational Unit <span className="text-slate-400 font-normal">(Optional)</span>
-            </label>
-            <div className="relative">
-              <Layers className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-              <input
-                type="text"
-                value={departmentName}
-                onChange={(e) => setDepartmentName(e.target.value)}
-                placeholder="e.g. Animation & Media Unit"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm font-medium border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 outline-hidden focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
-              />
-            </div>
-          </div>
         </div>
 
         {/* Row 2: Contact Person & Official Email */}
@@ -296,27 +281,27 @@ export function MinistryOnboardingForm({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              Official Contact Email <span className="text-amber-500">*</span>
+              Contact Email or Kingschat Handle <span className="text-amber-500">*</span>
             </label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
               <input
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="officer@ministry.org"
+                placeholder="officer@ministry.org or @kingschat"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm font-medium border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 outline-hidden focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
               />
             </div>
           </div>
         </div>
 
-        {/* Row 3: Phone / WhatsApp & Zone / Region */}
+        {/* Row 3: Phone & Zone / Region */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              Phone / WhatsApp <span className="text-slate-400 font-normal">(Optional)</span>
+              Phone  <span className="text-slate-400 font-normal">(Optional)</span>
             </label>
             <div className="relative">
               <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -325,22 +310,6 @@ export function MinistryOnboardingForm({
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+234 803 000 0000"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm font-medium border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 outline-hidden focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              Zone / Region / Location <span className="text-slate-400 font-normal">(Optional)</span>
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-              <input
-                type="text"
-                value={zoneRegion}
-                onChange={(e) => setZoneRegion(e.target.value)}
-                placeholder="e.g. Lagos Zone 1 / UK Region 2"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm font-medium border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 outline-hidden focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
               />
             </div>
@@ -446,3 +415,4 @@ export function MinistryOnboardingForm({
     </form>
   )
 }
+

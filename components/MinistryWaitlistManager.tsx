@@ -678,3 +678,4 @@ export function MinistryWaitlistManager({ className = '' }: MinistryWaitlistMana
     </div>
   )
 }
+

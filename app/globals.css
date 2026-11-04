@@ -667,3 +667,209 @@
 }
 
 
+
+
+/* ==========================================================================
+   KMM Landing Page Core Variables & Classes (Zero-FOUC Critical CSS)
+   ========================================================================== */
+:root {
+  --kmm-bg: #FFF7E6;
+  --kmm-surface: #FFFFFF;
+  --kmm-band: #FCEBC4;
+  --kmm-fg: #10233F;
+  --kmm-muted: #46566E;
+  --kmm-line: rgba(16, 35, 63, 0.14);
+  --kmm-header: rgba(255, 247, 230, 0.94);
+  --kmm-blue: #1F6FD0;
+  --kmm-orange: #F26A1B;
+  --kmm-gold: #F2B233;
+  --kmm-navy: #10233F;
+  --kmm-cream: #FFF7E6;
+  --kmm-link: #1757A8;
+  --kmm-eyebrow: #B8420A;
+  --kmm-ribbon-a: #F2B233;
+  --kmm-ribbon-b: #1F6FD0;
+  --kmm-display: var(--font-bricolage, "Bricolage Grotesque"), "Trebuchet MS", system-ui, sans-serif;
+  --kmm-body: var(--font-figtree, "Figtree"), system-ui, -apple-system, sans-serif;
+}
+
+.dark,
+.dark :root,
+html.dark {
+  --kmm-bg: #0B1730;
+  --kmm-surface: #14294D;
+  --kmm-band: #102140;
+  --kmm-fg: #FFF3DA;
+  --kmm-muted: #B7C4DA;
+  --kmm-line: rgba(255, 243, 218, 0.16);
+  --kmm-header: rgba(11, 23, 48, 0.94);
+  --kmm-link: #8DBDFF;
+  --kmm-eyebrow: #FFB55E;
+}
+
+.kmm-site-root {
+  background: var(--kmm-bg);
+  color: var(--kmm-fg);
+  font-family: var(--kmm-body);
+  font-size: 17px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.dark .kmm-site-root {
+  --kmm-bg: #0B1730;
+  --kmm-surface: #14294D;
+  --kmm-band: #102140;
+  --kmm-fg: #FFF3DA;
+  --kmm-muted: #B7C4DA;
+  --kmm-line: rgba(255, 243, 218, 0.16);
+  --kmm-header: rgba(11, 23, 48, 0.94);
+  --kmm-link: #8DBDFF;
+  --kmm-eyebrow: #FFB55E;
+}
+
+.kmm-wrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+@media (min-width: 640px) {
+  .kmm-wrap {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+.kmm-site-root h1,
+.kmm-site-root h2,
+.kmm-site-root h3 {
+  font-family: var(--kmm-display);
+  line-height: 1.12;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.kmm-site-root .eyebrow {
+  font-family: var(--kmm-body);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--kmm-eyebrow);
+}
+
+.kmm-site-root .lead {
+  font-size: 1.15rem;
+  color: var(--kmm-muted);
+  max-width: 62ch;
+  line-height: 1.6;
+}
+
+/* Landing Page Buttons */
+.kmm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 9999px;
+  padding: 13px 26px;
+  font-family: var(--kmm-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border: 2px solid transparent;
+  transition: transform 0.2s ease, filter 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+}
+.kmm-btn:hover {
+  transform: translateY(-2px);
+}
+.kmm-btn-p {
+  background: var(--kmm-orange);
+  color: #10233F;
+}
+.kmm-btn-p:hover {
+  filter: brightness(1.05);
+}
+.kmm-btn-s {
+  background: var(--kmm-blue);
+  color: #FFFFFF;
+}
+.kmm-btn-s:hover {
+  filter: brightness(1.1);
+}
+.kmm-btn-o {
+  border-color: currentColor;
+  color: var(--kmm-fg);
+  background: transparent;
+}
+.kmm-btn-o:hover {
+  background: rgba(16, 35, 63, 0.05);
+}
+.dark .kmm-btn-o:hover {
+  background: rgba(255, 243, 218, 0.1);
+}
+.kmm-btn-disabled {
+  background: transparent;
+  border: 2px dashed currentColor;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.kmm-btn-disabled:hover {
+  transform: none;
+}
+
+/* Landing Page Keyframe Animations */
+@keyframes kmmRise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes kmmBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes kmmSlowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.kmm-animate-rise {
+  animation: kmmRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.kmm-chip-bob {
+  animation: kmmBob 5s ease-in-out infinite;
+}
+.kmm-slow-spin {
+  animation: kmmSlowSpin 80s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kmm-slow-spin,
+  .kmm-chip-bob,
+  .kmm-animate-rise {
+    animation: none !important;
+  }
+}
+
+/* Governance Spine Connector */
+.kmm-spine-connector {
+  position: relative;
+}
+.kmm-spine-connector::before {
+  content: "";
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 31px;
+  border-top: 3px dashed var(--kmm-gold);
+  z-index: 1;
+}
+@media (max-width: 860px) {
+  .kmm-spine-connector::before {
+    left: 31px;
+    right: auto;
+    top: 0;
+    bottom: 0;
+    border-top: 0;
+    border-left: 3px dashed var(--kmm-gold);
+  }
+}

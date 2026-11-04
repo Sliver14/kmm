@@ -43,7 +43,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initial load from localStorage
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null
+      const stored = (localStorage.getItem('kmp_theme') || localStorage.getItem('kmm_theme')) as Theme | null
       const initialTheme: Theme = stored && ['light', 'dark', 'system'].includes(stored) ? stored : 'dark'
       setThemeState(initialTheme)
       applyTheme(initialTheme)
@@ -72,7 +72,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(newTheme)
     applyTheme(newTheme)
     try {
-      localStorage.setItem(THEME_STORAGE_KEY, newTheme)
+      localStorage.setItem('kmp_theme', newTheme)
+      localStorage.setItem('kmm_theme', newTheme)
     } catch {
       // storage unavailable
     }

@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
+import { Plus_Jakarta_Sans, JetBrains_Mono, Bricolage_Grotesque, Figtree } from 'next/font/google'
 import { DataProvider } from '@/lib/store/DataContext'
 import { ThemeProvider } from '@/lib/store/ThemeContext'
 import './globals.css'
@@ -17,6 +17,20 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
+})
+
+const bricolageGrotesque = Bricolage_Grotesque({
+  subsets: ['latin'],
+  variable: '--font-bricolage',
+  display: 'swap',
+  weight: ['400', '600', '700', '800'],
+})
+
+const figtree = Figtree({
+  subsets: ['latin'],
+  variable: '--font-figtree',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
 })
 
 export const metadata: Metadata = {
@@ -51,7 +65,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`dark ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
+      className={`dark ${plusJakartaSans.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable} ${figtree.variable}`}
     >
       <head>
         <script
@@ -59,7 +73,7 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var stored = localStorage.getItem('kmp_theme');
+                  var stored = localStorage.getItem('kmp_theme') || localStorage.getItem('kmm_theme');
                   if (stored === 'light') {
                     document.documentElement.classList.remove('dark');
                     document.documentElement.style.colorScheme = 'light';
@@ -76,7 +90,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased bg-[#f8f9fa] dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 selection:bg-slate-900 selection:text-white dark:selection:bg-blue-600 transition-colors duration-200">
+      <body className="font-sans antialiased bg-[#f8f9fa] dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 selection:bg-slate-900 selection:text-white dark:selection:bg-blue-600">
         <ThemeProvider>
           <DataProvider>
             {children}
