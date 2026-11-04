@@ -175,6 +175,7 @@ export interface AssetArchive {
   streamUrl?: string
   appStoreUrl?: string
   playStoreUrl?: string
+  apkDownloadUrl?: string
   
   // Archival Master Files & Storage
   primaryMasterFile?: string

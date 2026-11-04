@@ -769,46 +769,57 @@ export default function KmmLandingPage() {
             {/* Lovetoons Anchor */}
             <div id="agencies-lovetoons" className="relative -top-24 pointer-events-none" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-              {/* TV */}
+              {/* Mobile App */}
               <article className="rounded-[40px] rounded-br-[120px] p-8 sm:p-10 bg-[var(--kmm-blue)] text-white shadow-xl flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center">
                       <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7zM8 21h8M10 10l5 2.5-5 2.5V10z" />
+                        <rect x="5" y="2" width="14" height="20" rx="3" ry="3" />
+                        <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="2.5" />
                       </svg>
                     </div>
                     <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-white/20 text-white">
                       Lovetoons Agency
                     </span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">LoveToons TV</h3>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">LoveToons Mobile App</h3>
                   <p className="text-sm leading-relaxed text-white/90 mb-8 max-w-md">
-                    Discover inspirational, character-building children's animated media through the LoveToons TV application.
+                    Discover and download inspirational, character-building children's animated media, Bible stories, and interactive adventures on your mobile device.
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <a
-                    href="https://lovetoons.org"
+                    href="https://apps.apple.com/us/app/lovetoons-tv/id1665457245"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="kmm-btn text-xs bg-white text-[var(--kmm-blue)] hover:bg-white/95 font-bold shadow-md inline-flex items-center gap-1.5 transition-all"
+                    className="kmm-btn text-xs bg-white text-[var(--kmm-blue)] hover:bg-white/95 font-bold shadow-md inline-flex items-center gap-2 transition-all"
                   >
-                    Stream LoveToons TV
-                    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      <polyline points="15 3 21 3 21 9" />
-                      <line x1="10" y1="14" x2="21" y2="3" />
+                    <svg className="size-4 fill-current shrink-0" viewBox="0 0 24 24">
+                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.74 1.04-1.79.92-2.85-.92.04-2.07.62-2.73 1.39-.58.67-1.09 1.74-.96 2.77 1.03.08 2.13-.53 2.77-1.31z" />
                     </svg>
+                    <span>App Store (iOS)</span>
+                  </a>
+                  <a
+                    href="/APP-APK/LovetoonsTv5.0.apk"
+                    download="LovetoonsTv5.0.apk"
+                    className="kmm-btn text-xs bg-white/20 hover:bg-white/30 text-white font-bold border border-white/30 inline-flex items-center gap-2 transition-all shadow-xs"
+                  >
+                    <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    <span>Download APK (Android)</span>
                   </a>
                   <a
                     href="https://lwappstore.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="kmm-btn text-xs bg-white/20 hover:bg-white/30 text-white font-semibold inline-flex items-center gap-1.5 transition-all"
+                    className="kmm-btn text-xs bg-white/10 hover:bg-white/20 text-white/90 font-medium inline-flex items-center gap-1.5 transition-all"
                   >
-                    Loveworld App Store
-                    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <span>Loveworld Store</span>
+                    <svg className="size-3.5 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                       <polyline points="15 3 21 3 21 9" />
                       <line x1="10" y1="14" x2="21" y2="3" />
@@ -1169,6 +1180,21 @@ export default function KmmLandingPage() {
                     className="hover:text-[var(--kmm-gold)] transition-colors inline-flex items-center gap-1.5"
                   >
                     LoveToons (lovetoons.org)
+                    <svg className="size-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://apps.apple.com/us/app/lovetoons-tv/id1665457245"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[var(--kmm-gold)] transition-colors inline-flex items-center gap-1.5"
+                  >
+                    LoveToons Mobile App (iOS / APK)
                     <svg className="size-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                       <polyline points="15 3 21 3 21 9" />

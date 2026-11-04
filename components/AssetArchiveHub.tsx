@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import {
   Globe, Server, Code, Terminal, Download, FileText, Film, Music,
   Package, Database, Check, Copy, ExternalLink, ShieldCheck, HardDrive,
-  FileCode, Sparkles, FolderArchive, Layers, ArrowDownToLine, Clock, Cloud
+  FileCode, Sparkles, FolderArchive, Layers, ArrowDownToLine, Clock, Cloud, Smartphone
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AssetData } from '@/types'
@@ -179,6 +179,43 @@ export function AssetArchiveHub({ asset, showToast }: AssetArchiveHubProps) {
             </div>
           )}
 
+          {/* Mobile App Distribution (iOS & APK) */}
+          {(archive.appStoreUrl || archive.apkDownloadUrl) && (
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 space-y-2 flex flex-col justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Mobile App Distribution</span>
+                  <Smartphone className="size-3.5 text-blue-600" />
+                </div>
+                <div className="font-bold text-slate-900 text-xs">iOS & Android Production Binaries</div>
+                <div className="text-[11px] text-slate-500">Apple App Store & Direct Signed APK</div>
+              </div>
+              <div className="pt-2 flex flex-wrap items-center gap-2">
+                {archive.appStoreUrl && (
+                  <a
+                    href={archive.appStoreUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-white border border-blue-200 rounded-lg px-2.5 py-1 hover:bg-blue-50 transition shadow-2xs"
+                  >
+                    <span>App Store</span>
+                    <ExternalLink className="size-3" />
+                  </a>
+                )}
+                {archive.apkDownloadUrl && (
+                  <a
+                    href={archive.apkDownloadUrl}
+                    download="LovetoonsTv5.0.apk"
+                    className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-white border border-emerald-200 rounded-lg px-2.5 py-1 hover:bg-emerald-50 transition shadow-2xs"
+                  >
+                    <Download className="size-3" />
+                    <span>Download APK</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Cloud Storage Vault Specification */}
           <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 space-y-2 flex flex-col justify-between">
             <div className="space-y-1">
@@ -280,13 +317,24 @@ export function AssetArchiveHub({ asset, showToast }: AssetArchiveHubProps) {
                   </td>
 
                   <td className="py-3.5 px-3 text-right">
-                    <button
-                      onClick={() => showToast(`Downloading "${file.name}" (${file.size}) from Cloud Storage...`)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition shadow-2xs"
-                    >
-                      <Download className="size-3" />
-                      <span>Download</span>
-                    </button>
+                    {file.downloadUrl ? (
+                      <a
+                        href={file.downloadUrl}
+                        download={file.name}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition shadow-2xs"
+                      >
+                        <Download className="size-3" />
+                        <span>Download</span>
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => showToast(`Downloading "${file.name}" (${file.size}) from Cloud Storage...`)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition shadow-2xs"
+                      >
+                        <Download className="size-3" />
+                        <span>Download</span>
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
