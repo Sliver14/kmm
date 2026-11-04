@@ -317,7 +317,7 @@ footer{background:var(--navy);color:#fff;padding-block:56px 36px;margin-top:84px
         <p>Discover children's media through the LoveToons Mobile Application.</p>
         <div class="row">
           <a class="btn" href="https://apps.apple.com/us/app/lovetoons-tv/id1665457245" target="_blank" rel="noopener noreferrer">App Store (iOS)</a>
-          <a class="btn" href="/APP-APK/LovetoonsTv5.0.apk" download="LovetoonsTv5.0.apk">Download APK</a>
+          <button class="btn" type="button" onclick="document.getElementById('apk-modal').style.display='flex'">Download APK</button>
         </div>
       </article>
       <article class="card web">
@@ -434,6 +434,39 @@ footer{background:var(--navy);color:#fff;padding-block:56px 36px;margin-top:84px
   n.addEventListener('click',function(e){if(e.target.tagName==='A'){n.classList.remove('open');b.setAttribute('aria-expanded','false');b.textContent='Menu';}});
   document.getElementById('yr').textContent=new Date().getFullYear();
 })();
+function submitApkForm(e){
+  e.preventDefault();
+  var name = document.getElementById('apk-name').value.trim();
+  var email = document.getElementById('apk-email').value.trim();
+  if(!name || !email){ alert('Please provide your name and email'); return; }
+  var link = document.createElement('a');
+  link.href = '/APP-APK/LovetoonsTv5.0.apk';
+  link.download = 'LovetoonsTv5.0.apk';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  document.getElementById('apk-modal').style.display='none';
+  alert('Thank you, ' + name + '! Your download of LoveToons APK (v5.0) has started.');
+}
 </script>
+
+<div id="apk-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:24px;max-width:420px;width:100%;padding:28px;box-shadow:0 20px 40px rgba(0,0,0,0.3);position:relative;font-family:sans-serif;color:#10233F;">
+    <button type="button" onclick="document.getElementById('apk-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#888;">&times;</button>
+    <h3 style="margin:0 0 6px 0;font-size:1.25rem;">Download LoveToons APK</h3>
+    <p style="margin:0 0 16px 0;font-size:0.85rem;color:#666;">Enter your name and email to download the official Android release (v5.0 &middot; 146 MB).</p>
+    <form onsubmit="submitApkForm(event)" style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="display:block;font-size:0.75rem;font-weight:bold;margin-bottom:4px;">Full Name *</label>
+        <input type="text" id="apk-name" required placeholder="e.g. Pastor David Vance" style="width:100%;box-sizing:border-box;padding:10px 14px;border:1px solid #ccc;border-radius:12px;font-size:0.85rem;">
+      </div>
+      <div>
+        <label style="display:block;font-size:0.75rem;font-weight:bold;margin-bottom:4px;">Email Address *</label>
+        <input type="email" id="apk-email" required placeholder="e.g. david.vance@loveworld.org" style="width:100%;box-sizing:border-box;padding:10px 14px;border:1px solid #ccc;border-radius:12px;font-size:0.85rem;">
+      </div>
+      <button type="submit" style="margin-top:6px;background:#034AA6;color:#fff;border:none;border-radius:9999px;padding:12px;font-size:0.9rem;font-weight:bold;cursor:pointer;">Download APK Now (146 MB)</button>
+    </form>
+  </div>
+</div>
 
 </body></html>

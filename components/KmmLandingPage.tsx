@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { MinistryOnboardingForm } from '@/components/MinistryOnboardingForm'
+import { ApkDownloadModal } from '@/components/ApkDownloadModal'
 
 const agenciesList = [
   {
@@ -52,6 +53,7 @@ export default function KmmLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [agenciesDropdownOpen, setAgenciesDropdownOpen] = useState(false)
   const [mobileAgenciesOpen, setMobileAgenciesOpen] = useState(false)
+  const [isApkModalOpen, setIsApkModalOpen] = useState(false)
   const agenciesDropdownRef = React.useRef<HTMLLIElement>(null)
   const currentYear = new Date().getFullYear()
 
@@ -800,10 +802,10 @@ export default function KmmLandingPage() {
                     </svg>
                     <span>App Store (iOS)</span>
                   </a>
-                  <a
-                    href="/APP-APK/LovetoonsTv5.0.apk"
-                    download="LovetoonsTv5.0.apk"
-                    className="kmm-btn text-xs bg-white/20 hover:bg-white/30 text-white font-bold border border-white/30 inline-flex items-center gap-2 transition-all shadow-xs"
+                  <button
+                    type="button"
+                    onClick={() => setIsApkModalOpen(true)}
+                    className="kmm-btn text-xs bg-white/20 hover:bg-white/30 text-white font-bold border border-white/30 inline-flex items-center gap-2 transition-all shadow-xs cursor-pointer"
                   >
                     <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -811,7 +813,7 @@ export default function KmmLandingPage() {
                       <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                     <span>Download APK (Android)</span>
-                  </a>
+                  </button>
                   <a
                     href="https://lwappstore.com"
                     target="_blank"
@@ -1213,6 +1215,12 @@ export default function KmmLandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* LoveToons APK Download Modal (Name + Email gate) */}
+      <ApkDownloadModal
+        isOpen={isApkModalOpen}
+        onClose={() => setIsApkModalOpen(false)}
+      />
     </div>
   )
 }
