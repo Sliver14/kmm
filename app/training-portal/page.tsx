@@ -613,7 +613,7 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
 
             <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400">
               <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                Institutional Hub
+                Institutional Portal
               </span>
             </div>
           </div>
@@ -756,7 +756,7 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
               }`}
             >
               <ArrowLeft className="size-3.5" />
-              <span>Back to Training Hub &amp; Resources</span>
+              <span>Back to Training Portal &amp; Resources</span>
             </button>
 
             {/* Video Player & Study Mode Box */}
@@ -1891,7 +1891,7 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs">
           <div>
             <div className="font-bold text-sm text-white mb-1">
-              Kiddies Media Ministry Training &amp; Resource Hub
+              Kiddies Media Ministry Training Portal
             </div>
             <p className="text-slate-400">
               Official repository for training materials, practical compliance tools, and helpful supporting documents.

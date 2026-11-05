@@ -1320,7 +1320,7 @@ export default function KmmLandingPage() {
                 <li><a href="#about" className="hover:text-[var(--kmm-gold)] transition-colors">About Kiddies Media Ministry &amp; Its Role</a></li>
                 <li><a href="#mandate" className="hover:text-[var(--kmm-gold)] transition-colors">Mandate &amp; Responsibilities</a></li>
                 <li><a href="#training" className="hover:text-[var(--kmm-gold)] transition-colors">Training, Tools &amp; Docs</a></li>
-                <li><Link href="/training-portal" className="hover:text-[var(--kmm-gold)] transition-colors">Training Portal Hub</Link></li>
+                <li><Link href="/training-portal" className="hover:text-[var(--kmm-gold)] transition-colors">Training Portal</Link></li>
                 <li><a href="#governance" className="hover:text-[var(--kmm-gold)] transition-colors">Governance &amp; Policies</a></li>
                 <li><a href="#updates" className="hover:text-[var(--kmm-gold)] transition-colors">Resources &amp; Updates</a></li>
               </ul>
