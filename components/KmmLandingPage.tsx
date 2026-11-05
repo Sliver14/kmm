@@ -623,14 +623,10 @@ export default function KmmLandingPage() {
               className="object-cover object-[80%_center] sm:object-[84%_center] lg:object-right"
               sizes="100vw"
             />
-            {/* High-legibility gradient scrim: soft white on left, crystal clear view of children on right */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 via-45% sm:via-white/65 sm:via-55% to-transparent lg:to-white/5" />
-            {/* Top navigation subtle highlight scrim */}
-            <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 via-white/30 to-transparent" />
-            {/* Bottom transition into About section */}
-            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white via-white/80 to-transparent" />
             {/* Subtle tactile micro-dots texture overlay */}
-            <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial opacity-25" />
+            <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial opacity-20" />
+            {/* Gentle bottom transition into white About section */}
+            <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white to-transparent" />
           </div>
 
           <div className="kmm-wrap relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center flex-1">
