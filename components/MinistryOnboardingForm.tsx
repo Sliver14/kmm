@@ -175,9 +175,9 @@ export function MinistryOnboardingForm({
 
           <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-4 space-y-1.5 shadow-xs">
             <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Step 03</span>
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Portal Credentials</div>
+            <div className="text-xs font-bold text-slate-900 dark:text-white">IP Portal Access</div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
-              Your unit receives dedicated agency admin access to register and govern assets.
+              Your unit receives dedicated access to the IP Portal — an important resource for documenting and stewarding children’s media content and related intellectual property.
             </p>
           </div>
         </div>
@@ -220,7 +220,7 @@ export function MinistryOnboardingForm({
           Onboard Your Ministry or Department
         </h3>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-          Join the Kiddies Media Ministry ecosystem. Register your ministry or department on our onboarding waitlist for content syndication, asset copyright registration, and Lovetoons distribution.
+          Join the Kiddies Media Ministry ecosystem and gain access to the <strong className="text-slate-700 dark:text-slate-200">IP Portal</strong>. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
         </p>
       </div>
 

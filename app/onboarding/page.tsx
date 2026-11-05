@@ -134,7 +134,7 @@ export default function OnboardingPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-500 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            Are you producing children animation, comic books, worship music, or educational materials for young minds? Register your ministry or department on our onboarding waitlist for official accreditation and rights governance.
+            Are you producing children's animation, comic books, worship music, or educational materials for young minds? Register your ministry or department to gain access to the <strong className="text-slate-900 dark:text-white">IP Portal</strong> — an important resource for documenting and stewarding children’s media content and related intellectual property.
           </p>
 
           {/* 3 Pillars Summary */}
@@ -168,10 +168,10 @@ export default function OnboardingPage() {
                 <Users2 className="size-5" />
               </div>
               <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mb-1">
-                Dedicated Agency Portal
+                KMM IP Portal Access
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                Empower your department officers with verified creator roles, asset uploading, and compliance tracking.
+                The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
               </p>
             </div>
           </div>

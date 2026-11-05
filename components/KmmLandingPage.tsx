@@ -1077,7 +1077,7 @@ export default function KmmLandingPage() {
                 Onboard your Ministry or Department
               </h2>
               <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
-                Whether you represent a Church Zone, Children's Ministry department, youth animation project, or media production unit, join the KMM ecosystem. Submit a simple expression of interest to join our onboarding waitlist.
+                Whether you represent a Church Zone, Children's Ministry department, or media production unit, join the KMM ecosystem and get onboarded to the IP Portal. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
               </p>
             </div>
 
