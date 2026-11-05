@@ -35,7 +35,6 @@ const agenciesList = [
     name: 'Lovetoons',
     tagline: 'Animation & Entertainment',
     description: 'Animation series, TV broadcast, character IP & children entertainment.',
-    icon: '📺',
     href: '#agencies-lovetoons',
     badge: 'Flagship',
   },
@@ -43,7 +42,6 @@ const agenciesList = [
     name: 'Publishing Agency',
     tagline: 'Literature & Curriculum',
     description: 'Comics, devotional books, storybooks, illustrated print & curriculum.',
-    icon: '📚',
     href: '#agencies-publishing',
     badge: 'Publishing',
   },
@@ -51,7 +49,6 @@ const agenciesList = [
     name: 'Digital Agency',
     tagline: 'Interactive & Apps',
     description: 'Interactive games, educational mobile apps, AR/VR & online portals.',
-    icon: '💻',
     href: '#agencies-digital',
     badge: 'Technology',
   },
@@ -59,7 +56,6 @@ const agenciesList = [
     name: 'Academy Agency',
     tagline: 'Governance & Training',
     description: 'Legal compliance, officer accreditation, policy auditing & safety covenants.',
-    icon: '⚖️',
     href: '#training',
     badge: 'Governance',
   },
@@ -67,7 +63,6 @@ const agenciesList = [
     name: 'Educational Agency',
     tagline: 'Foundational Learning',
     description: 'School partnerships, foundational learning aids & global outreaches.',
-    icon: '🎓',
     href: '#agencies-educational',
     badge: 'Education',
   },
@@ -347,13 +342,10 @@ export default function KmmLandingPage() {
                           key={ag.name}
                           href={ag.href}
                           onClick={() => setAgenciesDropdownOpen(false)}
-                          className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-[var(--kmm-band)] transition-colors group text-left"
+                          className="flex items-start justify-between p-2.5 rounded-2xl hover:bg-[var(--kmm-band)] transition-colors group text-left"
                         >
-                          <span className="size-9 rounded-xl bg-[var(--kmm-band)] flex items-center justify-center font-bold text-base shrink-0 group-hover:scale-105 transition-transform">
-                            {ag.icon}
-                          </span>
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-2">
                               <span className="font-bold text-sm text-[var(--kmm-fg)] group-hover:text-[var(--kmm-orange)] transition-colors">
                                 {ag.name}
                               </span>
@@ -509,9 +501,8 @@ export default function KmmLandingPage() {
                           setMenuOpen(false)
                           setMobileAgenciesOpen(false)
                         }}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+                        className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold hover:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
                       >
-                        <span className="text-base">{ag.icon}</span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-xs truncate">{ag.name}</span>
@@ -1465,10 +1456,7 @@ export default function KmmLandingPage() {
               <div id="agencies-publishing" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="size-11 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xl">
-                      📚
-                    </span>
-                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
+                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)] border border-[var(--kmm-line)]">
                       Publishing
                     </span>
                   </div>
@@ -1490,10 +1478,7 @@ export default function KmmLandingPage() {
               <div id="agencies-digital" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="size-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xl">
-                      💻
-                    </span>
-                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
+                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)] border border-[var(--kmm-line)]">
                       Technology
                     </span>
                   </div>
@@ -1515,10 +1500,7 @@ export default function KmmLandingPage() {
               <div id="agencies-educational" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between sm:col-span-2 lg:col-span-1">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="size-11 rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-xl">
-                      🎓
-                    </span>
-                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
+                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)] border border-[var(--kmm-line)]">
                       Education
                     </span>
                   </div>

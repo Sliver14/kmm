@@ -44,8 +44,47 @@ import {
   FileCheck,
   Printer,
   Eye,
+  ChevronDown,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem } from '@/lib/data/trainingVideosData'
+
+const AGENCIES_LIST = [
+  {
+    name: 'Lovetoons',
+    tagline: 'Animation & Entertainment',
+    description: 'Animation series, TV broadcast, character IP & children entertainment.',
+    href: '/#agencies-lovetoons',
+    badge: 'Flagship',
+  },
+  {
+    name: 'Publishing Agency',
+    tagline: 'Literature & Curriculum',
+    description: 'Comics, devotional books, storybooks, illustrated print & curriculum.',
+    href: '/#agencies-publishing',
+    badge: 'Publishing',
+  },
+  {
+    name: 'Digital Agency',
+    tagline: 'Interactive & Apps',
+    description: 'Interactive games, educational mobile apps, AR/VR & online portals.',
+    href: '/#agencies-digital',
+    badge: 'Technology',
+  },
+  {
+    name: 'Academy Agency',
+    tagline: 'Governance & Training',
+    description: 'Legal compliance, officer accreditation, policy auditing & safety covenants.',
+    href: '/training-portal',
+    badge: 'Governance',
+  },
+  {
+    name: 'Educational Agency',
+    tagline: 'Foundational Learning',
+    description: 'School partnerships, foundational learning aids & global outreaches.',
+    href: '/#agencies-educational',
+    badge: 'Education',
+  },
+]
 
 export interface SupportingDocument {
   id: string
@@ -61,12 +100,12 @@ export interface SupportingDocument {
 }
 
 const CATEGORIES = [
-  { id: 'all', label: 'All Categories', icon: Film },
-  { id: 'broadcast', label: 'Broadcast Standards', icon: Radio },
-  { id: 'protection', label: 'Child Protection', icon: ShieldCheck },
-  { id: 'copyright', label: 'Copyright & IP', icon: Scale },
-  { id: 'doctrinal', label: 'Scriptural Review', icon: BookOpen },
-  { id: 'merchandising', label: 'Merchandising & Digital', icon: ShoppingBag },
+  { id: 'all', label: 'All Categories' },
+  { id: 'broadcast', label: 'Broadcast Standards' },
+  { id: 'protection', label: 'Child Protection' },
+  { id: 'copyright', label: 'Copyright & IP' },
+  { id: 'doctrinal', label: 'Scriptural Review' },
+  { id: 'merchandising', label: 'Merchandising & Digital' },
 ]
 
 const SUPPORTING_DOCUMENTS: SupportingDocument[] = [
@@ -295,6 +334,8 @@ export default function TrainingPortalPage() {
   const [toastMessage, setToastMessage] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [agenciesDropdownOpen, setAgenciesDropdownOpen] = useState(false)
+  const agenciesDropdownRef = useRef<HTMLDivElement>(null)
 
   // Document Modal state
   const [readingDoc, setReadingDoc] = useState<SupportingDocument | null>(null)
@@ -371,6 +412,17 @@ export default function TrainingPortalPage() {
         startPlayingVideo(found)
       }
     }
+  }, [])
+
+  // Close agencies dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (agenciesDropdownRef.current && !agenciesDropdownRef.current.contains(e.target as Node)) {
+        setAgenciesDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   // Auto playback simulation
@@ -667,6 +719,64 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
               <span>IP Portal</span>
             </Link>
 
+            {/* Agencies Dropdown (no icons) */}
+            <div className="relative hidden md:block" ref={agenciesDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setAgenciesDropdownOpen((prev) => !prev)}
+                onMouseEnter={() => setAgenciesDropdownOpen(true)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                  agenciesDropdownOpen
+                    ? isDark
+                      ? 'bg-slate-800 border-amber-400/40 text-amber-400'
+                      : 'bg-slate-100 border-slate-300 text-slate-900'
+                    : isDark
+                    ? 'border-white/15 text-slate-300 hover:text-white hover:bg-white/5'
+                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs'
+                }`}
+                aria-expanded={agenciesDropdownOpen}
+              >
+                <span>Agencies</span>
+                <ChevronDown className={`size-3 transition-transform ${agenciesDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {agenciesDropdownOpen && (
+                <div
+                  onMouseLeave={() => setAgenciesDropdownOpen(false)}
+                  className={`absolute right-0 top-full mt-2 w-72 rounded-2xl p-2 shadow-2xl border z-50 animate-in fade-in zoom-in-95 duration-150 ${
+                    isDark ? 'bg-slate-900 border-white/15 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
+                  }`}
+                >
+                  <div className="px-3 py-1.5 border-b border-slate-200 dark:border-white/10 mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <span>Ministry Agencies</span>
+                    <span>5 Arms</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    {AGENCIES_LIST.map((ag) => (
+                      <Link
+                        key={ag.name}
+                        href={ag.href}
+                        onClick={() => setAgenciesDropdownOpen(false)}
+                        className={`p-2 rounded-xl transition-colors text-left flex flex-col ${
+                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs">{ag.name}</span>
+                          <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
+                            isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {ag.badge}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 truncate mt-0.5">{ag.tagline}</p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Officer authenticated status */}
             <div
               className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${
@@ -809,6 +919,28 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
                 {isDark ? <Sun className="size-3.5 text-amber-400" /> : <Moon className="size-3.5 text-indigo-500" />}
                 <span>{isDark ? 'Light Theme' : 'Dark Theme'}</span>
               </button>
+            </div>
+
+            {/* Mobile Agencies List (no icons) */}
+            <div className="pt-2 border-t border-slate-200 dark:border-white/10">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                Ministry Agencies
+              </span>
+              <div className="grid grid-cols-1 gap-1">
+                {AGENCIES_LIST.map((ag) => (
+                  <Link
+                    key={ag.name}
+                    href={ag.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                      isDark ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>{ag.name}</span>
+                    <span className="text-[9px] uppercase font-bold text-slate-400">{ag.badge}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
 
             <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
@@ -1386,25 +1518,21 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
               isDark ? 'border-white/10' : 'border-slate-200'
             }`}>
               <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none">
-                {CATEGORIES.map((cat) => {
-                  const Icon = cat.icon
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => setActiveFilter(cat.id)}
-                      className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                        activeFilter === cat.id
-                          ? 'bg-amber-500 text-slate-950 shadow-md scale-102'
-                          : isDark
-                          ? 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white hover:border-white/20'
-                          : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-2xs'
-                      }`}
-                    >
-                      <Icon className="size-3.5 shrink-0" />
-                      <span>{cat.label}</span>
-                    </button>
-                  )
-                })}
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveFilter(cat.id)}
+                    className={`inline-flex items-center px-3.5 sm:px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                      activeFilter === cat.id
+                        ? 'bg-amber-500 text-slate-950 shadow-md scale-102'
+                        : isDark
+                        ? 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white hover:border-white/20'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-2xs'
+                    }`}
+                  >
+                    <span>{cat.label}</span>
+                  </button>
+                ))}
               </div>
 
               <div className={`text-xs font-bold shrink-0 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
