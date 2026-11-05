@@ -659,22 +659,16 @@ export default function KmmLandingPage() {
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2 kmm-animate-rise">
-                <a
-                  href="#mandate"
-                  className="kmm-btn kmm-btn-p font-black shadow-lg shadow-amber-500/25 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-                >
-                  <span>Explore Our Mandate</span>
-                  <span className="text-sm font-black">&rarr;</span>
-                </a>
                 <Link
                   href="/training-portal"
-                  className="kmm-btn kmm-btn-s font-black shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all bg-white/95 backdrop-blur-md border border-slate-200/90 text-slate-900"
+                  className="kmm-btn kmm-btn-p font-black shadow-lg shadow-amber-500/25 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
                 >
-                  Access Training &amp; Tools
+                  <span>Access Training &amp; Tools</span>
+                  <span className="text-sm font-black">&rarr;</span>
                 </Link>
                 <Link
                   href="/ip-portal"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-black text-sm bg-[#0E1E38] text-[#FFC700] border-2 border-[#FFC700]/70 hover:bg-[#FFC700] hover:text-slate-950 shadow-md hover:shadow-lg transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-black text-sm bg-[#0E1E38] text-[#FFC700] border-2 border-[#FFC700]/70 hover:bg-[#FFC700] hover:text-slate-950 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
                   title="Intellectual Property & Asset Management Platform"
                 >
                   <span className="size-2 rounded-full bg-[#FFC700] animate-pulse" />
