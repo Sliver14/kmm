@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { MinistryOnboardingForm } from '@/components/MinistryOnboardingForm'
 import { ApkDownloadModal } from '@/components/ApkDownloadModal'
 
 const agenciesList = [
@@ -1187,8 +1186,61 @@ export default function KmmLandingPage() {
               </p>
             </div>
 
-            <div className="max-w-3xl mx-auto">
-              <MinistryOnboardingForm embedded />
+            {/* CTA Showcase Card */}
+            <div className="p-8 sm:p-12 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-lg relative overflow-hidden">
+              {/* Decorative background glows */}
+              <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-[var(--kmm-gold)]/10 blur-3xl" />
+              <div className="pointer-events-none absolute -left-20 -bottom-20 size-72 rounded-full bg-[var(--kmm-blue)]/10 blur-3xl" />
+
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="lg:col-span-8 space-y-4 text-left">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[var(--kmm-gold)]/15 text-[var(--kmm-fg)] border border-[var(--kmm-gold)]/30">
+                    <span className="size-2 rounded-full bg-[var(--kmm-gold)] animate-pulse" />
+                    <span>Official Ministry Waitlist &amp; Verification</span>
+                  </div>
+
+                  <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--kmm-fg)]">
+                    Ready to Document and Steward Your Ministry&apos;s Media?
+                  </h3>
+
+                  <p className="text-sm text-[var(--kmm-muted)] leading-relaxed max-w-2xl">
+                    Submit your ministry unit’s expression of interest to receive dedicated access credentials for the Kiddies Media Ministry IP Portal. Our secretariat verifies governance mandates, chain-of-title records, and child safety compliance.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)]">
+                      <span className="text-[var(--kmm-gold)] font-bold">✓</span>
+                      <span>IP Governance &amp; Deeds</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)]">
+                      <span className="text-[var(--kmm-gold)] font-bold">✓</span>
+                      <span>Asset Cataloguing</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)]">
+                      <span className="text-[var(--kmm-gold)] font-bold">✓</span>
+                      <span>Dedicated Portal Access</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
+                  <Link
+                    href="/onboarding"
+                    className="kmm-btn kmm-btn-p text-center shadow-md font-bold"
+                  >
+                    <span>Begin Onboarding &rarr;</span>
+                  </Link>
+                  <Link
+                    href="/training-portal"
+                    className="kmm-btn kmm-btn-o text-center font-bold"
+                  >
+                    <span>View Training &amp; Guidelines</span>
+                  </Link>
+                  <p className="text-[11px] text-[var(--kmm-muted)] text-center">
+                    Simple 2-minute registration • Verified by Secretariat
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
