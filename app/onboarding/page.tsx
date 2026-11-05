@@ -130,7 +130,7 @@ export default function OnboardingPage() {
             className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight"
             style={{ fontFamily: 'Bricolage Grotesque, -apple-system, sans-serif' }}
           >
-            Bring Your Ministry&apos;s Children&apos;s Media Content to the Kiddies Media Ministry IP Portal
+            Document and Steward Your Ministry&apos;s Children&apos;s Media on the Kiddies Media Ministry IP Portal
           </h1>
 
           <p className="text-sm sm:text-base text-slate-500 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
@@ -156,10 +156,10 @@ export default function OnboardingPage() {
                 <Tv className="size-5" />
               </div>
               <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mb-1">
-                Global Broadcast Syndication
+                Asset Cataloguing &amp; Stewardship
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                Distribution channels across Lovetoons Mobile App, Loveworld Nation networks, and child digital platforms.
+                Standardized media classification, metadata stewardship, and structured IP registers across departments.
               </p>
             </div>
 

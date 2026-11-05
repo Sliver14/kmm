@@ -170,7 +170,7 @@ export function MinistryOnboardingForm({
             <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Step 02</span>
             <div className="text-xs font-bold text-slate-900 dark:text-white">Consultation Call</div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
-              We reach out to {submittedRequest.email} to align on content format & broadcast policies.
+              We reach out to {submittedRequest.email} to align on documentation standards and IP onboarding protocols.
             </p>
           </div>
 
