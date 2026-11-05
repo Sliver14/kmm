@@ -882,19 +882,6 @@ export default function KmmLandingPage() {
                     </svg>
                     <span>Download APK (Android)</span>
                   </button>
-                  <a
-                    href="https://lwappstore.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="kmm-btn text-xs bg-white/10 hover:bg-white/20 text-white/90 font-bold inline-flex items-center gap-1.5 transition-all"
-                  >
-                    <span>Loveworld Store</span>
-                    <svg className="size-3.5 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      <polyline points="15 3 21 3 21 9" />
-                      <line x1="10" y1="14" x2="21" y2="3" />
-                    </svg>
-                  </a>
                 </div>
               </article>
 
@@ -1389,7 +1376,7 @@ export default function KmmLandingPage() {
                 <li><a href="#mandate" className="hover:text-[var(--kmm-gold)] transition-colors">Mandate &amp; Responsibilities</a></li>
                 <li><a href="#training" className="hover:text-[var(--kmm-gold)] transition-colors">Training, Tools &amp; Docs</a></li>
                 <li><Link href="/training-portal" className="hover:text-[var(--kmm-gold)] transition-colors">Training Portal</Link></li>
-                                <li><a href="#updates" className="hover:text-[var(--kmm-gold)] transition-colors">Resources &amp; Updates</a></li>
+                <li><a href="#updates" className="hover:text-[var(--kmm-gold)] transition-colors">Resources &amp; Updates</a></li>
               </ul>
             </div>
 
