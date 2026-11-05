@@ -2296,10 +2296,10 @@ function Dashboard({
             <div className="space-y-4 animate-in fade-in duration-150 min-w-0 w-full">
               <div className="min-w-0">
                 <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider truncate">
-                  Agency & Studio Title Distribution
+                  Agency &amp; Ministry Title Distribution
                 </h3>
                 <p className="text-[11px] text-slate-400 truncate">
-                  Compliance rate and title clearance status across all ministry production arms
+                  Compliance rate and title clearance status across all agencies and onboarded departments
                 </p>
               </div>
 

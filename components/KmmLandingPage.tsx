@@ -41,6 +41,13 @@ const agenciesList = [
     href: '#agencies-educational',
     badge: 'Education',
   },
+  {
+    name: "Children's Ministry",
+    tagline: 'Kingdom Kids Directorate',
+    description: "Church ministry departments, kids churches, teacher training & regional children outreaches.",
+    href: '/onboarding',
+    badge: 'Ministry',
+  },
 ]
 
 export default function KmmLandingPage() {
@@ -150,7 +157,7 @@ export default function KmmLandingPage() {
                   aria-expanded={agenciesDropdownOpen}
                   aria-haspopup="true"
                 >
-                  <span>Agencies</span>
+                  <span>Agencies &amp; Ministries</span>
                   <svg
                     className={`size-3.5 transition-transform duration-200 ${agenciesDropdownOpen ? 'rotate-180' : ''}`}
                     viewBox="0 0 20 20"
@@ -171,7 +178,7 @@ export default function KmmLandingPage() {
                   >
                     <div className="px-3 py-2 border-b border-[var(--kmm-line)] mb-1.5 flex items-center justify-between">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--kmm-muted)]">
-                        Ministry Agencies
+                        Agencies &amp; Ministries
                       </span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
                         Directory
@@ -203,16 +210,27 @@ export default function KmmLandingPage() {
                       ))}
                     </div>
 
-                    <div className="mt-2 pt-2 border-t border-[var(--kmm-line)] px-2.5 py-1 flex items-center justify-between">
-                      <span className="text-[11px] text-[var(--kmm-muted)] font-medium">Looking for IP records?</span>
-                      <Link
-                        href="/ip-portal"
-                        onClick={() => setAgenciesDropdownOpen(false)}
-                        className="text-[11px] font-bold text-[var(--kmm-link)] hover:underline flex items-center gap-1"
-                      >
-                        <span>Open IP Portal</span>
-                        <span>&rarr;</span>
-                      </Link>
+                    <div className="mt-2 pt-2 border-t border-[var(--kmm-line)] px-2.5 py-1.5 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[var(--kmm-muted)] font-medium">New ministry / department?</span>
+                        <Link
+                          href="/onboarding"
+                          onClick={() => setAgenciesDropdownOpen(false)}
+                          className="text-[11px] font-bold text-amber-600 hover:underline flex items-center gap-1"
+                        >
+                          <span>+ Onboard Entity &rarr;</span>
+                        </Link>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[var(--kmm-muted)] font-medium">Looking for IP records?</span>
+                        <Link
+                          href="/ip-portal"
+                          onClick={() => setAgenciesDropdownOpen(false)}
+                          className="text-[11px] font-bold text-[var(--kmm-link)] hover:underline flex items-center gap-1"
+                        >
+                          <span>Open IP Portal &rarr;</span>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -313,7 +331,7 @@ export default function KmmLandingPage() {
                     <span className="size-8 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center font-bold text-sm">
                       🏛
                     </span>
-                    <span>Agencies</span>
+                    <span>Agencies &amp; Ministries</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-muted)]">
@@ -354,6 +372,17 @@ export default function KmmLandingPage() {
                         </div>
                       </a>
                     ))}
+                    <Link
+                      href="/onboarding"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        setMobileAgenciesOpen(false)
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-amber-600 hover:bg-amber-500/10 transition-colors mt-1"
+                    >
+                      <span>+ Onboard Ministry / Department</span>
+                      <span>&rarr;</span>
+                    </Link>
                   </div>
                 )}
               </div>

@@ -62,15 +62,17 @@ const DEFAULT_DEMO_USERS: TrainingUser[] = [
   },
 ]
 
-const STANDARD_AGENCIES = [
+const MINISTRIES_AND_AGENCIES = [
+  "Children's Ministry",
   'Lovetoons Animation',
   'Publishing Agency',
   'Digital Agency',
   'Academy Agency',
   'Educational Agency',
-  "Children's Ministry",
   'Healing School Kids',
   'Global Youth Leaders Forum Kids',
+  'Teens & Youth Ministry',
+  'Other Ministry / Department',
 ]
 
 const STANDARD_ROLES = [
@@ -98,6 +100,7 @@ export default function AuthPage() {
   const [signUpName, setSignUpName] = useState('')
   const [signUpEmail, setSignUpEmail] = useState('')
   const [signUpAgency, setSignUpAgency] = useState("Children's Ministry")
+  const [customAgency, setCustomAgency] = useState('')
   const [signUpRole, setSignUpRole] = useState('Child Safeguarding Officer')
   const [signUpPassword, setSignUpPassword] = useState('')
   const [showSignUpPassword, setShowSignUpPassword] = useState(false)
@@ -196,7 +199,10 @@ export default function AuthPage() {
 
     const name = signUpName.trim()
     const email = signUpEmail.trim().toLowerCase()
-    const agency = signUpAgency.trim() || "Children's Ministry"
+    const agency =
+      signUpAgency === 'Other Ministry / Department'
+        ? customAgency.trim() || 'Ministry Department'
+        : signUpAgency.trim() || "Children's Ministry"
     const role = signUpRole.trim() || 'Child Safeguarding Officer'
     const password = signUpPassword
 
@@ -579,13 +585,27 @@ export default function AuthPage() {
                         : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
                     }`}
                   >
-                    {STANDARD_AGENCIES.map((ag) => (
+                    {MINISTRIES_AND_AGENCIES.map((ag) => (
                       <option key={ag} value={ag} className="dark:bg-slate-900">
                         {ag}
                       </option>
                     ))}
                   </select>
                 </div>
+                {signUpAgency === 'Other Ministry / Department' && (
+                  <input
+                    type="text"
+                    value={customAgency}
+                    onChange={(e) => setCustomAgency(e.target.value)}
+                    placeholder="Enter ministry / department name"
+                    required
+                    className={`w-full h-9 mt-1.5 px-3 rounded-lg border font-medium text-xs transition-all outline-hidden ${
+                      isDark
+                        ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    }`}
+                  />
+                )}
               </div>
 
               <div>

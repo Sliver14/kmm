@@ -2054,7 +2054,7 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
                 <div className="max-w-3xl space-y-3">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                     <GraduationCap className="size-3.5" />
-                    <span className="uppercase tracking-widest text-[10px]">Academy Agency Directorate</span>
+                    <span className="uppercase tracking-widest text-[10px]">Academy &amp; Governance Directorate</span>
                   </div>
 
                   <h1
