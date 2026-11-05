@@ -207,7 +207,7 @@ flowchart TD
     ACT1["ACT 1: The Authority & Vision (3 mins)"] --> ACT2["ACT 2: The Training & Tool Audit (4 mins)"]
     ACT2 --> ACT3["ACT 3: Live Ministry Registration & Zero-Selection IP Entry (3 mins)"]
 
-    ACT1 -.->|Key Demo Points| D1["• Hero artwork & visual clarity<br/>• Floating Legal & Copyright status seals<br/>• 5 Specialized Agencies showcase"]
+    ACT1 -.->|Key Demo Points| D1["• Hero artwork & visual clarity<br/>• Floating Legal & Copyright status seals<br/>• Ministries & Agencies directory showcase"]
     ACT2 -.->|Key Demo Points| D2["• Open /training-portal (instant light theme)<br/>• Launch GOV-101 or DAT-603<br/>• Execute live Child Safeguarding Checklist<br/>• Open Policy Manual modal with print preview"]
     ACT3 -.->|Key Demo Points| D3["• Invite visiting Pastor/Leader to register on /onboarding<br/>• Show instant Credentials Card (Code, Key, Peer Status)<br/>• Click 1-Click Login: session activates as their Ministry<br/>• Click '+ Register New IP': show locked entity with Zero Selection!"]
 ```

@@ -7280,7 +7280,7 @@ function ReportsPage({
           <Layers className="size-3.5" />
           <span>Agency Distribution & Compliance</span>
           <span className="ml-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
-            5 Agencies
+            {operationalUnits.length} Entities
           </span>
         </button>
       </div>

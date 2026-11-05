@@ -43,7 +43,7 @@ flowchart LR
 - Hover smoothly over the **Kiddies Media Ministry** gold-ringed logo and title.
 - Point cursor to the main tagline: *"Policy, Training & Governance for Kingdom Kids Media"*.
 - Scroll down gently past the **Core Mandates** (Child Safeguarding, IP Clearance, Broadcast Standards).
-- Open the **Agencies Dropdown** in the top navigation, highlighting the 5 arms:
+- Open the **Agencies & Ministries Dropdown** in the top navigation, highlighting key agencies and onboarded departments:
   1. *Lovetoons Animation*
   2. *Publishing Agency*
   3. *Digital Agency*
@@ -239,7 +239,7 @@ flowchart LR
 
 | Segment | URL / Screen | Key Actions to Demonstrate | Demo Accounts / Inputs |
 | :--- | :--- | :--- | :--- |
-| **1. Landing Page** | `/` | Hero, 5 Agencies dropdown, mandates, waitlist banner | None required |
+| **1. Landing Page** | `/` | Hero, Ministries & Agencies directory, mandates, onboarding banner | None required |
 | **2. IP Portal Auth** | `/signin` | Light/Dark switch, 1-click Super Admin fill | `admin@lovetoons.tv` / `admin123` |
 | **3. Asset Registry** | `/assets` | `+ New Asset` modal, zero-selection entity, VPS file upload | Title: *The Golden Shield Ep 4*, File: Sample PDF |
 | **4. Approvals** | `/approvals` | Review pending queue, inspect clearance gates, approve | Sample pending asset |

@@ -174,7 +174,7 @@ export default function KmmLandingPage() {
                         Ministry Agencies
                       </span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)]">
-                        5 Arms
+                        Directory
                       </span>
                     </div>
 
@@ -317,7 +317,7 @@ export default function KmmLandingPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-muted)]">
-                      5
+                      Directory
                     </span>
                     <svg
                       className={`size-4 transition-transform duration-200 text-[var(--kmm-muted)] ${mobileAgenciesOpen ? 'rotate-180' : ''}`}
@@ -511,7 +511,7 @@ export default function KmmLandingPage() {
               <div className="pt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs font-bold text-slate-700 kmm-animate-rise">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xs">
                   <span className="size-2 rounded-full bg-emerald-500" />
-                  <span className="font-extrabold text-slate-900">5 Specialized Ministry Arms</span>
+                  <span className="font-extrabold text-slate-900">Ministries &amp; Department Registry</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xs">
                   <span className="size-2 rounded-full bg-[#0284C7]" />
@@ -570,12 +570,12 @@ export default function KmmLandingPage() {
             </div>
           </div>
 
-          {/* Quick Agency Jump Bar at Bottom of Hero */}
+          {/* Quick Ministry & Agency Jump Bar at Bottom of Hero */}
           <div className="kmm-wrap relative z-10 w-full mt-10 pt-6 border-t border-slate-900/10 hidden md:flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 shrink-0">
               <span className="size-2 rounded-full bg-amber-500" />
               <span className="font-extrabold uppercase tracking-wider text-[11px] text-slate-600">
-                Explore 5 Ministry Arms:
+                Ministries &amp; Departments:
               </span>
             </div>
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
@@ -591,6 +591,14 @@ export default function KmmLandingPage() {
                   </span>
                 </a>
               ))}
+              <Link
+                href="/onboarding"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 border border-amber-500/30 font-bold whitespace-nowrap text-xs transition-all shadow-xs"
+                title="Register and onboard a new ministry or church department"
+              >
+                <span className="text-amber-600 font-extrabold">+</span>
+                <span>Onboard Department</span>
+              </Link>
             </div>
           </div>
         </section>
@@ -792,10 +800,10 @@ export default function KmmLandingPage() {
 
           <div className="kmm-wrap relative z-10">
             <div className="max-w-2xl space-y-3 mb-12">
-              <p className="eyebrow">Operational Directorate & Agencies</p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold">The specialized agencies powering children's media</h2>
+              <p className="eyebrow">Operational Directorate &amp; Ministries</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold">Agencies &amp; onboarded departments powering children&apos;s media</h2>
               <p className="text-sm leading-relaxed text-[var(--kmm-muted)]">
-                Kiddies Media Ministry operates across five dedicated specialized agencies governing creative animation, literature, interactive technology, institutional accreditation, and foundational schooling.
+                Kiddies Media Ministry operates across specialized agencies and onboarded ministry departments governing creative animation, literature, interactive technology, institutional accreditation, and foundational schooling.
               </p>
             </div>
 
