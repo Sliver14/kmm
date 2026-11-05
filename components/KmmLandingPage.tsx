@@ -388,7 +388,7 @@ export default function KmmLandingPage() {
               <li className="ml-2">
                 <Link
                   href="/training-portal"
-                  className="px-4 py-2 rounded-full font-bold text-sm bg-[var(--kmm-orange)] text-[#10233F] hover:brightness-95 transition-all shadow-xs"
+                  className="px-4 py-2 rounded-full font-black text-sm bg-[#FFC700] text-slate-950 hover:bg-[#FFB800] transition-all shadow-xs"
                 >
                   Training Portal
                 </Link>
@@ -396,7 +396,7 @@ export default function KmmLandingPage() {
               <li>
                 <Link
                   href="/ip-portal"
-                  className="px-4 py-2 rounded-full font-bold text-sm bg-[var(--kmm-navy)] text-[var(--kmm-gold)] border-[1.5px] border-[var(--kmm-gold)] hover:bg-[var(--kmm-gold)] hover:text-[var(--kmm-navy)] transition-all shadow-xs ml-1"
+                  className="px-4 py-2 rounded-full font-black text-sm bg-[#0E1E38] text-[#FFC700] border-[1.5px] border-[#FFC700] hover:bg-[#FFC700] hover:text-slate-950 transition-all shadow-xs ml-1"
                   title="Lovetoons Intellectual Property & Rights Portal"
                 >
                   IP Portal
@@ -538,10 +538,10 @@ export default function KmmLandingPage() {
                 <Link
                   href="/training-portal"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between p-4 rounded-2xl font-bold bg-[var(--kmm-orange)] text-[#10233F] shadow-md hover:brightness-105 active:scale-98 transition-all"
+                  className="flex items-center justify-between p-4 rounded-2xl font-black bg-[#FFC700] text-slate-950 shadow-md hover:bg-[#FFB800] active:scale-98 transition-all"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="size-9 rounded-xl bg-black/15 text-[#10233F] flex items-center justify-center font-black text-sm">
+                    <span className="size-9 rounded-xl bg-black/15 text-slate-950 flex items-center justify-center font-black text-sm">
                       ▶
                     </span>
                     <div className="text-left">
@@ -559,10 +559,10 @@ export default function KmmLandingPage() {
                 <Link
                   href="/ip-portal"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between p-4 rounded-2xl font-bold bg-[var(--kmm-navy)] text-[var(--kmm-gold)] border-2 border-[var(--kmm-gold)] shadow-md hover:bg-[var(--kmm-gold)] hover:text-[var(--kmm-navy)] active:scale-98 transition-all"
+                  className="flex items-center justify-between p-4 rounded-2xl font-black bg-[#0E1E38] text-[#FFC700] border-2 border-[#FFC700] shadow-md hover:bg-[#FFC700] hover:text-slate-950 active:scale-98 transition-all"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="size-9 rounded-xl bg-[var(--kmm-gold)]/20 text-[var(--kmm-gold)] flex items-center justify-center font-black text-sm">
+                    <span className="size-9 rounded-xl bg-[#FFC700]/20 text-[#FFC700] flex items-center justify-center font-black text-sm">
                       🛡
                     </span>
                     <div className="text-left">
@@ -603,40 +603,44 @@ export default function KmmLandingPage() {
 
       <main id="top">
         {/* =========================================================================
-            HERO SECTION
+            HERO SECTION - Welcoming Children's Ministry Palette & Visuals
             ========================================================================= */}
         <section className="relative overflow-hidden py-14 sm:py-20">
-          {/* Ribbon SVG background */}
+          {/* Playful curved sunshine doodle loops mirroring reference image */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 1200 640" preserveAspectRatio="none" aria-hidden="true">
             <path
               d="M-40 470 C 260 330, 520 560, 820 400 S 1180 210, 1260 250"
               fill="none"
               stroke="var(--kmm-ribbon-a)"
-              strokeWidth="64"
+              strokeWidth="56"
               strokeLinecap="round"
-              opacity="0.55"
+              opacity="0.35"
             />
             <path
               d="M-40 560 C 300 470, 600 640, 900 520 S 1200 420, 1260 440"
               fill="none"
               stroke="var(--kmm-ribbon-b)"
-              strokeWidth="30"
+              strokeWidth="28"
               strokeLinecap="round"
-              opacity="0.35"
+              opacity="0.25"
             />
           </svg>
 
           <div className="kmm-wrap relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Copy Left */}
             <div className="lg:col-span-7 space-y-6">
-              <p className="eyebrow kmm-animate-rise">Kiddies Media Ministry</p>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-500/10 text-[#FF3B6C] border border-rose-500/25 kmm-animate-rise">
+                <span className="size-2 rounded-full bg-[#FF3B6C] animate-pulse" />
+                <span>Kiddies Media Ministry</span>
+              </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] kmm-animate-rise">
                 Guiding the Standards.{' '}
-                <em className="not-italic text-[var(--kmm-orange)] block">
-                  Governing the Future of Children's Media.
-                </em>
+                <span className="block text-[#FF3B6C]">
+                  Governing the Future{' '}
+                  <span className="text-[#0284C7]">of Children&apos;s Media.</span>
+                </span>
               </h1>
-              <p className="lead kmm-animate-rise !text-white" style={{ color: '#ffffff' }}>
+              <p className="lead kmm-animate-rise text-slate-700 dark:text-slate-200 text-base sm:text-lg max-w-2xl leading-relaxed">
                 Kiddies Media Ministry provides the governance, training, and resources to document and steward children&apos;s media content and intellectual property across Loveworld Kingdom.
               </p>
 
@@ -645,7 +649,7 @@ export default function KmmLandingPage() {
                   Explore Our Mandate
                 </a>
                 <Link href="/training-portal" className="kmm-btn kmm-btn-s">
-                  Access Training & Tools
+                  Access Training &amp; Tools
                 </Link>
                 <Link href="/ip-portal" className="kmm-btn kmm-btn-o" title="Intellectual Property & Asset Management Platform">
                   Launch IP Portal
@@ -653,51 +657,79 @@ export default function KmmLandingPage() {
               </div>
             </div>
 
-            {/* Stage Graphic Right */}
+            {/* Stage Graphic Right - Featuring Welcoming Children's Ministry Imagery */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-[380px] sm:max-w-[440px] aspect-square flex items-center justify-center">
-                {/* Rotating SVG aura with calm, gentle speed */}
-                <svg className="absolute -inset-[8%] w-[116%] h-[116%] overflow-visible kmm-slow-spin" viewBox="0 0 400 400" aria-hidden="true">
-                  <circle cx="200" cy="200" r="190" fill="none" stroke="var(--kmm-orange)" strokeWidth="3" strokeDasharray="3 14" strokeLinecap="round" />
-                  <circle cx="352" cy="92" r="26" fill="var(--kmm-orange)" />
-                  <rect x="14" y="296" width="52" height="52" rx="16" fill="var(--kmm-blue)" transform="rotate(14 40 322)" />
-                  <path d="M356 318l8 17 18 3-13 13 3 18-16-9-16 9 3-18-13-13 18-3z" fill="var(--kmm-gold)" />
+              <div className="relative w-full max-w-[420px] sm:max-w-[460px]">
+                {/* Playful Sunshine Curved Doodle Rings mirroring reference image */}
+                <svg className="absolute -inset-6 w-[calc(100%+48px)] h-[calc(100%+48px)] pointer-events-none select-none overflow-visible kmm-slow-spin opacity-70" viewBox="0 0 400 400" aria-hidden="true">
+                  <circle cx="200" cy="200" r="195" fill="none" stroke="#FFC700" strokeWidth="4" strokeDasharray="6 14" strokeLinecap="round" opacity="0.6" />
+                  <circle cx="360" cy="110" r="16" fill="#FF3B6C" opacity="0.8" />
+                  <rect x="18" y="290" width="36" height="36" rx="10" fill="#0284C7" transform="rotate(18 36 308)" opacity="0.75" />
+                  <path d="M350 310l6 14 15 2-11 11 3 15-13-8-13 8 3-15-11-11 15-2z" fill="#FFC700" opacity="0.85" />
                 </svg>
 
-                {/* Central Emblem */}
-                <div className="relative size-[72%] rounded-full bg-white flex items-center justify-center p-6 shadow-[0_0_0_10px_var(--kmm-cream),0_0_0_14px_var(--kmm-gold),0_24px_50px_-16px_rgba(16,35,63,0.5)]">
-                  <Image
-                    src="/kmm-logo.png"
-                    alt="Kiddies Media Ministry Emblem"
-                    width={240}
-                    height={240}
-                    priority
-                    className="object-contain"
-                  />
+                {/* Main Welcoming Showcase Frame */}
+                <div className="relative rounded-[36px] sm:rounded-[44px] overflow-hidden shadow-2xl border-4 border-white dark:border-white/10 bg-white dark:bg-slate-900 group">
+                  <div className="relative aspect-[4/3] sm:aspect-square w-full overflow-hidden">
+                    <Image
+                      src="/children-ministry-hero.png"
+                      alt="Children's Ministry - Welcoming smiling kids and creative media"
+                      width={700}
+                      height={700}
+                      priority
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {/* Subtle gradient vignette at bottom */}
+                    <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
+
+                    {/* Institutional Badge Overlay */}
+                    <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-between p-2.5 rounded-2xl bg-white/95 dark:bg-slate-950/90 backdrop-blur-md shadow-lg border border-white/40 dark:border-white/10">
+                      <div className="flex items-center gap-2.5">
+                        <div className="size-9 rounded-xl bg-white p-1 shadow-xs border border-amber-500/30 shrink-0">
+                          <Image
+                            src="/kmm-logo.png"
+                            alt="Kiddies Media Ministry"
+                            width={36}
+                            height={36}
+                            className="object-contain"
+                          />
+                        </div>
+                        <div>
+                          <span className="text-[11px] font-black block text-slate-900 dark:text-white leading-tight" style={{ fontFamily: 'var(--kmm-display)' }}>
+                            Kiddies Media Ministry
+                          </span>
+                          <span className="text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
+                            Official Children&apos;s IP Registry
+                          </span>
+                        </div>
+                      </div>
+                      <span className="size-2 rounded-full bg-emerald-500 animate-pulse mr-1" title="Active Directorate" />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Floating Chips */}
+                {/* Floating Interactive Micro-Chips */}
                 <div
-                  className="absolute left-[-2%] top-[10%] px-4 py-2 rounded-full font-bold text-xs bg-[var(--kmm-surface)] text-[var(--kmm-fg)] shadow-[0_10px_24px_-10px_rgba(16,35,63,0.4)] flex items-center gap-2 kmm-chip-bob"
+                  className="absolute -left-3 top-[8%] px-3.5 py-1.5 rounded-full font-black text-[11px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-lg border border-slate-200/80 dark:border-white/10 flex items-center gap-2 kmm-chip-bob z-20"
                 >
-                  <i className="size-2 rounded-full bg-[var(--kmm-gold)]" />
-                  Policy & Standards
+                  <span className="size-2 rounded-full bg-[#FFC700]" />
+                  <span>Policy &amp; Standards</span>
                 </div>
 
                 <div
-                  className="absolute right-[-4%] top-[42%] px-4 py-2 rounded-full font-bold text-xs bg-[var(--kmm-surface)] text-[var(--kmm-fg)] shadow-[0_10px_24px_-10px_rgba(16,35,63,0.4)] flex items-center gap-2 kmm-chip-bob"
+                  className="absolute -right-3 top-[38%] px-3.5 py-1.5 rounded-full font-black text-[11px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-lg border border-slate-200/80 dark:border-white/10 flex items-center gap-2 kmm-chip-bob z-20"
                   style={{ animationDelay: '-1.7s' }}
                 >
-                  <i className="size-2 rounded-full bg-[var(--kmm-blue)]" />
-                  Child Protection
+                  <span className="size-2 rounded-full bg-[#0284C7]" />
+                  <span>Child Protection</span>
                 </div>
 
                 <div
-                  className="absolute left-[6%] bottom-[6%] px-4 py-2 rounded-full font-bold text-xs bg-[var(--kmm-surface)] text-[var(--kmm-fg)] shadow-[0_10px_24px_-10px_rgba(16,35,63,0.4)] flex items-center gap-2 kmm-chip-bob"
+                  className="absolute left-[8%] -bottom-3 px-3.5 py-1.5 rounded-full font-black text-[11px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-lg border border-slate-200/80 dark:border-white/10 flex items-center gap-2 kmm-chip-bob z-20"
                   style={{ animationDelay: '-3.2s' }}
                 >
-                  <i className="size-2 rounded-full bg-[var(--kmm-orange)]" />
-                  Copyright & IP
+                  <span className="size-2 rounded-full bg-[#FF3B6C]" />
+                  <span>Copyright &amp; IP</span>
                 </div>
               </div>
             </div>
@@ -722,7 +754,7 @@ export default function KmmLandingPage() {
                   The website provides basic information about Kiddies Media Ministry and its role to guide, coordinate, and set expectations for children&apos;s media initiatives. Our mission equips ministry departments, animation studios, and creative teams with official training materials, actionable compliance tools, and helpful supporting documents so they can create and share content with clarity, spiritual fidelity, and confidence.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="rounded-3xl p-6 bg-[var(--kmm-blue)] text-white shadow-md">
+                  <div className="rounded-[32px] p-6 sm:p-7 bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-lg">
                     <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
                       What Kiddies Media Ministry does
                     </b>
@@ -730,11 +762,11 @@ export default function KmmLandingPage() {
                       Guides, coordinates, and establishes the expectations, training materials, practical tools, and supporting documents children&apos;s media initiatives follow.
                     </span>
                   </div>
-                  <div className="rounded-3xl p-6 bg-[var(--kmm-gold)] text-[#10233F] shadow-md">
+                  <div className="rounded-[32px] p-6 sm:p-7 bg-gradient-to-br from-[#FFC700] via-[#FFB800] to-[#F59E0B] text-slate-950 shadow-lg">
                     <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
                       What Kiddies Media Ministry is not
                     </b>
-                    <span className="text-sm leading-relaxed block text-[#10233F]/90">
+                    <span className="text-sm leading-relaxed block text-[#10233F]/90 font-medium">
                       A standalone studio that simply produces entertainment content without institutional governance.
                     </span>
                   </div>
@@ -744,8 +776,8 @@ export default function KmmLandingPage() {
 
             {/* 4 Pillars of Kiddies Media Ministry's Role */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-4">
-              <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
-                <div className="size-10 rounded-2xl bg-[var(--kmm-blue)]/15 text-[var(--kmm-blue)] flex items-center justify-center font-bold text-lg">
+              <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
+                <div className="size-11 rounded-2xl bg-[#0284C7]/15 text-[#0284C7] flex items-center justify-center font-bold text-lg">
                   ⚖
                 </div>
                 <h3 className="font-extrabold text-base">Policy & Governance</h3>
@@ -754,8 +786,8 @@ export default function KmmLandingPage() {
                 </p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
-                <div className="size-10 rounded-2xl bg-[var(--kmm-gold)]/20 text-[#10233F] dark:text-[var(--kmm-gold)] flex items-center justify-center font-bold text-lg">
+              <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
+                <div className="size-11 rounded-2xl bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] flex items-center justify-center font-bold text-lg">
                   📚
                 </div>
                 <h3 className="font-extrabold text-base">Training Materials</h3>
@@ -764,8 +796,8 @@ export default function KmmLandingPage() {
                 </p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
-                <div className="size-10 rounded-2xl bg-[var(--kmm-orange)]/15 text-[var(--kmm-orange)] flex items-center justify-center font-bold text-lg">
+              <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
+                <div className="size-11 rounded-2xl bg-rose-500/15 text-[#FF3B6C] flex items-center justify-center font-bold text-lg">
                   🛠
                 </div>
                 <h3 className="font-extrabold text-base">Practical Tools</h3>
@@ -774,8 +806,8 @@ export default function KmmLandingPage() {
                 </p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
-                <div className="size-10 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
+              <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
+                <div className="size-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
                   📋
                 </div>
                 <h3 className="font-extrabold text-base">Supporting Documents</h3>
@@ -802,7 +834,7 @@ export default function KmmLandingPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {/* 1 */}
-              <article className="p-7 rounded-3xl rounded-br-[80px] bg-[var(--kmm-blue)] text-white shadow-md hover:-translate-y-1 transition-transform">
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
                 <svg className="size-9 mb-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 3v18M5 7h14M5 7l-3 7a4 4 0 0 0 6 0L5 7zm14 0l-3 7a4 4 0 0 0 6 0l-3-7z" />
                 </svg>
@@ -811,27 +843,27 @@ export default function KmmLandingPage() {
               </article>
 
               {/* 2 */}
-              <article className="p-7 rounded-3xl rounded-br-[80px] bg-[var(--kmm-orange)] text-[#10233F] shadow-md hover:-translate-y-1 transition-transform">
-                <svg className="size-9 mb-10 text-[#10233F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#FF3B6C] to-[#E11D48] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 12l2 2 4-4M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z" />
                 </svg>
                 <h3 className="text-xl font-bold mb-2">Content Standards</h3>
-                <p className="text-sm leading-relaxed text-[#10233F]/90">Define and communicate expectations for content quality, suitability, consistency, and alignment with ministry values.</p>
+                <p className="text-sm leading-relaxed text-white/90">Define and communicate expectations for content quality, suitability, consistency, and alignment with ministry values.</p>
               </article>
 
               {/* 3 */}
-              <article className="p-7 rounded-3xl rounded-br-[80px] bg-[var(--kmm-gold)] text-[#10233F] shadow-md hover:-translate-y-1 transition-transform">
-                <svg className="size-9 mb-10 text-[#10233F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#FFC700] via-[#FFB800] to-[#F59E0B] text-slate-950 shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="7" r="3" />
                   <path d="M5 21v-3a7 7 0 0 1 14 0v3M12 12v3" />
                 </svg>
                 <h3 className="text-xl font-bold mb-2">Child Protection & Safety</h3>
-                <p className="text-sm leading-relaxed text-[#10233F]/90">Promote age-appropriate content, safeguarding principles, responsible representation of children, privacy, and ethical media practices.</p>
+                <p className="text-sm leading-relaxed text-slate-900/90 font-medium">Promote age-appropriate content, safeguarding principles, responsible representation of children, privacy, and ethical media practices.</p>
               </article>
 
               {/* 4 */}
-              <article className="p-7 rounded-3xl rounded-br-[80px] bg-[var(--kmm-navy)] text-white shadow-md hover:-translate-y-1 transition-transform">
-                <svg className="size-9 mb-10 text-[var(--kmm-gold)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#0E1E38] to-[#162B4E] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 border border-white/10">
+                <svg className="size-9 mb-10 text-[#FFC700]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="9" />
                   <path d="M14.5 9.5a3.5 3.5 0 1 0 0 5" />
                 </svg>
@@ -840,26 +872,26 @@ export default function KmmLandingPage() {
               </article>
 
               {/* 5 */}
-              <article className="p-7 rounded-3xl rounded-br-[80px] bg-[var(--kmm-orange)] text-[#10233F] shadow-md hover:-translate-y-1 transition-transform">
-                <svg className="size-9 mb-10 text-[#10233F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#FF4D7E] to-[#F43F5E] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 3v2M15 3v2M9 19v2M15 19v2M3 9h2M3 15h2M19 9h2M19 15h2M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM10 10h4v4h-4z" />
                 </svg>
                 <h3 className="text-xl font-bold mb-2">AI & Digital Media</h3>
-                <p className="text-sm leading-relaxed text-[#10233F]/90">Guide the responsible use of AI-generated content, digital tools, emerging technologies, and related creative workflows.</p>
+                <p className="text-sm leading-relaxed text-white/90">Guide the responsible use of AI-generated content, digital tools, emerging technologies, and related creative workflows.</p>
               </article>
 
               {/* 6 */}
-              <article className="p-7 rounded-3xl rounded-br-[80px] bg-[var(--kmm-gold)] text-[#10233F] shadow-md hover:-translate-y-1 transition-transform">
-                <svg className="size-9 mb-10 text-[#10233F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#FFBA00] to-[#E09900] text-slate-950 shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5zM4 19a2 2 0 0 1 2-2h13" />
                 </svg>
                 <h3 className="text-xl font-bold mb-2">Training & Tools</h3>
-                <p className="text-sm leading-relaxed text-[#10233F]/90">Institutional training materials, interactive compliance tools, and qualification for children&apos;s media producers, safeguarding auditors, and broadcast reviewers.</p>
+                <p className="text-sm leading-relaxed text-slate-900/90 font-medium">Institutional training materials, interactive compliance tools, and qualification for children&apos;s media producers, safeguarding auditors, and broadcast reviewers.</p>
               </article>
 
               {/* 7 */}
-              <article className="p-7 rounded-3xl rounded-br-[80px] bg-[var(--kmm-navy)] text-white shadow-md hover:-translate-y-1 transition-transform">
-                <svg className="size-9 mb-10 text-[var(--kmm-gold)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#0E1E38] to-[#1E293B] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 border border-white/10">
+                <svg className="size-9 mb-10 text-[#FFC700]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="9" cy="8" r="3" />
                   <path d="M3 20c0-3 2.7-5 6-5s6 2 6 5M17 11a2.5 2.5 0 1 0 0-5M21 19c0-2.2-1.6-3.7-4-4.2" />
                 </svg>
@@ -868,7 +900,7 @@ export default function KmmLandingPage() {
               </article>
 
               {/* 8 */}
-              <article className="p-7 rounded-3xl rounded-br-[80px] bg-[var(--kmm-blue)] text-white shadow-md hover:-translate-y-1 transition-transform">
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#0284C7] to-[#0066CC] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
                 <svg className="size-9 mb-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5M9 12l2 2 4-4" />
                 </svg>
@@ -914,33 +946,30 @@ export default function KmmLandingPage() {
                 <button
                   type="button"
                   onClick={() => setGovView('both')}
-                  className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
-                    govView === 'both'
-                      ? 'bg-[var(--kmm-navy)] text-[var(--kmm-gold)] shadow-xs'
-                      : 'text-[var(--kmm-muted)] hover:text-[var(--kmm-fg)]'
-                  }`}
+                  className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${govView === 'both'
+                    ? 'bg-[var(--kmm-navy)] text-[var(--kmm-gold)] shadow-xs'
+                    : 'text-[var(--kmm-muted)] hover:text-[var(--kmm-fg)]'
+                    }`}
                 >
                   Complete Architecture
                 </button>
                 <button
                   type="button"
                   onClick={() => setGovView('lifecycle')}
-                  className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
-                    govView === 'lifecycle'
-                      ? 'bg-[var(--kmm-navy)] text-[var(--kmm-gold)] shadow-xs'
-                      : 'text-[var(--kmm-muted)] hover:text-[var(--kmm-fg)]'
-                  }`}
+                  className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${govView === 'lifecycle'
+                    ? 'bg-[var(--kmm-navy)] text-[var(--kmm-gold)] shadow-xs'
+                    : 'text-[var(--kmm-muted)] hover:text-[var(--kmm-fg)]'
+                    }`}
                 >
                   5-Stage Lifecycle
                 </button>
                 <button
                   type="button"
                   onClick={() => setGovView('pillars')}
-                  className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
-                    govView === 'pillars'
-                      ? 'bg-[var(--kmm-navy)] text-[var(--kmm-gold)] shadow-xs'
-                      : 'text-[var(--kmm-muted)] hover:text-[var(--kmm-fg)]'
-                  }`}
+                  className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${govView === 'pillars'
+                    ? 'bg-[var(--kmm-navy)] text-[var(--kmm-gold)] shadow-xs'
+                    : 'text-[var(--kmm-muted)] hover:text-[var(--kmm-fg)]'
+                    }`}
                 >
                   Four Legal Pillars
                 </button>
@@ -972,36 +1001,32 @@ export default function KmmLandingPage() {
                         key={s.step}
                         type="button"
                         onClick={() => setActiveGovStep(idx)}
-                        className={`p-4 sm:p-5 rounded-3xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-3 relative overflow-hidden group ${
-                          isActive
-                            ? 'bg-[var(--kmm-surface)] border-[var(--kmm-gold)] shadow-lg ring-2 ring-[var(--kmm-gold)]/30 -translate-y-0.5'
-                            : 'bg-[var(--kmm-surface)]/60 border-[var(--kmm-line)] hover:border-[var(--kmm-line)]/80 hover:bg-[var(--kmm-surface)]'
-                        }`}
+                        className={`p-4 sm:p-5 rounded-3xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-3 relative overflow-hidden group ${isActive
+                          ? 'bg-[var(--kmm-surface)] border-[var(--kmm-gold)] shadow-lg ring-2 ring-[var(--kmm-gold)]/30 -translate-y-0.5'
+                          : 'bg-[var(--kmm-surface)]/60 border-[var(--kmm-line)] hover:border-[var(--kmm-line)]/80 hover:bg-[var(--kmm-surface)]'
+                          }`}
                       >
                         {/* Accent top line */}
                         <div
-                          className={`absolute top-0 left-0 right-0 h-1 transition-all ${
-                            isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'
-                          }`}
+                          className={`absolute top-0 left-0 right-0 h-1 transition-all ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-40'
+                            }`}
                           style={{ backgroundColor: s.accent }}
                         />
 
                         <div className="flex items-center justify-between">
                           <span
-                            className={`size-8 rounded-xl flex items-center justify-center font-black text-xs transition-colors ${
-                              isActive
-                                ? 'bg-[var(--kmm-navy)] text-[var(--kmm-gold)] shadow-xs'
-                                : 'bg-[var(--kmm-line)] text-[var(--kmm-muted)]'
-                            }`}
+                            className={`size-8 rounded-xl flex items-center justify-center font-black text-xs transition-colors ${isActive
+                              ? 'bg-[var(--kmm-navy)] text-[var(--kmm-gold)] shadow-xs'
+                              : 'bg-[var(--kmm-line)] text-[var(--kmm-muted)]'
+                              }`}
                           >
                             {s.step}
                           </span>
                           <div
-                            className={`size-8 rounded-xl flex items-center justify-center transition-colors ${
-                              isActive
-                                ? 'text-white shadow-xs'
-                                : 'text-[var(--kmm-muted)] group-hover:text-[var(--kmm-fg)]'
-                            }`}
+                            className={`size-8 rounded-xl flex items-center justify-center transition-colors ${isActive
+                              ? 'text-white shadow-xs'
+                              : 'text-[var(--kmm-muted)] group-hover:text-[var(--kmm-fg)]'
+                              }`}
                             style={{
                               backgroundColor: isActive ? s.accent : 'transparent',
                             }}
@@ -1024,9 +1049,8 @@ export default function KmmLandingPage() {
                             {isActive ? 'Active Stage' : 'Inspect Details'}
                           </span>
                           <ChevronRight
-                            className={`size-3 transition-transform ${
-                              isActive ? 'translate-x-0.5 text-[var(--kmm-gold)]' : 'text-[var(--kmm-muted)]'
-                            }`}
+                            className={`size-3 transition-transform ${isActive ? 'translate-x-0.5 text-[var(--kmm-gold)]' : 'text-[var(--kmm-muted)]'
+                              }`}
                           />
                         </div>
                       </button>
@@ -1357,7 +1381,7 @@ export default function KmmLandingPage() {
             <div id="agencies-lovetoons" className="relative -top-24 pointer-events-none" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
               {/* Mobile App */}
-              <article className="rounded-[40px] rounded-br-[120px] p-8 sm:p-10 bg-[var(--kmm-blue)] text-white shadow-xl flex flex-col justify-between">
+              <article className="rounded-[40px] rounded-br-[120px] p-8 sm:p-10 bg-gradient-to-br from-[#0284C7] via-[#0369A1] to-[#0052A3] text-white shadow-xl flex flex-col justify-between hover:shadow-2xl transition-shadow">
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center">
@@ -1380,7 +1404,7 @@ export default function KmmLandingPage() {
                     href="https://apps.apple.com/us/app/lovetoons-tv/id1665457245"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="kmm-btn text-xs bg-white text-[var(--kmm-blue)] hover:bg-white/95 font-bold shadow-md inline-flex items-center gap-2 transition-all"
+                    className="kmm-btn text-xs bg-white text-[#0284C7] hover:bg-white/95 font-black shadow-md inline-flex items-center gap-2 transition-all"
                   >
                     <svg className="size-4 fill-current shrink-0" viewBox="0 0 24 24">
                       <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.74 1.04-1.79.92-2.85-.92.04-2.07.62-2.73 1.39-.58.67-1.09 1.74-.96 2.77 1.03.08 2.13-.53 2.77-1.31z" />
@@ -1390,7 +1414,7 @@ export default function KmmLandingPage() {
                   <button
                     type="button"
                     onClick={() => setIsApkModalOpen(true)}
-                    className="kmm-btn text-xs bg-white/20 hover:bg-white/30 text-white font-bold border border-white/30 inline-flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+                    className="kmm-btn text-xs bg-white/20 hover:bg-white/30 text-white font-black border border-white/30 inline-flex items-center gap-2 transition-all shadow-xs cursor-pointer"
                   >
                     <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -1403,7 +1427,7 @@ export default function KmmLandingPage() {
                     href="https://lwappstore.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="kmm-btn text-xs bg-white/10 hover:bg-white/20 text-white/90 font-medium inline-flex items-center gap-1.5 transition-all"
+                    className="kmm-btn text-xs bg-white/10 hover:bg-white/20 text-white/90 font-bold inline-flex items-center gap-1.5 transition-all"
                   >
                     <span>Loveworld Store</span>
                     <svg className="size-3.5 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1416,21 +1440,21 @@ export default function KmmLandingPage() {
               </article>
 
               {/* Website */}
-              <article className="rounded-[40px] rounded-bl-[120px] p-8 sm:p-10 bg-[var(--kmm-gold)] text-[#10233F] shadow-xl flex flex-col justify-between">
+              <article className="rounded-[40px] rounded-bl-[120px] p-8 sm:p-10 bg-gradient-to-br from-[#FFC700] via-[#FFB800] to-[#F59E0B] text-slate-950 shadow-xl flex flex-col justify-between hover:shadow-2xl transition-shadow">
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <div className="size-14 rounded-2xl bg-[#10233F]/15 flex items-center justify-center">
-                      <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="size-14 rounded-2xl bg-black/15 flex items-center justify-center">
+                      <svg className="size-8 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="9" />
                         <path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" />
                       </svg>
                     </div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[#10233F]/15 text-[#10233F]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-black/15 text-slate-950">
                       Lovetoons Agency
                     </span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">LoveToons Website</h3>
-                  <p className="text-sm leading-relaxed text-[#10233F]/90 mb-8 max-w-md">
+                  <p className="text-sm leading-relaxed text-slate-900/90 font-medium mb-8 max-w-md">
                     Explore LoveToons broadcast series, animated episodes, published comics, and interactive learning media.
                   </p>
                 </div>
@@ -1439,7 +1463,7 @@ export default function KmmLandingPage() {
                     href="https://lovetoons.org"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="kmm-btn text-xs bg-[#10233F] text-white hover:bg-[#10233F]/90 font-bold shadow-md inline-flex items-center gap-2 transition-all"
+                    className="kmm-btn text-xs bg-[#0E1E38] text-white hover:bg-slate-900 font-black shadow-md inline-flex items-center gap-2 transition-all"
                   >
                     Visit lovetoons.org
                     <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -1453,10 +1477,10 @@ export default function KmmLandingPage() {
 
             {/* Other Specialized Agencies Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
-              <div id="agencies-publishing" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between">
+              <div id="agencies-publishing" className="scroll-mt-24 rounded-[28px] p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)] border border-[var(--kmm-line)]">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-rose-500/15 text-[#FF3B6C] border border-rose-500/25">
                       Publishing
                     </span>
                   </div>
@@ -1475,10 +1499,10 @@ export default function KmmLandingPage() {
                 </Link>
               </div>
 
-              <div id="agencies-digital" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between">
+              <div id="agencies-digital" className="scroll-mt-24 rounded-[28px] p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)] border border-[var(--kmm-line)]">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-[#0284C7]/15 text-[#0284C7] border border-[#0284C7]/25">
                       Technology
                     </span>
                   </div>
@@ -1497,10 +1521,10 @@ export default function KmmLandingPage() {
                 </Link>
               </div>
 
-              <div id="agencies-educational" className="scroll-mt-24 rounded-3xl p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between sm:col-span-2 lg:col-span-1">
+              <div id="agencies-educational" className="scroll-mt-24 rounded-[28px] p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between sm:col-span-2 lg:col-span-1">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-[var(--kmm-band)] text-[var(--kmm-fg)] border border-[var(--kmm-line)]">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] border border-amber-500/25">
                       Education
                     </span>
                   </div>
@@ -1532,9 +1556,9 @@ export default function KmmLandingPage() {
         <section className="py-20 scroll-mt-20" id="training">
           <div className="kmm-wrap space-y-12">
             {/* Header Box */}
-            <div className="rounded-[40px] p-8 sm:p-12 bg-[var(--kmm-navy)] text-white shadow-2xl relative overflow-hidden">
+            <div className="rounded-[40px] p-8 sm:p-12 bg-gradient-to-br from-[#0E1E38] via-[#142646] to-[#0E1E38] text-white shadow-2xl relative overflow-hidden border border-white/10">
               <div className="max-w-3xl space-y-4 relative z-10">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--kmm-gold)] text-[#10233F]">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#FFC700] text-slate-950">
                   <span>Kiddies Media Ministry Institutional Training &amp; Resources</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
@@ -1564,13 +1588,13 @@ export default function KmmLandingPage() {
             {/* 3 Main Pillars Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Card 1: Training Materials */}
-              <div className="p-8 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="p-8 rounded-[32px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="size-12 rounded-2xl bg-[var(--kmm-blue)]/15 text-[var(--kmm-blue)] flex items-center justify-center font-bold text-xl">
+                  <div className="size-12 rounded-2xl bg-[#0284C7]/15 text-[#0284C7] flex items-center justify-center font-bold text-xl">
                     📚
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-blue)] block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#0284C7] block mb-1">
                       Curriculum & Modules
                     </span>
                     <h3 className="text-xl font-bold">Training Materials</h3>
@@ -1580,15 +1604,15 @@ export default function KmmLandingPage() {
                   </p>
                   <ul className="text-xs text-[var(--kmm-muted)] space-y-2 pt-2 border-t border-[var(--kmm-line)]">
                     <li className="flex items-center gap-2">
-                      <span className="text-[var(--kmm-blue)] font-bold">✓</span>
+                      <span className="text-[#0284C7] font-bold">✓</span>
                       <span>8 Core masterclasses & curriculum outlines</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-[var(--kmm-blue)] font-bold">✓</span>
+                      <span className="text-[#0284C7] font-bold">✓</span>
                       <span>Biblical anchors & statutory citations</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-[var(--kmm-blue)] font-bold">✓</span>
+                      <span className="text-[#0284C7] font-bold">✓</span>
                       <span>Lesson takeaways & production checkpoints</span>
                     </li>
                   </ul>
@@ -1606,13 +1630,13 @@ export default function KmmLandingPage() {
               </div>
 
               {/* Card 2: Practical Tools */}
-              <div className="p-8 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="p-8 rounded-[32px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="size-12 rounded-2xl bg-[var(--kmm-gold)]/20 text-[#10233F] dark:text-[var(--kmm-gold)] flex items-center justify-center font-bold text-xl">
+                  <div className="size-12 rounded-2xl bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] flex items-center justify-center font-bold text-xl">
                     🛠
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-gold)] block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-[#FFB800] block mb-1">
                       Interactive Utilities
                     </span>
                     <h3 className="text-xl font-bold">Practical Tools</h3>
@@ -1648,13 +1672,13 @@ export default function KmmLandingPage() {
               </div>
 
               {/* Card 3: Supporting Documents */}
-              <div className="p-8 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="p-8 rounded-[32px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="size-12 rounded-2xl bg-[var(--kmm-orange)]/15 text-[var(--kmm-orange)] flex items-center justify-center font-bold text-xl">
+                  <div className="size-12 rounded-2xl bg-rose-500/15 text-[#FF3B6C] flex items-center justify-center font-bold text-xl">
                     📋
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-orange)] block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF3B6C] block mb-1">
                       Charters & Templates
                     </span>
                     <h3 className="text-xl font-bold">Helpful Supporting Documents</h3>
@@ -1664,15 +1688,15 @@ export default function KmmLandingPage() {
                   </p>
                   <ul className="text-xs text-[var(--kmm-muted)] space-y-2 pt-2 border-t border-[var(--kmm-line)]">
                     <li className="flex items-center gap-2">
-                      <span className="text-[var(--kmm-orange)] font-bold">✓</span>
+                      <span className="text-[#FF3B6C] font-bold">✓</span>
                       <span>Official Child Safeguarding Policy Manual</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-[var(--kmm-orange)] font-bold">✓</span>
+                      <span className="text-[#FF3B6C] font-bold">✓</span>
                       <span>Minor Talent & Voice Contributor Release Deeds</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-[var(--kmm-orange)] font-bold">✓</span>
+                      <span className="text-[#FF3B6C] font-bold">✓</span>
                       <span>COPPA Digital Safety & Broadcast Standards</span>
                     </li>
                   </ul>
@@ -1703,9 +1727,9 @@ export default function KmmLandingPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <article className="p-7 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm space-y-3">
+              <article className="p-7 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="px-3 py-1 rounded-full font-bold bg-[var(--kmm-gold)] text-[#10233F]">
+                  <span className="px-3 py-1 rounded-full font-black text-[11px] bg-[#FFC700] text-slate-950 uppercase tracking-wider">
                     Policy Updates
                   </span>
                   <span className="text-xs text-[var(--kmm-muted)] font-semibold">Institutional circular</span>
@@ -1716,9 +1740,9 @@ export default function KmmLandingPage() {
                 </p>
               </article>
 
-              <article className="p-7 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm space-y-3">
+              <article className="p-7 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="px-3 py-1 rounded-full font-bold bg-[var(--kmm-gold)] text-[#10233F]">
+                  <span className="px-3 py-1 rounded-full font-black text-[11px] bg-[#FFC700] text-slate-950 uppercase tracking-wider">
                     Training
                   </span>
                   <span className="text-xs text-[var(--kmm-muted)] font-semibold">Academy session</span>
@@ -1729,9 +1753,9 @@ export default function KmmLandingPage() {
                 </p>
               </article>
 
-              <article className="p-7 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm space-y-3">
+              <article className="p-7 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="px-3 py-1 rounded-full font-bold bg-[var(--kmm-gold)] text-[#10233F]">
+                  <span className="px-3 py-1 rounded-full font-black text-[11px] bg-[#FFC700] text-slate-950 uppercase tracking-wider">
                     Guidelines
                   </span>
                   <span className="text-xs text-[var(--kmm-muted)] font-semibold">Pre-release standard</span>
@@ -1761,15 +1785,15 @@ export default function KmmLandingPage() {
             </div>
 
             {/* CTA Showcase Card */}
-            <div className="p-8 sm:p-12 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-lg relative overflow-hidden">
+            <div className="p-8 sm:p-12 rounded-[36px] sm:rounded-[44px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xl relative overflow-hidden">
               {/* Decorative background glows */}
-              <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-[var(--kmm-gold)]/10 blur-3xl" />
-              <div className="pointer-events-none absolute -left-20 -bottom-20 size-72 rounded-full bg-[var(--kmm-blue)]/10 blur-3xl" />
+              <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-[#FFC700]/15 blur-3xl" />
+              <div className="pointer-events-none absolute -left-20 -bottom-20 size-72 rounded-full bg-[#0284C7]/15 blur-3xl" />
 
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-8 space-y-4 text-left">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[var(--kmm-gold)]/15 text-[var(--kmm-fg)] border border-[var(--kmm-gold)]/30">
-                    <span className="size-2 rounded-full bg-[var(--kmm-gold)] animate-pulse" />
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-[#FFC700]/20 text-slate-900 dark:text-[#FFC700] border border-[#FFC700]/30 uppercase tracking-wider">
+                    <span className="size-2 rounded-full bg-[#FFC700] animate-pulse" />
                     <span>Official Ministry Waitlist &amp; Verification</span>
                   </div>
 
@@ -1782,16 +1806,16 @@ export default function KmmLandingPage() {
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
-                    <div className="flex items-center gap-2 text-[var(--kmm-muted)]">
-                      <span className="text-[var(--kmm-gold)] font-bold">✓</span>
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)] font-semibold">
+                      <span className="text-[#0284C7] font-bold">✓</span>
                       <span>IP Governance &amp; Deeds</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[var(--kmm-muted)]">
-                      <span className="text-[var(--kmm-gold)] font-bold">✓</span>
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)] font-semibold">
+                      <span className="text-[#0284C7] font-bold">✓</span>
                       <span>Asset Cataloguing</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[var(--kmm-muted)]">
-                      <span className="text-[var(--kmm-gold)] font-bold">✓</span>
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)] font-semibold">
+                      <span className="text-[#0284C7] font-bold">✓</span>
                       <span>Dedicated Portal Access</span>
                     </div>
                   </div>

@@ -670,25 +670,27 @@
 
 
 /* ==========================================================================
-   KMM Landing Page Core Variables & Classes (Zero-FOUC Critical CSS)
+   KMM Landing Page Core Variables & Classes (Welcoming Kids Ministry Palette)
    ========================================================================== */
 :root {
-  --kmm-bg: #FFF7E6;
+  --kmm-bg: #F0FAFD;
   --kmm-surface: #FFFFFF;
-  --kmm-band: #FCEBC4;
-  --kmm-fg: #10233F;
-  --kmm-muted: #46566E;
-  --kmm-line: rgba(16, 35, 63, 0.14);
-  --kmm-header: rgba(255, 247, 230, 0.94);
-  --kmm-blue: #1F6FD0;
-  --kmm-orange: #F26A1B;
-  --kmm-gold: #F2B233;
-  --kmm-navy: #10233F;
-  --kmm-cream: #FFF7E6;
-  --kmm-link: #1757A8;
-  --kmm-eyebrow: #B8420A;
-  --kmm-ribbon-a: #F2B233;
-  --kmm-ribbon-b: #1F6FD0;
+  --kmm-band: #E2F3F9;
+  --kmm-fg: #0D1F3C;
+  --kmm-muted: #4B6184;
+  --kmm-line: rgba(13, 31, 60, 0.10);
+  --kmm-header: rgba(240, 250, 253, 0.94);
+  --kmm-blue: #0284C7;
+  --kmm-pink: #FF3B6C;
+  --kmm-orange: #FF5A36;
+  --kmm-gold: #FFB800;
+  --kmm-yellow: #FFC700;
+  --kmm-navy: #0E1E38;
+  --kmm-cream: #FFF9ED;
+  --kmm-link: #0284C7;
+  --kmm-eyebrow: #FF3B6C;
+  --kmm-ribbon-a: #FFC700;
+  --kmm-ribbon-b: #0284C7;
   --kmm-display: var(--font-bricolage, "Bricolage Grotesque"), "Trebuchet MS", system-ui, sans-serif;
   --kmm-body: var(--font-figtree, "Figtree"), system-ui, -apple-system, sans-serif;
 }
@@ -696,15 +698,15 @@
 .dark,
 .dark :root,
 html.dark {
-  --kmm-bg: #0B1730;
-  --kmm-surface: #14294D;
-  --kmm-band: #102140;
-  --kmm-fg: #FFF3DA;
-  --kmm-muted: #B7C4DA;
-  --kmm-line: rgba(255, 243, 218, 0.16);
-  --kmm-header: rgba(11, 23, 48, 0.94);
-  --kmm-link: #8DBDFF;
-  --kmm-eyebrow: #FFB55E;
+  --kmm-bg: #091326;
+  --kmm-surface: #101E38;
+  --kmm-band: #0C182F;
+  --kmm-fg: #F0F6FD;
+  --kmm-muted: #9BB3D6;
+  --kmm-line: rgba(240, 246, 253, 0.12);
+  --kmm-header: rgba(9, 19, 38, 0.94);
+  --kmm-link: #38BDF8;
+  --kmm-eyebrow: #FFC700;
 }
 
 .kmm-site-root {
@@ -717,15 +719,15 @@ html.dark {
 }
 
 .dark .kmm-site-root {
-  --kmm-bg: #0B1730;
-  --kmm-surface: #14294D;
-  --kmm-band: #102140;
-  --kmm-fg: #FFF3DA;
-  --kmm-muted: #B7C4DA;
-  --kmm-line: rgba(255, 243, 218, 0.16);
-  --kmm-header: rgba(11, 23, 48, 0.94);
-  --kmm-link: #8DBDFF;
-  --kmm-eyebrow: #FFB55E;
+  --kmm-bg: #091326;
+  --kmm-surface: #101E38;
+  --kmm-band: #0C182F;
+  --kmm-fg: #F0F6FD;
+  --kmm-muted: #9BB3D6;
+  --kmm-line: rgba(240, 246, 253, 0.12);
+  --kmm-header: rgba(9, 19, 38, 0.94);
+  --kmm-link: #38BDF8;
+  --kmm-eyebrow: #FFC700;
 }
 
 .kmm-wrap {
@@ -775,29 +777,45 @@ html.dark {
   border-radius: 9999px;
   padding: 13px 26px;
   font-family: var(--kmm-body);
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.95rem;
   text-decoration: none;
   border: 2px solid transparent;
-  transition: transform 0.2s ease, filter 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
 .kmm-btn:hover {
   transform: translateY(-2px);
 }
+.kmm-btn:active {
+  transform: scale(0.98);
+}
 .kmm-btn-p {
-  background: var(--kmm-orange);
-  color: #10233F;
+  background: var(--kmm-gold);
+  color: #0D1F3C;
+  box-shadow: 0 6px 18px rgba(255, 184, 0, 0.35);
 }
 .kmm-btn-p:hover {
   filter: brightness(1.05);
+  box-shadow: 0 8px 22px rgba(255, 184, 0, 0.45);
 }
 .kmm-btn-s {
   background: var(--kmm-blue);
   color: #FFFFFF;
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
 }
 .kmm-btn-s:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
+  box-shadow: 0 8px 22px rgba(2, 132, 199, 0.45);
+}
+.kmm-btn-pink {
+  background: var(--kmm-pink);
+  color: #FFFFFF;
+  box-shadow: 0 6px 18px rgba(255, 59, 108, 0.35);
+}
+.kmm-btn-pink:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 8px 22px rgba(255, 59, 108, 0.45);
 }
 .kmm-btn-o {
   border-color: currentColor;
@@ -805,10 +823,10 @@ html.dark {
   background: transparent;
 }
 .kmm-btn-o:hover {
-  background: rgba(16, 35, 63, 0.05);
+  background: rgba(13, 31, 60, 0.06);
 }
 .dark .kmm-btn-o:hover {
-  background: rgba(255, 243, 218, 0.1);
+  background: rgba(240, 246, 253, 0.1);
 }
 .kmm-btn-disabled {
   background: transparent;
