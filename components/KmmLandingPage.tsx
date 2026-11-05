@@ -226,6 +226,13 @@ export default function KmmLandingPage() {
   const agenciesDropdownRef = React.useRef<HTMLLIElement>(null)
   const currentYear = new Date().getFullYear()
 
+  // Ensure landing page renders in light theme
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
+
   // Close agencies dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
