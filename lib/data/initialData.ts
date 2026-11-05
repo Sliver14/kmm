@@ -317,7 +317,7 @@ export const initialSubcategories: SubcategoryItem[] = [
 
   // Digital / Interactive Platform
   { id: 'sub-18', name: 'Mobile Applications', parentCategory: 'Digital / Interactive Platform', assetsCount: 2, status: 'Active', iconType: 'game', color: 'bg-[#06b6d4]' },
-  { id: 'sub-19', name: 'Web Portals & Apps', parentCategory: 'Digital / Interactive Platform', assetsCount: 1, status: 'Active', iconType: 'game', color: 'bg-[#06b6d4]' },
+  { id: 'sub-19', name: 'Web Application', parentCategory: 'Digital / Interactive Platform', assetsCount: 1, status: 'Active', iconType: 'game', color: 'bg-[#06b6d4]' },
   { id: 'sub-20', name: 'Interactive Kiddies Games', parentCategory: 'Digital / Interactive Platform', assetsCount: 1, status: 'Active', iconType: 'game', color: 'bg-[#06b6d4]' },
 
   // Outreach / Event Format
@@ -1522,10 +1522,10 @@ const rawAssetsData: AssetData[] = [
   {
     id: 'LT-DGT-002',
     name: 'Lovetoons TV Official Website',
-    type: 'Web Portal',
+    type: 'Web Application',
     category: 'Digital / Interactive Platform',
     categoryGroup: 'Digital / Interactive Platform',
-    subcategory: 'Web Portals & Apps',
+    subcategory: 'Web Application',
     agency: 'Digital Agency',
     unit: 'Digital Agency',
     creatorRole: 'Digital & Tech Admin',
@@ -1572,8 +1572,8 @@ const rawAssetsData: AssetData[] = [
     thumbType: 'logo',
     posterUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop&q=80',
     rightsHolder: 'Lovetoons Tech Ltd',
-    description: 'Responsive global web portal hosting digital broadcasts, schedule programming and online resource center.',
-    tags: ['Web Portal', 'Live TV', 'React'],
+    description: 'Responsive global web application hosting digital broadcasts, schedule programming and online resource center.',
+    tags: ['Web Application', 'Live TV', 'React'],
     fileSize: '150 MB',
     version: 'v3.1.0',
   },
@@ -2512,7 +2512,7 @@ export const initialActivityLogs: ActivityLog[] = [
   {
     id: 'act-2',
     title: 'Rights record registered: Lovetoons TV App',
-    subtitle: 'Software source code, privacy & OTT streaming rights logged',
+    subtitle: 'Software source code, privacy & web application rights logged',
     time: '2 hours ago',
     user: 'Emmanuel Vance',
     agency: 'Digital Agency',

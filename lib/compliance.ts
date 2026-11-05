@@ -342,7 +342,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
     cluster: 'Digital',
     clusterLabel: 'Digital Platforms, Apps & Interactive Games',
     inherentLiability: 'High',
-    description: 'Streaming portals, mobile games, reading apps, and web interactive tools.',
+    description: 'Web applications, mobile games, reading apps, and web interactive tools.',
     standardsReference: 'Kiddies Media Ministry Child Online Privacy Protection & Software Standard',
     gates: [
       {

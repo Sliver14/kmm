@@ -1989,7 +1989,7 @@ function Dashboard({
                   </div>
                 </div>
                 <div className="text-[9.5px] text-slate-400 dark:text-slate-400 mt-1.5 leading-tight truncate">
-                  Global streaming & OTT
+                  Global streaming & web application
                 </div>
               </div>
 
@@ -8509,7 +8509,7 @@ function SettingsPage() {
                 >
                   <option value="Worldwide Master Copyright">Worldwide Master Copyright (All Channels & Media)</option>
                   <option value="Territorial License (Africa & EMEA)">Territorial License (Africa & EMEA)</option>
-                  <option value="Digital / OTT Distribution Only">Digital / OTT Distribution Only</option>
+                  <option value="Digital / Web Application Distribution Only">Digital / Web Application Distribution Only</option>
                   <option value="Print & Merchandise Exclusive">Print & Merchandise Exclusive</option>
                 </select>
               </div>

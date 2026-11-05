@@ -233,7 +233,7 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
     categoryGroup = 'Digital / Interactive Platform'
     subcategory = entry.name.toLowerCase().includes('app')
       ? 'Mobile Applications'
-      : 'Web Portals & Streaming Platforms'
+      : 'Web Application'
     agency = 'Digital Agency'
     type = 'Digital Platform'
     thumbType = 'interactive'

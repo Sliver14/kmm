@@ -58,16 +58,16 @@ export function AssetArchiveHub({ asset, showToast }: AssetArchiveHubProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-          {/* Website / Web Portal (Only if present) */}
+          {/* Website / Web Application (Only if present) */}
           {archive.websiteUrl && isDigital && (
             <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 space-y-2 flex flex-col justify-between">
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Live Web Portal</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Live Web Application</span>
                   <Globe className="size-3.5 text-blue-600" />
                 </div>
                 <div className="font-bold text-slate-900 font-mono text-xs truncate">{archive.websiteUrl}</div>
-                <div className="text-[11px] text-slate-500">Public ministry distribution & streaming portal</div>
+                <div className="text-[11px] text-slate-500">Public ministry distribution & web application</div>
               </div>
               <div className="pt-2 flex items-center gap-2">
                 <a

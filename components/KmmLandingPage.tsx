@@ -910,7 +910,7 @@ export default function KmmLandingPage() {
                     Digital Agency
                   </h4>
                   <p className="text-xs text-[var(--kmm-muted)] leading-relaxed mb-4">
-                    Interactive games, educational mobile apps, AR/VR experiences, web portals, and kid-safe digital architectures.
+                    Interactive games, educational mobile apps, AR/VR experiences, web applications, and kid-safe digital architectures.
                   </p>
                 </div>
                 <Link
