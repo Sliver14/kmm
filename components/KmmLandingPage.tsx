@@ -623,10 +623,14 @@ export default function KmmLandingPage() {
               className="object-cover object-[80%_center] sm:object-[84%_center] lg:object-right"
               sizes="100vw"
             />
+            {/* High-legibility gradient scrim: soft white on left, crystal clear view of children on right */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 via-45% sm:via-white/65 sm:via-55% to-transparent lg:to-white/5" />
+            {/* Top navigation subtle highlight scrim */}
+            <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 via-white/30 to-transparent" />
+            {/* Bottom transition into About section */}
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white via-white/80 to-transparent" />
             {/* Subtle tactile micro-dots texture overlay */}
-            <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial opacity-20" />
-            {/* Gentle bottom transition into white About section */}
-            <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white to-transparent" />
+            <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial opacity-25" />
           </div>
 
           <div className="kmm-wrap relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center flex-1">
@@ -719,15 +723,15 @@ export default function KmmLandingPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-700 font-bold">
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 font-bold">
                     <span className="flex items-center gap-1.5">
-                      <span className="size-1.5 rounded-full bg-[#0284C7]" />
-                      Legal Clearance: Active
+                      <span className="size-1.5 rounded-full bg-sky-500" />
+                      Statutory Safeguarded
                     </span>
                     <span className="text-slate-300">•</span>
                     <span className="flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-emerald-500" />
-                      Copyright Status: Cleared
+                      Chain of Title Cleared
                     </span>
                   </div>
                 </div>
@@ -763,30 +767,25 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             WHO WE ARE SECTION (KMM & ITS ROLE)
             ========================================================================= */}
-        <section className="py-20 sm:py-24 scroll-mt-20 relative overflow-hidden bg-white" id="about">
+        <section className="py-20 scroll-mt-20 relative overflow-hidden bg-white" id="about">
           {/* Subtle structural grid texture */}
           <div className="absolute inset-0 kmm-pattern-grid kmm-mask-linear-y pointer-events-none opacity-50" aria-hidden="true" />
           <div className="absolute -top-24 right-10 size-80 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
           <div className="kmm-wrap relative z-10 space-y-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div>
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-500/10 text-amber-950 border border-amber-500/25 mb-4 shadow-xs">
-                  <span className="size-2 rounded-full bg-[#FFB800] animate-pulse" />
-                  <span className="uppercase tracking-wider">About Kiddies Media Ministry &amp; Its Role</span>
-                </div>
-                <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-slate-950 leading-tight">
-                  The framework that children&apos;s media works within
-                </h2>
+                <p className="eyebrow mb-3">About Kiddies Media Ministry &amp; Its Role</p>
+                <h2 className="text-3xl sm:text-4xl font-extrabold">The framework that children&apos;s media works within</h2>
               </div>
               <div className="space-y-6">
-                <p className="text-lg sm:text-xl text-slate-700 leading-relaxed font-medium">
+                <p className="lead">
                   Kiddies Media Ministry provides the governance, policy, and standards framework for children&apos;s content across Loveworld Kingdom.
                 </p>
-                <p className="text-base text-slate-600 leading-relaxed">
+                <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
                   The website provides basic information about Kiddies Media Ministry and its role to guide, coordinate, and set expectations for children&apos;s media initiatives. Our mission equips ministry departments, animation studios, and creative teams with official training materials, actionable compliance tools, and helpful supporting documents so they can create and share content with clarity, spiritual fidelity, and confidence.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="rounded-3xl p-6 sm:p-7 bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-md">
+                  <div className="rounded-[32px] p-6 sm:p-7 bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-lg">
                     <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
                       What Kiddies Media Ministry does
                     </b>
@@ -794,11 +793,11 @@ export default function KmmLandingPage() {
                       Guides, coordinates, and establishes the expectations, training materials, practical tools, and supporting documents children&apos;s media initiatives follow.
                     </span>
                   </div>
-                  <div className="rounded-3xl p-6 sm:p-7 bg-gradient-to-br from-[#FFC700] via-[#FFB800] to-[#F59E0B] text-slate-950 shadow-md">
+                  <div className="rounded-[32px] p-6 sm:p-7 bg-gradient-to-br from-[#FFC700] via-[#FFB800] to-[#F59E0B] text-slate-950 shadow-lg">
                     <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
                       What Kiddies Media Ministry is not
                     </b>
-                    <span className="text-sm leading-relaxed block text-slate-950/90 font-medium">
+                    <span className="text-sm leading-relaxed block text-[#10233F]/90 font-medium">
                       A standalone studio that simply produces entertainment content without institutional governance.
                     </span>
                   </div>
@@ -808,42 +807,42 @@ export default function KmmLandingPage() {
 
             {/* 4 Pillars of Kiddies Media Ministry's Role */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-4">
-              <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all space-y-3 group">
-                <div className="size-12 rounded-2xl bg-[#0284C7]/10 text-[#0284C7] flex items-center justify-center font-bold text-xl border border-[#0284C7]/20 group-hover:scale-105 transition-transform">
+              <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
+                <div className="size-11 rounded-2xl bg-[#0284C7]/15 text-[#0284C7] flex items-center justify-center font-bold text-lg">
                   ⚖
                 </div>
-                <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#0284C7] transition-colors">Policy &amp; Governance</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <h3 className="font-extrabold text-base">Policy & Governance</h3>
+                <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
                   Establishes statutory child safeguarding covenants, broadcast standards, and operational guidelines across all channels.
                 </p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all space-y-3 group">
-                <div className="size-12 rounded-2xl bg-amber-500/10 text-amber-700 flex items-center justify-center font-bold text-xl border border-amber-500/20 group-hover:scale-105 transition-transform">
+              <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
+                <div className="size-11 rounded-2xl bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] flex items-center justify-center font-bold text-lg">
                   📚
                 </div>
-                <h3 className="font-extrabold text-base text-slate-900 group-hover:text-amber-600 transition-colors">Training Materials</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <h3 className="font-extrabold text-base">Training Materials</h3>
+                <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
                   Delivers structured curriculum modules, masterclasses, and production playbooks for animators and creators.
                 </p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all space-y-3 group">
-                <div className="size-12 rounded-2xl bg-rose-500/10 text-[#FF3B6C] flex items-center justify-center font-bold text-xl border border-rose-500/20 group-hover:scale-105 transition-transform">
+              <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
+                <div className="size-11 rounded-2xl bg-rose-500/15 text-[#FF3B6C] flex items-center justify-center font-bold text-lg">
                   🛠
                 </div>
-                <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#FF3B6C] transition-colors">Practical Tools</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <h3 className="font-extrabold text-base">Practical Tools</h3>
+                <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
                   Provides interactive safeguarding audit checklists, age-rating calculators, and IP clearance verification tools.
                 </p>
               </div>
 
-              <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all space-y-3 group">
-                <div className="size-12 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-xl border border-purple-500/20 group-hover:scale-105 transition-transform">
+              <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
+                <div className="size-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
                   📋
                 </div>
-                <h3 className="font-extrabold text-base text-slate-900 group-hover:text-purple-600 transition-colors">Supporting Documents</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <h3 className="font-extrabold text-base">Supporting Documents</h3>
+                <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
                   Publishes legal covenants, minor contributor release deeds, and stewards children&apos;s intellectual property.
                 </p>
               </div>
@@ -854,158 +853,97 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             MANDATE SECTION (8 AREAS OF RESPONSIBILITY)
             ========================================================================= */}
-        <section className="py-20 sm:py-24 scroll-mt-20 bg-[#F0FAFD] border-y border-slate-200/60 transition-colors relative overflow-hidden" id="mandate">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors relative overflow-hidden" id="mandate">
           {/* Tactile dual-stipple texture overlay */}
           <div className="absolute inset-0 kmm-pattern-playful kmm-mask-linear-y pointer-events-none opacity-80" aria-hidden="true" />
           <div className="absolute -bottom-24 left-1/4 size-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
           <div className="kmm-wrap relative z-10">
             <div className="max-w-2xl space-y-3 mb-12">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-sky-500/10 text-sky-950 border border-sky-500/25 mb-2 shadow-xs">
-                <span className="size-2 rounded-full bg-[#0284C7] animate-pulse" />
-                <span className="uppercase tracking-wider">Our Mandate &amp; Directives</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-slate-950 leading-tight">
-                Eight areas of strategic responsibility
-              </h2>
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-                From policy to compliance, these are the core areas Kiddies Media Ministry covers on behalf of children&apos;s media across Loveworld Kingdom.
+              <p className="eyebrow">Our mandate</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold">Eight areas of responsibility</h2>
+              <p className="lead">
+                From policy to compliance, these are the areas Kiddies Media Ministry covers on behalf of children's media across the ministry.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {/* 1 */}
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="size-12 rounded-2xl bg-sky-50 text-[#0284C7] border border-sky-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <svg className="size-6 text-[#0284C7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 3v18M5 7h14M5 7l-3 7a4 4 0 0 0 6 0L5 7zm14 0l-3 7a4 4 0 0 0 6 0l-3-7z" />
-                      </svg>
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">01</span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-950 mb-2 group-hover:text-[#0284C7] transition-colors">Governance and Policy</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">Establish and maintain policies, governance frameworks, and operating guidelines for children&apos;s content.</p>
-                </div>
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3v18M5 7h14M5 7l-3 7a4 4 0 0 0 6 0L5 7zm14 0l-3 7a4 4 0 0 0 6 0l-3-7z" />
+                </svg>
+                <h3 className="text-xl font-bold mb-2">Governance and Policy</h3>
+                <p className="text-sm leading-relaxed text-white/90">Establish and maintain policies, governance frameworks, and operating guidelines for children's content.</p>
               </article>
 
               {/* 2 */}
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="size-12 rounded-2xl bg-rose-50 text-[#FF3B6C] border border-rose-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <svg className="size-6 text-[#FF3B6C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 12l2 2 4-4M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z" />
-                      </svg>
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">02</span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-950 mb-2 group-hover:text-[#FF3B6C] transition-colors">Content Standards</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">Define and communicate expectations for content quality, suitability, consistency, and alignment with ministry values.</p>
-                </div>
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#FF3B6C] to-[#E11D48] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 12l2 2 4-4M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z" />
+                </svg>
+                <h3 className="text-xl font-bold mb-2">Content Standards</h3>
+                <p className="text-sm leading-relaxed text-white/90">Define and communicate expectations for content quality, suitability, consistency, and alignment with ministry values.</p>
               </article>
 
               {/* 3 */}
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="size-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <svg className="size-6 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="7" r="3" />
-                        <path d="M5 21v-3a7 7 0 0 1 14 0v3M12 12v3" />
-                      </svg>
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">03</span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-950 mb-2 group-hover:text-amber-600 transition-colors">Child Protection &amp; Safety</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">Promote age-appropriate content, safeguarding principles, responsible representation of children, privacy, and ethical media practices.</p>
-                </div>
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#FFC700] via-[#FFB800] to-[#F59E0B] text-slate-950 shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="7" r="3" />
+                  <path d="M5 21v-3a7 7 0 0 1 14 0v3M12 12v3" />
+                </svg>
+                <h3 className="text-xl font-bold mb-2">Child Protection & Safety</h3>
+                <p className="text-sm leading-relaxed text-slate-900/90 font-medium">Promote age-appropriate content, safeguarding principles, responsible representation of children, privacy, and ethical media practices.</p>
               </article>
 
               {/* 4 */}
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="size-12 rounded-2xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <svg className="size-6 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="M14.5 9.5a3.5 3.5 0 1 0 0 5" />
-                      </svg>
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">04</span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-950 mb-2 group-hover:text-slate-900 transition-colors">IP &amp; Copyright</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">Provide guidance on content ownership, copyright compliance, permissions, licensing, and appropriate use of creative assets.</p>
-                </div>
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#0E1E38] to-[#162B4E] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 border border-white/10">
+                <svg className="size-9 mb-10 text-[#FFC700]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M14.5 9.5a3.5 3.5 0 1 0 0 5" />
+                </svg>
+                <h3 className="text-xl font-bold mb-2">IP & Copyright</h3>
+                <p className="text-sm leading-relaxed text-white/90">Provide guidance on content ownership, copyright compliance, permissions, licensing, and appropriate use of creative assets.</p>
               </article>
 
               {/* 5 */}
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="size-12 rounded-2xl bg-purple-50 text-purple-700 border border-purple-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <svg className="size-6 text-purple-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 3v2M15 3v2M9 19v2M15 19v2M3 9h2M3 15h2M19 9h2M19 15h2M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM10 10h4v4h-4z" />
-                      </svg>
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">05</span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-950 mb-2 group-hover:text-purple-600 transition-colors">AI &amp; Digital Media</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">Guide the responsible use of AI-generated content, digital tools, emerging technologies, and related creative workflows.</p>
-                </div>
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#FF4D7E] to-[#F43F5E] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 3v2M15 3v2M9 19v2M15 19v2M3 9h2M3 15h2M19 9h2M19 15h2M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM10 10h4v4h-4z" />
+                </svg>
+                <h3 className="text-xl font-bold mb-2">AI & Digital Media</h3>
+                <p className="text-sm leading-relaxed text-white/90">Guide the responsible use of AI-generated content, digital tools, emerging technologies, and related creative workflows.</p>
               </article>
 
               {/* 6 */}
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="size-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <svg className="size-6 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5zM4 19a2 2 0 0 1 2-2h13" />
-                      </svg>
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">06</span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-950 mb-2 group-hover:text-amber-600 transition-colors">Training &amp; Tools</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">Institutional training materials, interactive compliance tools, and qualification for children&apos;s media producers, safeguarding auditors, and broadcast reviewers.</p>
-                </div>
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#FFBA00] to-[#E09900] text-slate-950 shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5zM4 19a2 2 0 0 1 2-2h13" />
+                </svg>
+                <h3 className="text-xl font-bold mb-2">Training & Tools</h3>
+                <p className="text-sm leading-relaxed text-slate-900/90 font-medium">Institutional training materials, interactive compliance tools, and qualification for children&apos;s media producers, safeguarding auditors, and broadcast reviewers.</p>
               </article>
 
               {/* 7 */}
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="size-12 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <svg className="size-6 text-indigo-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="9" cy="8" r="3" />
-                        <path d="M3 20c0-3 2.7-5 6-5s6 2 6 5M17 11a2.5 2.5 0 1 0 0-5M21 19c0-2.2-1.6-3.7-4-4.2" />
-                      </svg>
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">07</span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-950 mb-2 group-hover:text-indigo-600 transition-colors">Collaboration</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">Facilitate structured collaboration, accountability, and alignment among relevant children&apos;s media teams and initiatives.</p>
-                </div>
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#0E1E38] to-[#1E293B] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 border border-white/10">
+                <svg className="size-9 mb-10 text-[#FFC700]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="8" r="3" />
+                  <path d="M3 20c0-3 2.7-5 6-5s6 2 6 5M17 11a2.5 2.5 0 1 0 0-5M21 19c0-2.2-1.6-3.7-4-4.2" />
+                </svg>
+                <h3 className="text-xl font-bold mb-2">Collaboration</h3>
+                <p className="text-sm leading-relaxed text-white/90">Facilitate structured collaboration, accountability, and alignment among relevant children's media teams and initiatives.</p>
               </article>
 
               {/* 8 */}
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="size-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <svg className="size-6 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5M9 12l2 2 4-4" />
-                      </svg>
-                    </div>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">08</span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-slate-950 mb-2 group-hover:text-emerald-700 transition-colors">Monitoring &amp; Review</h3>
-                  <p className="text-sm leading-relaxed text-slate-600">Support the implementation, review, and continuous improvement of established policies and standards.</p>
-                </div>
+              <article className="p-7 rounded-[32px] rounded-br-[72px] bg-gradient-to-br from-[#0284C7] to-[#0066CC] text-white shadow-lg hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
+                <svg className="size-9 mb-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5M9 12l2 2 4-4" />
+                </svg>
+                <h3 className="text-xl font-bold mb-2">Monitoring & Review</h3>
+                <p className="text-sm leading-relaxed text-white/90">Support the implementation, review, and continuous improvement of established policies and standards.</p>
               </article>
             </div>
 
-            <p className="text-xs text-slate-500 mt-8 max-w-3xl">
+            <p className="text-xs text-[var(--kmm-muted)] mt-8 max-w-3xl">
               These are Kiddies Media Ministry&apos;s proposed public-facing areas of responsibility, subject to confirmation against officially approved policies and organizational mandates.
             </p>
           </div>
@@ -1462,7 +1400,7 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             AGENCIES & LOVETOONS ECOSYSTEM SECTION
             ========================================================================= */}
-        <section className="py-20 sm:py-24 scroll-mt-20 bg-[#F0FAFD] border-y border-slate-200/60 transition-colors relative overflow-hidden" id="agencies">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors relative overflow-hidden" id="agencies">
           {/* Subtle Dual Stipple Pattern Overlay */}
           <div className="absolute inset-0 kmm-pattern-cross kmm-mask-linear-y pointer-events-none opacity-60" aria-hidden="true" />
           <div className="absolute -top-20 right-1/4 size-96 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
@@ -1471,14 +1409,9 @@ export default function KmmLandingPage() {
 
           <div className="kmm-wrap relative z-10">
             <div className="max-w-2xl space-y-3 mb-12">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-500/10 text-amber-950 border border-amber-500/25 mb-2 shadow-xs">
-                <span className="size-2 rounded-full bg-[#FFB800] animate-pulse" />
-                <span className="uppercase tracking-wider">Operational Directorate &amp; Agencies</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-slate-950 leading-tight">
-                The 5 specialized agencies powering children&apos;s media
-              </h2>
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+              <p className="eyebrow">Operational Directorate & Agencies</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold">The specialized agencies powering children's media</h2>
+              <p className="text-sm leading-relaxed text-[var(--kmm-muted)]">
                 Kiddies Media Ministry operates across five dedicated specialized agencies governing creative animation, literature, interactive technology, institutional accreditation, and foundational schooling.
               </p>
             </div>
@@ -1487,7 +1420,7 @@ export default function KmmLandingPage() {
             <div id="agencies-lovetoons" className="relative -top-24 pointer-events-none" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
               {/* Mobile App */}
-              <article className="rounded-3xl p-8 sm:p-10 bg-gradient-to-br from-[#0284C7] via-[#0369A1] to-[#0052A3] text-white shadow-xl flex flex-col justify-between hover:shadow-2xl transition-all hover:-translate-y-1">
+              <article className="rounded-[40px] rounded-br-[120px] p-8 sm:p-10 bg-gradient-to-br from-[#0284C7] via-[#0369A1] to-[#0052A3] text-white shadow-xl flex flex-col justify-between hover:shadow-2xl transition-shadow">
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center">
@@ -1502,7 +1435,7 @@ export default function KmmLandingPage() {
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">LoveToons Mobile App</h3>
                   <p className="text-sm leading-relaxed text-white/90 mb-8 max-w-md">
-                    Discover and download inspirational, character-building children&apos;s animated media, Bible stories, and interactive adventures on your mobile device.
+                    Discover and download inspirational, character-building children's animated media, Bible stories, and interactive adventures on your mobile device.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2.5">
@@ -1546,7 +1479,7 @@ export default function KmmLandingPage() {
               </article>
 
               {/* Website */}
-              <article className="rounded-3xl p-8 sm:p-10 bg-gradient-to-br from-[#FFC700] via-[#FFB800] to-[#F59E0B] text-slate-950 shadow-xl flex flex-col justify-between hover:shadow-2xl transition-all hover:-translate-y-1">
+              <article className="rounded-[40px] rounded-bl-[120px] p-8 sm:p-10 bg-gradient-to-br from-[#FFC700] via-[#FFB800] to-[#F59E0B] text-slate-950 shadow-xl flex flex-col justify-between hover:shadow-2xl transition-shadow">
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div className="size-14 rounded-2xl bg-black/15 flex items-center justify-center">
@@ -1560,7 +1493,7 @@ export default function KmmLandingPage() {
                     </span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">LoveToons Website</h3>
-                  <p className="text-sm leading-relaxed text-slate-950/90 font-medium mb-8 max-w-md">
+                  <p className="text-sm leading-relaxed text-slate-900/90 font-medium mb-8 max-w-md">
                     Explore LoveToons broadcast series, animated episodes, published comics, and interactive learning media.
                   </p>
                 </div>
@@ -1583,67 +1516,67 @@ export default function KmmLandingPage() {
 
             {/* Other Specialized Agencies Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
-              <div id="agencies-publishing" className="scroll-mt-24 rounded-3xl p-7 bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between group">
+              <div id="agencies-publishing" className="scroll-mt-24 rounded-[28px] p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-rose-50 text-[#FF3B6C] border border-rose-200/80">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-rose-500/15 text-[#FF3B6C] border border-rose-500/25">
                       Publishing
                     </span>
                   </div>
-                  <h4 className="text-lg font-bold mb-1.5 text-slate-950 group-hover:text-[#FF3B6C] transition-colors" style={{ fontFamily: 'var(--kmm-display)' }}>
+                  <h4 className="text-lg font-bold mb-1.5" style={{ fontFamily: 'var(--kmm-display)' }}>
                     Publishing Agency
                   </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  <p className="text-xs text-[var(--kmm-muted)] leading-relaxed mb-4">
                     Comics, devotional books, storybooks, illustrated print, audio books, and foundational curriculum for children.
                   </p>
                 </div>
                 <Link
                   href="/ip-portal"
-                  className="text-xs font-bold text-[#0284C7] hover:underline inline-flex items-center gap-1"
+                  className="text-xs font-bold text-[var(--kmm-link)] hover:underline inline-flex items-center gap-1"
                 >
                   View Publishing Catalog &rarr;
                 </Link>
               </div>
 
-              <div id="agencies-digital" className="scroll-mt-24 rounded-3xl p-7 bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between group">
+              <div id="agencies-digital" className="scroll-mt-24 rounded-[28px] p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-sky-50 text-[#0284C7] border border-sky-200/80">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-[#0284C7]/15 text-[#0284C7] border border-[#0284C7]/25">
                       Technology
                     </span>
                   </div>
-                  <h4 className="text-lg font-bold mb-1.5 text-slate-950 group-hover:text-[#0284C7] transition-colors" style={{ fontFamily: 'var(--kmm-display)' }}>
+                  <h4 className="text-lg font-bold mb-1.5" style={{ fontFamily: 'var(--kmm-display)' }}>
                     Digital Agency
                   </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  <p className="text-xs text-[var(--kmm-muted)] leading-relaxed mb-4">
                     Interactive games, educational mobile apps, AR/VR experiences, web applications, and kid-safe digital architectures.
                   </p>
                 </div>
                 <Link
                   href="/ip-portal"
-                  className="text-xs font-bold text-[#0284C7] hover:underline inline-flex items-center gap-1"
+                  className="text-xs font-bold text-[var(--kmm-link)] hover:underline inline-flex items-center gap-1"
                 >
                   Explore Digital Assets &rarr;
                 </Link>
               </div>
 
-              <div id="agencies-educational" className="scroll-mt-24 rounded-3xl p-7 bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between sm:col-span-2 lg:col-span-1 group">
+              <div id="agencies-educational" className="scroll-mt-24 rounded-[28px] p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between sm:col-span-2 lg:col-span-1">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] border border-amber-500/25">
                       Education
                     </span>
                   </div>
-                  <h4 className="text-lg font-bold mb-1.5 text-slate-950 group-hover:text-amber-600 transition-colors" style={{ fontFamily: 'var(--kmm-display)' }}>
+                  <h4 className="text-lg font-bold mb-1.5" style={{ fontFamily: 'var(--kmm-display)' }}>
                     Educational Agency
                   </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  <p className="text-xs text-[var(--kmm-muted)] leading-relaxed mb-4">
                     School outreach packages, Sunday school learning aids, teacher training resources, and moral education frameworks.
                   </p>
                 </div>
                 <Link
                   href="/auth"
-                  className="text-xs font-bold text-[#0284C7] hover:underline inline-flex items-center gap-1"
+                  className="text-xs font-bold text-[var(--kmm-link)] hover:underline inline-flex items-center gap-1"
                 >
                   Access Educational Tools &rarr;
                 </Link>
@@ -1659,15 +1592,15 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             TRAINING SECTION (MATERIALS, TOOLS & SUPPORTING DOCUMENTS)
             ========================================================================= */}
-        <section className="py-20 sm:py-24 scroll-mt-20 relative overflow-hidden bg-white" id="training">
+        <section className="py-20 scroll-mt-20 relative overflow-hidden bg-white" id="training">
           {/* Subtle Dot Mesh Pattern Overlay */}
           <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial pointer-events-none opacity-50" aria-hidden="true" />
           <div className="absolute -bottom-20 right-10 size-80 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
           <div className="kmm-wrap relative z-10 space-y-12">
             {/* Header Box */}
-            <div className="rounded-3xl sm:rounded-[36px] p-8 sm:p-12 bg-gradient-to-br from-[#0E1E38] via-[#142646] to-[#0E1E38] text-white shadow-2xl relative overflow-hidden border border-white/10">
+            <div className="rounded-[40px] p-8 sm:p-12 bg-gradient-to-br from-[#0E1E38] via-[#142646] to-[#0E1E38] text-white shadow-2xl relative overflow-hidden border border-white/10">
               <div className="max-w-3xl space-y-4 relative z-10">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#FFC700] text-slate-950 shadow-xs">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#FFC700] text-slate-950">
                   <span>Kiddies Media Ministry Institutional Training &amp; Resources</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
@@ -1678,13 +1611,13 @@ export default function KmmLandingPage() {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-4">
-                  <Link href="/training-portal" className="kmm-btn kmm-btn-p font-black shadow-md">
+                  <Link href="/training-portal" className="kmm-btn kmm-btn-p">
                     Launch Training Portal &rarr;
                   </Link>
-                  <Link href="/training-portal?tab=tools" className="kmm-btn kmm-btn-s font-black shadow-md">
+                  <Link href="/training-portal?tab=tools" className="kmm-btn kmm-btn-s">
                     Practical Tools
                   </Link>
-                  <Link href="/training-portal?tab=documents" className="kmm-btn kmm-btn-o !text-white border-white/40 hover:bg-white/10 font-bold">
+                  <Link href="/training-portal?tab=documents" className="kmm-btn kmm-btn-o !text-white border-white/40 hover:bg-white/10">
                     Supporting Documents
                   </Link>
                   <Link href="/auth" className="px-4 py-2.5 rounded-full text-xs font-bold text-white/80 hover:text-white hover:underline transition-colors ml-auto sm:ml-0">
@@ -1697,32 +1630,32 @@ export default function KmmLandingPage() {
             {/* 3 Main Pillars Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Card 1: Training Materials */}
-              <div className="p-7 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group">
+              <div className="p-8 rounded-[32px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="size-12 rounded-2xl bg-[#0284C7]/15 text-[#0284C7] flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">
+                  <div className="size-12 rounded-2xl bg-[#0284C7]/15 text-[#0284C7] flex items-center justify-center font-bold text-xl">
                     📚
                   </div>
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#0284C7] block mb-1">
-                      Curriculum &amp; Modules
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#0284C7] block mb-1">
+                      Curriculum & Modules
                     </span>
-                    <h3 className="text-xl font-bold text-slate-950 group-hover:text-[#0284C7] transition-colors">Training Materials</h3>
+                    <h3 className="text-xl font-bold">Training Materials</h3>
                   </div>
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    Comprehensive learning modules covering Child Safeguarding in Media, Broadcast &amp; Visual Excellence, Scriptural Fidelity, and Intellectual Property Clearance.
+                  <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
+                    Comprehensive learning modules covering Child Safeguarding in Media, Broadcast & Visual Excellence, Scriptural Fidelity, and Intellectual Property Clearance.
                   </p>
-                  <ul className="text-xs text-slate-600 space-y-2 pt-2 border-t border-slate-100">
+                  <ul className="text-xs text-[var(--kmm-muted)] space-y-2 pt-2 border-t border-[var(--kmm-line)]">
                     <li className="flex items-center gap-2">
                       <span className="text-[#0284C7] font-bold">✓</span>
-                      <span>8 Core masterclasses &amp; curriculum outlines</span>
+                      <span>8 Core masterclasses & curriculum outlines</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-[#0284C7] font-bold">✓</span>
-                      <span>Biblical anchors &amp; statutory citations</span>
+                      <span>Biblical anchors & statutory citations</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-[#0284C7] font-bold">✓</span>
-                      <span>Lesson takeaways &amp; production checkpoints</span>
+                      <span>Lesson takeaways & production checkpoints</span>
                     </li>
                   </ul>
                 </div>
@@ -1730,7 +1663,7 @@ export default function KmmLandingPage() {
                 <div className="pt-6">
                   <Link
                     href="/training-portal?tab=materials"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0284C7] hover:underline"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
                   >
                     <span>Explore Training Materials</span>
                     <span>&rarr;</span>
@@ -1739,32 +1672,32 @@ export default function KmmLandingPage() {
               </div>
 
               {/* Card 2: Practical Tools */}
-              <div className="p-7 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group">
+              <div className="p-8 rounded-[32px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="size-12 rounded-2xl bg-[#FFB800]/25 text-amber-700 flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">
+                  <div className="size-12 rounded-2xl bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] flex items-center justify-center font-bold text-xl">
                     🛠
                   </div>
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-[#FFB800] block mb-1">
                       Interactive Utilities
                     </span>
-                    <h3 className="text-xl font-bold text-slate-950 group-hover:text-amber-600 transition-colors">Practical Tools</h3>
+                    <h3 className="text-xl font-bold">Practical Tools</h3>
                   </div>
-                  <p className="text-sm text-slate-600 leading-relaxed">
+                  <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
                     Interactive utilities designed for everyday production verification, safeguarding audits, and content age-rating assessments.
                   </p>
-                  <ul className="text-xs text-slate-600 space-y-2 pt-2 border-t border-slate-100">
+                  <ul className="text-xs text-[var(--kmm-muted)] space-y-2 pt-2 border-t border-[var(--kmm-line)]">
                     <li className="flex items-center gap-2">
                       <span className="text-amber-500 font-bold">✓</span>
                       <span>Child Safeguarding Audit Tool with live score</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-amber-500 font-bold">✓</span>
-                      <span>Age-Rating &amp; Sensitivity Advisory Calculator</span>
+                      <span>Age-Rating & Sensitivity Advisory Calculator</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-amber-500 font-bold">✓</span>
-                      <span>5-Point IP Clearance &amp; Licensing Verifier</span>
+                      <span>5-Point IP Clearance & Licensing Verifier</span>
                     </li>
                   </ul>
                 </div>
@@ -1772,7 +1705,7 @@ export default function KmmLandingPage() {
                 <div className="pt-6">
                   <Link
                     href="/training-portal?tab=tools"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0284C7] hover:underline"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
                   >
                     <span>Launch Practical Tools</span>
                     <span>&rarr;</span>
@@ -1781,32 +1714,32 @@ export default function KmmLandingPage() {
               </div>
 
               {/* Card 3: Supporting Documents */}
-              <div className="p-7 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group">
+              <div className="p-8 rounded-[32px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="size-12 rounded-2xl bg-rose-500/15 text-[#FF3B6C] flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">
+                  <div className="size-12 rounded-2xl bg-rose-500/15 text-[#FF3B6C] flex items-center justify-center font-bold text-xl">
                     📋
                   </div>
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#FF3B6C] block mb-1">
-                      Charters &amp; Templates
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#FF3B6C] block mb-1">
+                      Charters & Templates
                     </span>
-                    <h3 className="text-xl font-bold text-slate-950 group-hover:text-[#FF3B6C] transition-colors">Helpful Supporting Documents</h3>
+                    <h3 className="text-xl font-bold">Helpful Supporting Documents</h3>
                   </div>
-                  <p className="text-sm text-slate-600 leading-relaxed">
+                  <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
                     Official gazetted charters, policy covenants, talent release deeds, and compliance templates ready for immediate reading and download.
                   </p>
-                  <ul className="text-xs text-slate-600 space-y-2 pt-2 border-t border-slate-100">
+                  <ul className="text-xs text-[var(--kmm-muted)] space-y-2 pt-2 border-t border-[var(--kmm-line)]">
                     <li className="flex items-center gap-2">
                       <span className="text-[#FF3B6C] font-bold">✓</span>
                       <span>Official Child Safeguarding Policy Manual</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-[#FF3B6C] font-bold">✓</span>
-                      <span>Minor Talent &amp; Voice Contributor Release Deeds</span>
+                      <span>Minor Talent & Voice Contributor Release Deeds</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="text-[#FF3B6C] font-bold">✓</span>
-                      <span>COPPA Digital Safety &amp; Broadcast Standards</span>
+                      <span>COPPA Digital Safety & Broadcast Standards</span>
                     </li>
                   </ul>
                 </div>
@@ -1814,7 +1747,7 @@ export default function KmmLandingPage() {
                 <div className="pt-6">
                   <Link
                     href="/training-portal?tab=documents"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0284C7] hover:underline"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
                   >
                     <span>View Supporting Documents</span>
                     <span>&rarr;</span>
@@ -1828,59 +1761,51 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             LATEST UPDATES SECTION
             ========================================================================= */}
-        <section className="py-20 sm:py-24 scroll-mt-20 bg-[#F0FAFD] border-y border-slate-200/60 transition-colors relative overflow-hidden" id="updates">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors relative overflow-hidden" id="updates">
           {/* Tactile Playful Multi-Tone Pattern */}
           <div className="absolute inset-0 kmm-pattern-playful kmm-mask-linear-y pointer-events-none opacity-60" aria-hidden="true" />
           <div className="kmm-wrap relative z-10">
             <div className="max-w-2xl space-y-3 mb-12">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-rose-500/10 text-rose-950 border border-rose-500/25 mb-2 shadow-xs">
-                <span className="size-2 rounded-full bg-[#FF3B6C] animate-pulse" />
-                <span className="uppercase tracking-wider">Latest Policy Announcements</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-slate-950 leading-tight">
-                Policy updates, gazettes and new guidelines
-              </h2>
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-                Approved policy revisions, institutional gazettes, and quarterly board seminars from the Kiddies Media Ministry Secretariat.
-              </p>
+              <p className="eyebrow">Latest updates</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold">Policy updates, announcements and new guidelines</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all space-y-3">
+              <article className="p-7 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <span className="px-3 py-1 rounded-full font-black text-[11px] bg-[#FFC700] text-slate-950 uppercase tracking-wider">
                     Policy Updates
                   </span>
-                  <span className="text-xs text-slate-500 font-semibold">Institutional circular</span>
+                  <span className="text-xs text-[var(--kmm-muted)] font-semibold">Institutional circular</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-950">How policy updates will be announced</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <h3 className="text-lg font-bold">How policy updates will be announced</h3>
+                <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
                   Approved policy updates and revisions will appear here with a date, a category, and direct links to gazetted documentation.
                 </p>
               </article>
 
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all space-y-3">
+              <article className="p-7 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <span className="px-3 py-1 rounded-full font-black text-[11px] bg-[#FFC700] text-slate-950 uppercase tracking-wider">
                     Training
                   </span>
-                  <span className="text-xs text-slate-500 font-semibold">Academy session</span>
+                  <span className="text-xs text-[var(--kmm-muted)] font-semibold">Academy session</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-950">Training announcements</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <h3 className="text-lg font-bold">Training announcements</h3>
+                <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
                   Public training cohorts and quarterly board seminars will be published here. Video modules and transcripts reside inside the Training Portal.
                 </p>
               </article>
 
-              <article className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all space-y-3">
+              <article className="p-7 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <span className="px-3 py-1 rounded-full font-black text-[11px] bg-[#FFC700] text-slate-950 uppercase tracking-wider">
                     Guidelines
                   </span>
-                  <span className="text-xs text-slate-500 font-semibold">Pre-release standard</span>
+                  <span className="text-xs text-[var(--kmm-muted)] font-semibold">Pre-release standard</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-950">New guidelines and resources</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <h3 className="text-lg font-bold">New guidelines and resources</h3>
+                <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
                   When new guidelines on AI generation, child privacy, or character licensing are approved, they will be introduced here.
                 </p>
               </article>
@@ -1891,56 +1816,53 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             MINISTRY & DEPARTMENT ONBOARDING WAITLIST SECTION
             ========================================================================= */}
-        <section className="py-20 sm:py-24 scroll-mt-20 bg-white transition-colors relative overflow-hidden" id="onboarding">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors relative overflow-hidden" id="onboarding">
           {/* Subtle Geometric Texture Overlay */}
           <div className="absolute inset-0 kmm-pattern-grid kmm-mask-radial pointer-events-none opacity-60" aria-hidden="true" />
           <div className="absolute top-1/2 left-10 size-96 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 right-10 size-96 rounded-full bg-sky-400/15 blur-3xl pointer-events-none" />
           <div className="kmm-wrap relative z-10 space-y-10">
             <div className="max-w-3xl space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-500/10 text-amber-950 border border-amber-500/25 mb-2 shadow-xs">
-                <span className="size-2 rounded-full bg-[#FFB800] animate-pulse" />
-                <span className="uppercase tracking-wider">Institutional Access &amp; Waitlist</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-slate-950 leading-tight">
+              <p className="eyebrow">Institutional Access & Waitlist</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Onboard your Ministry or Department
               </h2>
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-                Whether you represent a Church Zone, Children&apos;s Ministry department, or media production unit, join the Kiddies Media Ministry ecosystem and get onboarded to the IP Portal. The portal is an important resource for documenting and stewarding children&apos;s media content and related intellectual property.
+              <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
+                Whether you represent a Church Zone, Children's Ministry department, or media production unit, join the Kiddies Media Ministry ecosystem and get onboarded to the IP Portal. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
               </p>
             </div>
 
             {/* CTA Showcase Card */}
-            <div className="p-8 sm:p-12 rounded-3xl sm:rounded-[36px] bg-slate-50/80 border border-slate-200/90 shadow-xl relative overflow-hidden">
+            <div className="p-8 sm:p-12 rounded-[36px] sm:rounded-[44px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xl relative overflow-hidden">
               {/* Decorative background glows */}
               <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-[#FFC700]/15 blur-3xl" />
               <div className="pointer-events-none absolute -left-20 -bottom-20 size-72 rounded-full bg-[#0284C7]/15 blur-3xl" />
 
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-8 space-y-4 text-left">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-[#FFC700]/20 text-slate-900 border border-[#FFC700]/30 uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-[#FFC700]/20 text-slate-900 dark:text-[#FFC700] border border-[#FFC700]/30 uppercase tracking-wider">
                     <span className="size-2 rounded-full bg-[#FFC700] animate-pulse" />
                     <span>Official Ministry Waitlist &amp; Verification</span>
                   </div>
 
-                  <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--kmm-fg)]">
                     Ready to Document and Steward Your Ministry&apos;s Media?
                   </h3>
 
-                  <p className="text-sm text-slate-600 leading-relaxed max-w-2xl">
+                  <p className="text-sm text-[var(--kmm-muted)] leading-relaxed max-w-2xl">
                     Submit your ministry unit’s expression of interest to receive dedicated access credentials for the Kiddies Media Ministry IP Portal. Our secretariat verifies governance mandates, chain-of-title records, and child safety compliance.
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
-                    <div className="flex items-center gap-2 text-slate-700 font-semibold">
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)] font-semibold">
                       <span className="text-[#0284C7] font-bold">✓</span>
                       <span>IP Governance &amp; Deeds</span>
                     </div>
-                    <div className="flex items-center gap-2 text-slate-700 font-semibold">
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)] font-semibold">
                       <span className="text-[#0284C7] font-bold">✓</span>
                       <span>Asset Cataloguing</span>
                     </div>
-                    <div className="flex items-center gap-2 text-slate-700 font-semibold">
+                    <div className="flex items-center gap-2 text-[var(--kmm-muted)] font-semibold">
                       <span className="text-[#0284C7] font-bold">✓</span>
                       <span>Dedicated Portal Access</span>
                     </div>
@@ -1956,11 +1878,11 @@ export default function KmmLandingPage() {
                   </Link>
                   <Link
                     href="/training-portal"
-                    className="kmm-btn kmm-btn-o text-center font-bold bg-white"
+                    className="kmm-btn kmm-btn-o text-center font-bold"
                   >
                     <span>View Training &amp; Guidelines</span>
                   </Link>
-                  <p className="text-[11px] text-slate-500 text-center">
+                  <p className="text-[11px] text-[var(--kmm-muted)] text-center">
                     Simple 2-minute registration • Verified by Secretariat
                   </p>
                 </div>
@@ -1972,21 +1894,13 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             CONTACT / ENQUIRIES SECTION
             ========================================================================= */}
-        <section className="py-20 sm:py-24 scroll-mt-20 bg-[#F0FAFD] border-t border-slate-200/60 relative overflow-hidden" id="contact">
+        <section className="py-20 scroll-mt-20 relative overflow-hidden bg-white" id="contact">
           {/* Subtle Dot Matrix Texture */}
           <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial pointer-events-none opacity-45" aria-hidden="true" />
           <div className="kmm-wrap relative z-10 space-y-8">
             <div className="max-w-2xl space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-sky-500/10 text-sky-950 border border-sky-500/25 mb-2 shadow-xs">
-                <span className="size-2 rounded-full bg-[#0284C7] animate-pulse" />
-                <span className="uppercase tracking-wider">Institutional Enquiries &amp; Engagement</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-slate-950 leading-tight">
-                Connect with Kiddies Media Ministry
-              </h2>
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-                Official secretariat channels for doctrinal vetting, safeguarding audits, copyright clearances, and institutional partnerships across Loveworld Kingdom.
-              </p>
+              <p className="eyebrow">Contact</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold">Institutional enquiries</h2>
             </div>
 
             <div className="flex flex-wrap gap-2.5">
@@ -2000,25 +1914,25 @@ export default function KmmLandingPage() {
               ].map((item, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center px-4 py-2 rounded-full font-bold text-xs bg-white text-slate-800 border border-slate-200/90 shadow-xs hover:border-[#0284C7] hover:text-[#0284C7] transition-all cursor-default"
+                  className="px-4 py-2 rounded-full font-semibold text-xs border-2 border-[var(--kmm-blue)] text-[var(--kmm-fg)]"
                 >
                   {item}
                 </span>
               ))}
             </div>
 
-            <dl className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4 m-0">
-              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-                <dt className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Email</dt>
-                <dd className="m-0 font-bold text-base text-slate-950">governance@kiddiesmediaministry.org</dd>
+            <dl className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 m-0">
+              <div className="p-6 rounded-2xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)]">
+                <dt className="text-xs font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">Email</dt>
+                <dd className="m-0 font-bold text-base text-[var(--kmm-fg)]">governance@kiddiesmediaministry.org</dd>
               </div>
-              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-                <dt className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Directorate</dt>
-                <dd className="m-0 font-bold text-base text-slate-950">Kiddies Media Ministry Legal &amp; Broadcast Directorate</dd>
+              <div className="p-6 rounded-2xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)]">
+                <dt className="text-xs font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">Directorate</dt>
+                <dd className="m-0 font-bold text-base text-[var(--kmm-fg)]">Kiddies Media Ministry Legal &amp; Broadcast Directorate</dd>
               </div>
-              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-                <dt className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Network Hub</dt>
-                <dd className="m-0 font-bold text-base text-slate-950">Loveworld Nation Headquarters</dd>
+              <div className="p-6 rounded-2xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)]">
+                <dt className="text-xs font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">Network Hub</dt>
+                <dd className="m-0 font-bold text-base text-[var(--kmm-fg)]">Loveworld Nation Headquarters</dd>
               </div>
             </dl>
           </div>
