@@ -65,7 +65,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`dark ${plusJakartaSans.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable} ${figtree.variable}`}
+      className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} ${bricolageGrotesque.variable} ${figtree.variable}`}
     >
       <head>
         <script
@@ -73,8 +73,21 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  var path = window.location.pathname || '';
+                  var isPublic = path === '/' || path.startsWith('/training-portal') || path.startsWith('/onboarding');
+                  if (path.startsWith('/training-portal')) {
+                    var tpTheme = localStorage.getItem('kmm_training_theme') || localStorage.getItem('kmm_theme');
+                    if (tpTheme === 'dark') {
+                      document.documentElement.classList.add('dark');
+                      document.documentElement.style.colorScheme = 'dark';
+                    } else {
+                      document.documentElement.classList.remove('dark');
+                      document.documentElement.style.colorScheme = 'light';
+                    }
+                    return;
+                  }
                   var stored = localStorage.getItem('kmp_theme') || localStorage.getItem('kmm_theme');
-                  if (stored === 'light') {
+                  if (stored === 'light' || (!stored && isPublic)) {
                     document.documentElement.classList.remove('dark');
                     document.documentElement.style.colorScheme = 'light';
                   } else {
@@ -82,8 +95,7 @@ export default function RootLayout({
                     document.documentElement.style.colorScheme = 'dark';
                   }
                 } catch(e) {
-                  document.documentElement.classList.add('dark');
-                  document.documentElement.style.colorScheme = 'dark';
+                  document.documentElement.classList.remove('dark');
                 }
               })();
             `,

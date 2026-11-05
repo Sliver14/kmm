@@ -317,7 +317,7 @@ COORDINATED BY: Kiddies Media Ministry Content Operations Directorate`,
 ]
 
 export default function TrainingPortalPage() {
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [officerEmail, setOfficerEmail] = useState('Barrister Lillian')
   const [activeTab, setActiveTab] = useState<'all' | 'materials' | 'tools' | 'documents'>('all')
@@ -374,8 +374,16 @@ export default function TrainingPortalPage() {
 
   useEffect(() => {
     setIsMounted(true)
-    const savedTheme = localStorage.getItem('kmm_theme') || 'dark'
-    setIsDark(savedTheme === 'dark')
+    const savedTheme = localStorage.getItem('kmm_training_theme') || localStorage.getItem('kmm_theme')
+    const darkActive = savedTheme === 'dark'
+    setIsDark(darkActive)
+    if (typeof window !== 'undefined') {
+      if (darkActive) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    }
 
     const auth = localStorage.getItem('kmm_auth_officer')
     if (auth) {
@@ -455,7 +463,15 @@ export default function TrainingPortalPage() {
   const toggleTheme = () => {
     const next = !isDark
     setIsDark(next)
+    localStorage.setItem('kmm_training_theme', next ? 'dark' : 'light')
     localStorage.setItem('kmm_theme', next ? 'dark' : 'light')
+    if (typeof window !== 'undefined') {
+      if (next) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    }
   }
 
   const startPlayingVideo = (video: VideoItem) => {

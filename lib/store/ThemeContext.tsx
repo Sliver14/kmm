@@ -17,8 +17,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 const THEME_STORAGE_KEY = 'kmp_theme'
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark')
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark')
+  const [theme, setThemeState] = useState<Theme>('light')
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light')
   const [mounted, setMounted] = useState(false)
 
   // Apply theme to document
@@ -43,12 +43,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initial load from localStorage
   useEffect(() => {
     try {
+      const isPublicRoute = typeof window !== 'undefined' && (
+        window.location.pathname === '/' ||
+        window.location.pathname.startsWith('/training-portal') ||
+        window.location.pathname.startsWith('/onboarding')
+      )
       const stored = (localStorage.getItem('kmp_theme') || localStorage.getItem('kmm_theme')) as Theme | null
-      const initialTheme: Theme = stored && ['light', 'dark', 'system'].includes(stored) ? stored : 'dark'
+      const defaultTheme: Theme = isPublicRoute ? 'light' : 'dark'
+      const initialTheme: Theme = stored && ['light', 'dark', 'system'].includes(stored) ? stored : defaultTheme
       setThemeState(initialTheme)
       applyTheme(initialTheme)
     } catch {
-      applyTheme('dark')
+      applyTheme('light')
     }
     setMounted(true)
   }, [applyTheme])
