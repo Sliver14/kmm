@@ -1,3 +1,5 @@
+export type ComplianceToolKey = 'safeguard' | 'age-rating' | 'ip-clearance'
+
 export interface VideoItem {
   id: string
   code: string
@@ -15,6 +17,8 @@ export interface VideoItem {
   glow: string
   points: string[]
   citations: string[]
+  tools?: ComplianceToolKey[]
+  docIds?: string[]
 }
 
 export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
@@ -40,6 +44,8 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Statutory broadcast compliance filing requirements for international partner territories.',
     ],
     citations: ['NBC Broadcast Code § 4.2.1', 'ITU-R BT.1702 Strobing Threshold', 'Kiddies Media Ministry Charter Art. IX'],
+    tools: ['safeguard', 'age-rating'],
+    docIds: ['doc-2', 'doc-1'],
   },
   {
     id: 'vid-2',
@@ -63,6 +69,8 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Automated data purges on inactive child gamer records after 90 days.',
     ],
     citations: ['COPPA Rule 16 C.F.R. Part 312', 'GDPR Article 8 (Children)', 'CARU Mobile App Guidelines'],
+    tools: ['safeguard'],
+    docIds: ['doc-4', 'doc-1'],
   },
   {
     id: 'vid-3',
@@ -86,6 +94,8 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'International assignment of copyright transfers across multi-territory co-productions.',
     ],
     citations: ['WIPO Copyright Treaty Art. 6', 'Berne Convention Section 7', 'US Copyright Circular 9'],
+    tools: ['ip-clearance'],
+    docIds: ['doc-3', 'doc-2'],
   },
   {
     id: 'vid-4',
@@ -109,6 +119,8 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Lip-sync tolerances: Maximum 1 frame ahead or 2 frames behind dialogue audio.',
     ],
     citations: ['EBU R128 Loudness Normalisation', 'Ofcom Guidance Section 2.14', 'ATSC A/85 Audio Code'],
+    tools: ['age-rating', 'safeguard'],
+    docIds: ['doc-2'],
   },
   {
     id: 'vid-5',
@@ -132,6 +144,8 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Prohibition of theological caricatures or fear-inducing behavioral tropes.',
     ],
     citations: ['Kiddies Media Ministry Doctrinal Canon 2026', 'King James Bible Concordance', 'Loveworld Editorial Policy'],
+    tools: ['age-rating'],
+    docIds: ['doc-5'],
   },
   {
     id: 'vid-6',
@@ -155,6 +169,8 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Child choke hazard warning labels and age-grading verification audits.',
     ],
     citations: ['EN-71 Toy Safety Directive', 'ASTM F963-17 Standard', 'ISO 8124 Toy Safety'],
+    tools: ['ip-clearance'],
+    docIds: ['doc-3', 'doc-1'],
   },
   {
     id: 'vid-7',
@@ -178,6 +194,8 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Ergonomic studio adjustments (height-adjustable mic arms, acoustic comfort).',
     ],
     citations: ['SAG-AFTRA Young Performer Rules', 'UK Child Performance Regulations', 'ILO Convention 138'],
+    tools: ['safeguard', 'ip-clearance'],
+    docIds: ['doc-1', 'doc-3'],
   },
   {
     id: 'vid-8',
@@ -201,6 +219,8 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Automated closed-caption timing checks against broadcast playout servers.',
     ],
     citations: ['SMPTE ST 2052 Timed Text', 'EBU Tech 3264 Subtitling', 'WIPO Phonograms Treaty'],
+    tools: ['age-rating', 'ip-clearance'],
+    docIds: ['doc-2', 'doc-5'],
   },
 ]
 

@@ -45,8 +45,12 @@ import {
   Printer,
   Eye,
   ChevronDown,
+  Award,
+  CheckCircle,
+  Info,
+  Layers,
 } from 'lucide-react'
-import { ARCHIVED_TRAINING_VIDEOS, VideoItem } from '@/lib/data/trainingVideosData'
+import { ARCHIVED_TRAINING_VIDEOS, VideoItem, ComplianceToolKey } from '@/lib/data/trainingVideosData'
 
 const AGENCIES_LIST = [
   {
@@ -320,17 +324,18 @@ export default function TrainingPortalPage() {
   const [isDark, setIsDark] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [officerEmail, setOfficerEmail] = useState('Barrister Lillian')
-  const [activeTab, setActiveTab] = useState<'all' | 'materials' | 'tools' | 'documents'>('all')
   const [activeFilter, setActiveFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'in-progress'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [currentVideo, setCurrentVideo] = useState<VideoItem | null>(null)
   const [viewMode, setViewMode] = useState<'catalog' | 'watch'>('catalog')
+  const [activeVideoTab, setActiveVideoTab] = useState<'notes' | 'tools' | 'documents' | 'accreditation'>('notes')
+  const [activeToolKey, setActiveToolKey] = useState<ComplianceToolKey>('safeguard')
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [progressPercent, setProgressPercent] = useState(15)
   const [isCaptionsOn, setIsCaptionsOn] = useState(false)
   const [isTheaterExpanded, setIsTheaterExpanded] = useState(false)
-  const [isAutoplayOn, setIsAutoplayOn] = useState(true)
   const [toastMessage, setToastMessage] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
@@ -401,17 +406,6 @@ export default function TrainingPortalPage() {
       // ignore
     }
 
-    // Parse URL tab parameter
-    try {
-      const params = new URLSearchParams(window.location.search)
-      const tab = params.get('tab')
-      if (tab === 'materials' || tab === 'tools' || tab === 'documents') {
-        setActiveTab(tab)
-      }
-    } catch {
-      // ignore
-    }
-
     // Check hash for direct watch link
     if (window.location.hash.startsWith('#watch-')) {
       const vidId = window.location.hash.replace('#watch-', '')
@@ -474,10 +468,17 @@ export default function TrainingPortalPage() {
     }
   }
 
-  const startPlayingVideo = (video: VideoItem) => {
+  const startPlayingVideo = (
+    video: VideoItem,
+    initialTab: 'notes' | 'tools' | 'documents' | 'accreditation' = 'notes'
+  ) => {
     setCurrentVideo(video)
+    setActiveVideoTab(initialTab)
+    if (video.tools && video.tools.length > 0) {
+      setActiveToolKey(video.tools[0])
+    }
     setViewMode('watch')
-    setIsPlaying(true)
+    setIsPlaying(initialTab === 'notes')
     setProgressPercent(10)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -497,31 +498,38 @@ export default function TrainingPortalPage() {
   const filteredVideos = useMemo(() => {
     return ARCHIVED_TRAINING_VIDEOS.filter((vid) => {
       const matchesCat = activeFilter === 'all' || vid.category === activeFilter
+      const isComp = !!completedModules[vid.id]
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'completed' && isComp) ||
+        (statusFilter === 'in-progress' && !isComp)
+
       const q = searchQuery.toLowerCase().trim()
       const matchesSearch =
         !q ||
         vid.title.toLowerCase().includes(q) ||
         vid.desc.toLowerCase().includes(q) ||
         vid.code.toLowerCase().includes(q) ||
-        vid.speaker.toLowerCase().includes(q)
-      return matchesCat && matchesSearch
+        vid.speaker.toLowerCase().includes(q) ||
+        vid.citations.some((c) => c.toLowerCase().includes(q))
+      return matchesCat && matchesStatus && matchesSearch
     })
-  }, [activeFilter, searchQuery])
+  }, [activeFilter, statusFilter, searchQuery, completedModules])
 
-  // Filtered Supporting Documents
-  const filteredDocuments = useMemo(() => {
-    return SUPPORTING_DOCUMENTS.filter((doc) => {
-      const matchesCat = activeFilter === 'all' || doc.category === activeFilter
-      const q = searchQuery.toLowerCase().trim()
-      const matchesSearch =
-        !q ||
-        doc.title.toLowerCase().includes(q) ||
-        doc.desc.toLowerCase().includes(q) ||
-        doc.code.toLowerCase().includes(q) ||
-        doc.classification.toLowerCase().includes(q)
-      return matchesCat && matchesSearch
-    })
-  }, [activeFilter, searchQuery])
+  // Attached docs for current video
+  const attachedDocs = useMemo(() => {
+    if (!currentVideo) return []
+    if (currentVideo.docIds && currentVideo.docIds.length > 0) {
+      return SUPPORTING_DOCUMENTS.filter((doc) => currentVideo.docIds?.includes(doc.id))
+    }
+    return SUPPORTING_DOCUMENTS.filter((doc) => doc.category === currentVideo.category).slice(0, 2)
+  }, [currentVideo])
+
+  // Other documents not primarily attached
+  const otherDocs = useMemo(() => {
+    if (!currentVideo) return SUPPORTING_DOCUMENTS
+    return SUPPORTING_DOCUMENTS.filter((doc) => !currentVideo.docIds?.includes(doc.id))
+  }, [currentVideo])
 
   // Tool 1: Safeguard score calculation
   const safeguardScore = useMemo(() => {
@@ -533,6 +541,7 @@ export default function TrainingPortalPage() {
   const copySafeguardReport = () => {
     const checkedCount = Object.values(safeguardChecks).filter(Boolean).length
     const text = `KIDDIES MEDIA MINISTRY CHILD SAFEGUARDING AUDIT VERIFICATION REPORT
+Module: ${currentVideo ? `${currentVideo.code} - ${currentVideo.title}` : 'General Compliance Audit'}
 Generated by: Officer ${officerEmail}
 Compliance Score: ${safeguardScore}% (${checkedCount} of 6 Checks Passed)
 Status: ${safeguardScore === 100 ? 'CLEARED FOR SATELLITE & DIGITAL BROADCAST' : 'ATTENTION REQUIRED - INCOMPLETE REMEDIATION'}
@@ -632,6 +641,9 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
     window.print()
   }
 
+  const completedCount = Object.values(completedModules).filter(Boolean).length
+  const progressPercentTotal = Math.round((completedCount / ARCHIVED_TRAINING_VIDEOS.length) * 100)
+
   return (
     <div
       className={`min-h-screen transition-colors duration-300 font-sans ${
@@ -647,10 +659,10 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
         </div>
       )}
 
-      {/* Top Navigation Bar */}
+      {/* Top Modern Navigation Bar */}
       <header
         className={`sticky top-0 z-40 backdrop-blur-md border-b transition-colors ${
-          isDark ? 'bg-slate-950/85 border-white/10' : 'bg-white/90 border-slate-200 shadow-xs'
+          isDark ? 'bg-slate-950/85 border-white/10' : 'bg-white/90 border-slate-200/80 shadow-xs'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4">
@@ -658,149 +670,83 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <Link
               href="/"
-              className="flex items-center gap-2 sm:gap-2.5 group text-inherit no-underline shrink-0"
+              className="flex items-center gap-2.5 sm:gap-3 group text-inherit no-underline shrink-0"
               title="Return to Kiddies Media Ministry Main Home"
             >
-              <div className="size-9 sm:size-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-slate-950 shadow-md group-hover:scale-105 transition-transform shrink-0">
-                <GraduationCap className="size-4.5 sm:size-5 font-black" />
+              <div className="size-10 sm:size-11 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-orange-500 flex items-center justify-center text-slate-950 shadow-md group-hover:scale-105 transition-transform shrink-0">
+                <GraduationCap className="size-5 font-black" />
               </div>
               <div className="min-w-0">
                 <div
-                  className="font-extrabold text-sm sm:text-lg leading-tight tracking-tight truncate"
+                  className="font-extrabold text-sm sm:text-base lg:text-lg leading-tight tracking-tight truncate flex items-center gap-2"
                   style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
                 >
-                  <span className="sm:hidden">KMM Training</span>
-                  <span className="hidden sm:inline">Kiddies Media Ministry Training Portal</span>
+                  <span>KMM Academy Portal</span>
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-600 border border-amber-500/30">
+                    Accreditation Hub
+                  </span>
                 </div>
-                <div className="text-[9px] sm:text-[10px] font-bold text-amber-500 uppercase tracking-widest truncate">
-                  <span className="sm:hidden">Materials &bull; Tools</span>
-                  <span className="hidden sm:inline">Materials &bull; Tools &bull; Supporting Documents</span>
+                <div className="text-[10px] sm:text-[11px] font-bold text-[var(--kmm-muted)] uppercase tracking-wider truncate">
+                  Broadcast Standards &bull; Safeguarding &bull; IP Clearance
                 </div>
               </div>
             </Link>
-
-            <span className="hidden sm:inline-block text-slate-300 dark:text-slate-600 text-xs font-semibold px-1">/</span>
-
-            <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400">
-              <span className={`px-2.5 py-1 rounded-full border text-[11px] ${
-                isDark ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-amber-50 text-amber-800 border-amber-200'
-              }`}>
-                Institutional Portal
-              </span>
-            </div>
           </div>
 
           {/* Center search (desktop) */}
-          <div className="hidden lg:flex items-center flex-1 max-w-md mx-4">
+          <div className="hidden md:flex items-center flex-1 max-w-sm mx-4">
             <div
               className={`w-full flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs transition-all ${
                 isDark
                   ? 'bg-slate-900 border-white/10 focus-within:border-amber-400 text-white'
-                  : 'bg-slate-50 border-slate-200 focus-within:border-amber-500 text-slate-900 focus-within:bg-white'
+                  : 'bg-slate-100 border-slate-200 focus-within:border-amber-500 text-slate-900 focus-within:bg-white'
               }`}
             >
               <Search className="size-3.5 text-slate-400 shrink-0" />
               <input
                 type="text"
-                placeholder="Search training modules, tools, supporting documents..."
+                placeholder="Search masterclasses, citations, charters..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent border-none outline-none w-full text-xs placeholder:text-slate-400 dark:placeholder:text-slate-500 text-inherit"
+                className="bg-transparent border-none outline-none w-full text-xs placeholder:text-slate-400"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
                   className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
-                  title="Clear search"
                 >
-                  <X className="size-3.5" />
+                  <X className="size-3" />
                 </button>
               )}
             </div>
           </div>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* Quick Link to IP Portal */}
-            <Link
-              href="/ip-portal"
-              className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
-                isDark
-                  ? 'border-white/15 text-slate-300 hover:text-white hover:bg-white/5'
-                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs'
-              }`}
-              title="Switch to Intellectual Property Portal"
-            >
-              <Scale className="size-3 text-amber-500" />
-              <span>IP Portal</span>
-            </Link>
-
-            {/* Agencies Dropdown (no icons) */}
-            <div className="relative hidden md:block" ref={agenciesDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setAgenciesDropdownOpen((prev) => !prev)}
-                onMouseEnter={() => setAgenciesDropdownOpen(true)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
-                  agenciesDropdownOpen
-                    ? isDark
-                      ? 'bg-slate-800 border-amber-400/40 text-amber-400'
-                      : 'bg-slate-100 border-slate-300 text-slate-900'
-                    : isDark
-                    ? 'border-white/15 text-slate-300 hover:text-white hover:bg-white/5'
-                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 shadow-2xs'
-                }`}
-                aria-expanded={agenciesDropdownOpen}
-              >
-                <span>Agencies</span>
-                <ChevronDown className={`size-3 transition-transform ${agenciesDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {agenciesDropdownOpen && (
+          {/* Right Action Icons & User Info */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Accreditation progress badge */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-xs">
+              <Award className="size-3.5 text-amber-500" />
+              <span className="font-semibold text-slate-600 dark:text-slate-300">
+                {completedCount}/8 Certified
+              </span>
+              <div className="w-12 h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
                 <div
-                  onMouseLeave={() => setAgenciesDropdownOpen(false)}
-                  className={`absolute right-0 top-full mt-2 w-72 rounded-2xl p-2 shadow-2xl border z-50 animate-in fade-in zoom-in-95 duration-150 ${
-                    isDark ? 'bg-slate-900 border-white/15 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
-                  }`}
-                >
-                  <div className="px-3 py-1.5 border-b border-slate-200 dark:border-white/10 mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    <span>Ministry Agencies</span>
-                    <span>5 Arms</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    {AGENCIES_LIST.map((ag) => (
-                      <Link
-                        key={ag.name}
-                        href={ag.href}
-                        onClick={() => setAgenciesDropdownOpen(false)}
-                        className={`p-2 rounded-xl transition-colors text-left flex flex-col ${
-                          isDark ? 'hover:bg-slate-800' : 'hover:bg-slate-100'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs">{ag.name}</span>
-                          <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
-                            isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600'
-                          }`}>
-                            {ag.badge}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-400 truncate mt-0.5">{ag.tagline}</p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+                  className="h-full bg-amber-500 rounded-full transition-all"
+                  style={{ width: `${progressPercentTotal}%` }}
+                />
+              </div>
             </div>
 
-            {/* Officer authenticated status */}
+            {/* Officer Profile Badge */}
             <div
-              className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${
+              className={`hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs ${
                 isDark ? 'bg-slate-900 border-white/10 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
               }`}
             >
-              <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className={`font-bold truncate max-w-[120px] ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>{officerEmail}</span>
+              <UserCheck className="size-3.5 text-amber-500 shrink-0" />
+              <span className={`font-bold truncate max-w-[120px] ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
+                {officerEmail}
+              </span>
             </div>
 
             {/* Officer switch profile button */}
@@ -843,150 +789,55 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
         </div>
 
         {/* Mobile Search Input */}
-        <div className="lg:hidden px-4 pb-3">
+        <div className="md:hidden px-4 pb-3">
           <div
-            className={`w-full flex items-center gap-2 px-3.5 py-2 rounded-full border text-xs ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs ${
               isDark ? 'bg-slate-900 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}
           >
             <Search className="size-3.5 text-slate-400 shrink-0" />
             <input
               type="text"
-              placeholder="Search modules, tools, supporting documents..."
+              placeholder="Search curriculum..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none w-full text-xs text-inherit placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="bg-transparent border-none outline-none w-full text-xs text-inherit placeholder:text-slate-400"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                <X className="size-3.5" />
+              <button onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-slate-600">
+                <X className="size-3" />
               </button>
             )}
           </div>
         </div>
 
-        {/* Mobile Dropdown Drawer when hamburger opened */}
+        {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
           <div
-            className={`sm:hidden border-t px-4 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200 ${
+            className={`sm:hidden border-b px-4 py-4 space-y-3 ${
               isDark ? 'bg-slate-950/95 border-white/10' : 'bg-white/95 border-slate-200 shadow-lg'
             }`}
           >
-            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-full bg-emerald-500" />
-                <span className={`font-bold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>{officerEmail}</span>
-              </div>
-              <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
-                isDark ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-50 text-amber-700'
-              }`}>
-                Institutional Officer
-              </span>
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
+              <span className="text-xs text-slate-500">Authenticated Officer:</span>
+              <span className={`font-bold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>{officerEmail}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
-              <Link
-                href="/ip-portal"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-2 p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
-                    : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
-                }`}
-              >
-                <Scale className="size-3.5 text-amber-500" />
-                <span>IP Portal</span>
-              </Link>
-              <Link
-                href="/auth"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-2 p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
-                    : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
-                }`}
-              >
-                <ArrowRightLeft className="size-3.5 text-sky-500" />
-                <span>Switch Officer</span>
-              </Link>
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <Link
                 href="/"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-2 p-2.5 rounded-xl border transition-colors ${
-                  isDark
-                    ? 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
-                    : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
-                }`}
+                className="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200"
               >
                 <Home className="size-3.5 text-emerald-500" />
                 <span>KMM Home</span>
               </Link>
-              <button
-                onClick={() => {
-                  toggleTheme()
-                  setMobileMenuOpen(false)
-                }}
-                className={`flex items-center gap-2 p-2.5 rounded-xl border transition-colors text-left cursor-pointer ${
-                  isDark
-                    ? 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
-                    : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
-                }`}
+              <Link
+                href="/ip-portal"
+                className="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200"
               >
-                {isDark ? <Sun className="size-3.5 text-amber-400" /> : <Moon className="size-3.5 text-indigo-500" />}
-                <span>{isDark ? 'Light Theme' : 'Dark Theme'}</span>
-              </button>
-            </div>
-
-            {/* Mobile Agencies List (no icons) */}
-            <div className="pt-2 border-t border-slate-200 dark:border-white/10">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
-                Ministry Agencies
-              </span>
-              <div className="grid grid-cols-1 gap-1">
-                {AGENCIES_LIST.map((ag) => (
-                  <Link
-                    key={ag.name}
-                    href={ag.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
-                      isDark ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>{ag.name}</span>
-                    <span className="text-[9px] uppercase font-bold text-slate-400">{ag.badge}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
-              <button
-                onClick={() => {
-                  setActiveTab('materials')
-                  setMobileMenuOpen(false)
-                }}
-                className="hover:text-amber-500"
-              >
-                Materials ({ARCHIVED_TRAINING_VIDEOS.length})
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('tools')
-                  setMobileMenuOpen(false)
-                }}
-                className="hover:text-amber-500"
-              >
-                Tools (3)
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('documents')
-                  setMobileMenuOpen(false)
-                }}
-                className="hover:text-amber-500"
-              >
-                Docs ({SUPPORTING_DOCUMENTS.length})
-              </button>
+                <Scale className="size-3.5 text-blue-500" />
+                <span>IP Portal</span>
+              </Link>
             </div>
           </div>
         )}
@@ -995,29 +846,45 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
         {/* =========================================================================
-            WATCH / STUDY GUIDE MODE (When a training module is active)
+            WATCH / MODULE WORKSPACE MODE (Video Player + Embedded Tools & Docs)
             ========================================================================= */}
         {viewMode === 'watch' && currentVideo && (
           <div className="space-y-8 animate-in fade-in duration-300">
-            {/* Back Button */}
-            <button
-              onClick={() => {
-                setViewMode('catalog')
-                setIsPlaying(false)
-              }}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
-                isDark
-                  ? 'bg-slate-900 border-white/10 hover:bg-slate-800 text-slate-200'
-                  : 'bg-white border-slate-200 hover:bg-slate-100 text-slate-800 shadow-2xs'
-              }`}
-            >
-              <ArrowLeft className="size-3.5" />
-              <span>Back to Training Portal &amp; Resources</span>
-            </button>
+            {/* Top Bar with Back & Quick Info */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-white/10">
+              <button
+                onClick={() => {
+                  setViewMode('catalog')
+                  setIsPlaying(false)
+                }}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer self-start ${
+                  isDark
+                    ? 'bg-slate-900 border-white/10 hover:bg-slate-800 text-slate-200'
+                    : 'bg-white border-slate-200 hover:bg-slate-100 text-slate-800 shadow-2xs'
+                }`}
+              >
+                <ArrowLeft className="size-3.5" />
+                <span>Back to Academy Curriculum</span>
+              </button>
+
+              <div className="flex items-center gap-2.5 text-xs">
+                <span className="font-mono font-bold text-amber-500 uppercase tracking-widest">
+                  {currentVideo.code}
+                </span>
+                <span className="text-slate-300 dark:text-slate-600">&bull;</span>
+                <span className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] border ${
+                  completedModules[currentVideo.id]
+                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                }`}>
+                  {completedModules[currentVideo.id] ? '✓ Module Certified' : 'In Progress'}
+                </span>
+              </div>
+            </div>
 
             {/* Video Player & Study Mode Box */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-              {/* Left 8 Cols: Video Viewport & Curriculum Takeaways */}
+              {/* Left 8 Cols: Video Screen + Module Hub (Tabs) */}
               <div className="lg:col-span-8 space-y-6">
                 {/* Media Screen */}
                 <div
@@ -1035,7 +902,7 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
                     {/* Watermark Logo */}
                     <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold">
                       <GraduationCap className="size-3.5 text-amber-400" />
-                      <span>Kiddies Media Ministry Institutional Masterclass</span>
+                      <span>KMM Institutional Masterclass</span>
                     </div>
 
                     <div className="absolute top-4 right-4 text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-amber-400 border border-amber-400/30">
@@ -1165,166 +1032,812 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
                   </div>
                 </div>
 
-                {/* Module Details & Accreditation Box */}
+                {/* =====================================================================
+                    MODULE INTEGRATED WORKSPACE (TABS: Notes, Tools, Documents, Accreditation)
+                    ===================================================================== */}
                 <div
-                  className={`p-5 sm:p-8 rounded-3xl border transition-colors space-y-6 ${
-                    isDark ? 'bg-slate-900/60 border-white/10' : 'bg-white border-slate-200 shadow-sm'
+                  className={`rounded-3xl border overflow-hidden transition-colors ${
+                    isDark ? 'bg-slate-900/60 border-white/10' : 'bg-white border-slate-200/90 shadow-sm'
                   }`}
                 >
-                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b ${
-                    isDark ? 'border-white/10' : 'border-slate-200'
-                  }`}>
-                    <div className="space-y-1">
-                      <span className="text-xs font-mono font-bold text-amber-500 uppercase tracking-widest">
-                        Module Code: {currentVideo.code}
-                      </span>
-                      <h1
-                        className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-                          isDark ? 'text-white' : 'text-slate-900'
-                        }`}
-                        style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
-                      >
-                        {currentVideo.title}
-                      </h1>
-                    </div>
-
-                    <button
-                      onClick={() => toggleModuleCompletion(currentVideo.id)}
-                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs transition-all cursor-pointer shadow-md shrink-0 w-full sm:w-auto ${
-                        completedModules[currentVideo.id]
-                          ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
-                          : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
-                      }`}
-                    >
-                      <CheckCircle2 className="size-4" />
-                      <span>
-                        {completedModules[currentVideo.id]
-                          ? 'Accredited & Completed'
-                          : 'Mark as Completed'}
-                      </span>
-                    </button>
-                  </div>
-
-                  {/* Speaker card */}
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="size-11 rounded-2xl flex items-center justify-center font-bold text-sm text-white shadow-md shrink-0"
-                      style={{ background: currentVideo.avatarBg }}
-                    >
-                      {currentVideo.initials}
-                    </div>
-                    <div>
-                      <div className={`font-extrabold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{currentVideo.speaker}</div>
-                      <div className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{currentVideo.speakerRole}</div>
-                    </div>
-                  </div>
-
-                  <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                    {currentVideo.desc}
-                  </p>
-
-                  {/* Syllabus / Key points */}
-                  <div className="space-y-3 pt-2">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
-                      <FileCheck className="size-4" />
-                      <span>Curriculum Points &amp; Production Standards</span>
-                    </h3>
-                    <div className="grid grid-cols-1 gap-2.5">
-                      {currentVideo.points.map((pt, i) => (
-                        <div
-                          key={i}
-                          className={`p-3.5 rounded-xl border flex items-start gap-3 text-xs leading-relaxed ${
-                            isDark ? 'bg-slate-950/60 border-white/5 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-800'
-                          }`}
-                        >
-                          <span className={`size-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5 ${
-                            isDark ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-800'
-                          }`}>
-                            {i + 1}
+                  {/* Module Title Banner */}
+                  <div className="p-6 sm:p-8 pb-4 border-b border-slate-200 dark:border-white/10">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono font-bold text-amber-500 uppercase tracking-widest">
+                            {currentVideo.code} &bull; {currentVideo.categoryLabel}
                           </span>
-                          <span>{pt}</span>
                         </div>
-                      ))}
+                        <h1
+                          className={`text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight ${
+                            isDark ? 'text-white' : 'text-slate-900'
+                          }`}
+                          style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                        >
+                          {currentVideo.title}
+                        </h1>
+                      </div>
+
+                      <button
+                        onClick={() => toggleModuleCompletion(currentVideo.id)}
+                        className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs transition-all cursor-pointer shadow-sm shrink-0 ${
+                          completedModules[currentVideo.id]
+                            ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+                            : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                        }`}
+                      >
+                        <CheckCircle2 className="size-4" />
+                        <span>
+                          {completedModules[currentVideo.id]
+                            ? 'Module Accredited'
+                            : 'Mark as Completed'}
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Integrated Studio Tab Switcher Bar */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 pt-6 overflow-x-auto no-scrollbar">
+                      <button
+                        onClick={() => setActiveVideoTab('notes')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 ${
+                          activeVideoTab === 'notes'
+                            ? isDark
+                              ? 'bg-white text-slate-950 shadow-md'
+                              : 'bg-slate-950 text-white shadow-md'
+                            : isDark
+                            ? 'text-slate-300 hover:bg-slate-800'
+                            : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        <BookOpen className="size-3.5" />
+                        <span>Lesson Notes</span>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveVideoTab('tools')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 ${
+                          activeVideoTab === 'tools'
+                            ? isDark
+                              ? 'bg-white text-slate-950 shadow-md'
+                              : 'bg-slate-950 text-white shadow-md'
+                            : isDark
+                            ? 'text-slate-300 hover:bg-slate-800'
+                            : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        <Wrench className="size-3.5 text-amber-500" />
+                        <span>Interactive Tools</span>
+                        <span className="size-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] flex items-center justify-center font-bold">
+                          {currentVideo.tools?.length || 3}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveVideoTab('documents')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 ${
+                          activeVideoTab === 'documents'
+                            ? isDark
+                              ? 'bg-white text-slate-950 shadow-md'
+                              : 'bg-slate-950 text-white shadow-md'
+                            : isDark
+                            ? 'text-slate-300 hover:bg-slate-800'
+                            : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        <Scroll className="size-3.5 text-sky-500" />
+                        <span>Attached Policies &amp; Deeds</span>
+                        <span className="size-5 rounded-full bg-sky-500/20 text-sky-600 dark:text-sky-400 text-[10px] flex items-center justify-center font-bold">
+                          {attachedDocs.length}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveVideoTab('accreditation')}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 ${
+                          activeVideoTab === 'accreditation'
+                            ? isDark
+                              ? 'bg-white text-slate-950 shadow-md'
+                              : 'bg-slate-950 text-white shadow-md'
+                            : isDark
+                            ? 'text-slate-300 hover:bg-slate-800'
+                            : 'text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        <GraduationCap className="size-3.5 text-emerald-500" />
+                        <span>Accreditation &amp; Sign-Off</span>
+                      </button>
                     </div>
                   </div>
 
-                  {/* Statutory Citations */}
-                  <div className="pt-2">
-                    <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${
-                      isDark ? 'text-slate-400' : 'text-slate-500'
-                    }`}>
-                      Statutory Citations &amp; Institutional Governance
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {currentVideo.citations.map((c, i) => (
-                        <span
-                          key={i}
-                          className={`px-3 py-1 rounded-full text-[11px] font-mono font-semibold border ${
-                            isDark
-                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                              : 'bg-amber-50 text-amber-800 border-amber-300'
-                          }`}
+                  {/* Tab 1: Lesson Notes */}
+                  {activeVideoTab === 'notes' && (
+                    <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
+                      {/* Speaker card */}
+                      <div className="flex items-center gap-3.5 p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-950/40">
+                        <div
+                          className="size-12 rounded-2xl flex items-center justify-center font-bold text-base text-white shadow-md shrink-0"
+                          style={{ background: currentVideo.avatarBg }}
                         >
-                          {c}
-                        </span>
-                      ))}
+                          {currentVideo.initials}
+                        </div>
+                        <div>
+                          <div className={`font-extrabold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            {currentVideo.speaker}
+                          </div>
+                          <div className={`text-xs font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                            {currentVideo.speakerRole}
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                        {currentVideo.desc}
+                      </p>
+
+                      {/* Syllabus / Key points */}
+                      <div className="space-y-3 pt-2">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
+                          <FileCheck className="size-4" />
+                          <span>Curriculum Checkpoints &amp; Production Standards</span>
+                        </h3>
+                        <div className="grid grid-cols-1 gap-2.5">
+                          {currentVideo.points.map((pt, i) => (
+                            <div
+                              key={i}
+                              className={`p-3.5 rounded-xl border flex items-start gap-3 text-xs leading-relaxed ${
+                                isDark ? 'bg-slate-950/60 border-white/5 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-800'
+                              }`}
+                            >
+                              <span className={`size-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5 ${
+                                isDark ? 'bg-amber-500/15 text-amber-400' : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {i + 1}
+                              </span>
+                              <span>{pt}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Statutory Citations */}
+                      <div className="pt-2">
+                        <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${
+                          isDark ? 'text-slate-400' : 'text-slate-500'
+                        }`}>
+                          Statutory Citations &amp; Institutional Governance
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {currentVideo.citations.map((c, i) => (
+                            <span
+                              key={i}
+                              className={`px-3 py-1 rounded-full text-[11px] font-mono font-semibold border ${
+                                isDark
+                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                  : 'bg-amber-50 text-amber-800 border-amber-300'
+                              }`}
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Bottom action pills to tools and docs */}
+                      <div className="pt-4 flex flex-wrap items-center gap-3 border-t border-slate-200 dark:border-white/10">
+                        <button
+                          onClick={() => setActiveVideoTab('tools')}
+                          className="px-4 py-2 rounded-full text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Wrench className="size-3.5" />
+                          <span>Launch Practical Tools for This Module →</span>
+                        </button>
+                        <button
+                          onClick={() => setActiveVideoTab('documents')}
+                          className="px-4 py-2 rounded-full text-xs font-bold border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Scroll className="size-3.5" />
+                          <span>Inspect Attached Policies ({attachedDocs.length}) →</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Tab 2: Embedded Practical Compliance Tools */}
+                  {activeVideoTab === 'tools' && (
+                    <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
+                      {/* Tool selector bar */}
+                      <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div>
+                            <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                              Practical Verification Utilities
+                            </h3>
+                            <p className="text-xs text-[var(--kmm-muted)]">
+                              Select a compliance engine to audit the parameters taught in this masterclass.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Switcher Buttons */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                          <button
+                            onClick={() => setActiveToolKey('safeguard')}
+                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                              activeToolKey === 'safeguard'
+                                ? isDark
+                                  ? 'border-amber-400/50 bg-amber-500/10 text-white shadow-xs'
+                                  : 'border-amber-500 bg-amber-50 text-slate-900 shadow-2xs'
+                                : isDark
+                                ? 'border-white/10 bg-slate-950/40 text-slate-400 hover:text-white'
+                                : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-white'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Tool 1</span>
+                              {currentVideo.tools?.includes('safeguard') && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                  Primary
+                                </span>
+                              )}
+                            </div>
+                            <div className="font-bold text-xs">Child Safeguarding Checklist</div>
+                            <div className="text-[10px] text-[var(--kmm-muted)] mt-0.5">
+                              {safeguardScore}% Passed
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => setActiveToolKey('age-rating')}
+                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                              activeToolKey === 'age-rating'
+                                ? isDark
+                                  ? 'border-amber-400/50 bg-amber-500/10 text-white shadow-xs'
+                                  : 'border-amber-500 bg-amber-50 text-slate-900 shadow-2xs'
+                                : isDark
+                                ? 'border-white/10 bg-slate-950/40 text-slate-400 hover:text-white'
+                                : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-white'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Tool 2</span>
+                              {currentVideo.tools?.includes('age-rating') && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                  Primary
+                                </span>
+                              )}
+                            </div>
+                            <div className="font-bold text-xs">Age-Rating Calculator</div>
+                            <div className="text-[10px] text-[var(--kmm-muted)] mt-0.5">
+                              Computed: {computedRating.rating}
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => setActiveToolKey('ip-clearance')}
+                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                              activeToolKey === 'ip-clearance'
+                                ? isDark
+                                  ? 'border-amber-400/50 bg-amber-500/10 text-white shadow-xs'
+                                  : 'border-amber-500 bg-amber-50 text-slate-900 shadow-2xs'
+                                : isDark
+                                ? 'border-white/10 bg-slate-950/40 text-slate-400 hover:text-white'
+                                : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-white'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-sky-500">Tool 3</span>
+                              {currentVideo.tools?.includes('ip-clearance') && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-600 dark:text-sky-400">
+                                  Primary
+                                </span>
+                              )}
+                            </div>
+                            <div className="font-bold text-xs">IP Rights Verifier</div>
+                            <div className="text-[10px] text-[var(--kmm-muted)] mt-0.5">
+                              {Object.values(ipChecks).filter(Boolean).length}/5 Cleared
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Tool 1 Content */}
+                      {activeToolKey === 'safeguard' && (
+                        <div className="p-6 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-slate-50/40 dark:bg-slate-950/30 space-y-5 animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-extrabold text-base">Child Safeguarding Audit Tool</h4>
+                              <p className="text-xs text-[var(--kmm-muted)]">
+                                Audit on-set physical safety, audio levels, and parental consent deeds before release.
+                              </p>
+                            </div>
+                            <span className="font-mono text-sm font-bold text-amber-500">
+                              {safeguardScore}% Passed
+                            </span>
+                          </div>
+
+                          {/* Progress bar */}
+                          <div className={`w-full h-2 rounded-full overflow-hidden ${
+                            isDark ? 'bg-white/10' : 'bg-slate-200'
+                          }`}>
+                            <div
+                              className={`h-full transition-all duration-300 rounded-full ${
+                                safeguardScore === 100 ? 'bg-emerald-500' : 'bg-amber-500'
+                              }`}
+                              style={{ width: `${safeguardScore}%` }}
+                            />
+                          </div>
+
+                          {/* Checklist Items */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                            {[
+                              { key: 'consent', label: '1. Minor Guardian Release Deed Signed' },
+                              { key: 'strobe', label: '2. Strobe Safety Verified (< 3 Hz limit)' },
+                              { key: 'loudness', label: '3. Audio Loudness at -24 LKFS Target' },
+                              { key: 'tone', label: '4. Non-Frightening Emotional Narrative' },
+                              { key: 'music', label: '5. Work-For-Hire Original Music Cleared' },
+                              { key: 'privacy', label: '6. Minor Personal Identity Protected' },
+                            ].map((item) => (
+                              <label
+                                key={item.key}
+                                className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-medium cursor-pointer transition-colors ${
+                                  safeguardChecks[item.key]
+                                    ? isDark
+                                      ? 'bg-amber-500/10 border-amber-500/30 text-slate-200'
+                                      : 'bg-amber-50 border-amber-300 text-slate-900 shadow-2xs'
+                                    : isDark
+                                    ? 'bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-200'
+                                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={safeguardChecks[item.key] || false}
+                                  onChange={(e) =>
+                                    setSafeguardChecks((prev) => ({
+                                      ...prev,
+                                      [item.key]: e.target.checked,
+                                    }))
+                                  }
+                                  className="size-4 accent-amber-500 cursor-pointer rounded shrink-0"
+                                />
+                                <span className="leading-tight flex-1">{item.label}</span>
+                              </label>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-white/10">
+                            <button
+                              onClick={copySafeguardReport}
+                              className="px-4 py-2 rounded-full text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                            >
+                              <Copy className="size-3.5" />
+                              <span>Copy Verification Report</span>
+                            </button>
+                            <button
+                              onClick={() =>
+                                setSafeguardChecks({
+                                  consent: false,
+                                  strobe: false,
+                                  loudness: false,
+                                  tone: false,
+                                  music: false,
+                                  privacy: false,
+                                })
+                              }
+                              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                            >
+                              Reset
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Tool 2 Content */}
+                      {activeToolKey === 'age-rating' && (
+                        <div className="p-6 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-slate-50/40 dark:bg-slate-950/30 space-y-5 animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-extrabold text-base">Age-Rating &amp; Advisory Calculator</h4>
+                              <p className="text-xs text-[var(--kmm-muted)]">
+                                Compute official KMM broadcast certificate based on audience age and thematic parameters.
+                              </p>
+                            </div>
+                            <span className={`px-2.5 py-0.5 rounded-md text-xs font-black border ${computedRating.color}`}>
+                              {computedRating.rating}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+                            <div>
+                              <label className="block text-[11px] font-bold mb-1 text-slate-600 dark:text-slate-400">
+                                Target Age Bracket
+                              </label>
+                              <select
+                                value={ageCalc.ageBand}
+                                onChange={(e) => setAgeCalc({ ...ageCalc, ageBand: e.target.value })}
+                                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-xs outline-none"
+                              >
+                                <option value="0-3">0-3 Years (Infant / Nursery)</option>
+                                <option value="4-7">4-7 Years (Early Childhood)</option>
+                                <option value="8-12">8-12 Years (Pre-Teens)</option>
+                                <option value="13+">13+ Years (Teens &amp; Family)</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-bold mb-1 text-slate-600 dark:text-slate-400">
+                                Conflict Level
+                              </label>
+                              <select
+                                value={ageCalc.conflict}
+                                onChange={(e) => setAgeCalc({ ...ageCalc, conflict: e.target.value })}
+                                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-xs outline-none"
+                              >
+                                <option value="none">Gentle &bull; Zero Conflict</option>
+                                <option value="mild">Mild Animated Slapstick</option>
+                                <option value="action">Dramatic Action / Stakes</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-bold mb-1 text-slate-600 dark:text-slate-400">
+                                Scriptural Depth
+                              </label>
+                              <select
+                                value={ageCalc.doctrine}
+                                onChange={(e) => setAgeCalc({ ...ageCalc, doctrine: e.target.value })}
+                                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-xs outline-none"
+                              >
+                                <option value="foundational">Basic Bible Stories &amp; Songs</option>
+                                <option value="character">Christian Character &amp; Ethics</option>
+                                <option value="deep">In-Depth Spiritual Truths</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Advisory Result */}
+                          <div className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-black ${computedRating.color}`}>
+                                {computedRating.rating}
+                              </span>
+                              <span className="font-bold text-xs">{computedRating.label}</span>
+                            </div>
+                            <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
+                              {computedRating.summary}
+                            </p>
+                            <div className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                              Air Window: {computedRating.guidance}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Tool 3 Content */}
+                      {activeToolKey === 'ip-clearance' && (
+                        <div className="p-6 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-slate-50/40 dark:bg-slate-950/30 space-y-5 animate-in fade-in duration-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-extrabold text-base">IP Clearance &amp; Rights Verifier</h4>
+                              <p className="text-xs text-[var(--kmm-muted)]">
+                                Verify voice, music, character silhouette, and worldwide distribution deeds.
+                              </p>
+                            </div>
+                            <span className="font-mono text-sm font-bold text-sky-500">
+                              {Object.values(ipChecks).filter(Boolean).length}/5 Cleared
+                            </span>
+                          </div>
+
+                          <div className="space-y-2 pt-1">
+                            {[
+                              { key: 'voice', label: 'Voice Actor Work-for-Hire Deeds Archived' },
+                              { key: 'music', label: 'Original Score Master Sync Licenses Acquired' },
+                              { key: 'character', label: 'Characters Registered on Kiddies Media Ministry IP Portal' },
+                              { key: 'script', label: 'Script Treatments Free of 3rd Party IP' },
+                              { key: 'territory', label: 'Worldwide Broadcast Territories Assigned' },
+                            ].map((chk) => (
+                              <label
+                                key={chk.key}
+                                className={`flex items-center gap-3 p-2.5 rounded-xl border text-xs font-medium cursor-pointer transition-colors ${
+                                  ipChecks[chk.key]
+                                    ? isDark
+                                      ? 'bg-sky-500/10 border-sky-500/30 text-slate-200'
+                                      : 'bg-sky-50 border-sky-300 text-slate-900 shadow-2xs'
+                                    : isDark
+                                    ? 'bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-200'
+                                    : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={ipChecks[chk.key] || false}
+                                  onChange={(e) =>
+                                    setIpChecks((prev) => ({
+                                      ...prev,
+                                      [chk.key]: e.target.checked,
+                                    }))
+                                  }
+                                  className="size-4 accent-sky-500 cursor-pointer rounded shrink-0"
+                                />
+                                <span className="leading-tight flex-1">{chk.label}</span>
+                              </label>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-white/10">
+                            <Link
+                              href="/ip-portal"
+                              className="px-4 py-2 rounded-full text-xs font-bold border border-sky-400 bg-sky-500 text-white hover:bg-sky-600 inline-flex items-center gap-1.5 transition-colors shadow-2xs"
+                            >
+                              <Scale className="size-3.5" />
+                              <span>Open IP Register in Full Portal →</span>
+                            </Link>
+
+                            <button
+                              onClick={() => {
+                                const count = Object.values(ipChecks).filter(Boolean).length
+                                navigator.clipboard.writeText(
+                                  `Kiddies Media Ministry IP Clearance Log: ${count} of 5 Verification Pillars Cleared for ${currentVideo.code}. Registered by ${officerEmail}.`
+                                )
+                                showToast('IP Clearance summary copied!')
+                              }}
+                              className="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 cursor-pointer"
+                            >
+                              Copy Clearance Summary
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Tab 3: Attached Policies & Deeds */}
+                  {activeVideoTab === 'documents' && (
+                    <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
+                      <div>
+                        <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                          Accompanying Statutory Charters &amp; Deeds
+                        </h3>
+                        <p className="text-xs text-[var(--kmm-muted)]">
+                          These official governance documents directly govern the regulatory standards taught in {currentVideo.code}.
+                        </p>
+                      </div>
+
+                      {/* Attached Documents Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {attachedDocs.map((doc) => (
+                          <div
+                            key={doc.id}
+                            className={`p-5 rounded-2xl border flex flex-col justify-between space-y-4 transition-all ${
+                              isDark ? 'bg-slate-950/40 border-white/10 hover:border-amber-400/30' : 'bg-slate-50/60 border-slate-200 hover:border-amber-500/40 hover:bg-white shadow-2xs'
+                            }`}
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-mono font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded text-[11px]">
+                                  {doc.code}
+                                </span>
+                                <span className="text-[10px] text-[var(--kmm-muted)]">{doc.pages}</span>
+                              </div>
+                              <h4 className="font-extrabold text-sm leading-snug line-clamp-2">
+                                {doc.title}
+                              </h4>
+                              <p className="text-xs text-[var(--kmm-muted)] line-clamp-2">
+                                {doc.desc}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-white/10">
+                              <button
+                                onClick={() => setReadingDoc(doc)}
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-500 hover:text-amber-600 cursor-pointer"
+                              >
+                                <Eye className="size-3.5" />
+                                <span>Read Document</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleDownloadDocument(doc)}
+                                className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                title="Download Text"
+                              >
+                                <Download className="size-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Browse Other Documents Drawer */}
+                      {otherDocs.length > 0 && (
+                        <div className="pt-4 border-t border-slate-200 dark:border-white/10 space-y-3">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--kmm-muted)]">
+                            Other Academy Charters Available in Repository ({otherDocs.length})
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            {otherDocs.map((doc) => (
+                              <button
+                                key={doc.id}
+                                onClick={() => setReadingDoc(doc)}
+                                className="p-3 rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/40 text-left hover:border-amber-400 transition-colors cursor-pointer group"
+                              >
+                                <div className="text-[10px] font-mono font-bold text-amber-500 mb-0.5">
+                                  {doc.code}
+                                </div>
+                                <div className="font-bold text-xs truncate group-hover:text-amber-500 transition-colors">
+                                  {doc.title}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Tab 4: Accreditation & Sign-Off */}
+                  {activeVideoTab === 'accreditation' && (
+                    <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-200">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            Module Verification &amp; Institutional Sign-Off
+                          </h3>
+                          <p className="text-xs text-[var(--kmm-muted)]">
+                            Verify completion of video lecture, practical audit tools, and accompanying policy charters.
+                          </p>
+                        </div>
+
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold border self-start sm:self-auto ${
+                          completedModules[currentVideo.id]
+                            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                            : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                        }`}>
+                          {completedModules[currentVideo.id] ? '✓ Accreditated' : 'Pending Verification'}
+                        </span>
+                      </div>
+
+                      {/* Criteria Breakdown */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950/40 space-y-1">
+                          <div className="text-[10px] font-bold uppercase text-[var(--kmm-muted)]">Step 1: Video Lecture</div>
+                          <div className="font-bold text-xs flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                            <CheckCircle className="size-3.5" />
+                            <span>{progressPercent >= 80 ? 'Completed (100%)' : `In Progress (${progressPercent}%)`}</span>
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950/40 space-y-1">
+                          <div className="text-[10px] font-bold uppercase text-[var(--kmm-muted)]">Step 2: Practical Tools</div>
+                          <div className="font-bold text-xs flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                            <Wrench className="size-3.5" />
+                            <span>Audit Score: {safeguardScore}%</span>
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-950/40 space-y-1">
+                          <div className="text-[10px] font-bold uppercase text-[var(--kmm-muted)]">Step 3: Statutory Policies</div>
+                          <div className="font-bold text-xs flex items-center gap-1.5 text-sky-600 dark:text-sky-400">
+                            <Scroll className="size-3.5" />
+                            <span>{attachedDocs.length} Charters Attached</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Official Digital Certificate Card */}
+                      <div className="p-6 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-transparent to-amber-500/5 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <div className="size-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
+                            <Award className="size-5" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                              KMM Academy Accreditation Record
+                            </div>
+                            <div className="font-extrabold text-sm sm:text-base">
+                              Certified Officer: {officerEmail}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-xs text-[var(--kmm-muted)] leading-relaxed">
+                          This digital credential confirms that the candidate has completed all statutory compliance benchmarks under <b>{currentVideo.code}: {currentVideo.title}</b> in accordance with Loveworld Kingdom children safeguarding directives.
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-amber-500/20 text-xs">
+                          <span className="font-mono text-[11px] text-[var(--kmm-muted)]">
+                            Hash: KMM-ACR-{currentVideo.id}-2026
+                          </span>
+
+                          <button
+                            onClick={() => toggleModuleCompletion(currentVideo.id)}
+                            className={`px-5 py-2 rounded-full font-bold text-xs transition-colors cursor-pointer shadow-xs ${
+                              completedModules[currentVideo.id]
+                                ? 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
+                                : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                            }`}
+                          >
+                            {completedModules[currentVideo.id]
+                              ? 'Revoke & Retake Module'
+                              : 'Sign & Issue Accreditation Certificate'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Right 4 Cols: Up next / Other Modules */}
+              {/* Right 4 Cols: Up Next / Curriculum Playlist */}
               <div className="lg:col-span-4 space-y-4">
                 <div className={`flex items-center justify-between text-xs font-bold px-1 ${
                   isDark ? 'text-slate-400' : 'text-slate-600'
                 }`}>
-                  <span>Other Training Modules</span>
-                  <span>{ARCHIVED_TRAINING_VIDEOS.length} Total</span>
+                  <span className="uppercase tracking-wider">Curriculum Masterclasses</span>
+                  <span>{ARCHIVED_TRAINING_VIDEOS.length} Modules</span>
                 </div>
 
-                <div className="space-y-3 max-h-[780px] overflow-y-auto pr-1">
-                  {ARCHIVED_TRAINING_VIDEOS.filter((v) => v.id !== currentVideo.id).map((vid) => (
-                    <div
-                      key={vid.id}
-                      onClick={() => startPlayingVideo(vid)}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer group flex gap-3 ${
-                        isDark
-                          ? 'bg-slate-900/50 border-white/5 hover:border-amber-400/40 hover:bg-slate-800/50'
-                          : 'bg-white border-slate-200 hover:border-amber-500/40 hover:bg-slate-50 shadow-2xs'
-                      }`}
-                    >
+                <div className="space-y-3 max-h-[820px] overflow-y-auto pr-1">
+                  {ARCHIVED_TRAINING_VIDEOS.map((vid) => {
+                    const isCurrent = vid.id === currentVideo.id
+                    return (
                       <div
-                        className="w-24 h-16 rounded-xl flex items-center justify-center shrink-0 relative overflow-hidden text-xs font-bold shadow-xs group-hover:scale-102 transition-transform"
-                        style={{ background: vid.gradient }}
+                        key={vid.id}
+                        onClick={() => startPlayingVideo(vid, 'notes')}
+                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer group flex gap-3 ${
+                          isCurrent
+                            ? isDark
+                              ? 'bg-amber-500/10 border-amber-400/40 shadow-xs'
+                              : 'bg-amber-50/80 border-amber-300 shadow-xs'
+                            : isDark
+                            ? 'bg-slate-900/50 border-white/5 hover:border-amber-400/40 hover:bg-slate-800/50'
+                            : 'bg-white border-slate-200 hover:border-amber-500/40 hover:bg-slate-50 shadow-2xs'
+                        }`}
                       >
-                        <span className="size-6 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-[10px] shadow-md">
-                          <Play className="size-2.5 fill-current ml-0.5" />
-                        </span>
-                        <span className="absolute bottom-1 right-1 text-[9px] font-mono bg-black/70 px-1 rounded text-white">
-                          {vid.duration}
-                        </span>
-                      </div>
-
-                      <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">
-                            {vid.code}
+                        <div
+                          className="w-24 h-18 rounded-xl flex items-center justify-center shrink-0 relative overflow-hidden text-xs font-bold shadow-xs group-hover:scale-102 transition-transform"
+                          style={{ background: vid.gradient }}
+                        >
+                          <span className={`size-7 rounded-full flex items-center justify-center text-[10px] shadow-md ${
+                            isCurrent ? 'bg-amber-500 text-slate-950 scale-110' : 'bg-white/80 text-slate-950'
+                          }`}>
+                            <Play className="size-3 fill-current ml-0.5" />
                           </span>
-                          {completedModules[vid.id] && (
-                            <Check className="size-3 text-emerald-500 shrink-0" />
-                          )}
+                          <span className="absolute bottom-1 right-1 text-[9px] font-mono bg-black/70 px-1 rounded text-white">
+                            {vid.duration}
+                          </span>
                         </div>
-                        <h4 className={`text-xs font-bold leading-snug line-clamp-2 transition-colors ${
-                          isDark ? 'text-slate-200 group-hover:text-amber-400' : 'text-slate-900 group-hover:text-amber-600'
-                        }`}>
-                          {vid.title}
-                        </h4>
-                        <span className={`text-[11px] mt-1 truncate ${
-                          isDark ? 'text-slate-400' : 'text-slate-500'
-                        }`}>{vid.speaker}</span>
+
+                        <div className="min-w-0 flex-1 flex flex-col justify-center">
+                          <div className="flex items-center justify-between gap-1 mb-0.5">
+                            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">
+                              {vid.code}
+                            </span>
+                            {completedModules[vid.id] && (
+                              <CheckCircle className="size-3.5 text-emerald-500 shrink-0" />
+                            )}
+                          </div>
+                          <h4 className={`text-xs font-bold leading-snug line-clamp-2 transition-colors ${
+                            isCurrent
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : isDark
+                              ? 'text-slate-200 group-hover:text-amber-400'
+                              : 'text-slate-900 group-hover:text-amber-600'
+                          }`}>
+                            {vid.title}
+                          </h4>
+
+                          {/* Quick indicators of tools and docs inside */}
+                          <div className="flex items-center gap-2 mt-1.5 text-[10px] text-[var(--kmm-muted)]">
+                            <span>🛠️ {vid.tools?.length || 2} Tools</span>
+                            <span>&bull;</span>
+                            <span>📄 {vid.docIds?.length || 1} Docs</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             </div>
@@ -1332,881 +1845,380 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
         )}
 
         {/* =========================================================================
-            CATALOG VIEW (Tabs: All Resources, Materials, Tools, Supporting Documents)
+            CATALOG VIEW (Modern Academy Dashboard + Curriculum Masterclasses)
             ========================================================================= */}
         {viewMode === 'catalog' && (
-          <div className="space-y-12 animate-in fade-in duration-300">
-            {/* Overview Hero Banner */}
+          <div className="space-y-10 animate-in fade-in duration-300">
+            {/* Modern Hero & Dashboard Overview */}
             <section
-              className={`rounded-3xl border overflow-hidden p-6 sm:p-8 lg:p-12 relative shadow-xl transition-all ${
+              className={`p-6 sm:p-10 rounded-[32px] border relative overflow-hidden shadow-sm transition-colors ${
                 isDark
-                  ? 'bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-950/60 border-white/10'
-                  : 'bg-gradient-to-br from-white via-amber-50/40 to-orange-50/30 border-slate-200'
+                  ? 'bg-gradient-to-br from-slate-900 via-slate-900/80 to-slate-950 border-white/10'
+                  : 'bg-gradient-to-br from-white via-amber-50/20 to-sky-50/20 border-slate-200/90'
               }`}
             >
-              <div className="max-w-3xl relative z-10 space-y-4">
-                <div className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
-                  isDark
-                    ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-                    : 'bg-amber-100/80 border-amber-300 text-amber-800'
-                }`}>
-                  <GraduationCap className="size-4" />
-                  <span>Kiddies Media Ministry Institutional Training &amp; Resources</span>
+              <div className="relative z-10 space-y-6">
+                <div className="max-w-3xl space-y-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                    <GraduationCap className="size-3.5" />
+                    <span className="uppercase tracking-widest text-[10px]">Academy Agency Directorate</span>
+                  </div>
+
+                  <h1
+                    className={`text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight ${
+                      isDark ? 'text-white' : 'text-slate-900'
+                    }`}
+                    style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
+                  >
+                    Officer Training &amp; Compliance Hub
+                  </h1>
+
+                  <p className={`text-sm sm:text-base leading-relaxed ${
+                    isDark ? 'text-slate-300' : 'text-slate-600'
+                  }`}>
+                    Official regulatory curriculums covering international child broadcast safety, COPPA mobile privacy, copyright licensing, and scriptural integrity. Each masterclass includes live interactive compliance utilities and statutory policy deeds directly inside the video studio.
+                  </p>
                 </div>
 
-                <h1
-                  className={`text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight ${
-                    isDark ? 'text-white' : 'text-slate-950'
-                  }`}
-                  style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
-                >
-                  Training Materials, Tools &amp; Supporting Documents
-                </h1>
-
-                <p className={`text-sm sm:text-base leading-relaxed ${
-                  isDark ? 'text-slate-300' : 'text-slate-600'
-                }`}>
-                  The official institutional training repository for Kiddies Media Ministry officers, department heads, animators, and broadcast compliance reviewers. Explore specialized training materials, launch practical compliance tools, and access helpful supporting documents.
-                </p>
-
-                {/* Quick Stats Chips */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3">
-                  <div
-                    onClick={() => setActiveTab('materials')}
-                    className={`p-3 sm:p-3.5 rounded-2xl border cursor-pointer transition-all hover:scale-102 ${
-                      activeTab === 'materials'
-                        ? isDark
-                          ? 'border-amber-500 bg-amber-500/10'
-                          : 'border-amber-500 bg-amber-50 shadow-xs'
-                        : isDark
-                        ? 'border-white/10 bg-slate-900/50'
-                        : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs'
-                    }`}
-                  >
-                    <div className="text-xl sm:text-2xl font-extrabold text-amber-500">{ARCHIVED_TRAINING_VIDEOS.length}</div>
-                    <div className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Training Modules</div>
+                {/* Stat Metrics Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-2">
+                  <div className={`p-4 sm:p-5 rounded-2xl border ${
+                    isDark ? 'bg-slate-950/60 border-white/10' : 'bg-white/80 border-slate-200 shadow-2xs'
+                  }`}>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">
+                      Curriculum
+                    </div>
+                    <div className="text-xl sm:text-2xl font-extrabold">8 Masterclasses</div>
+                    <div className="text-xs text-amber-500 mt-0.5">4K Broadcast Masters</div>
                   </div>
 
-                  <div
-                    onClick={() => setActiveTab('tools')}
-                    className={`p-3 sm:p-3.5 rounded-2xl border cursor-pointer transition-all hover:scale-102 ${
-                      activeTab === 'tools'
-                        ? isDark
-                          ? 'border-amber-500 bg-amber-500/10'
-                          : 'border-amber-500 bg-amber-50 shadow-xs'
-                        : isDark
-                        ? 'border-white/10 bg-slate-900/50'
-                        : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs'
-                    }`}
-                  >
-                    <div className="text-xl sm:text-2xl font-extrabold text-amber-500">3</div>
-                    <div className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Practical Tools</div>
+                  <div className={`p-4 sm:p-5 rounded-2xl border ${
+                    isDark ? 'bg-slate-950/60 border-white/10' : 'bg-white/80 border-slate-200 shadow-2xs'
+                  }`}>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">
+                      Integrated Tools
+                    </div>
+                    <div className="text-xl sm:text-2xl font-extrabold">3 Utilities</div>
+                    <div className="text-xs text-amber-500 mt-0.5">Embedded in Lessons</div>
                   </div>
 
-                  <div
-                    onClick={() => setActiveTab('documents')}
-                    className={`p-3 sm:p-3.5 rounded-2xl border cursor-pointer transition-all hover:scale-102 ${
-                      activeTab === 'documents'
-                        ? isDark
-                          ? 'border-amber-500 bg-amber-500/10'
-                          : 'border-amber-500 bg-amber-50 shadow-xs'
-                        : isDark
-                        ? 'border-white/10 bg-slate-900/50'
-                        : 'border-slate-200 bg-white hover:border-slate-300 shadow-2xs'
-                    }`}
-                  >
-                    <div className="text-xl sm:text-2xl font-extrabold text-amber-500">{SUPPORTING_DOCUMENTS.length}</div>
-                    <div className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Supporting Docs</div>
+                  <div className={`p-4 sm:p-5 rounded-2xl border ${
+                    isDark ? 'bg-slate-950/60 border-white/10' : 'bg-white/80 border-slate-200 shadow-2xs'
+                  }`}>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">
+                      Statutory Charters
+                    </div>
+                    <div className="text-xl sm:text-2xl font-extrabold">5 Policy Manuals</div>
+                    <div className="text-xs text-sky-500 mt-0.5">Full-Text Reader &amp; PDF</div>
                   </div>
 
-                  <div
-                    className={`p-3 sm:p-3.5 rounded-2xl border ${
-                      isDark ? 'border-white/10 bg-slate-900/50' : 'border-slate-200 bg-white shadow-2xs'
-                    }`}
-                  >
-                    <div className="text-xl sm:text-2xl font-extrabold text-emerald-500">100%</div>
-                    <div className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Zero-Defect Goal</div>
-                  </div>
-                </div>
-
-                <div className={`flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-semibold pt-3 ${
-                  isDark ? 'text-slate-400' : 'text-slate-600'
-                }`}>
-                  <div className="flex items-center gap-1.5">
-                    <UserCheck className="size-3.5 text-emerald-500" />
-                    <span>Officer Authenticated ({officerEmail})</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <ShieldCheck className="size-3.5 text-amber-500" />
-                    <span>Statutory Child Safeguarding</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Scroll className="size-3.5 text-sky-500" />
-                    <span>Broadcast Playout Standards</span>
+                  <div className={`p-4 sm:p-5 rounded-2xl border ${
+                    isDark ? 'bg-slate-950/60 border-white/10' : 'bg-white/80 border-slate-200 shadow-2xs'
+                  }`}>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">
+                      Your Accreditation
+                    </div>
+                    <div className="text-xl sm:text-2xl font-extrabold">{completedCount} of 8 Done</div>
+                    <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-white/10 mt-2 overflow-hidden">
+                      <div
+                        className="h-full bg-amber-500 rounded-full transition-all"
+                        style={{ width: `${progressPercentTotal}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Top Level Tab Switcher */}
-            <div className={`flex items-center gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-full border w-full sm:w-fit overflow-x-auto ${
-              isDark ? 'border-white/10 bg-slate-900/50' : 'border-slate-200 bg-white shadow-2xs'
-            }`}>
-              <button
-                onClick={() => setActiveTab('all')}
-                className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === 'all'
-                    ? 'bg-amber-500 text-slate-950 shadow-md'
-                    : isDark
-                    ? 'text-slate-400 hover:text-white'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                All Resources
-              </button>
-              <button
-                onClick={() => setActiveTab('materials')}
-                className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                  activeTab === 'materials'
-                    ? 'bg-amber-500 text-slate-950 shadow-md'
-                    : isDark
-                    ? 'text-slate-400 hover:text-white'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <span>Training Materials</span>
-                <span className={`size-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  activeTab === 'materials'
-                    ? 'bg-slate-950/20 text-slate-950'
-                    : isDark
-                    ? 'bg-white/10 text-slate-300'
-                    : 'bg-slate-200 text-slate-700'
-                }`}>
-                  {ARCHIVED_TRAINING_VIDEOS.length}
-                </span>
-              </button>
-              <button
-                onClick={() => setActiveTab('tools')}
-                className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                  activeTab === 'tools'
-                    ? 'bg-amber-500 text-slate-950 shadow-md'
-                    : isDark
-                    ? 'text-slate-400 hover:text-white'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <span>Practical Tools</span>
-                <span className={`size-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  activeTab === 'tools'
-                    ? 'bg-slate-950/20 text-slate-950'
-                    : isDark
-                    ? 'bg-white/10 text-slate-300'
-                    : 'bg-slate-200 text-slate-700'
-                }`}>
-                  3
-                </span>
-              </button>
-              <button
-                onClick={() => setActiveTab('documents')}
-                className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                  activeTab === 'documents'
-                    ? 'bg-amber-500 text-slate-950 shadow-md'
-                    : isDark
-                    ? 'text-slate-400 hover:text-white'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <span>Supporting Documents</span>
-                <span className={`size-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  activeTab === 'documents'
-                    ? 'bg-slate-950/20 text-slate-950'
-                    : isDark
-                    ? 'bg-white/10 text-slate-300'
-                    : 'bg-slate-200 text-slate-700'
-                }`}>
-                  {SUPPORTING_DOCUMENTS.length}
-                </span>
-              </button>
-            </div>
-
-            {/* Category Filter Pills */}
-            <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b ${
-              isDark ? 'border-white/10' : 'border-slate-200'
-            }`}>
-              <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none">
-                {CATEGORIES.map((cat) => (
+            {/* Filter & Search Bar */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-white/10">
+              {/* Category Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+                {[
+                  { id: 'all', label: 'All Disciplines' },
+                  { id: 'broadcast', label: 'Broadcast Standards' },
+                  { id: 'protection', label: 'Child Protection' },
+                  { id: 'copyright', label: 'Copyright & IP' },
+                  { id: 'doctrinal', label: 'Scriptural Review' },
+                  { id: 'merchandising', label: 'Production & QA' },
+                ].map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setActiveFilter(cat.id)}
-                    className={`inline-flex items-center px-3.5 sm:px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                       activeFilter === cat.id
-                        ? 'bg-amber-500 text-slate-950 shadow-md scale-102'
+                        ? 'bg-amber-500 text-slate-950 shadow-xs'
                         : isDark
-                        ? 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white hover:border-white/20'
-                        : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-2xs'
+                        ? 'bg-slate-900 border border-white/10 text-slate-300 hover:text-white'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs'
                     }`}
                   >
-                    <span>{cat.label}</span>
+                    {cat.label}
                   </button>
                 ))}
               </div>
 
-              <div className={`text-xs font-bold shrink-0 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                {activeTab === 'materials'
-                  ? `${filteredVideos.length} Modules Filtered`
-                  : activeTab === 'documents'
-                  ? `${filteredDocuments.length} Documents Filtered`
-                  : activeTab === 'tools'
-                  ? '3 Practical Utilities'
-                  : `${filteredVideos.length} Modules &bull; 3 Tools &bull; ${filteredDocuments.length} Docs`}
+              {/* Status Toggle Pills */}
+              <div className="flex items-center gap-1 self-start lg:self-auto text-xs font-semibold">
+                <span className="text-[var(--kmm-muted)] text-[11px] mr-1">Status:</span>
+                {[
+                  { id: 'all', label: 'All' },
+                  { id: 'in-progress', label: 'In Progress' },
+                  { id: 'completed', label: 'Accredited' },
+                ].map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setStatusFilter(s.id as any)}
+                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                      statusFilter === s.id
+                        ? isDark
+                          ? 'bg-white/20 text-white font-bold'
+                          : 'bg-slate-900 text-white font-bold'
+                        : 'text-[var(--kmm-muted)] hover:text-[var(--kmm-fg)]'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* =========================================================================
-                SECTION 1: RELEVANT TRAINING MATERIALS (8 Modules)
-                ========================================================================= */}
-            {(activeTab === 'all' || activeTab === 'materials') && (
-              <section className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
-                      <GraduationCap className="size-4" />
-                      <span>Curriculum &amp; Masterclasses</span>
-                    </div>
-                    <h2
-                      className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-                        isDark ? 'text-white' : 'text-slate-950'
-                      }`}
-                      style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
-                    >
-                      Relevant Training Materials
-                    </h2>
-                  </div>
-                  <span className={`text-xs font-semibold hidden sm:inline ${
-                    isDark ? 'text-slate-400' : 'text-slate-500'
-                  }`}>
-                    Interactive Video &amp; Study Guides
-                  </span>
-                </div>
-
-                {filteredVideos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredVideos.map((vid) => (
+            {/* Curriculum Masterclasses Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+              {filteredVideos.map((video) => {
+                const isCertified = !!completedModules[video.id]
+                return (
+                  <div
+                    key={video.id}
+                    className={`rounded-[28px] border overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                      isDark
+                        ? 'bg-slate-900/60 border-white/10 hover:border-amber-400/40'
+                        : 'bg-white border-slate-200/90 hover:border-amber-500/40 shadow-sm'
+                    }`}
+                  >
+                    <div>
+                      {/* Video Thumbnail Header */}
                       <div
-                        key={vid.id}
-                        onClick={() => startPlayingVideo(vid)}
-                        className={`rounded-3xl border overflow-hidden flex flex-col justify-between transition-all cursor-pointer group hover:-translate-y-1 hover:shadow-2xl ${
-                          isDark
-                            ? 'bg-slate-900/60 border-white/10 hover:border-amber-400/50 shadow-black/40'
-                            : 'bg-white border-slate-200 hover:border-amber-500/50 shadow-slate-200/50'
-                        }`}
+                        onClick={() => startPlayingVideo(video, 'notes')}
+                        className="aspect-[16/9] w-full relative flex items-center justify-center p-5 cursor-pointer group overflow-hidden"
+                        style={{ background: video.gradient }}
                       >
-                        {/* Card Thumbnail */}
-                        <div
-                          className="h-44 relative flex items-center justify-center p-4 overflow-hidden"
-                          style={{ background: vid.gradient }}
-                        >
-                          <div className="size-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform z-10">
-                            <Play className="size-5 fill-current ml-0.5" />
-                          </div>
+                        <div className="absolute inset-0 pointer-events-none opacity-80" style={{ background: video.glow }} />
 
-                          <span className="absolute top-3 left-3 text-[10px] font-mono font-bold bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded text-amber-400 border border-amber-400/30">
-                            {vid.code}
+                        {/* Top Badges */}
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-black/60 text-amber-400 border border-amber-400/30">
+                            {video.code}
                           </span>
-
-                          <span className="absolute bottom-3 right-3 text-[10px] font-mono font-bold bg-black/70 px-2 py-0.5 rounded text-white">
-                            {vid.duration}
-                          </span>
-
-                          {completedModules[vid.id] && (
-                            <span className="absolute top-3 right-3 text-[10px] font-bold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
-                              <Check className="size-3" />
-                              <span>Accredited</span>
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Card Content */}
-                        <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-[10px] font-black uppercase text-amber-500 tracking-wider">
-                                {vid.categoryLabel}
-                              </span>
-                              <span className={`text-[10px] font-semibold ml-auto ${
-                                isDark ? 'text-slate-400' : 'text-slate-500'
-                              }`}>{vid.res}</span>
-                            </div>
-
-                            <h3
-                              className={`text-base font-extrabold leading-snug group-hover:text-amber-500 transition-colors line-clamp-2 mb-2 ${
-                                isDark ? 'text-white' : 'text-slate-900'
-                              }`}
-                              style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
-                            >
-                              {vid.title}
-                            </h3>
-
-                            <p className={`text-xs line-clamp-2 leading-relaxed ${
-                              isDark ? 'text-slate-400' : 'text-slate-600'
-                            }`}>{vid.desc}</p>
-                          </div>
-
-                          {/* Speaker footer */}
-                          <div className={`pt-3 border-t flex items-center justify-between text-xs ${
-                            isDark ? 'border-white/10' : 'border-slate-100'
-                          }`}>
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="size-6 rounded-full flex items-center justify-center font-bold text-[10px] text-white shrink-0 shadow-2xs"
-                                style={{ background: vid.avatarBg }}
-                              >
-                                {vid.initials}
-                              </div>
-                              <span className={`font-semibold truncate max-w-[130px] sm:max-w-[140px] ${
-                                isDark ? 'text-slate-300' : 'text-slate-800'
-                              }`}>
-                                {vid.speaker}
-                              </span>
-                            </div>
-
-                            <span className="inline-flex items-center gap-1 font-bold text-amber-500 group-hover:translate-x-1 transition-transform shrink-0">
-                              <span className="hidden xs:inline">Open Masterclass</span>
-                              <ChevronRight className="size-3.5" />
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div
-                    className={`rounded-3xl border border-dashed p-10 text-center space-y-3 ${
-                      isDark ? 'bg-slate-900/30 border-white/10' : 'bg-slate-100/50 border-slate-300'
-                    }`}
-                  >
-                    <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>No training modules matched the selected category or search filter.</p>
-                    <button
-                      onClick={() => {
-                        setActiveFilter('all')
-                        setSearchQuery('')
-                      }}
-                      className="px-4 py-2 rounded-full text-xs font-bold bg-amber-500 text-slate-950 cursor-pointer shadow-xs"
-                    >
-                      Clear Filters
-                    </button>
-                  </div>
-                )}
-              </section>
-            )}
-
-            {/* =========================================================================
-                SECTION 2: PRACTICAL INTERACTIVE COMPLIANCE TOOLS (3 Tools)
-                ========================================================================= */}
-            {(activeTab === 'all' || activeTab === 'tools') && (
-              <section className="space-y-6 pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
-                      <Wrench className="size-4" />
-                      <span>Interactive Production Utilities</span>
-                    </div>
-                    <h2
-                      className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-                        isDark ? 'text-white' : 'text-slate-950'
-                      }`}
-                      style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
-                    >
-                      Practical Compliance Tools
-                    </h2>
-                  </div>
-                  <span className={`text-xs font-semibold hidden sm:inline ${
-                    isDark ? 'text-slate-400' : 'text-slate-500'
-                  }`}>
-                    Live Checklists &amp; Advisory Calculators
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Tool 1: Child Safeguarding Audit Checklist */}
-                  <div
-                    className={`p-6 sm:p-7 rounded-3xl border flex flex-col justify-between space-y-5 ${
-                      isDark ? 'bg-slate-900/70 border-white/10' : 'bg-white border-slate-200 shadow-sm'
-                    }`}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-500 border border-amber-500/30">
-                          Tool 1: Audit Checklist
-                        </span>
-                        <span className={`text-xs font-mono font-bold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
-                          {safeguardScore}% Passed
-                        </span>
-                      </div>
-
-                      <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        Child Safeguarding Audit Tool
-                      </h3>
-                      <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                        Verify statutory child safety checkpoints before approving animations, live-action shoots, or voice recordings for broadcast.
-                      </p>
-
-                      {/* Progress bar */}
-                      <div className={`w-full h-2 rounded-full overflow-hidden ${
-                        isDark ? 'bg-white/10' : 'bg-slate-200'
-                      }`}>
-                        <div
-                          className={`h-full transition-all duration-300 rounded-full ${
-                            safeguardScore === 100 ? 'bg-emerald-500' : 'bg-amber-500'
-                          }`}
-                          style={{ width: `${safeguardScore}%` }}
-                        />
-                      </div>
-
-                      {/* Checklist Items */}
-                      <div className="space-y-2 pt-1">
-                        {[
-                          { key: 'consent', label: '1. Minor Guardian Release Deed Signed' },
-                          { key: 'strobe', label: '2. Strobe Safety Verified (< 3 Hz limit)' },
-                          { key: 'loudness', label: '3. Audio Loudness at -24 LKFS Target' },
-                          { key: 'tone', label: '4. Non-Frightening Emotional Narrative' },
-                          { key: 'music', label: '5. Work-For-Hire Original Music Cleared' },
-                          { key: 'privacy', label: '6. Minor Personal Identity Protected' },
-                        ].map((item) => (
-                          <label
-                            key={item.key}
-                            className={`flex items-center gap-3 p-2.5 rounded-xl border text-xs font-medium cursor-pointer transition-colors ${
-                              safeguardChecks[item.key]
-                                ? isDark
-                                  ? 'bg-amber-500/10 border-amber-500/30 text-slate-200'
-                                  : 'bg-amber-50 border-amber-300 text-slate-900 shadow-2xs'
-                                : isDark
-                                ? 'bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-200'
-                                : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={safeguardChecks[item.key] || false}
-                              onChange={(e) =>
-                                setSafeguardChecks((prev) => ({
-                                  ...prev,
-                                  [item.key]: e.target.checked,
-                                }))
-                              }
-                              className="size-4 accent-amber-500 cursor-pointer rounded shrink-0"
-                            />
-                            <span className="leading-tight flex-1">{item.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className={`pt-2 flex items-center justify-between gap-2 border-t ${
-                      isDark ? 'border-white/10' : 'border-slate-100'
-                    }`}>
-                      <button
-                        onClick={copySafeguardReport}
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors cursor-pointer shadow-xs"
-                      >
-                        <Copy className="size-3.5" />
-                        <span>Copy Audit Report</span>
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          setSafeguardChecks({
-                            consent: false,
-                            strobe: false,
-                            loudness: false,
-                            tone: false,
-                            music: false,
-                            privacy: false,
-                          })
-                        }
-                        className={`py-2 px-3 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
-                          isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                      >
-                        Reset
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Tool 2: Content Age-Rating & Sensitivity Calculator */}
-                  <div
-                    className={`p-6 sm:p-7 rounded-3xl border flex flex-col justify-between space-y-5 ${
-                      isDark ? 'bg-slate-900/70 border-white/10' : 'bg-white border-slate-200 shadow-sm'
-                    }`}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-500 border border-amber-500/30">
-                          Tool 2: Rating Calculator
-                        </span>
-                        <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-black border ${computedRating.color}`}>
-                          {computedRating.rating}
-                        </span>
-                      </div>
-
-                      <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        Age-Rating &amp; Advisory Calculator
-                      </h3>
-                      <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                        Calculate official Kiddies Media Ministry Content Advisory Badges based on intended age demographics and thematic parameters.
-                      </p>
-
-                      {/* Selectors */}
-                      <div className="space-y-2.5 pt-1 text-xs">
-                        <div>
-                          <label className={`block text-[11px] font-bold mb-1 ${
-                            isDark ? 'text-slate-400' : 'text-slate-700'
-                          }`}>
-                            Target Age Bracket
-                          </label>
-                          <select
-                            value={ageCalc.ageBand}
-                            onChange={(e) => setAgeCalc({ ...ageCalc, ageBand: e.target.value })}
-                            className={`w-full p-2.5 rounded-xl border text-xs outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors ${
-                              isDark ? 'bg-slate-950 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
-                            }`}
-                          >
-                            <option value="0-3">0-3 Years (Infant / Nursery)</option>
-                            <option value="4-7">4-7 Years (Early Childhood)</option>
-                            <option value="8-12">8-12 Years (Pre-Teens)</option>
-                            <option value="13+">13+ Years (Teens &amp; Family)</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className={`block text-[11px] font-bold mb-1 ${
-                            isDark ? 'text-slate-400' : 'text-slate-700'
-                          }`}>
-                            Conflict &amp; Tension Level
-                          </label>
-                          <select
-                            value={ageCalc.conflict}
-                            onChange={(e) => setAgeCalc({ ...ageCalc, conflict: e.target.value })}
-                            className={`w-full p-2.5 rounded-xl border text-xs outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors ${
-                              isDark ? 'bg-slate-950 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
-                            }`}
-                          >
-                            <option value="none">Gentle &bull; Zero Conflict</option>
-                            <option value="mild">Mild Animated Slapstick</option>
-                            <option value="action">Dramatic Action / High Stakes</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className={`block text-[11px] font-bold mb-1 ${
-                            isDark ? 'text-slate-400' : 'text-slate-700'
-                          }`}>
-                            Scriptural Depth
-                          </label>
-                          <select
-                            value={ageCalc.doctrine}
-                            onChange={(e) => setAgeCalc({ ...ageCalc, doctrine: e.target.value })}
-                            className={`w-full p-2.5 rounded-xl border text-xs outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors ${
-                              isDark ? 'bg-slate-950 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
-                            }`}
-                          >
-                            <option value="foundational">Basic Bible Stories &amp; Songs</option>
-                            <option value="character">Christian Character &amp; Ethics</option>
-                            <option value="deep">In-Depth Spiritual Truths &amp; War</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Computed Advisory Result Box */}
-                      <div
-                        className={`p-3.5 rounded-2xl border ${
-                          isDark ? 'bg-slate-950/80 border-white/10' : 'bg-slate-50 border-slate-200 shadow-2xs'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-black ${computedRating.color}`}>
-                            {computedRating.rating}
-                          </span>
-                          <span className={`font-bold text-xs truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                            {computedRating.label}
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-black/60 text-white border border-white/20">
+                            {video.categoryLabel}
                           </span>
                         </div>
-                        <p className={`text-[11px] leading-relaxed mb-1.5 ${
-                          isDark ? 'text-slate-400' : 'text-slate-600'
-                        }`}>
-                          {computedRating.summary}
-                        </p>
-                        <div className={`text-[10px] font-semibold ${
-                          isDark ? 'text-amber-400' : 'text-amber-600'
-                        }`}>
-                          Air Window: {computedRating.guidance}
+
+                        <div className="absolute top-3 right-3 text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-slate-300">
+                          {video.duration}
                         </div>
-                      </div>
-                    </div>
 
-                    <div className={`pt-2 border-t text-center ${
-                      isDark ? 'border-white/10' : 'border-slate-100'
-                    }`}>
-                      <span className={`text-[11px] font-semibold ${
-                        isDark ? 'text-slate-400' : 'text-slate-500'
-                      }`}>
-                        Officially gazetted under Kiddies Media Ministry Advisory Matrix 2026
-                      </span>
-                    </div>
-                  </div>
+                        {/* Play Button Icon */}
+                        <div className="size-14 rounded-full bg-amber-500 group-hover:scale-110 text-slate-950 flex items-center justify-center shadow-xl transition-transform">
+                          <Play className="size-6 fill-current ml-0.5" />
+                        </div>
 
-                  {/* Tool 3: IP Clearance & Rights Verifier */}
-                  <div
-                    className={`p-6 sm:p-7 rounded-3xl border flex flex-col justify-between space-y-5 ${
-                      isDark ? 'bg-slate-900/70 border-white/10' : 'bg-white border-slate-200 shadow-sm'
-                    }`}
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-500 border border-amber-500/30">
-                          Tool 3: Rights Verifier
-                        </span>
-                        <span className={`text-xs font-mono font-bold ${isDark ? 'text-sky-400' : 'text-sky-600'}`}>
-                          {Object.values(ipChecks).filter(Boolean).length}/5 Cleared
-                        </span>
-                      </div>
-
-                      <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        IP Clearance &amp; Licensing Verifier
-                      </h3>
-                      <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                        Verify original voice, audio, and character copyright clearances before releasing assets on the Kiddies Media Ministry IP Portal.
-                      </p>
-
-                      {/* 5 IP Clearance checks */}
-                      <div className="space-y-2 pt-1">
-                        {[
-                          { key: 'voice', label: 'Voice Actor Work-for-Hire Deeds Archived' },
-                          { key: 'music', label: 'Original Score Master Sync Licenses Acquired' },
-                          { key: 'character', label: 'Characters Registered on Kiddies Media Ministry IP Portal' },
-                          { key: 'script', label: 'Script Treatments Free of 3rd Party IP' },
-                          { key: 'territory', label: 'Worldwide Broadcast Territories Assigned' },
-                        ].map((chk) => (
-                          <label
-                            key={chk.key}
-                            className={`flex items-center gap-3 p-2.5 rounded-xl border text-xs font-medium cursor-pointer transition-colors ${
-                              ipChecks[chk.key]
-                                ? isDark
-                                  ? 'bg-sky-500/10 border-sky-500/30 text-slate-200'
-                                  : 'bg-sky-50 border-sky-300 text-slate-900 shadow-2xs'
-                                : isDark
-                                ? 'bg-slate-950/40 border-white/5 text-slate-400 hover:text-slate-200'
-                                : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={ipChecks[chk.key] || false}
-                              onChange={(e) =>
-                                setIpChecks((prev) => ({
-                                  ...prev,
-                                  [chk.key]: e.target.checked,
-                                }))
-                              }
-                              className="size-4 accent-sky-500 cursor-pointer rounded shrink-0"
-                            />
-                            <span className="leading-tight flex-1">{chk.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className={`pt-2 border-t flex items-center justify-between gap-3 ${
-                      isDark ? 'border-white/10' : 'border-slate-100'
-                    }`}>
-                      <Link
-                        href="/ip-portal"
-                        className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-bold border transition-colors ${
-                          isDark
-                            ? 'border-sky-400/40 text-sky-400 hover:bg-sky-400/10'
-                            : 'border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100'
-                        }`}
-                      >
-                        <Scale className="size-3.5" />
-                        <span>Launch IP Portal</span>
-                      </Link>
-
-                      <button
-                        onClick={() => {
-                          const count = Object.values(ipChecks).filter(Boolean).length
-                          navigator.clipboard.writeText(
-                            `Kiddies Media Ministry IP Clearance Log: ${count} of 5 Verification Pillars Cleared. Registered by ${officerEmail}.`
-                          )
-                          showToast('IP Clearance summary copied!')
-                        }}
-                        className={`py-2 px-3 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
-                          isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                      >
-                        Copy Log
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* =========================================================================
-                SECTION 3: HELPFUL SUPPORTING DOCUMENTS (6 Documents)
-                ========================================================================= */}
-            {(activeTab === 'all' || activeTab === 'documents') && (
-              <section className="space-y-6 pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
-                      <Scroll className="size-4" />
-                      <span>Official Policies &amp; Legal Deeds</span>
-                    </div>
-                    <h2
-                      className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-                        isDark ? 'text-white' : 'text-slate-950'
-                      }`}
-                      style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
-                    >
-                      Helpful Supporting Documents
-                    </h2>
-                  </div>
-                  <span className={`text-xs font-semibold hidden sm:inline ${
-                    isDark ? 'text-slate-400' : 'text-slate-500'
-                  }`}>
-                    Read Online or Download PDF/Text
-                  </span>
-                </div>
-
-                {filteredDocuments.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredDocuments.map((doc) => (
-                      <div
-                        key={doc.id}
-                        className={`p-6 sm:p-7 rounded-3xl border flex flex-col justify-between space-y-5 transition-all hover:shadow-lg ${
-                          isDark
-                            ? 'bg-slate-900/60 border-white/10 hover:border-amber-400/40'
-                            : 'bg-white border-slate-200 hover:border-amber-500/40 shadow-sm'
-                        }`}
-                      >
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="px-2.5 py-0.5 rounded font-mono font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30">
-                              {doc.code}
-                            </span>
-                            <span className={`font-semibold text-[11px] ${
-                              isDark ? 'text-slate-400' : 'text-slate-500'
-                            }`}>
-                              {doc.pages}
-                            </span>
+                        {/* Completed Stamp */}
+                        {isCertified && (
+                          <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-[10px] shadow-md">
+                            <CheckCircle2 className="size-3 fill-current" />
+                            <span>Accredited</span>
                           </div>
+                        )}
+                      </div>
 
+                      {/* Content Area */}
+                      <div className="p-5 sm:p-6 space-y-4">
+                        <div className="space-y-1.5">
                           <h3
-                            className={`text-base font-extrabold leading-snug ${
-                              isDark ? 'text-white' : 'text-slate-900'
-                            }`}
+                            onClick={() => startPlayingVideo(video, 'notes')}
+                            className="font-extrabold text-base leading-snug cursor-pointer hover:text-amber-500 transition-colors line-clamp-2"
                             style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
                           >
-                            {doc.title}
+                            {video.title}
                           </h3>
-
-                          <div className="flex items-center gap-2 text-[10px] font-semibold">
-                            <span className={`px-2 py-0.5 rounded border ${
-                              isDark
-                                ? 'bg-white/5 border-white/10 text-slate-300'
-                                : 'bg-slate-100 border-slate-200 text-slate-700'
-                            }`}>
-                              {doc.classification}
-                            </span>
-                            <span className={isDark ? 'text-slate-500' : 'text-slate-400'}>&bull;</span>
-                            <span className={isDark ? 'text-slate-400' : 'text-slate-500'}>{doc.revisedDate}</span>
-                          </div>
-
-                          <p className={`text-xs leading-relaxed line-clamp-3 ${
-                            isDark ? 'text-slate-400' : 'text-slate-600'
-                          }`}>
-                            {doc.desc}
+                          <p className="text-xs text-[var(--kmm-muted)] line-clamp-2 leading-relaxed">
+                            {video.desc}
                           </p>
                         </div>
 
-                        {/* Actions */}
-                        <div className={`pt-4 border-t flex items-center justify-between gap-3 ${
-                          isDark ? 'border-white/10' : 'border-slate-100'
-                        }`}>
+                        {/* Embedded Tools & Docs Badges */}
+                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
                           <button
-                            onClick={() => setReadingDoc(doc)}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer"
+                            onClick={() => startPlayingVideo(video, 'tools')}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/20 transition-colors cursor-pointer"
+                            title="Launch embedded compliance tools for this module"
                           >
-                            <Eye className="size-3.5" />
-                            <span>Read Document</span>
+                            <Wrench className="size-3" />
+                            <span>{video.tools?.length || 2} Tools Embedded</span>
                           </button>
 
                           <button
-                            onClick={() => handleDownloadDocument(doc)}
-                            className={`p-2 rounded-xl border text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
-                              isDark
-                                ? 'border-white/10 hover:bg-white/10 text-slate-200'
-                                : 'border-slate-200 hover:bg-slate-100 text-slate-700 bg-slate-50'
-                            }`}
-                            title="Download document text"
+                            onClick={() => startPlayingVideo(video, 'documents')}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/25 hover:bg-sky-500/20 transition-colors cursor-pointer"
+                            title="Inspect attached policies and charters"
                           >
-                            <Download className="size-3.5" />
-                            <span>Download</span>
+                            <Scroll className="size-3" />
+                            <span>{video.docIds?.length || 1} Attached Policies</span>
                           </button>
                         </div>
+
+                        {/* Speaker Information */}
+                        <div className="flex items-center gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10 text-xs">
+                          <div
+                            className="size-7 rounded-xl flex items-center justify-center font-bold text-[10px] text-white shadow-xs shrink-0"
+                            style={{ background: video.avatarBg }}
+                          >
+                            {video.initials}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold truncate text-[11px]">{video.speaker}</div>
+                            <div className="text-[10px] text-[var(--kmm-muted)] truncate">{video.speakerRole}</div>
+                          </div>
+                        </div>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Bottom Action CTA */}
+                    <div className="p-5 sm:p-6 pt-0">
+                      <button
+                        onClick={() => startPlayingVideo(video, 'notes')}
+                        className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                          isCertified
+                            ? isDark
+                              ? 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                              : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+                            : 'bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-sm'
+                        }`}
+                      >
+                        <Play className="size-3.5 fill-current" />
+                        <span>{isCertified ? 'Review Masterclass & Tools' : 'Start Masterclass & Tools →'}</span>
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <div
-                    className={`rounded-3xl border border-dashed p-10 text-center space-y-3 ${
-                      isDark ? 'bg-slate-900/30 border-white/10' : 'bg-slate-100/50 border-slate-300'
-                    }`}
-                  >
-                    <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      No supporting documents matched your search filter.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setActiveFilter('all')
-                        setSearchQuery('')
-                      }}
-                      className="px-4 py-2 rounded-full text-xs font-bold bg-amber-500 text-slate-950 cursor-pointer shadow-xs"
-                    >
-                      Clear Filters
-                    </button>
-                  </div>
-                )}
-              </section>
-            )}
+                )
+              })}
+            </div>
+
+            {/* Quick Directory Strip: Interactive Tools & Policies Across the Curriculum */}
+            <section
+              className={`p-6 sm:p-8 rounded-[28px] border space-y-5 transition-colors ${
+                isDark ? 'bg-slate-900/40 border-white/10' : 'bg-slate-100/60 border-slate-200'
+              }`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="font-extrabold text-base sm:text-lg flex items-center gap-2">
+                    <Wrench className="size-4 text-amber-500" />
+                    <span>Curriculum Tools &amp; Policy Charters Directory</span>
+                  </h3>
+                  <p className="text-xs text-[var(--kmm-muted)]">
+                    All tools and documents are integrated directly inside their respective video lessons above. Quick launch any module below:
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div
+                  onClick={() => {
+                    const vid = ARCHIVED_TRAINING_VIDEOS.find((v) => v.id === 'vid-1') || ARCHIVED_TRAINING_VIDEOS[0]
+                    startPlayingVideo(vid, 'tools')
+                  }}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
+                    isDark ? 'bg-slate-950/60 border-white/10 hover:border-amber-400' : 'bg-white border-slate-200 hover:border-amber-500 shadow-2xs'
+                  }`}
+                >
+                  <div className="text-[10px] font-bold uppercase text-amber-500 mb-1">Interactive Tool 1</div>
+                  <h4 className="font-bold text-xs group-hover:text-amber-500 transition-colors">
+                    Child Safeguarding Audit Checklist
+                  </h4>
+                  <p className="text-[11px] text-[var(--kmm-muted)] mt-1 line-clamp-2">
+                    Included inside <b>GOV-101</b>, <b>DAT-603</b>, and <b>TAL-305</b>.
+                  </p>
+                  <span className="text-[10px] font-bold text-amber-500 inline-flex items-center gap-1 mt-2">
+                    Launch in Module →
+                  </span>
+                </div>
+
+                <div
+                  onClick={() => {
+                    const vid = ARCHIVED_TRAINING_VIDEOS.find((v) => v.id === 'vid-4') || ARCHIVED_TRAINING_VIDEOS[0]
+                    startPlayingVideo(vid, 'tools')
+                  }}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
+                    isDark ? 'bg-slate-950/60 border-white/10 hover:border-amber-400' : 'bg-white border-slate-200 hover:border-amber-500 shadow-2xs'
+                  }`}
+                >
+                  <div className="text-[10px] font-bold uppercase text-amber-500 mb-1">Interactive Tool 2</div>
+                  <h4 className="font-bold text-xs group-hover:text-amber-500 transition-colors">
+                    Age-Rating &amp; Advisory Calculator
+                  </h4>
+                  <p className="text-[11px] text-[var(--kmm-muted)] mt-1 line-clamp-2">
+                    Included inside <b>DEF-401</b>, <b>DOC-102</b>, and <b>INT-702</b>.
+                  </p>
+                  <span className="text-[10px] font-bold text-amber-500 inline-flex items-center gap-1 mt-2">
+                    Launch in Module →
+                  </span>
+                </div>
+
+                <div
+                  onClick={() => {
+                    const vid = ARCHIVED_TRAINING_VIDEOS.find((v) => v.id === 'vid-3') || ARCHIVED_TRAINING_VIDEOS[0]
+                    startPlayingVideo(vid, 'tools')
+                  }}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
+                    isDark ? 'bg-slate-950/60 border-white/10 hover:border-sky-400' : 'bg-white border-slate-200 hover:border-sky-500 shadow-2xs'
+                  }`}
+                >
+                  <div className="text-[10px] font-bold uppercase text-sky-500 mb-1">Interactive Tool 3</div>
+                  <h4 className="font-bold text-xs group-hover:text-sky-500 transition-colors">
+                    IP Clearance &amp; Licensing Verifier
+                  </h4>
+                  <p className="text-[11px] text-[var(--kmm-muted)] mt-1 line-clamp-2">
+                    Included inside <b>LAW-204</b>, <b>MER-502</b>, and <b>TAL-305</b>.
+                  </p>
+                  <span className="text-[10px] font-bold text-sky-500 inline-flex items-center gap-1 mt-2">
+                    Launch in Module →
+                  </span>
+                </div>
+              </div>
+            </section>
           </div>
         )}
       </main>
 
       {/* =========================================================================
-          DOCUMENT READER MODAL
+          DOCUMENT MODAL (Reader for Supporting Documents)
           ========================================================================= */}
       {readingDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
           <div
-            className={`w-full max-w-4xl max-h-[90vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 ${
+            className={`w-full max-w-4xl max-h-[90vh] rounded-3xl border shadow-2xl flex flex-col overflow-hidden ${
               isDark ? 'bg-slate-900 border-white/15 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
             }`}
           >
             {/* Modal Header */}
-            <div className={`p-4 sm:p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+            <div className={`p-5 sm:p-6 border-b flex items-start justify-between gap-4 ${
               isDark ? 'border-white/10' : 'border-slate-200'
             }`}>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="font-mono font-bold text-amber-500">{readingDoc.code}</span>
+                  <span className="font-mono font-bold text-amber-500 bg-amber-500/15 px-2 py-0.5 rounded">
+                    {readingDoc.code}
+                  </span>
                   <span className={isDark ? 'text-slate-500' : 'text-slate-400'}>&bull;</span>
                   <span className={`font-semibold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                     {readingDoc.classification}
                   </span>
                 </div>
                 <h2
-                  className={`text-lg sm:text-2xl font-extrabold tracking-tight truncate max-w-xl ${
+                  className={`text-xl sm:text-2xl font-extrabold leading-tight ${
                     isDark ? 'text-white' : 'text-slate-900'
                   }`}
                   style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
@@ -2215,67 +2227,70 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
                 </h2>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(readingDoc.content)
                     showToast('Document text copied to clipboard!')
                   }}
-                  className={`p-2 sm:p-2.5 rounded-full border transition-colors cursor-pointer ${
-                    isDark ? 'border-white/10 hover:bg-white/10 text-slate-200' : 'border-slate-200 hover:bg-slate-100 text-slate-700 bg-slate-50'
+                  className={`p-2 rounded-xl border text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                    isDark ? 'border-white/10 hover:bg-white/10 text-slate-200' : 'border-slate-200 hover:bg-slate-100 text-slate-700'
                   }`}
-                  title="Copy full document text"
+                  title="Copy Document Text"
                 >
                   <Copy className="size-4" />
                 </button>
 
                 <button
-                  onClick={() => handleDownloadDocument(readingDoc)}
-                  className={`p-2 sm:p-2.5 rounded-full border transition-colors cursor-pointer ${
-                    isDark ? 'border-white/10 hover:bg-white/10 text-slate-200' : 'border-slate-200 hover:bg-slate-100 text-slate-700 bg-slate-50'
-                  }`}
-                  title="Download file"
-                >
-                  <Download className="size-4" />
-                </button>
-
-                <button
                   onClick={handlePrintDocument}
-                  className={`p-2 sm:p-2.5 rounded-full border transition-colors cursor-pointer ${
-                    isDark ? 'border-white/10 hover:bg-white/10 text-slate-200' : 'border-slate-200 hover:bg-slate-100 text-slate-700 bg-slate-50'
+                  className={`p-2 rounded-xl border text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                    isDark ? 'border-white/10 hover:bg-white/10 text-slate-200' : 'border-slate-200 hover:bg-slate-100 text-slate-700'
                   }`}
-                  title="Print document"
+                  title="Print / Save as PDF"
                 >
                   <Printer className="size-4" />
                 </button>
 
                 <button
                   onClick={() => setReadingDoc(null)}
-                  className="p-2 sm:p-2.5 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold cursor-pointer transition-colors shadow-xs"
-                  title="Close document viewer"
+                  className={`p-2 rounded-xl border text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                    isDark ? 'border-white/10 hover:bg-white/10 text-slate-200' : 'border-slate-200 hover:bg-slate-100 text-slate-700'
+                  }`}
+                  aria-label="Close document modal"
                 >
                   <X className="size-4" />
                 </button>
               </div>
             </div>
 
-            {/* Document Body */}
-            <div className={`p-4 sm:p-8 overflow-y-auto space-y-4 font-mono text-xs sm:text-sm leading-relaxed whitespace-pre-wrap select-text ${
-              isDark ? 'bg-black/20 text-slate-200' : 'bg-slate-50/80 text-slate-800 border-y border-slate-200'
-            }`}>
-              {readingDoc.content}
+            {/* Modal Body / Preformatted Document Content */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-4 font-mono text-xs sm:text-sm leading-relaxed">
+              <div
+                className={`p-4 sm:p-6 rounded-2xl border font-sans text-xs ${
+                  isDark ? 'bg-black/20 text-slate-200 border-white/5' : 'bg-slate-50/80 text-slate-800 border-slate-200'
+                }`}
+              >
+                <div className="font-bold uppercase tracking-wider text-amber-500 mb-1">Document Synopsis</div>
+                <p className="leading-relaxed">{readingDoc.desc}</p>
+              </div>
+
+              <div className={`p-4 sm:p-6 rounded-2xl border whitespace-pre-wrap ${
+                isDark ? 'bg-slate-950 border-white/10 text-slate-300' : 'bg-white border-slate-200 text-slate-800'
+              }`}>
+                {readingDoc.content}
+              </div>
             </div>
 
             {/* Modal Footer */}
-            <div className={`p-4 border-t flex flex-col-reverse sm:flex-row items-center justify-between gap-3 text-xs ${
+            <div className={`p-4 px-6 border-t flex items-center justify-between text-xs ${
               isDark ? 'border-white/10 text-slate-400' : 'border-slate-200 text-slate-600'
             }`}>
-              <span>{readingDoc.revisedDate} &bull; Kiddies Media Ministry Official Gazette</span>
+              <span>Accreditation Reference: {readingDoc.code} &bull; {readingDoc.pages}</span>
               <button
                 onClick={() => setReadingDoc(null)}
-                className="w-full sm:w-auto px-5 py-2 rounded-full font-bold text-xs bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-1.5 rounded-full text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 cursor-pointer"
               >
-                Done Reading
+                Close Reader
               </button>
             </div>
           </div>
@@ -2284,49 +2299,34 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
 
       {/* Footer */}
       <footer
-        className={`border-t py-12 mt-16 transition-colors ${
+        className={`border-t py-12 px-4 sm:px-6 transition-colors text-xs ${
           isDark ? 'bg-slate-950 border-white/10 text-slate-400' : 'bg-white border-slate-200 text-slate-600'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs">
-          <div>
-            <div className={`font-bold text-sm mb-1 ${
-              isDark ? 'text-white' : 'text-slate-900'
-            }`}>
-              Kiddies Media Ministry Training Portal
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="size-8 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
+              <GraduationCap className="size-4" />
             </div>
-            <p className={isDark ? 'text-slate-400' : 'text-slate-500'}>
-              Official repository for training materials, practical compliance tools, and helpful supporting documents.
-            </p>
+            <div>
+              <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Kiddies Media Ministry Academy Directorate
+              </span>
+              <p className={isDark ? 'text-slate-400' : 'text-slate-500'}>
+                Institutional compliance, child safeguarding covenants, and broadcast licensing.
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 font-bold">
-            <Link
-              href="/"
-              className={`inline-flex items-center gap-1.5 transition-colors ${
-                isDark ? 'text-slate-400 hover:text-amber-400' : 'text-slate-600 hover:text-amber-600'
-              }`}
-            >
-              <Home className="size-3.5" />
-              <span>Kiddies Media Ministry Home</span>
+          <div className="flex items-center gap-6 text-xs font-semibold">
+            <Link href="/" className="hover:text-amber-500 transition-colors">
+              Landing Page
             </Link>
-            <Link
-              href="/ip-portal"
-              className={`inline-flex items-center gap-1.5 transition-colors ${
-                isDark ? 'text-slate-400 hover:text-amber-400' : 'text-slate-600 hover:text-amber-600'
-              }`}
-            >
-              <Scale className="size-3.5" />
-              <span>IP Portal</span>
+            <Link href="/ip-portal" className="hover:text-amber-500 transition-colors">
+              IP Register
             </Link>
-            <Link
-              href="/auth"
-              className={`inline-flex items-center gap-1.5 transition-colors ${
-                isDark ? 'text-slate-400 hover:text-amber-400' : 'text-slate-600 hover:text-amber-600'
-              }`}
-            >
-              <UserCheck className="size-3.5" />
-              <span>Officer Sign In</span>
+            <Link href="/onboarding" className="hover:text-amber-500 transition-colors">
+              Expression of Interest
             </Link>
           </div>
         </div>
