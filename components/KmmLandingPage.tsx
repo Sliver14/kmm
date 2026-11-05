@@ -723,15 +723,15 @@ export default function KmmLandingPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 font-bold">
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-700 font-bold">
                     <span className="flex items-center gap-1.5">
-                      <span className="size-1.5 rounded-full bg-sky-500" />
-                      Statutory Safeguarded
+                      <span className="size-1.5 rounded-full bg-[#0284C7]" />
+                      Legal Clearance: Active
                     </span>
                     <span className="text-slate-300">•</span>
                     <span className="flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-emerald-500" />
-                      Chain of Title Cleared
+                      Copyright Status: Cleared
                     </span>
                   </div>
                 </div>
