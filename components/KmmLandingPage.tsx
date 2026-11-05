@@ -472,7 +472,7 @@ export default function KmmLandingPage() {
                 </em>
               </h1>
               <p className="lead kmm-animate-rise !text-white" style={{ color: '#ffffff' }}>
-                The official website provides basic information about Kiddies Media Ministry (KMM) and its role, alongside an institutional Training section with training materials and tools, and helpful supporting documents for children&apos;s content across Loveworld Kingdom. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
+                Kiddies Media Ministry (KMM) provides the governance, training, and resources to document and steward children&apos;s media content and intellectual property across Loveworld Kingdom.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2 kmm-animate-rise">

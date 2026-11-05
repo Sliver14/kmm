@@ -134,7 +134,7 @@ export default function OnboardingPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-500 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            Are you producing children's animation, comic books, worship music, or educational materials for young minds? Register your ministry or department to gain access to the <strong className="text-slate-900 dark:text-white">IP Portal</strong> — an important resource for documenting and stewarding children’s media content and related intellectual property.
+            Register your ministry or department to access the <strong className="text-slate-900 dark:text-white">IP Portal</strong> — the official platform for documenting and stewarding children’s media content and related intellectual property.
           </p>
 
           {/* 3 Pillars Summary */}
