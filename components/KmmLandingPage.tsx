@@ -612,7 +612,7 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             HERO SECTION - Full-Bleed Image covering Navigation & Hero Canvas
             ========================================================================= */}
-        <section className="relative overflow-hidden -mt-[64px] sm:-mt-[72px] pt-[96px] sm:pt-[116px] lg:pt-[128px] pb-16 sm:pb-24 min-h-[640px] lg:min-h-[720px] flex items-center">
+        <section className="relative overflow-hidden -mt-[64px] sm:-mt-[72px] pt-[100px] sm:pt-[120px] lg:pt-[132px] pb-12 sm:pb-16 min-h-[660px] lg:min-h-[760px] flex flex-col justify-between">
           {/* Full-Bleed Background Image covering the entire hero and navigation area */}
           <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden" aria-hidden="true">
             <Image
@@ -620,151 +620,152 @@ export default function KmmLandingPage() {
               alt="Children's Ministry Background"
               fill
               priority
-              className="object-cover object-[78%_center] sm:object-[82%_center] lg:object-right"
+              className="object-cover object-[80%_center] sm:object-[84%_center] lg:object-right"
               sizes="100vw"
             />
-            {/* Soft high-legibility gradient scrim protecting hero typography on the left */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 sm:via-white/70 to-transparent lg:to-white/10" />
+            {/* High-legibility gradient scrim: soft white on left, crystal clear view of children on right */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 via-45% sm:via-white/65 sm:via-55% to-transparent lg:to-white/5" />
             {/* Top navigation subtle highlight scrim */}
             <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 via-white/30 to-transparent" />
             {/* Bottom transition into About section */}
-            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white via-white/80 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white via-white/80 to-transparent" />
             {/* Subtle tactile micro-dots texture overlay */}
-            <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial opacity-30" />
+            <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial opacity-25" />
           </div>
 
-          <div className="kmm-wrap relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <div className="kmm-wrap relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center flex-1">
             {/* Copy Left */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-black bg-white/90 backdrop-blur-md text-amber-900 border border-amber-500/25 shadow-xs kmm-animate-rise">
-                <span className="flex size-2 rounded-full bg-[#FFB800] ring-4 ring-[#FFB800]/25 animate-pulse" />
-                <span className="tracking-wider uppercase text-[11px]">Official Children&apos;s Media Framework</span>
+            <div className="lg:col-span-7 xl:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-black bg-amber-500/15 text-amber-950 border border-amber-500/30 backdrop-blur-md shadow-xs kmm-animate-rise">
+                <span className="flex size-2 rounded-full bg-[#FFB800] ring-4 ring-[#FFB800]/30 animate-pulse" />
+                <span className="tracking-wider uppercase text-[11px] font-black">Official Children&apos;s Media Framework</span>
                 <span className="text-amber-400 font-bold">•</span>
                 <span className="text-[#FF3B6C] font-black">Kiddies Media Ministry</span>
               </div>
 
               <h1
-                className="text-4xl sm:text-5xl lg:text-[56px] font-extrabold tracking-tight leading-[1.08] text-slate-950 kmm-animate-rise"
+                className="text-4xl sm:text-5xl lg:text-[56px] xl:text-[60px] font-extrabold tracking-tight leading-[1.06] text-slate-950 kmm-animate-rise"
                 style={{ fontFamily: 'var(--kmm-display)' }}
               >
                 Guiding the Standards.{' '}
-                <span className="block mt-1">
+                <span className="block mt-1 sm:mt-2">
                   <span className="text-[#FF3B6C]">Governing the Future </span>
                   <span className="text-[#0284C7]">of Children&apos;s Media.</span>
                 </span>
               </h1>
 
-              <p className="lead kmm-animate-rise text-slate-700 text-base sm:text-lg max-w-2xl leading-relaxed font-medium">
+              <p className="lead kmm-animate-rise text-slate-700 text-base sm:text-lg lg:text-xl max-w-2xl leading-relaxed font-medium">
                 Kiddies Media Ministry provides the governance, training, and resources to document and steward children&apos;s media content and intellectual property across Loveworld Kingdom.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2 kmm-animate-rise">
-                <a href="#mandate" className="kmm-btn kmm-btn-p font-black shadow-md hover:shadow-lg">
+                <a
+                  href="#mandate"
+                  className="kmm-btn kmm-btn-p font-black shadow-lg shadow-amber-500/25 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
                   <span>Explore Our Mandate</span>
                   <span className="text-sm font-black">&rarr;</span>
                 </a>
-                <Link href="/training-portal" className="kmm-btn kmm-btn-s font-black shadow-md hover:shadow-lg">
+                <Link
+                  href="/training-portal"
+                  className="kmm-btn kmm-btn-s font-black shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all bg-white/95 backdrop-blur-md border border-slate-200/90 text-slate-900"
+                >
                   Access Training &amp; Tools
                 </Link>
                 <Link
                   href="/ip-portal"
-                  className="kmm-btn kmm-btn-o font-black border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-800"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-black text-sm bg-[#0E1E38] text-[#FFC700] border-2 border-[#FFC700]/70 hover:bg-[#FFC700] hover:text-slate-950 shadow-md hover:shadow-lg transition-all"
                   title="Intellectual Property & Asset Management Platform"
                 >
-                  Launch IP Portal
+                  <span className="size-2 rounded-full bg-[#FFC700] animate-pulse" />
+                  <span>Launch IP Portal</span>
                 </Link>
               </div>
 
-              {/* Trust & Proof Highlights */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2 text-xs font-bold text-slate-600 kmm-animate-rise">
-                <div className="flex items-center gap-1.5">
+              {/* Trust & Proof Highlights - Modern Frosted Glass Pills */}
+              <div className="pt-2 flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs font-bold text-slate-700 kmm-animate-rise">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xs">
                   <span className="size-2 rounded-full bg-emerald-500" />
-                  <span>5 Specialized Ministry Arms</span>
+                  <span className="font-extrabold text-slate-900">5 Specialized Ministry Arms</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xs">
                   <span className="size-2 rounded-full bg-[#0284C7]" />
-                  <span>Child Safeguarded Standards</span>
+                  <span className="font-extrabold text-slate-900">Child Safeguarded Standards</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xs">
                   <span className="size-2 rounded-full bg-[#FFB800]" />
-                  <span>Loveworld Kingdom Registry</span>
+                  <span className="font-extrabold text-slate-900">Loveworld Kingdom Registry</span>
                 </div>
               </div>
             </div>
 
-            {/* Stage Graphic Right - Floating Badges Showcase Frame framing the artwork */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-end">
-              <div className="w-full max-w-[420px] space-y-4">
-                {/* Frosted Glass Institutional Status Card */}
-                <div className="p-3.5 sm:p-4 rounded-3xl bg-white/92 backdrop-blur-md shadow-xl border border-white/80 flex items-center justify-between gap-3 kmm-animate-rise">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="size-11 rounded-2xl bg-amber-50 p-1.5 shadow-xs border border-amber-300/40 shrink-0 flex items-center justify-center">
+            {/* Stage Graphic Right - Open, Unobstructed Children Showcase with Anchored Verified Seal */}
+            <div className="lg:col-span-5 xl:col-span-5 flex flex-col justify-end items-center lg:items-end pt-6 lg:pt-0">
+              {/* Anchored Institutional Status Card at bottom right */}
+              <div className="w-full max-w-[360px] kmm-animate-rise">
+                <div className="p-4 rounded-3xl bg-white/92 backdrop-blur-md shadow-2xl border border-white/90 transition-all hover:scale-[1.02] duration-300 group">
+                  <div className="flex items-center gap-3">
+                    <div className="size-12 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 p-1.5 shadow-xs border border-amber-300/50 shrink-0 flex items-center justify-center group-hover:scale-105 transition-transform">
                       <Image
                         src="/kmm-logo.png"
                         alt="Kiddies Media Ministry"
-                        width={36}
-                        height={36}
+                        width={40}
+                        height={40}
                         className="object-contain"
                       />
                     </div>
-                    <div className="min-w-0">
-                      <span className="text-xs sm:text-sm font-black block text-slate-900 leading-tight truncate" style={{ fontFamily: 'var(--kmm-display)' }}>
-                        Kiddies Media Ministry
-                      </span>
-                      <span className="text-[10px] sm:text-[11px] font-bold text-amber-600 uppercase tracking-wider block truncate">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="text-sm font-black text-slate-900 truncate" style={{ fontFamily: 'var(--kmm-display)' }}>
+                          Kiddies Media Ministry
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-black border border-emerald-200 shrink-0">
+                          <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Verified
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-bold text-amber-600 uppercase tracking-wider block truncate mt-0.5">
                         Official Children&apos;s IP Registry
                       </span>
                     </div>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-black text-emerald-700 shrink-0">
-                    <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>Verified</span>
-                  </div>
-                </div>
-
-                {/* Floating Interactive Micro-Chips Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3.5 rounded-2xl bg-white/90 backdrop-blur-md shadow-lg border border-white/80 flex items-center gap-2.5 kmm-chip-bob">
-                    <span className="size-8 rounded-xl bg-[#FFC700]/20 text-amber-700 flex items-center justify-center font-black text-sm shrink-0">
-                      ⚖
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <span className="size-1.5 rounded-full bg-sky-500" />
+                      Statutory Safeguarded
                     </span>
-                    <div className="min-w-0">
-                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 block leading-none">
-                        Mandate
-                      </span>
-                      <span className="text-xs font-black text-slate-900 leading-tight block truncate">
-                        Policy &amp; Standards
-                      </span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="p-3.5 rounded-2xl bg-white/90 backdrop-blur-md shadow-lg border border-white/80 flex items-center gap-2.5 kmm-chip-bob"
-                    style={{ animationDelay: '-2s' }}
-                  >
-                    <span className="size-8 rounded-xl bg-[#0284C7]/15 text-[#0284C7] flex items-center justify-center font-black text-sm shrink-0">
-                      🛡
+                    <span className="text-slate-300">•</span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                      Chain of Title Cleared
                     </span>
-                    <div className="min-w-0">
-                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 block leading-none">
-                        Protection
-                      </span>
-                      <span className="text-xs font-black text-slate-900 leading-tight block truncate">
-                        Child Safeguarding
-                      </span>
-                    </div>
                   </div>
-                </div>
-
-                {/* Third Floating Feature Pill */}
-                <div
-                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur-md shadow-lg border border-white/80 kmm-chip-bob"
-                  style={{ animationDelay: '-3.2s' }}
-                >
-                  <span className="size-2 rounded-full bg-[#FF3B6C]" />
-                  <span className="text-xs font-black text-slate-900">Chain of Title &amp; Global IP Clearance</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Quick Agency Jump Bar at Bottom of Hero */}
+          <div className="kmm-wrap relative z-10 w-full mt-10 pt-6 border-t border-slate-900/10 hidden md:flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="size-2 rounded-full bg-amber-500" />
+              <span className="font-extrabold uppercase tracking-wider text-[11px] text-slate-600">
+                Explore 5 Ministry Arms:
+              </span>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              {agenciesList.map((ag) => (
+                <a
+                  key={ag.name}
+                  href={ag.href}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-slate-800 hover:text-slate-950 border border-slate-200/70 shadow-xs hover:shadow transition-all font-bold whitespace-nowrap text-xs group"
+                >
+                  <span>{ag.name}</span>
+                  <span className="text-[10px] text-slate-400 group-hover:text-amber-600 font-medium transition-colors">
+                    &bull; {ag.badge}
+                  </span>
+                </a>
+              ))}
             </div>
           </div>
         </section>
