@@ -472,7 +472,7 @@ export default function KmmLandingPage() {
                 </em>
               </h1>
               <p className="lead kmm-animate-rise !text-white" style={{ color: '#ffffff' }}>
-                Kiddies Media Ministry (KMM) provides the governance, training, and resources to document and steward children&apos;s media content and intellectual property across Loveworld Kingdom.
+                Kiddies Media Ministry provides the governance, training, and resources to document and steward children&apos;s media content and intellectual property across Loveworld Kingdom.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2 kmm-animate-rise">
@@ -551,10 +551,10 @@ export default function KmmLandingPage() {
               </div>
               <div className="space-y-6">
                 <p className="lead">
-                  Kiddies Media Ministry (KMM) provides the governance, policy, and standards framework for children&apos;s content across Loveworld Kingdom.
+                  Kiddies Media Ministry provides the governance, policy, and standards framework for children&apos;s content across Loveworld Kingdom.
                 </p>
                 <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
-                  The website provides basic information about Kiddies Media Ministry (KMM) and its role to guide, coordinate, and set expectations for children&apos;s media initiatives. Our mission equips ministry departments, animation studios, and creative teams with official training materials, actionable compliance tools, and helpful supporting documents so they can create and share content with clarity, spiritual fidelity, and confidence.
+                  The website provides basic information about Kiddies Media Ministry and its role to guide, coordinate, and set expectations for children&apos;s media initiatives. Our mission equips ministry departments, animation studios, and creative teams with official training materials, actionable compliance tools, and helpful supporting documents so they can create and share content with clarity, spiritual fidelity, and confidence.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="rounded-3xl p-6 bg-[var(--kmm-blue)] text-white shadow-md">
@@ -968,7 +968,7 @@ export default function KmmLandingPage() {
                   Training Materials, Practical Tools &amp; Supporting Documents
                 </h2>
                 <p className="text-sm sm:text-base leading-relaxed text-white/85">
-                  The website provides basic information about Kiddies Media Ministry (KMM) and its role, alongside an institutional Training section with training materials and tools, and helpful supporting documents. The training portal equips ministry departments, animation studios, and creative teams with the knowledge, interactive utilities, and official templates needed to uphold zero-defect standards for children&apos;s media.
+                  The website provides basic information about Kiddies Media Ministry and its role, alongside an institutional Training section with training materials and tools, and helpful supporting documents. The training portal equips ministry departments, animation studios, and creative teams with the knowledge, interactive utilities, and official templates needed to uphold zero-defect standards for children&apos;s media.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-4">
@@ -1183,7 +1183,7 @@ export default function KmmLandingPage() {
                 Onboard your Ministry or Department
               </h2>
               <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
-                Whether you represent a Church Zone, Children's Ministry department, or media production unit, join the Kiddies Media Ministry (KMM) ecosystem and get onboarded to the IP Portal. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
+                Whether you represent a Church Zone, Children's Ministry department, or media production unit, join the Kiddies Media Ministry ecosystem and get onboarded to the IP Portal. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
               </p>
             </div>
 

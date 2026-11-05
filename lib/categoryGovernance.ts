@@ -1,5 +1,5 @@
 /**
- * Kiddies Media Ministries (KMM) - Intellectual Asset Categories & Governance Register
+ * Kiddies Media Ministry - Intellectual Asset Categories & Governance Register
  * 
  * Normalized category governance framework based on official document:
  * "INTELLECTUAL ASSET CATEGORIES & GOVERNANCE REGISTER"

@@ -80,12 +80,12 @@ const SUPPORTING_DOCUMENTS: SupportingDocument[] = [
     revisedDate: 'Quarter 1, 2026',
     pages: '18 Pages',
     desc: 'Mandatory institutional framework governing on-set physical safety, chaperone presence, emotional welfare, and reporting protocols for minors involved in media productions.',
-    content: `KIDDIES MEDIA MINISTRY (KMM)
+    content: `KIDDIES MEDIA MINISTRY
 INSTITUTIONAL DIRECTIVE: CHILD SAFEGUARDING & WELFARE MANUAL
 DOCUMENT CODE: KMM-DOC-001 / STATUTORY SERIES
 
 PREAMBLE
-The Kiddies Media Ministry (KMM) establishes this Child Safeguarding Policy Manual under divine biblical stewardship and statutory child protection jurisprudence. Every media production, voice recording, live studio appearance, and digital broadcast involving minors across Loveworld Kingdom must comply unconditionally with these directives.
+The Kiddies Media Ministry establishes this Child Safeguarding Policy Manual under divine biblical stewardship and statutory child protection jurisprudence. Every media production, voice recording, live studio appearance, and digital broadcast involving minors across Loveworld Kingdom must comply unconditionally with these directives.
 
 ARTICLE I: PRINCIPLES OF CHILD SAFETY
 1.1 Absolute Primacy of Child Welfare: In any conflict between production schedules, deadlines, or budget and the welfare of a minor, the safety and emotional health of the minor shall immediately take precedence.
@@ -118,7 +118,7 @@ APPROVED FOR BROADCAST RELEASE ACROSS ALL LOVEWORLD CHANNELS`,
     revisedDate: 'Quarter 1, 2026',
     pages: '14 Pages',
     desc: 'Technical video specifications, EBU R128 audio loudness thresholds, visual motion pacing, and zero-defect broadcast quality requirements for terrestrial and satellite playout.',
-    content: `KIDDIES MEDIA MINISTRY (KMM)
+    content: `KIDDIES MEDIA MINISTRY
 TECHNICAL QUALITY CHARTER: BROADCAST & ANIMATION SPECIFICATIONS
 DOCUMENT CODE: KMM-DOC-002 / BROADCAST SERIES
 
@@ -154,7 +154,7 @@ SANCTIONED BY: Kiddies Media Ministry Broadcast Quality Assurance Committee`,
     pages: '4 Pages',
     desc: 'Official covenant template executed by parents and legal guardians granting irrevocable, worldwide, perpetual broadcast and likeness rights for child voice performers.',
     content: `DEED OF CONTRIBUTION & TALENT RELEASE FOR MINORS
-KIDDIES MEDIA MINISTRY (KMM) / LOVEWORLD KINGDOM
+KIDDIES MEDIA MINISTRY / LOVEWORLD KINGDOM
 DOCUMENT CODE: KMM-DOC-003 / LEGAL SERIES
 
 THIS DEED OF RELEASE is executed between:
@@ -165,7 +165,7 @@ THIS DEED OF RELEASE is executed between:
    Date of Birth: ___________________ (the "Minor Talent")
 
 AND
-2. KIDDIES MEDIA MINISTRY (KMM), representing Loveworld Media Holdings (the "Ministry").
+2. KIDDIES MEDIA MINISTRY, representing Loveworld Media Holdings (the "Ministry").
 
 1. GRANT OF RIGHTS & PERMISSIONS
 The undersigned Parent/Legal Guardian hereby unconditionally grants to the Ministry the irrevocable, perpetual, worldwide, royalty-free license and authority to:
@@ -194,7 +194,7 @@ Kiddies Media Ministry Commissioning Officer Signature: ________________ Date: _
     pages: '12 Pages',
     desc: 'Statutory rules for kid-facing mobile apps and websites, strictly prohibiting third-party advertising, commercial tracking, voice storage, and unverified data collection.',
     content: `DIGITAL PRIVACY & CHILD DATA PROTECTION DIRECTIVE
-KIDDIES MEDIA MINISTRY (KMM) / DIGITAL DIVISION
+KIDDIES MEDIA MINISTRY / DIGITAL DIVISION
 DOCUMENT CODE: KMM-DOC-004 / REGULATORY SERIES
 
 1. PURPOSE & JURISDICTION
@@ -223,7 +223,7 @@ APPROVED BY: Kiddies Media Ministry Digital Transformation & Cyber Safeguarding 
     pages: '10 Pages',
     desc: 'Standards for biblical fidelity, theological accuracy, age-graded doctrine, and editorial review processes to anchor children in the unadulterated Word of God.',
     content: `SCRIPTURAL INTEGRITY & DOCTRINAL REVIEW PROTOCOL
-KIDDIES MEDIA MINISTRY (KMM) / PASTORAL REVIEW COUNCIL
+KIDDIES MEDIA MINISTRY / PASTORAL REVIEW COUNCIL
 DOCUMENT CODE: KMM-DOC-005 / THEOLOGICAL SERIES
 
 1. THEOLOGICAL VISION
@@ -251,7 +251,7 @@ AUTHORIZED BY: Kiddies Media Ministry Pastoral Directorate & Editorial Review Co
     pages: '8 Pages',
     desc: 'Procedural roadmap for external ministry departments and internal studios submitting children’s animations, books, or audio dramas for official Kiddies Media Ministry accreditation.',
     content: `CONTENT SUBMISSION & QUALITY GATE PROTOCOL
-KIDDIES MEDIA MINISTRY (KMM) / OPERATIONS DIVISION
+KIDDIES MEDIA MINISTRY / OPERATIONS DIVISION
 DOCUMENT CODE: KMM-DOC-006 / PROCEDURAL SERIES
 
 1. STAGES OF ACCREDITATION
@@ -1891,7 +1891,7 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs">
           <div>
             <div className="font-bold text-sm text-white mb-1">
-              Kiddies Media Ministry (KMM) Training &amp; Resource Hub
+              Kiddies Media Ministry Training &amp; Resource Hub
             </div>
             <p className="text-slate-400">
               Official repository for training materials, practical compliance tools, and helpful supporting documents.

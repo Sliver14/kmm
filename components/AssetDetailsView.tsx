@@ -815,7 +815,7 @@ export function AssetDetailsView({
                 </div>
                 <div>
                   <span className="text-slate-400 text-[11px] block">Target Ministry</span>
-                  <span className="font-medium text-slate-700">Kiddies Media Ministry (KMM)</span>
+                  <span className="font-medium text-slate-700">Kiddies Media Ministry</span>
                 </div>
               </div>
             </div>
