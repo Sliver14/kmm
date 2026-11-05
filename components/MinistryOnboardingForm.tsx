@@ -19,7 +19,6 @@ import {
   Copy,
   Check,
   KeyRound,
-  MapPin,
   ExternalLink,
   Lock,
 } from 'lucide-react'
@@ -70,7 +69,6 @@ export function MinistryOnboardingForm({
   const { addOnboardingRequest, loginAsMinistry, showToast } = useLovetoonsData()
 
   const [ministryName, setMinistryName] = useState('')
-  const [zoneRegion, setZoneRegion] = useState('')
   const [contactPerson, setContactPerson] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -89,7 +87,7 @@ export function MinistryOnboardingForm({
     setErrorMessage(null)
 
     if (!ministryName.trim()) {
-      setErrorMessage('Please enter your Ministry or Church Entity Name.')
+      setErrorMessage('Please enter your Ministry or Department.')
       return
     }
 
@@ -108,7 +106,6 @@ export function MinistryOnboardingForm({
     try {
       const created = await addOnboardingRequest({
         ministryName: ministryName.trim(),
-        zoneRegion: zoneRegion.trim() || undefined,
         contactPerson: contactPerson.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim() || undefined,
@@ -131,7 +128,6 @@ export function MinistryOnboardingForm({
 
   const handleReset = () => {
     setMinistryName('')
-    setZoneRegion('')
     setContactPerson('')
     setEmail('')
     setPhone('')
@@ -148,8 +144,7 @@ export function MinistryOnboardingForm({
     if (!submittedRequest) return
     const textToCopy = [
       `=== KIDDIES MEDIA MINISTRIES - PORTAL ACCESS DETAILS ===`,
-      `Ministry / Entity: ${submittedRequest.ministryName}`,
-      `Zone / Region: ${submittedRequest.zoneRegion || 'Regional Headquarters'}`,
+      `Ministry / Department: ${submittedRequest.ministryName}`,
       `Entity Identifier Code: ${submittedRequest.assignedCode || 'KMM-NEW'}`,
       `Portal Login Email: ${submittedRequest.portalLoginEmail || submittedRequest.email}`,
       `Secure Access Key: ${submittedRequest.accessKey || 'KMM-ACCESS-KEY'}`,
@@ -229,17 +224,10 @@ export function MinistryOnboardingForm({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-            <div className="rounded-xl bg-white dark:bg-slate-800/80 p-3 border border-slate-200/80 dark:border-white/5">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Ministry / Entity Name</span>
+            <div className="sm:col-span-2 rounded-xl bg-white dark:bg-slate-800/80 p-3 border border-slate-200/80 dark:border-white/5">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Ministry / Department</span>
               <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm block truncate">
                 {submittedRequest.ministryName}
-              </span>
-            </div>
-
-            <div className="rounded-xl bg-white dark:bg-slate-800/80 p-3 border border-slate-200/80 dark:border-white/5">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Zone / Region</span>
-              <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm block truncate">
-                {submittedRequest.zoneRegion || 'Regional Headquarters'}
               </span>
             </div>
 
@@ -334,39 +322,21 @@ export function MinistryOnboardingForm({
       )}
 
       <div className="space-y-4 sm:space-y-5 text-left">
-        {/* Row 1: Ministry / Church Entity Name & Zone / Region (Paired 2-Columns) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-950 mb-1.5">
-              Ministry / Church Entity Name <span className="text-red-700">*</span>
-            </label>
-            <div className="relative">
-              <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-800/70" />
-              <input
-                type="text"
-                required
-                value={ministryName}
-                onChange={(e) => setMinistryName(e.target.value)}
-                placeholder="e.g. Children's Ministry - CE Lagos Zone 5"
-                className="w-full pl-10 pr-4 py-3 rounded-2xl border text-xs sm:text-sm font-semibold border-amber-600/25 bg-[#FFE380]/85 text-slate-950 placeholder-slate-700/60 outline-hidden focus:bg-white focus:ring-2 focus:ring-slate-950/20 transition-all shadow-inner/10"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-950 mb-1.5">
-              Zone / Region / Jurisdiction
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-800/70" />
-              <input
-                type="text"
-                value={zoneRegion}
-                onChange={(e) => setZoneRegion(e.target.value)}
-                placeholder="e.g. Lagos Zone 5 / Nigeria South"
-                className="w-full pl-10 pr-4 py-3 rounded-2xl border text-xs sm:text-sm font-semibold border-amber-600/25 bg-[#FFE380]/85 text-slate-950 placeholder-slate-700/60 outline-hidden focus:bg-white focus:ring-2 focus:ring-slate-950/20 transition-all shadow-inner/10"
-              />
-            </div>
+        {/* Row 1: Ministry / Department */}
+        <div>
+          <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-950 mb-1.5">
+            Ministry / Department <span className="text-red-700">*</span>
+          </label>
+          <div className="relative">
+            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-800/70" />
+            <input
+              type="text"
+              required
+              value={ministryName}
+              onChange={(e) => setMinistryName(e.target.value)}
+              placeholder="e.g Children's Ministry"
+              className="w-full pl-10 pr-4 py-3 rounded-2xl border text-xs sm:text-sm font-semibold border-amber-600/25 bg-[#FFE380]/85 text-slate-950 placeholder-slate-700/60 outline-hidden focus:bg-white focus:ring-2 focus:ring-slate-950/20 transition-all shadow-inner/10"
+            />
           </div>
         </div>
 

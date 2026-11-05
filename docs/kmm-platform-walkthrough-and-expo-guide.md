@@ -173,7 +173,7 @@ sequenceDiagram
 ### 2. Information Collected
 | Field Category | Specific Data Points | Purpose |
 | :--- | :--- | :--- |
-| **Entity Identity** | Ministry / Church Entity Name, Zone / Region / Jurisdiction | Establishes organizational peer identity |
+| **Entity Identity** | Ministry / Department (e.g. Children's Ministry) | Establishes organizational peer identity |
 | **Contact Officer** | Contact Person / Lead Officer Name | Designates administrative liaison |
 | **Mandatory Communication** | Official Email, Phone Number, Kingschat Handle | Required for enquiry, verification, and credentials |
 | **Discipline Focus** | Animation, Comics, Music, Games, TV Broadcast, Puppetry | Maps to the primary media focus area |
@@ -183,11 +183,10 @@ sequenceDiagram
 
 ### 3. Immediate Access Credentials Issued Upon Registration
 Upon form submission, the entity does not encounter a passive wait screen. Instead, the screen immediately renders the **Portal Access Credentials Card**:
-- **Ministry / Entity Name**: e.g., `Children's Ministry - CE Lagos Zone 5`
-- **Zone / Region**: e.g., `Lagos Zone 5 / Nigeria South`
-- **Entity Identifier Code**: e.g., `KMM-LZ5CM`
-- **Portal Login Email**: e.g., `pastor.grace@celz5.org`
-- **Generated Secure Access Key (Password)**: e.g., `KMM-LZ5CM-9412`
+- **Ministry / Department**: e.g., `Children's Ministry`
+- **Entity Identifier Code**: e.g., `KMM-CM-4821`
+- **Portal Login Email**: e.g., `pastor.grace@ministry.org`
+- **Generated Secure Access Key (Password)**: e.g., `KMM-CM-9412`
 - **Access Level**: `Full Agency Peer Status Granted • Equal to Lovetoons`
 
 ### 4. Direct 1-Click Portal Entry
