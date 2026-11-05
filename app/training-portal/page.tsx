@@ -338,7 +338,7 @@ export default function TrainingPortalPage() {
 
   useEffect(() => {
     setIsMounted(true)
-    const savedTheme = localStorage.getItem('kmm_training_theme') || localStorage.getItem('kmm_theme')
+    const savedTheme = localStorage.getItem('kmm_training_theme')
     const darkActive = savedTheme === 'dark'
     setIsDark(darkActive)
     if (typeof window !== 'undefined') {
@@ -371,6 +371,18 @@ export default function TrainingPortalPage() {
       const found = ARCHIVED_TRAINING_VIDEOS.find((v) => v.id === vidId)
       if (found) {
         startPlayingVideo(found)
+      }
+    }
+
+    return () => {
+      // Ensure leaving training portal does not keep dark mode on landing/onboarding
+      if (typeof document !== 'undefined') {
+        const nextPath = window.location.pathname || ''
+        if (nextPath === '/' || nextPath.startsWith('/onboarding')) {
+          document.documentElement.classList.remove('dark')
+          document.documentElement.classList.add('light')
+          document.documentElement.style.colorScheme = 'light'
+        }
       }
     }
   }, [])
@@ -407,7 +419,6 @@ export default function TrainingPortalPage() {
     const next = !isDark
     setIsDark(next)
     localStorage.setItem('kmm_training_theme', next ? 'dark' : 'light')
-    localStorage.setItem('kmm_theme', next ? 'dark' : 'light')
     if (typeof window !== 'undefined') {
       if (next) {
         document.documentElement.classList.add('dark')

@@ -12,14 +12,14 @@ export default function AuthPage() {
 
   useEffect(() => {
     setIsMounted(true)
-    const savedTheme = localStorage.getItem('kmm_theme') || 'dark'
+    const savedTheme = localStorage.getItem('kmp_theme') || 'dark'
     setIsDark(savedTheme === 'dark')
   }, [])
 
   const toggleTheme = () => {
     const nextDark = !isDark
     setIsDark(nextDark)
-    localStorage.setItem('kmm_theme', nextDark ? 'dark' : 'light')
+    localStorage.setItem('kmp_theme', nextDark ? 'dark' : 'light')
   }
 
   const handleSignIn = (e: React.FormEvent) => {

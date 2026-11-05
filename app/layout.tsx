@@ -49,11 +49,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'dark light',
-  themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0b0f17' },
-    { media: '(prefers-color-scheme: light)', color: '#f8f9fa' },
-  ],
+  colorScheme: 'light',
+  themeColor: '#f8f9fa',
 }
 
 export default function RootLayout({
@@ -74,28 +71,46 @@ export default function RootLayout({
               (function() {
                 try {
                   var path = window.location.pathname || '';
-                  var isPublic = path === '/' || path.startsWith('/training-portal') || path.startsWith('/onboarding');
-                  if (path.startsWith('/training-portal')) {
-                    var tpTheme = localStorage.getItem('kmm_training_theme') || localStorage.getItem('kmm_theme');
+                  var isLanding = path === '' || path === '/' || path === '/index.html';
+                  var isOnboarding = path.startsWith('/onboarding');
+                  var isTrainingPortal = path.startsWith('/training-portal');
+
+                  // Landing page and onboarding must ALWAYS be light theme
+                  if (isLanding || isOnboarding) {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                    document.documentElement.style.colorScheme = 'light';
+                    return;
+                  }
+
+                  if (isTrainingPortal) {
+                    var tpTheme = localStorage.getItem('kmm_training_theme');
                     if (tpTheme === 'dark') {
                       document.documentElement.classList.add('dark');
+                      document.documentElement.classList.remove('light');
                       document.documentElement.style.colorScheme = 'dark';
                     } else {
                       document.documentElement.classList.remove('dark');
+                      document.documentElement.classList.add('light');
                       document.documentElement.style.colorScheme = 'light';
                     }
                     return;
                   }
-                  var stored = localStorage.getItem('kmp_theme') || localStorage.getItem('kmm_theme');
-                  if (stored === 'light' || (!stored && isPublic)) {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.style.colorScheme = 'light';
-                  } else {
+
+                  // IP Portal and internal apps
+                  var stored = localStorage.getItem('kmp_theme');
+                  if (stored === 'dark') {
                     document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
                     document.documentElement.style.colorScheme = 'dark';
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                    document.documentElement.style.colorScheme = 'light';
                   }
                 } catch(e) {
                   document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
                 }
               })();
             `,

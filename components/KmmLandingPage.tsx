@@ -92,10 +92,20 @@ export default function KmmLandingPage() {
     }
   }, [menuOpen])
 
+  // Ensure landing page is strictly in light mode under all circumstances
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.remove('dark')
+      document.documentElement.classList.add('light')
+      document.documentElement.style.colorScheme = 'light'
+      document.body.classList.remove('dark')
+    }
+  }, [])
+
   return (
     <div className="kmm-site-root">
       {/* Top Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md border-b transition-colors border-slate-900/10 bg-white/75">
+      <header className="sticky top-0 z-50 backdrop-blur-md border-b transition-colors border-slate-900/10 bg-white/90 text-[var(--kmm-fg)]">
         <div className="kmm-wrap flex items-center justify-between min-h-[64px] sm:min-h-[72px] gap-2 sm:gap-4">
           {/* Brand */}
           <Link href="#top" className="flex items-center gap-2.5 sm:gap-3 no-underline text-[var(--kmm-fg)] min-w-0 group">
@@ -157,7 +167,7 @@ export default function KmmLandingPage() {
                 {agenciesDropdownOpen && (
                   <div
                     onMouseLeave={() => setAgenciesDropdownOpen(false)}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[390px] rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-2xl p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[390px] rounded-3xl bg-white border border-[var(--kmm-line)] shadow-2xl p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
                   >
                     <div className="px-3 py-2 border-b border-[var(--kmm-line)] mb-1.5 flex items-center justify-between">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--kmm-muted)]">
@@ -278,7 +288,7 @@ export default function KmmLandingPage() {
 
         {/* Mobile Navigation Drawer */}
         {menuOpen && (
-          <nav className="fixed top-[64px] sm:top-[72px] left-0 right-0 z-50 max-h-[calc(100vh-64px)] sm:max-h-[calc(100vh-72px)] overflow-y-auto border-b border-[var(--kmm-line)] bg-[var(--kmm-bg)] px-5 py-6 shadow-2xl animate-in slide-in-from-top-3 duration-250 lg:hidden">
+          <nav className="fixed top-[64px] sm:top-[72px] left-0 right-0 z-50 max-h-[calc(100vh-64px)] sm:max-h-[calc(100vh-72px)] overflow-y-auto border-b border-[var(--kmm-line)] bg-white px-5 py-6 shadow-2xl animate-in slide-in-from-top-3 duration-250 lg:hidden">
             <div className="flex flex-col gap-2 list-none m-0 p-0">
               <a
                 href="#about"
@@ -300,7 +310,7 @@ export default function KmmLandingPage() {
                   aria-expanded={mobileAgenciesOpen}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="size-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm">
+                    <span className="size-8 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center font-bold text-sm">
                       🏛
                     </span>
                     <span>Agencies</span>
@@ -353,7 +363,7 @@ export default function KmmLandingPage() {
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
               >
-                <span className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm">
+                <span className="size-8 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center font-bold text-sm">
                   ✨
                 </span>
                 <div className="flex-1 min-w-0">
@@ -639,7 +649,7 @@ export default function KmmLandingPage() {
               </div>
 
               <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
-                <div className="size-11 rounded-2xl bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] flex items-center justify-center font-bold text-lg">
+                <div className="size-11 rounded-2xl bg-[#FFB800]/25 text-amber-700 flex items-center justify-center font-bold text-lg">
                   📚
                 </div>
                 <h3 className="font-extrabold text-base">Training Materials</h3>
@@ -659,7 +669,7 @@ export default function KmmLandingPage() {
               </div>
 
               <div className="p-6 rounded-[28px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all space-y-2.5">
-                <div className="size-11 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
+                <div className="size-11 rounded-2xl bg-purple-500/15 text-purple-600 flex items-center justify-center font-bold text-lg">
                   📋
                 </div>
                 <h3 className="font-extrabold text-base">Supporting Documents</h3>
@@ -936,7 +946,7 @@ export default function KmmLandingPage() {
               <div id="agencies-educational" className="scroll-mt-24 rounded-[28px] p-6 bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col justify-between sm:col-span-2 lg:col-span-1">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] border border-amber-500/25">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-[#FFB800]/25 text-amber-700 border border-amber-500/25">
                       Education
                     </span>
                   </div>
@@ -1047,11 +1057,11 @@ export default function KmmLandingPage() {
               {/* Card 2: Practical Tools */}
               <div className="p-8 rounded-[32px] bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="size-12 rounded-2xl bg-[#FFB800]/25 text-amber-700 dark:text-[#FFB800] flex items-center justify-center font-bold text-xl">
+                  <div className="size-12 rounded-2xl bg-[#FFB800]/25 text-amber-700 flex items-center justify-center font-bold text-xl">
                     🛠
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-[#FFB800] block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block mb-1">
                       Interactive Utilities
                     </span>
                     <h3 className="text-xl font-bold">Practical Tools</h3>
@@ -1213,7 +1223,7 @@ export default function KmmLandingPage() {
 
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-8 space-y-4 text-left">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-[#FFC700]/20 text-slate-900 dark:text-[#FFC700] border border-[#FFC700]/30 uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-[#FFC700]/20 text-slate-900 border border-[#FFC700]/30 uppercase tracking-wider">
                     <span className="size-2 rounded-full bg-[#FFC700] animate-pulse" />
                     <span>Official Ministry Waitlist &amp; Verification</span>
                   </div>
