@@ -57,7 +57,7 @@ export default function AuthPage() {
             ▶
           </div>
           <span className="font-extrabold tracking-tight" style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}>
-            KMM Video Portal
+            Kiddies Media Ministry Video Portal
           </span>
         </Link>
 
@@ -182,7 +182,7 @@ export default function AuthPage() {
               isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Return to KMM Official Website
+            Return to Kiddies Media Ministry Official Website
           </Link>
         </div>
       </main>

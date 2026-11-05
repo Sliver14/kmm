@@ -226,7 +226,7 @@ function SignInContent() {
                   />
                   <span>Remember this device</span>
                 </label>
-                <span className="text-[11px] text-slate-400 font-medium">KMM Cloud Auth</span>
+                <span className="text-[11px] text-slate-400 font-medium">Kiddies Media Ministry Cloud Auth</span>
               </div>
 
               <button
@@ -260,7 +260,7 @@ function SignInContent() {
           </div>
 
           <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
-            <span>Kiddies Media Ministries</span>
+            <span>Kiddies Media Ministry</span>
             <span>Intellectual Asset Portal</span>
           </div>
         </div>

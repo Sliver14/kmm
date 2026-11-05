@@ -130,7 +130,7 @@ export default function OnboardingPage() {
             className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight"
             style={{ fontFamily: 'Bricolage Grotesque, -apple-system, sans-serif' }}
           >
-            Bring Your Ministry&apos;s Children&apos;s Media Content to the KMM IP Portal
+            Bring Your Ministry&apos;s Children&apos;s Media Content to the Kiddies Media Ministry IP Portal
           </h1>
 
           <p className="text-sm sm:text-base text-slate-500 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
@@ -168,7 +168,7 @@ export default function OnboardingPage() {
                 <Users2 className="size-5" />
               </div>
               <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mb-1">
-                KMM IP Portal Access
+                Kiddies Media Ministry IP Portal Access
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                 The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
@@ -191,7 +191,7 @@ export default function OnboardingPage() {
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-bold">
-            <img src="/kmm-logo.png" alt="KMM" className="size-5 object-contain" />
+            <img src="/kmm-logo.png" alt="Kiddies Media Ministry" className="size-5 object-contain" />
             <span>Kiddies Media Ministry • IP &amp; Rights Directorate</span>
           </div>
 

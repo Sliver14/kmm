@@ -232,7 +232,7 @@ export function MinistryWaitlistManager({ className = '' }: MinistryWaitlistMana
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Review incoming expressions of interest from church zones and media departments wishing to join the KMM ecosystem and syndicate on Lovetoons.
+            Review incoming expressions of interest from church zones and media departments wishing to join the Kiddies Media Ministry ecosystem and syndicate on Lovetoons.
           </p>
         </div>
 

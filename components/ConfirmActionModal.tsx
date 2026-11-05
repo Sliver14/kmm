@@ -126,7 +126,7 @@ export function ConfirmActionModal({
         {/* Audit Compliance Notice */}
         <div className="flex items-center gap-2 rounded-xl bg-slate-100/70 dark:bg-[#171a24] px-3 py-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium border border-slate-200/50 dark:border-white/10">
           <span className="size-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-          <span>Permanently recorded in the KMM Intellectual Property Audit Trail</span>
+          <span>Permanently recorded in the Kiddies Media Ministry Intellectual Property Audit Trail</span>
         </div>
 
         {/* Footer Actions */}

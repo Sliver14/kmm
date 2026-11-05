@@ -149,7 +149,7 @@ export function WelcomeSplash({
               {!videoLoaded && (
                 <img
                   src="/kmm-logo.png"
-                  alt="Kiddies Media Ministries"
+                  alt="Kiddies Media Ministry"
                   className="absolute inset-0 size-full object-contain p-6 animate-pulse"
                 />
               )}
@@ -160,7 +160,7 @@ export function WelcomeSplash({
         {/* Brand Titles */}
         <div className="mt-6 space-y-1.5">
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            {userName ? `Welcome, ${userName}` : 'Welcome to KMM'}
+            {userName ? `Welcome, ${userName}` : 'Welcome to Kiddies Media Ministry'}
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-300">

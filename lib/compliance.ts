@@ -110,7 +110,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
     clusterLabel: 'Screen & Broadcast Media',
     inherentLiability: 'High',
     description: 'Animated series, broadcast programmes, films, and video features distributed globally.',
-    standardsReference: 'KMM Broadcast Clearance Code & Master Delivery Specs',
+    standardsReference: 'Kiddies Media Ministry Broadcast Clearance Code & Master Delivery Specs',
     gates: [
       {
         key: 'biblicalAlignment',
@@ -175,7 +175,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
     clusterLabel: 'Audio & Music Productions',
     inherentLiability: 'Medium',
     description: 'Original theme songs, sing-alongs, audio dramas, podcasts, and soundtrack stems.',
-    standardsReference: 'KMM Music Custody & Master Split Regulations',
+    standardsReference: 'Kiddies Media Ministry Music Custody & Master Split Regulations',
     gates: [
       {
         key: 'lyricalTheology',
@@ -186,7 +186,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
       },
       {
         key: 'soundMasterAssignment',
-        title: 'Master Sound Recording Rights Fully Assigned to KMM',
+        title: 'Master Sound Recording Rights Fully Assigned to Kiddies Media Ministry',
         desc: 'Producer, audio engineer, and mixing studio have transferred master stems custody.',
         pillar: 'Legal',
         mandatory: true,
@@ -233,7 +233,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
     clusterLabel: 'Publishing, Books & Comics',
     inherentLiability: 'Medium',
     description: 'Devotionals, illustrated storybooks, curricula, graphic novels, and character comics.',
-    standardsReference: 'KMM Literary Custody & ISBN Clearance Standard',
+    standardsReference: 'Kiddies Media Ministry Literary Custody & ISBN Clearance Standard',
     gates: [
       {
         key: 'biblicalAlignment',
@@ -285,7 +285,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
     clusterLabel: 'Consumer Merchandise, Apparel & Consumables',
     inherentLiability: 'Critical',
     description: 'School bags, toys, branded consumables, beverages (e.g. Zobo Drink), and apparel.',
-    standardsReference: 'KMM Child Consumer Product Safety & Health Standard',
+    standardsReference: 'Kiddies Media Ministry Child Consumer Product Safety & Health Standard',
     gates: [
       {
         key: 'healthSafetyLabClearance',
@@ -326,7 +326,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
       {
         type: 'CERT',
         label: 'Statutory Trademark Certificate',
-        desc: 'Trademark custody certificate under KMM intellectual property custody.',
+        desc: 'Trademark custody certificate under Kiddies Media Ministry intellectual property custody.',
         mandatory: true,
       },
       {
@@ -343,7 +343,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
     clusterLabel: 'Digital Platforms, Apps & Interactive Games',
     inherentLiability: 'High',
     description: 'Streaming portals, mobile games, reading apps, and web interactive tools.',
-    standardsReference: 'KMM Child Online Privacy Protection & Software Standard',
+    standardsReference: 'Kiddies Media Ministry Child Online Privacy Protection & Software Standard',
     gates: [
       {
         key: 'coppaChildPrivacyClearance',
@@ -384,7 +384,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
       {
         type: 'DEED',
         label: 'Software Developer IP Assignment Deed',
-        desc: 'Executed assignment of proprietary source code and game engines to KMM.',
+        desc: 'Executed assignment of proprietary source code and game engines to Kiddies Media Ministry.',
         mandatory: true,
       },
     ],
@@ -395,7 +395,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
     clusterLabel: 'Outreach & Ministry Event Formats',
     inherentLiability: 'Medium',
     description: 'Bible reading fiestas, kids conferences, live rallies, and festival blueprints.',
-    standardsReference: 'KMM Outreach Format & Crowd Clearance Code',
+    standardsReference: 'Kiddies Media Ministry Outreach Format & Crowd Clearance Code',
     gates: [
       {
         key: 'biblicalAlignment',
@@ -447,7 +447,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
     clusterLabel: 'Foundational IP, Characters & Brand Custody',
     inherentLiability: 'High',
     description: 'Proprietary character turnaround rigs, mascots, master logos, and visual brand bibles.',
-    standardsReference: 'KMM Master Trademark & Character IP Custody Policy',
+    standardsReference: 'Kiddies Media Ministry Master Trademark & Character IP Custody Policy',
     gates: [
       {
         key: 'characterPersonaClearance',
@@ -459,7 +459,7 @@ export const CATEGORY_COMPLIANCE_STANDARDS: Record<CategoryCluster, CategoryComp
       {
         key: 'statutoryTrademarkRegistration',
         title: 'Statutory Trademark Registration & Custody Declaration',
-        desc: 'Master character name, logo, and distinctive design registered under KMM custody.',
+        desc: 'Master character name, logo, and distinctive design registered under Kiddies Media Ministry custody.',
         pillar: 'Legal',
         mandatory: true,
       },

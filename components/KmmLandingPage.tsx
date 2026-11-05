@@ -290,7 +290,7 @@ export default function KmmLandingPage() {
                 <span className="size-8 rounded-xl bg-[var(--kmm-blue)]/15 text-[var(--kmm-blue)] flex items-center justify-center font-bold text-sm">
                   ℹ
                 </span>
-                <span>About KMM</span>
+                <span>About Kiddies Media Ministry</span>
               </a>
 
               {/* Agencies Dropdown Accordion */}
@@ -464,7 +464,7 @@ export default function KmmLandingPage() {
           <div className="kmm-wrap relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Copy Left */}
             <div className="lg:col-span-7 space-y-6">
-              <p className="eyebrow kmm-animate-rise">Kiddies Media Ministry &middot; KMM</p>
+              <p className="eyebrow kmm-animate-rise">Kiddies Media Ministry</p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] kmm-animate-rise">
                 Guiding the Standards.{' '}
                 <em className="not-italic text-[var(--kmm-orange)] block">
@@ -503,7 +503,7 @@ export default function KmmLandingPage() {
                 <div className="relative size-[72%] rounded-full bg-white flex items-center justify-center p-6 shadow-[0_0_0_10px_var(--kmm-cream),0_0_0_14px_var(--kmm-gold),0_24px_50px_-16px_rgba(16,35,63,0.5)]">
                   <Image
                     src="/kmm-logo.png"
-                    alt="KMM Emblem"
+                    alt="Kiddies Media Ministry Emblem"
                     width={240}
                     height={240}
                     priority
@@ -546,7 +546,7 @@ export default function KmmLandingPage() {
           <div className="kmm-wrap space-y-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div>
-                <p className="eyebrow mb-3">About KMM & Its Role</p>
+                <p className="eyebrow mb-3">About Kiddies Media Ministry &amp; Its Role</p>
                 <h2 className="text-3xl sm:text-4xl font-extrabold">The framework that children&apos;s media works within</h2>
               </div>
               <div className="space-y-6">
@@ -554,12 +554,12 @@ export default function KmmLandingPage() {
                   Kiddies Media Ministry (KMM) provides the governance, policy, and standards framework for children&apos;s content across Loveworld Kingdom.
                 </p>
                 <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
-                  The website provides basic information about KMM and its role to guide, coordinate, and set expectations for children&apos;s media initiatives. Our mission equips ministry departments, animation studios, and creative teams with official training materials, actionable compliance tools, and helpful supporting documents so they can create and share content with clarity, spiritual fidelity, and confidence.
+                  The website provides basic information about Kiddies Media Ministry (KMM) and its role to guide, coordinate, and set expectations for children&apos;s media initiatives. Our mission equips ministry departments, animation studios, and creative teams with official training materials, actionable compliance tools, and helpful supporting documents so they can create and share content with clarity, spiritual fidelity, and confidence.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="rounded-3xl p-6 bg-[var(--kmm-blue)] text-white shadow-md">
                     <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
-                      What KMM does
+                      What Kiddies Media Ministry does
                     </b>
                     <span className="text-sm leading-relaxed block text-white/90">
                       Guides, coordinates, and establishes the expectations, training materials, practical tools, and supporting documents children&apos;s media initiatives follow.
@@ -567,7 +567,7 @@ export default function KmmLandingPage() {
                   </div>
                   <div className="rounded-3xl p-6 bg-[var(--kmm-gold)] text-[#10233F] shadow-md">
                     <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
-                      What KMM is not
+                      What Kiddies Media Ministry is not
                     </b>
                     <span className="text-sm leading-relaxed block text-[#10233F]/90">
                       A standalone studio that simply produces entertainment content without institutional governance.
@@ -577,7 +577,7 @@ export default function KmmLandingPage() {
               </div>
             </div>
 
-            {/* 4 Pillars of KMM's Role */}
+            {/* 4 Pillars of Kiddies Media Ministry's Role */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-4">
               <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
                 <div className="size-10 rounded-2xl bg-[var(--kmm-blue)]/15 text-[var(--kmm-blue)] flex items-center justify-center font-bold text-lg">
@@ -631,7 +631,7 @@ export default function KmmLandingPage() {
               <p className="eyebrow">Our mandate</p>
               <h2 className="text-3xl sm:text-4xl font-extrabold">Eight areas of responsibility</h2>
               <p className="lead">
-                From policy to compliance, these are the areas KMM covers on behalf of children's media across the ministry.
+                From policy to compliance, these are the areas Kiddies Media Ministry covers on behalf of children's media across the ministry.
               </p>
             </div>
 
@@ -713,7 +713,7 @@ export default function KmmLandingPage() {
             </div>
 
             <p className="text-xs text-[var(--kmm-muted)] mt-8 max-w-3xl">
-              These are KMM's proposed public-facing areas of responsibility, subject to confirmation against officially approved policies and organizational mandates.
+              These are Kiddies Media Ministry&apos;s proposed public-facing areas of responsibility, subject to confirmation against officially approved policies and organizational mandates.
             </p>
           </div>
         </section>
@@ -962,13 +962,13 @@ export default function KmmLandingPage() {
             <div className="rounded-[40px] p-8 sm:p-12 bg-[var(--kmm-navy)] text-white shadow-2xl relative overflow-hidden">
               <div className="max-w-3xl space-y-4 relative z-10">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--kmm-gold)] text-[#10233F]">
-                  <span>KMM Institutional Training & Resources</span>
+                  <span>Kiddies Media Ministry Institutional Training &amp; Resources</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-                  Training Materials, Practical Tools & Supporting Documents
+                  Training Materials, Practical Tools &amp; Supporting Documents
                 </h2>
                 <p className="text-sm sm:text-base leading-relaxed text-white/85">
-                  The website provides basic information about KMM and its role, alongside an institutional Training section with training materials and tools, and helpful supporting documents. The training portal equips ministry departments, animation studios, and creative teams with the knowledge, interactive utilities, and official templates needed to uphold zero-defect standards for children&apos;s media.
+                  The website provides basic information about Kiddies Media Ministry (KMM) and its role, alongside an institutional Training section with training materials and tools, and helpful supporting documents. The training portal equips ministry departments, animation studios, and creative teams with the knowledge, interactive utilities, and official templates needed to uphold zero-defect standards for children&apos;s media.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-4">
@@ -1183,7 +1183,7 @@ export default function KmmLandingPage() {
                 Onboard your Ministry or Department
               </h2>
               <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
-                Whether you represent a Church Zone, Children's Ministry department, or media production unit, join the KMM ecosystem and get onboarded to the IP Portal. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
+                Whether you represent a Church Zone, Children's Ministry department, or media production unit, join the Kiddies Media Ministry (KMM) ecosystem and get onboarded to the IP Portal. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
               </p>
             </div>
 
@@ -1228,7 +1228,7 @@ export default function KmmLandingPage() {
               </div>
               <div className="p-6 rounded-2xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)]">
                 <dt className="text-xs font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">Directorate</dt>
-                <dd className="m-0 font-bold text-base text-[var(--kmm-fg)]">KMM Legal & Broadcast Directorate</dd>
+                <dd className="m-0 font-bold text-base text-[var(--kmm-fg)]">Kiddies Media Ministry Legal &amp; Broadcast Directorate</dd>
               </div>
               <div className="p-6 rounded-2xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)]">
                 <dt className="text-xs font-bold uppercase tracking-wider text-[var(--kmm-muted)] mb-1">Network Hub</dt>
@@ -1250,7 +1250,7 @@ export default function KmmLandingPage() {
               <div className="relative size-16 rounded-full overflow-hidden shadow-[0_0_0_3px_var(--kmm-gold)] bg-white flex items-center justify-center">
                 <Image
                   src="/kmm-logo.png"
-                  alt="KMM"
+                  alt="Kiddies Media Ministry"
                   width={64}
                   height={64}
                   className="object-contain"
@@ -1265,7 +1265,7 @@ export default function KmmLandingPage() {
             <div className="md:col-span-3 space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--kmm-gold)]">Explore</h4>
               <ul className="list-none m-0 p-0 space-y-2 text-sm text-white/90">
-                <li><a href="#about" className="hover:text-[var(--kmm-gold)] transition-colors">About KMM &amp; Its Role</a></li>
+                <li><a href="#about" className="hover:text-[var(--kmm-gold)] transition-colors">About Kiddies Media Ministry &amp; Its Role</a></li>
                 <li><a href="#mandate" className="hover:text-[var(--kmm-gold)] transition-colors">Mandate &amp; Responsibilities</a></li>
                 <li><a href="#training" className="hover:text-[var(--kmm-gold)] transition-colors">Training, Tools &amp; Docs</a></li>
                 <li><Link href="/training-portal" className="hover:text-[var(--kmm-gold)] transition-colors">Training Portal Hub</Link></li>

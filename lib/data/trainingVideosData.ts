@@ -39,7 +39,7 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Mandatory legal sign-off threshold before publishing to satellite networks and digital apps.',
       'Statutory broadcast compliance filing requirements for international partner territories.',
     ],
-    citations: ['NBC Broadcast Code § 4.2.1', 'ITU-R BT.1702 Strobing Threshold', 'KMM Charter Art. IX'],
+    citations: ['NBC Broadcast Code § 4.2.1', 'ITU-R BT.1702 Strobing Threshold', 'Kiddies Media Ministry Charter Art. IX'],
   },
   {
     id: 'vid-2',
@@ -118,7 +118,7 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     categoryLabel: 'Scriptural Review',
     duration: '19:50',
     speaker: 'Pastor Victor Chidi',
-    speakerRole: 'KMM Editorial & Pastoral Director',
+    speakerRole: 'Kiddies Media Ministry Editorial & Pastoral Director',
     initials: 'VC',
     avatarBg: 'linear-gradient(135deg, #EC4899, #BE185D)',
     res: '4K ULTRA HD',
@@ -131,7 +131,7 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
       'Rigorous editorial clearance loop between writers room and the pastoral review council.',
       'Prohibition of theological caricatures or fear-inducing behavioral tropes.',
     ],
-    citations: ['KMM Doctrinal Canon 2026', 'King James Bible Concordance', 'Loveworld Editorial Policy'],
+    citations: ['Kiddies Media Ministry Doctrinal Canon 2026', 'King James Bible Concordance', 'Loveworld Editorial Policy'],
   },
   {
     id: 'vid-6',

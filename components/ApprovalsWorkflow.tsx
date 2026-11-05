@@ -35,8 +35,8 @@ export const GOVERNANCE_GATES = [
   },
   {
     key: 'KMM Ministry Trademark Registration Seal',
-    title: 'KMM Trademark & IP Custody',
-    desc: 'Registered under KMM intellectual property custody',
+    title: 'Kiddies Media Ministry Trademark & IP Custody',
+    desc: 'Registered under Kiddies Media Ministry intellectual property custody',
   },
 ]
 
@@ -1188,7 +1188,7 @@ export function ApprovalsWorkflow() {
                 <div className="flex items-center justify-between">
                   <span className="font-black text-slate-900 dark:text-white text-xs">Chain of Title & Legal Governance Summary</span>
                   <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40 font-bold px-2 py-0.5 text-[10px]">
-                    KMM Certified Record
+                    Kiddies Media Ministry Certified Record
                   </span>
                 </div>
                 <div className="p-4 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs leading-relaxed space-y-2 font-mono">

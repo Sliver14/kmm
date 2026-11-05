@@ -34,8 +34,8 @@ const figtree = Figtree({
 })
 
 export const metadata: Metadata = {
-  title: 'Kiddies Media Ministries — Intellectual Asset Management Platform',
-  description: 'Manage intellectual assets, rights, governance, staff contributors and approvals across Kiddies Media Ministries agencies: Lovetoons, Publishing Agency, Digital Agency, Academy Agency, and Educational Agency.',
+  title: 'Kiddies Media Ministry — Intellectual Asset Management Platform',
+  description: 'Manage intellectual assets, rights, governance, staff contributors and approvals across Kiddies Media Ministry agencies: Lovetoons, Publishing Agency, Digital Agency, Academy Agency, and Educational Agency.',
   generator: 'v0.app',
   icons: {
     icon: [

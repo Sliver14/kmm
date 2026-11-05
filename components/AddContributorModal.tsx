@@ -291,7 +291,7 @@ export function AddContributorModal({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@kmm.org"
+                  placeholder="name@kiddiesmedia.org"
                   className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white pl-9 pr-3 text-xs outline-none focus:border-[#2f80ed]"
                 />
               </div>

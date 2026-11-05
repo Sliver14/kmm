@@ -414,16 +414,16 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
     ownerCertificateRef: 'CERT-EXEC-MIN-2026-HQ',
     trademarkStatus: 'Registered',
     distributionLicense: 'Exclusive Ministry Global Distribution',
-    productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    productionLicensees: 'Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media',
     territoryClearanceStatus: 'Cleared Global',
     contentProvenance: category.toLowerCase().includes('music') || category.toLowerCase().includes('audio')
       ? 'Fully Custom'
       : category.toLowerCase().includes('animated') || category.toLowerCase().includes('programme')
         ? 'AI Assisted'
         : 'Fully Custom',
-    songWriter: category.toLowerCase().includes('music') || category.toLowerCase().includes('audio') ? 'KMM Music Ministry (Staff Composer)' : undefined,
+    songWriter: category.toLowerCase().includes('music') || category.toLowerCase().includes('audio') ? 'Kiddies Media Ministry Music Ministry (Staff Composer)' : undefined,
     songWriterProvenance: category.toLowerCase().includes('music') || category.toLowerCase().includes('audio') ? 'Fully Custom' : undefined,
-    description: `${entry.name} - ${entry.docCategory}. Status: ${status}. Official intellectual asset Schedule Item #${entry.sn} catalogued under Lovetoons / Kiddies Media Ministries.`,
+    description: `${entry.name} - ${entry.docCategory}. Status: ${status}. Official intellectual asset Schedule Item #${entry.sn} catalogued under Lovetoons / Kiddies Media Ministry.`,
     tags: Array.from(
       new Set(
         [

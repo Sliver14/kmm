@@ -417,7 +417,7 @@ function Sidebar({
         <div className="pt-2 mt-2 border-t border-slate-200/60 dark:border-white/[0.08]">
           <Link
             href="/"
-            title="KMM Official Website"
+            title="Kiddies Media Ministry Official Website"
             className={cn(
               'group relative flex items-center rounded-xl font-medium transition cursor-pointer',
               isCollapsed ? 'justify-center size-9 mx-auto' : 'w-full gap-2.5 px-3 py-2 text-xs',
@@ -425,18 +425,18 @@ function Sidebar({
             )}
           >
             <Globe2 className="size-4 shrink-0 text-slate-500 group-hover:text-amber-500 transition-colors" />
-            {!isCollapsed && <span className="flex-1 truncate">KMM Website</span>}
+            {!isCollapsed && <span className="flex-1 truncate">Kiddies Media Ministry Website</span>}
             {!isCollapsed && <ExternalLink className="size-3 text-slate-400 opacity-60" />}
             {isCollapsed && (
               <div className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white shadow-xl border border-slate-800 opacity-0 transition-opacity duration-150 group-hover:opacity-100 lg:block z-50">
-                KMM Website
+                Kiddies Media Ministry Website
               </div>
             )}
           </Link>
 
           <Link
             href="/training-portal"
-            title="KMM Video Training Academy"
+            title="Kiddies Media Ministry Video Training Academy"
             className={cn(
               'group relative flex items-center rounded-xl font-medium transition cursor-pointer mt-0.5',
               isCollapsed ? 'justify-center size-9 mx-auto' : 'w-full gap-2.5 px-3 py-2 text-xs',
@@ -504,7 +504,7 @@ function Sidebar({
       {!isCollapsed ? (
         <div className="px-3.5 pb-3 text-[11px] text-slate-400 border-t border-slate-200/80 dark:border-white/[0.08] pt-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">KMM Platform • v2.1</span>
+            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">Kiddies Media Ministry Platform • v2.1</span>
             <div className="flex items-center gap-1">
               <ThemeToggle variant="icon" className="size-6 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 border-none bg-transparent shadow-none" />
               {setIsCollapsed && (
@@ -964,8 +964,8 @@ function Header({
 
       {/* Mobile Branding */}
       <div className="flex items-center gap-2 sm:hidden">
-        <img src="/kmm-logo.png" alt="Kiddies Media Ministries" className="size-6 object-contain" />
-        <span className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">KMM</span>
+        <img src="/kmm-logo.png" alt="Kiddies Media Ministry" className="size-6 object-contain" />
+        <span className="text-xs font-bold text-slate-900 dark:text-white tracking-tight">Kiddies Media Ministry</span>
       </div>
 
       {/* Pill Search Input (Matching Inspiration) */}
@@ -1709,7 +1709,7 @@ function Dashboard({
                 <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                New church zones and media departments have submitted expressions of interest to join the KMM ecosystem.
+                New church zones and media departments have submitted expressions of interest to join the Kiddies Media Ministry ecosystem.
               </p>
             </div>
           </div>
@@ -2269,7 +2269,7 @@ function Dashboard({
               <div className="min-w-0">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 dark:bg-blue-500/20 text-[#2f80ed] px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-bold">
                   <Sparkles className="size-3" />
-                  <span>KMM Executive Governance</span>
+                  <span>Kiddies Media Ministry Executive Governance</span>
                 </span>
                 <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2.5 truncate">
                   Hello, Super Admin!
@@ -2715,11 +2715,11 @@ function AssetsPage({
       ownerCertificateRef: `CERT-EXEC-MIN-${new Date().getFullYear()}-HQ`,
       trademarkStatus: 'Pending Filing',
       distributionLicense: 'Exclusive Ministry Global Distribution',
-      productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+      productionLicensees: 'Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media',
       territory: 'Worldwide / Global',
       territoryClearanceStatus: 'Cleared Global',
       contentProvenance: 'Fully Custom',
-      songWriter: newAssetForm.category.toLowerCase().includes('audio') || newAssetForm.category.toLowerCase().includes('music') ? 'KMM Music Ministry (Staff Composer)' : '',
+      songWriter: newAssetForm.category.toLowerCase().includes('audio') || newAssetForm.category.toLowerCase().includes('music') ? 'Kiddies Media Ministry Music Ministry (Staff Composer)' : '',
       songWriterProvenance: 'Fully Custom',
       description: newAssetForm.description.trim(),
       tags: tagList.length > 0 ? tagList : [newAssetForm.category],
@@ -2739,7 +2739,7 @@ function AssetsPage({
       ownerCertificateRef: `CERT-EXEC-MIN-${new Date().getFullYear()}-HQ`,
       trademarkStatus: 'Pending Filing',
       distributionLicense: 'Exclusive Ministry Global Distribution',
-      productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+      productionLicensees: 'Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media',
       territory: 'Worldwide / Global',
       territoryClearanceStatus: 'Cleared Global',
       contentProvenance: 'Fully Custom',
@@ -3767,7 +3767,7 @@ function RightsPage({
     territoryClearanceStatus: 'Cleared Global',
     trademarkStatus: 'Registered',
     distributionLicense: 'Exclusive Ministry Global Distribution',
-    productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    productionLicensees: 'Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media',
     contentProvenance: 'Fully Custom',
     songWriter: '',
     songWriterProvenance: 'Fully Custom',
@@ -3793,7 +3793,7 @@ function RightsPage({
       ownerCertificateRef: newRightsForm.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
       trademarkStatus: newRightsForm.trademarkStatus || 'Registered',
       distributionLicense: newRightsForm.distributionLicense || 'Exclusive Ministry Global Distribution',
-      productionLicensees: newRightsForm.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+      productionLicensees: newRightsForm.productionLicensees || 'Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media',
       territoryClearanceStatus: newRightsForm.territoryClearanceStatus || 'Cleared Global',
       contentProvenance: newRightsForm.contentProvenance || 'Fully Custom',
       songWriter: newRightsForm.songWriter,
@@ -4581,11 +4581,11 @@ function RightsDetailsPage({
     ownerCertificateRef: asset.ownerCertificateRef || 'CERT-EXEC-MIN-2026-HQ',
     trademarkStatus: (asset.trademarkStatus || 'Registered') as 'Registered' | 'Pending Filing' | 'In Progress' | 'Unregistered',
     distributionLicense: asset.distributionLicense || 'Exclusive Ministry Global Distribution',
-    productionLicensees: asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    productionLicensees: asset.productionLicensees || 'Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media',
     territory: asset.territory || 'Worldwide / Global',
     territoryClearanceStatus: (asset.territoryClearanceStatus || 'Cleared Global') as 'Cleared Global' | 'Cleared Regional' | 'Pending Clearance' | 'Restricted',
     contentProvenance: defaultAssetProvenance,
-    songWriter: asset.songWriter || (isAudioCategory ? 'KMM Music Ministry (Staff Composer)' : ''),
+    songWriter: asset.songWriter || (isAudioCategory ? 'Kiddies Media Ministry Music Ministry (Staff Composer)' : ''),
     songWriterProvenance: (asset.songWriterProvenance || 'Fully Custom') as ContentProvenance,
     governanceScore: asset.governanceScore ?? 92,
     status: asset.status || 'Cleared',
@@ -4597,7 +4597,7 @@ function RightsDetailsPage({
     rightsType: 'Universal Ministry Rights Scope',
     territory: 'Worldwide / Global',
     distributionLicense: 'Exclusive Ministry Global Distribution',
-    productionLicensees: 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media',
+    productionLicensees: 'Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media',
     contentProvenance: 'Fully Custom' as ContentProvenance,
     docName: '',
   })
@@ -5045,10 +5045,10 @@ function RightsDetailsPage({
                   type="button"
                   onClick={() => setIsStaffCovenantPopupOpen(true)}
                   className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 text-[10px] font-bold border border-amber-200 dark:border-amber-800/60 transition cursor-pointer shadow-2xs"
-                  title="View KMM Staff Content Ownership Covenant"
+                  title="View Kiddies Media Ministry Staff Content Ownership Covenant"
                 >
                   <ScrollText className="size-3 text-amber-600" />
-                  <span>KMM Staff Content Notice ⓘ</span>
+                  <span>Kiddies Media Ministry Staff Content Notice ⓘ</span>
                 </button>
               </div>
 
@@ -5127,7 +5127,7 @@ function RightsDetailsPage({
               </span>
               <span className="font-semibold text-slate-700 dark:text-slate-300">
                 {isAudioCategory
-                  ? '🎵 Audio & Music Ministry Governance: Songwriter attribution, 3-tier creation provenance & KMM Staff Covenant'
+                  ? '🎵 Audio & Music Ministry Governance: Songwriter attribution, 3-tier creation provenance & Kiddies Media Ministry Staff Covenant'
                   : isVideoCategory
                     ? '🎬 Video & Animation Production Governance: Broadcast distribution, production studio mandate & soundtrack clearance'
                     : isPublishingCategory
@@ -5197,7 +5197,7 @@ function RightsDetailsPage({
               <div className="pt-2 border-t border-slate-100 dark:border-white/10 space-y-1">
                 <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Licensed to Produce:</div>
                 <div className="text-[11px] font-semibold text-indigo-700 dark:text-indigo-400 leading-snug">
-                  {asset.productionLicensees || 'Lovetoons Animation Studio, KMM Publishing, LoveWorld Media'}
+                  {asset.productionLicensees || 'Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media'}
                 </div>
               </div>
             </div>
@@ -5261,7 +5261,7 @@ function RightsDetailsPage({
                     {isAudioCategory ? 'Songwriter / Composer:' : isVideoCategory ? 'Theme Song & Score Clearance:' : 'Lead Illustrator / Author:'}
                   </div>
                   <div className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">
-                    {asset.songWriter || (isAudioCategory ? 'KMM Music Ministry (Staff Composer)' : 'In-House Creative Staff')}
+                    {asset.songWriter || (isAudioCategory ? 'Kiddies Media Ministry Music Ministry (Staff Composer)' : 'In-House Creative Staff')}
                   </div>
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <span className="text-[10px] text-slate-500">Creation Method:</span>
@@ -5276,10 +5276,10 @@ function RightsDetailsPage({
                     {isAudioCategory ? 'Audio Master Rights:' : isVideoCategory ? 'Production Licensee:' : 'Publishing Entity:'}
                   </div>
                   <div className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">
-                    {isAudioCategory ? '100% Ministry Owned Masters' : isVideoCategory ? (asset.productionLicensees?.split(',')[0] || 'Lovetoons Animation Studio') : 'KMM Publishing'}
+                    {isAudioCategory ? '100% Ministry Owned Masters' : isVideoCategory ? (asset.productionLicensees?.split(',')[0] || 'Lovetoons Animation Studio') : 'Kiddies Media Ministry Publishing'}
                   </div>
                   <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold mt-1">
-                    ✓ All master stems & files deposited in KMM Vault
+                    ✓ All master stems & files deposited in Kiddies Media Ministry Vault
                   </div>
                 </div>
               </div>
@@ -5295,7 +5295,7 @@ function RightsDetailsPage({
                 <div className="flex items-center gap-2.5">
                   <ScrollText className="size-4 text-amber-600 shrink-0" />
                   <span className="text-[11px]">
-                    <b>Ministry Staff Content Clause:</b> All content produced by any staff member belongs exclusively to KMM.
+                    <b>Ministry Staff Content Clause:</b> All content produced by any staff member belongs exclusively to Kiddies Media Ministry.
                   </span>
                 </div>
                 <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 underline shrink-0 ml-3">
@@ -5967,7 +5967,7 @@ function RightsDetailsPage({
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-[#09245a] dark:text-white text-base">
-                      KMM Staff Intellectual Property Covenant
+                      Kiddies Media Ministry Staff Intellectual Property Covenant
                     </h3>
                     <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 px-2 py-0.5 text-[9px] font-black uppercase">
                       Official Policy
@@ -5993,7 +5993,7 @@ function RightsDetailsPage({
                 <span>⚠️ Universal Staff Ownership Clause</span>
               </div>
               <p className="text-amber-900 dark:text-amber-300 leading-relaxed font-semibold">
-                Any content, song compositions, audio stems, lyrics, scripts, animations, character designs, 3D assets, illustrations, or code produced by any staff member belongs unconditionally and exclusively to KMM (Kiddies Media Ministries).
+                Any content, song compositions, audio stems, lyrics, scripts, animations, character designs, 3D assets, illustrations, or code produced by any staff member belongs unconditionally and exclusively to Kiddies Media Ministry.
               </p>
             </div>
 
@@ -6035,7 +6035,7 @@ function RightsDetailsPage({
               <button
                 type="button"
                 onClick={() => {
-                  showToast('Downloading KMM Staff Intellectual Property Covenant Policy PDF...')
+                  showToast('Downloading Kiddies Media Ministry Staff Intellectual Property Covenant Policy PDF...')
                 }}
                 className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
               >
@@ -7738,7 +7738,7 @@ function AuditTrailPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
                         {/* Agency */}
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className="rounded-lg bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-                            {log.agency || 'Global KMM'}
+                            {log.agency || 'Global Kiddies Media Ministry'}
                           </span>
                         </td>
 
@@ -9226,7 +9226,7 @@ export function MainApp({
   if (!isInitialized) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-slate-500">
-        Loading KMM Platform...
+        Loading Kiddies Media Ministry Platform...
       </div>
     )
   }

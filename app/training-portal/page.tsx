@@ -73,7 +73,7 @@ const SUPPORTING_DOCUMENTS: SupportingDocument[] = [
   {
     id: 'doc-1',
     code: 'KMM-DOC-001',
-    title: 'KMM Official Child Safeguarding Policy Manual',
+    title: 'Kiddies Media Ministry Official Child Safeguarding Policy Manual',
     category: 'protection',
     categoryLabel: 'Child Protection & Safety',
     classification: 'Statutory Institutional Policy',
@@ -89,8 +89,8 @@ The Kiddies Media Ministry (KMM) establishes this Child Safeguarding Policy Manu
 
 ARTICLE I: PRINCIPLES OF CHILD SAFETY
 1.1 Absolute Primacy of Child Welfare: In any conflict between production schedules, deadlines, or budget and the welfare of a minor, the safety and emotional health of the minor shall immediately take precedence.
-1.2 Zero Tolerance for Abuse: KMM maintains a zero-tolerance policy regarding emotional humiliation, verbal harshness, inappropriate physical contact, or psychological manipulation of minors.
-1.3 Certified Chaperone Mandate: No child actor, voice talent, or student contributor shall remain unaccompanied in a studio, editing bay, sound booth, or stage without a designated parent, legal guardian, or certified KMM safeguarding officer present.
+1.2 Zero Tolerance for Abuse: Kiddies Media Ministry maintains a zero-tolerance policy regarding emotional humiliation, verbal harshness, inappropriate physical contact, or psychological manipulation of minors.
+1.3 Certified Chaperone Mandate: No child actor, voice talent, or student contributor shall remain unaccompanied in a studio, editing bay, sound booth, or stage without a designated parent, legal guardian, or certified Kiddies Media Ministry safeguarding officer present.
 
 ARTICLE II: ON-SET & STUDIO PRODUCTION STANDARDS
 2.1 Continuous Session Limits: Recording or filming sessions for children under 10 years of age shall not exceed 45 continuous minutes without a mandatory 15-minute rest and hydration pause.
@@ -102,10 +102,10 @@ ARTICLE III: SENSORY & EMOTIONAL CONTENT PROTECTION
 3.2 Fear & Anxiety Safeguard: Narrative storylines must not expose children to demonic horror, existential dread, or morbid themes contrary to the peace, joy, and victory of the New Creation in Christ Jesus.
 
 ARTICLE IV: INCIDENT REPORTING & COMPLIANCE
-4.1 Duty to Report: Any production staff who observes non-compliance or potential child distress is legally and spiritually bound to notify the KMM Safeguarding Board within twelve (12) hours.
-4.2 Audit & Sanctions: Failure to observe safeguarding covenants results in immediate revocation of KMM Broadcast Accreditation.
+4.1 Duty to Report: Any production staff who observes non-compliance or potential child distress is legally and spiritually bound to notify the Kiddies Media Ministry Safeguarding Board within twelve (12) hours.
+4.2 Audit & Sanctions: Failure to observe safeguarding covenants results in immediate revocation of Kiddies Media Ministry Broadcast Accreditation.
 
-ISSUED BY: KMM Directorate of Legal Jurisprudence & Child Safeguarding
+ISSUED BY: Kiddies Media Ministry Directorate of Legal Jurisprudence & Child Safeguarding
 APPROVED FOR BROADCAST RELEASE ACROSS ALL LOVEWORLD CHANNELS`,
   },
   {
@@ -141,7 +141,7 @@ This Charter governs all visual animation masters, live-action kid segments, mus
 - Major Defects (48-Hour Remediation): Lip-sync drift >2 frames, incorrect lower-third titles, audio level drift ±2 LUFS.
 - Minor Notes: Slight color grading inconsistency between scene cuts.
 
-SANCTIONED BY: KMM Broadcast Quality Assurance Committee`,
+SANCTIONED BY: Kiddies Media Ministry Broadcast Quality Assurance Committee`,
   },
   {
     id: 'doc-3',
@@ -181,7 +181,7 @@ The Ministry agrees to protect the Minor Talent's personal privacy by using char
 
 SIGNED, SEALED AND DELIVERED:
 Parent/Guardian Signature: _______________________ Date: ____________________
-KMM Commissioning Officer Signature: ________________ Date: _________________`,
+Kiddies Media Ministry Commissioning Officer Signature: ________________ Date: _________________`,
   },
   {
     id: 'doc-4',
@@ -198,7 +198,7 @@ KIDDIES MEDIA MINISTRY (KMM) / DIGITAL DIVISION
 DOCUMENT CODE: KMM-DOC-004 / REGULATORY SERIES
 
 1. PURPOSE & JURISDICTION
-This Directive establishes mandatory compliance for all mobile applications, interactive websites, and digital games produced under the Loveworld Kiddies umbrella, ensuring compliance with the Children's Online Privacy Protection Act (COPPA, 16 C.F.R. Part 312), GDPR-K (Article 8), and KMM Institutional Covenants.
+This Directive establishes mandatory compliance for all mobile applications, interactive websites, and digital games produced under the Loveworld Kiddies umbrella, ensuring compliance with the Children's Online Privacy Protection Act (COPPA, 16 C.F.R. Part 312), GDPR-K (Article 8), and Kiddies Media Ministry Institutional Covenants.
 
 2. MANDATORY ARCHITECTURAL PRINCIPLES
 2.1 Zero Commercial Ad Networks: Kid apps (including LoveToons Mobile App) are strictly prohibited from embedding third-party behavioral advertising SDKs or programmatic ad exchanges.
@@ -210,7 +210,7 @@ This Directive establishes mandatory compliance for all mobile applications, int
 3.2 Voice Data Protection: Interactive games utilizing microphone inputs must process voice commands locally on-device. No audio recordings of minors may be transmitted or permanently archived on remote cloud servers.
 3.3 90-Day Telemetry Purge: Any telemetry logs containing session identifiers must be permanently and irreversibly purged after ninety (90) days.
 
-APPROVED BY: KMM Digital Transformation & Cyber Safeguarding Directorate`,
+APPROVED BY: Kiddies Media Ministry Digital Transformation & Cyber Safeguarding Directorate`,
   },
   {
     id: 'doc-5',
@@ -235,21 +235,21 @@ Children's minds are fertile spiritual soil. The Kiddies Media Ministry is manda
 2.3 Dignity in Character Portrayals: Biblical heroes and disciples must be portrayed with reverence, avoid theological caricatures, and never depict godly patriarchs or biblical figures in morally compromising or frivolous lights.
 
 3. SCRIPTURAL CLEARANCE GATEWAY
-3.1 Pre-Animation Review: All series pitches, character backstories, and episode scripts must receive written sign-off from the KMM Pastoral Review Council prior to storyboard animation.
+3.1 Pre-Animation Review: All series pitches, character backstories, and episode scripts must receive written sign-off from the Kiddies Media Ministry Pastoral Review Council prior to storyboard animation.
 3.2 Zero Doctrinal Deviation: Submissions presenting salvation through works, generational curses for Christians, or unscriptural fear are returned immediately for theological rewrite.
 
-AUTHORIZED BY: KMM Pastoral Directorate & Editorial Review Council`,
+AUTHORIZED BY: Kiddies Media Ministry Pastoral Directorate & Editorial Review Council`,
   },
   {
     id: 'doc-6',
     code: 'KMM-DOC-006',
-    title: 'KMM Content Submission & Quality Gate Workflow',
+    title: 'Kiddies Media Ministry Content Submission & Quality Gate Workflow',
     category: 'broadcast',
     categoryLabel: 'Broadcast Standards',
     classification: 'Operational Submission Protocol',
     revisedDate: 'Quarter 1, 2026',
     pages: '8 Pages',
-    desc: 'Procedural roadmap for external ministry departments and internal studios submitting children’s animations, books, or audio dramas for official KMM accreditation.',
+    desc: 'Procedural roadmap for external ministry departments and internal studios submitting children’s animations, books, or audio dramas for official Kiddies Media Ministry accreditation.',
     content: `CONTENT SUBMISSION & QUALITY GATE PROTOCOL
 KIDDIES MEDIA MINISTRY (KMM) / OPERATIONS DIVISION
 DOCUMENT CODE: KMM-DOC-006 / PROCEDURAL SERIES
@@ -266,14 +266,14 @@ GATE 2: SAFEGUARDING & LEGAL COVENANTS
 - Submit proof of original music composition licenses and character trademark documentation.
 
 GATE 3: TECHNICAL QA AUDIT
-- Master video delivery submitted to KMM Playout Server.
+- Master video delivery submitted to Kiddies Media Ministry Playout Server.
 - Automated and human review for EBU R128 audio loudness (-24 LKFS) and ITU-R BT.1702 strobe compliance.
 
-GATE 4: ISSUANCE OF KMM BROADCAST SEAL
-- Content meeting zero-defect thresholds receives the Official KMM Broadcast Clearance Seal and is scheduled for satellite playout and mobile app inclusion.
+GATE 4: ISSUANCE OF KIDDIES MEDIA MINISTRY BROADCAST SEAL
+- Content meeting zero-defect thresholds receives the Official Kiddies Media Ministry Broadcast Clearance Seal and is scheduled for satellite playout and mobile app inclusion.
 
 SUBMISSION PORTAL: https://portal.kiddiesmediaministry.org
-COORDINATED BY: KMM Content Operations Directorate`,
+COORDINATED BY: Kiddies Media Ministry Content Operations Directorate`,
   },
 ]
 
@@ -464,7 +464,7 @@ export default function TrainingPortalPage() {
 
   const copySafeguardReport = () => {
     const checkedCount = Object.values(safeguardChecks).filter(Boolean).length
-    const text = `KMM CHILD SAFEGUARDING AUDIT VERIFICATION REPORT
+    const text = `KIDDIES MEDIA MINISTRY CHILD SAFEGUARDING AUDIT VERIFICATION REPORT
 Generated by: Officer ${officerEmail}
 Compliance Score: ${safeguardScore}% (${checkedCount} of 6 Checks Passed)
 Status: ${safeguardScore === 100 ? 'CLEARED FOR SATELLITE & DIGITAL BROADCAST' : 'ATTENTION REQUIRED - INCOMPLETE REMEDIATION'}
@@ -477,7 +477,7 @@ CHECKLIST BREAKDOWN:
 [${safeguardChecks.music ? 'X' : ' '}] 5. Third-Party Music & Sound Rights Cleared (Work-for-Hire)
 [${safeguardChecks.privacy ? 'X' : ' '}] 6. Child Privacy Safeguards Enforced (No personal minor data)
 
-Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaministry.org)`
+Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal.kiddiesmediaministry.org)`
 
     navigator.clipboard.writeText(text)
     showToast('Safeguarding Audit Report copied to clipboard!')
@@ -591,7 +591,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
             <Link
               href="/"
               className="flex items-center gap-2 group text-inherit no-underline shrink-0"
-              title="Return to KMM Main Home"
+              title="Return to Kiddies Media Ministry Main Home"
             >
               <div className="size-10 sm:size-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-slate-950 shadow-md group-hover:scale-105 transition-transform">
                 <GraduationCap className="size-5 font-black" />
@@ -601,7 +601,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
                   className="font-extrabold text-base sm:text-lg leading-tight tracking-tight truncate"
                   style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}
                 >
-                  KMM Training Portal
+                  Kiddies Media Ministry Training Portal
                 </div>
                 <div className="text-[10px] font-bold text-amber-500 uppercase tracking-widest truncate">
                   Materials &bull; Tools &bull; Supporting Documents
@@ -779,7 +779,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
                     {/* Watermark Logo */}
                     <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold">
                       <GraduationCap className="size-3.5 text-amber-400" />
-                      <span>KMM Institutional Masterclass</span>
+                      <span>Kiddies Media Ministry Institutional Masterclass</span>
                     </div>
 
                     <div className="absolute top-4 right-4 text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-amber-400 border border-amber-400/30">
@@ -1073,7 +1073,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
               <div className="max-w-3xl relative z-10 space-y-4">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-500">
                   <GraduationCap className="size-4" />
-                  <span>KMM Institutional Training &amp; Resources</span>
+                  <span>Kiddies Media Ministry Institutional Training &amp; Resources</span>
                 </div>
 
                 <h1
@@ -1509,7 +1509,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
 
                       <h3 className="text-lg font-bold">Age-Rating &amp; Advisory Calculator</h3>
                       <p className="text-xs text-slate-400 leading-relaxed">
-                        Calculate official KMM Content Advisory Badges based on intended age demographics and thematic parameters.
+                        Calculate official Kiddies Media Ministry Content Advisory Badges based on intended age demographics and thematic parameters.
                       </p>
 
                       {/* Selectors */}
@@ -1590,7 +1590,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
 
                     <div className="pt-2 border-t border-white/10 text-center">
                       <span className="text-[11px] text-slate-400 font-semibold">
-                        Officially gazetted under KMM Advisory Matrix 2026
+                        Officially gazetted under Kiddies Media Ministry Advisory Matrix 2026
                       </span>
                     </div>
                   </div>
@@ -1613,7 +1613,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
 
                       <h3 className="text-lg font-bold">IP Clearance &amp; Licensing Verifier</h3>
                       <p className="text-xs text-slate-400 leading-relaxed">
-                        Verify original voice, audio, and character copyright clearances before releasing assets on the KMM IP Portal.
+                        Verify original voice, audio, and character copyright clearances before releasing assets on the Kiddies Media Ministry IP Portal.
                       </p>
 
                       {/* 5 IP Clearance checks */}
@@ -1621,7 +1621,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
                         {[
                           { key: 'voice', label: 'Voice Actor Work-for-Hire Deeds Archived' },
                           { key: 'music', label: 'Original Score Master Sync Licenses Acquired' },
-                          { key: 'character', label: 'Characters Registered on KMM IP Portal' },
+                          { key: 'character', label: 'Characters Registered on Kiddies Media Ministry IP Portal' },
                           { key: 'script', label: 'Script Treatments Free of 3rd Party IP' },
                           { key: 'territory', label: 'Worldwide Broadcast Territories Assigned' },
                         ].map((chk) => (
@@ -1667,7 +1667,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
                         onClick={() => {
                           const count = Object.values(ipChecks).filter(Boolean).length
                           navigator.clipboard.writeText(
-                            `KMM IP CLEARANCE LOG: ${count} of 5 Verification Pillars Cleared. Registered by ${officerEmail}.`
+                            `Kiddies Media Ministry IP Clearance Log: ${count} of 5 Verification Pillars Cleared. Registered by ${officerEmail}.`
                           )
                           showToast('IP Clearance summary copied!')
                         }}
@@ -1901,7 +1901,7 @@ Verified via KMM Compliance & Training Portal (https://portal.kiddiesmediaminist
           <div className="flex items-center gap-6 font-bold">
             <Link href="/" className="inline-flex items-center gap-1.5 hover:text-amber-400 transition-colors">
               <Home className="size-3.5" />
-              <span>KMM Home</span>
+              <span>Kiddies Media Ministry Home</span>
             </Link>
             <Link href="/ip-portal" className="inline-flex items-center gap-1.5 hover:text-amber-400 transition-colors">
               <Scale className="size-3.5" />

@@ -38,7 +38,7 @@ const SCOPE_OPTIONS = [
 ]
 
 const GOAL_OPTIONS = [
-  'Documenting & stewarding IP on the KMM IP Portal',
+  'Documenting & stewarding IP on the Kiddies Media Ministry IP Portal',
   'Broadcast syndication on Lovetoons Mobile App & networks',
   'Official Copyright & IP Rights Protection',
   'Curriculum & Sunday School distribution',
@@ -148,7 +148,7 @@ export function MinistryOnboardingForm({
           className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3"
           style={{ fontFamily: 'Bricolage Grotesque, -apple-system, sans-serif' }}
         >
-          You're on the KMM Onboarding Waitlist!
+          You're on the Kiddies Media Ministry Onboarding Waitlist!
         </h3>
 
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed mb-8">
@@ -399,7 +399,7 @@ export function MinistryOnboardingForm({
         {/* Security & Confidentiality Tag */}
         <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 pt-2">
           <ShieldCheck className="size-3.5 text-emerald-500" />
-          <span>All submissions are reviewed confidentially by KMM Secretariat & Super Admin</span>
+          <span>All submissions are reviewed confidentially by Kiddies Media Ministry Secretariat & Super Admin</span>
         </div>
       </div>
     </form>

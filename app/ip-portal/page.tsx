@@ -8,7 +8,7 @@ export default function IpPortalRoute() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#f4faff] dark:bg-[#0b0f17] flex items-center justify-center font-bold text-slate-500">
-          Loading KMM IP Portal...
+          Loading Kiddies Media Ministry IP Portal...
         </div>
       }
     >

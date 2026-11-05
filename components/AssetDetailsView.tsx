@@ -1671,9 +1671,9 @@ export function AssetDetailsView({
                 <div className="flex items-start gap-3 rounded-lg border border-slate-100 dark:border-white/5 p-3 bg-slate-50/50 dark:bg-slate-800/40">
                   <div className="size-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 mt-1.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900 dark:text-white">Asset Registered into Central KMM Portal</div>
+                    <div className="font-semibold text-slate-900 dark:text-white">Asset Registered into Central Kiddies Media Ministry Portal</div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Initial intake catalogued for {asset.agency || 'KMM Network'} ({asset.createdDate})
+                      Initial intake catalogued for {asset.agency || 'Kiddies Media Ministry Network'} ({asset.createdDate})
                     </div>
                   </div>
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 font-medium">{asset.createdTime}</span>

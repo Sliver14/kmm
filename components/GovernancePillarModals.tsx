@@ -347,7 +347,7 @@ export function GovernancePillarModal({
 
               <div className="rounded-xl bg-blue-50/70 dark:bg-[#131b2e] border border-blue-100 dark:border-blue-500/25 p-3 text-[11px] text-blue-900 dark:text-blue-300 flex items-center gap-2.5">
                 <ShieldCheck className="size-4 text-blue-600 dark:text-[#2f80ed] shrink-0" />
-                <span>All intellectual property created under KMM ministries is vested solely in ministry leadership in perpetuity.</span>
+                <span>All intellectual property created under Kiddies Media Ministry is vested solely in ministry leadership in perpetuity.</span>
               </div>
             </div>
           )}
@@ -482,10 +482,10 @@ export function GovernancePillarModal({
                   <div className="flex gap-2 text-[10px]">
                     <button
                       type="button"
-                      onClick={() => setProductionLicensees('Lovetoons Animation Studio, KMM Publishing, LoveWorld Media')}
+                      onClick={() => setProductionLicensees('Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media')}
                       className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold cursor-pointer underline"
                     >
-                      KMM Studios
+                      Kiddies Media Ministry Studios
                     </button>
                     <button
                       type="button"
@@ -500,14 +500,14 @@ export function GovernancePillarModal({
                   rows={2}
                   value={productionLicensees}
                   onChange={(e) => setProductionLicensees(e.target.value)}
-                  placeholder="e.g. Lovetoons Animation Studio, KMM Publishing, LoveWorld Media or None"
+                  placeholder="e.g. Lovetoons Animation Studio, Kiddies Media Ministry Publishing, LoveWorld Media or None"
                   className="w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white p-3 text-xs outline-none focus:border-[#2f80ed] font-medium shadow-2xs"
                   required
                 />
               </div>
 
               <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                Authorized licensees maintain physical production rights while all final master deliverables remain exclusively vested in KMM.
+                Authorized licensees maintain physical production rights while all final master deliverables remain exclusively vested in Kiddies Media Ministry.
               </div>
             </div>
           )}
@@ -552,7 +552,7 @@ export function GovernancePillarModal({
                   type="text"
                   value={songWriter}
                   onChange={(e) => setSongWriter(e.target.value)}
-                  placeholder="e.g. KMM Music Ministry (Staff Composer)"
+                  placeholder="e.g. Kiddies Media Ministry Music Ministry (Staff Composer)"
                   className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white px-3 text-xs outline-none focus:border-[#2f80ed] font-medium shadow-2xs"
                 />
               </div>

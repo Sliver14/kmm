@@ -39,7 +39,7 @@ export function AssetArchiveHub({ asset, showToast }: AssetArchiveHubProps) {
             </div>
             <div>
               <h3 className="font-bold text-[#09245a] text-sm">
-                {isDigital ? 'Digital Endpoints, Repositories & Server Clusters' : 'KMM Cloud Media Storage & Distribution Endpoints'}
+                {isDigital ? 'Digital Endpoints, Repositories & Server Clusters' : 'Kiddies Media Ministry Cloud Media Storage & Distribution Endpoints'}
               </h3>
               <p className="text-[11px] text-slate-500">
                 {isDigital
