@@ -130,7 +130,7 @@ export default function OnboardingPage() {
             className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight"
             style={{ fontFamily: 'Bricolage Grotesque, -apple-system, sans-serif' }}
           >
-            Bring Your Ministry Content to the Global Lovetoons Network
+            Bring Your Ministry&apos;s Children&apos;s Media Content to the KMM IP Portal
           </h1>
 
           <p className="text-sm sm:text-base text-slate-500 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
@@ -159,7 +159,7 @@ export default function OnboardingPage() {
                 Global Broadcast Syndication
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                Distribution channels across Lovetoons TV, Loveworld Nation networks, and child digital platforms.
+                Distribution channels across Lovetoons Mobile App, Loveworld Nation networks, and child digital platforms.
               </p>
             </div>
 
@@ -192,7 +192,7 @@ export default function OnboardingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-bold">
             <img src="/kmm-logo.png" alt="KMM" className="size-5 object-contain" />
-            <span>Kiddies Media Ministry • Lovetoons Rights Directorate</span>
+            <span>Kiddies Media Ministry • IP &amp; Rights Directorate</span>
           </div>
 
           <div className="flex items-center gap-5 font-semibold">

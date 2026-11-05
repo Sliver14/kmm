@@ -38,7 +38,8 @@ const SCOPE_OPTIONS = [
 ]
 
 const GOAL_OPTIONS = [
-  'Broadcast syndication on Lovetoons TV & networks',
+  'Documenting & stewarding IP on the KMM IP Portal',
+  'Broadcast syndication on Lovetoons Mobile App & networks',
   'Official Copyright & IP Rights Protection',
   'Curriculum & Sunday School distribution',
   'Creative co-production & character licensing',
