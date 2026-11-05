@@ -30,7 +30,6 @@ import {
   Minimize2,
   Subtitles,
   UserCheck,
-  ArrowRightLeft,
   Clock,
   Globe,
   Wrench,
@@ -51,44 +50,6 @@ import {
   Layers,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem, ComplianceToolKey } from '@/lib/data/trainingVideosData'
-
-const AGENCIES_LIST = [
-  {
-    name: 'Lovetoons',
-    tagline: 'Animation & Entertainment',
-    description: 'Animation series, TV broadcast, character IP & children entertainment.',
-    href: '/#agencies-lovetoons',
-    badge: 'Flagship',
-  },
-  {
-    name: 'Publishing Agency',
-    tagline: 'Literature & Curriculum',
-    description: 'Comics, devotional books, storybooks, illustrated print & curriculum.',
-    href: '/#agencies-publishing',
-    badge: 'Publishing',
-  },
-  {
-    name: 'Digital Agency',
-    tagline: 'Interactive & Apps',
-    description: 'Interactive games, educational mobile apps, AR/VR & online portals.',
-    href: '/#agencies-digital',
-    badge: 'Technology',
-  },
-  {
-    name: 'Academy Agency',
-    tagline: 'Governance & Training',
-    description: 'Legal compliance, officer accreditation, policy auditing & safety covenants.',
-    href: '/training-portal',
-    badge: 'Governance',
-  },
-  {
-    name: 'Educational Agency',
-    tagline: 'Foundational Learning',
-    description: 'School partnerships, foundational learning aids & global outreaches.',
-    href: '/#agencies-educational',
-    badge: 'Education',
-  },
-]
 
 export interface SupportingDocument {
   id: string
@@ -339,8 +300,6 @@ export default function TrainingPortalPage() {
   const [toastMessage, setToastMessage] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const [agenciesDropdownOpen, setAgenciesDropdownOpen] = useState(false)
-  const agenciesDropdownRef = useRef<HTMLDivElement>(null)
 
   // Document Modal state
   const [readingDoc, setReadingDoc] = useState<SupportingDocument | null>(null)
@@ -416,16 +375,6 @@ export default function TrainingPortalPage() {
     }
   }, [])
 
-  // Close agencies dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (agenciesDropdownRef.current && !agenciesDropdownRef.current.contains(e.target as Node)) {
-        setAgenciesDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
   // Auto playback simulation
   useEffect(() => {
@@ -749,18 +698,6 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
               </span>
             </div>
 
-            {/* Officer switch profile button */}
-            <Link
-              href="/auth"
-              className={`p-2 rounded-full border transition-colors cursor-pointer ${
-                isDark
-                  ? 'bg-slate-900 border-white/10 text-slate-300 hover:text-white'
-                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-2xs'
-              }`}
-              title="Switch Officer Authentication"
-            >
-              <ArrowRightLeft className="size-4" />
-            </Link>
 
             {/* Dark / Light Toggle */}
             <button
