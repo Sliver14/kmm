@@ -17,7 +17,7 @@ import { ConfirmActionModal } from '@/components/ConfirmActionModal'
 import { EditAssetModal } from '@/components/EditAssetModal'
 import { GovernancePillarModal } from '@/components/GovernancePillarModals'
 import { AddContributorModal } from '@/components/AddContributorModal'
-import { AssetData, AssetStatus, RelationshipItem, RightsDocument, ApprovalRequest, AssetEpisode, GovernancePillarKey } from '@/types'
+import { AssetData, AssetStatus, ProductionStatus, ReviewStatus, RelationshipItem, RightsDocument, ApprovalRequest, AssetEpisode, GovernancePillarKey } from '@/types'
 import { getAssetRiskAssessment } from '@/lib/risk'
 import { getCategoryGovernance, isEpisodeCategory } from '@/lib/categoryGovernance'
 
@@ -72,7 +72,16 @@ export function AssetDetailsView({
 
   // 2 Intuitive Core Pillars (Tabs) - Rights & Governance centralized in its dedicated module
   const [activeTab, setActiveTab] = useState<'overview' | 'connections'>('overview')
-  const [statusMenuOpen, setStatusMenuOpen] = useState(false)
+  const [reviewStatusMenuOpen, setReviewStatusMenuOpen] = useState(false)
+  const [prodStatusMenuOpen, setProdStatusMenuOpen] = useState(false)
+
+  const currentProductionStatus: ProductionStatus = 
+    asset.productionStatus ||
+    (asset.status === 'Discontinued' ? 'Discontinued' : asset.status === 'Yet to Launch' ? 'Yet to Launch' : 'In Production')
+
+  const currentReviewStatus: ReviewStatus = 
+    asset.reviewStatus ||
+    (asset.status === 'Approved' || asset.status === 'In Review' || asset.status === 'Requires Attention' || asset.status === 'Draft' ? (asset.status as ReviewStatus) : 'Pending')
 
   // Individual Governance Pillar Modal State (Universal Single-Pillar Edits)
   const [activeIndividualPillar, setActiveIndividualPillar] = useState<GovernancePillarKey | null>(null)
@@ -472,20 +481,20 @@ export function AssetDetailsView({
     })
   }
 
-  // Handle Status Update with Confirmation & Audit Log
-  const handleUpdateStatus = (newStatus: AssetStatus) => {
-    setStatusMenuOpen(false)
-    if (newStatus === asset.status) return
+  // Handle Review (Clearance / Governance) Status Update with Confirmation & Audit Log
+  const handleUpdateReviewStatus = (newStatus: ReviewStatus) => {
+    setReviewStatusMenuOpen(false)
+    if (newStatus === currentReviewStatus) return
 
     setConfirmConfig({
       isOpen: true,
-      title: 'Confirm Status Transition',
-      description: `Are you sure you want to change the status of "${asset.name}" from "${asset.status}" to "${newStatus}"? This state change will be logged in the permanent audit trail.`,
+      title: 'Confirm Review Status Transition',
+      description: `Are you sure you want to change the review clearance status of "${asset.name}" from "${currentReviewStatus}" to "${newStatus}"? This state change will be logged in the permanent audit trail.`,
       details: (
         <div className="space-y-1 text-xs">
           <div>
-            <span className="font-semibold text-slate-700">State Transition:</span>{' '}
-            <span className="line-through text-slate-400">{asset.status}</span> → <span className="font-bold text-blue-600">{newStatus}</span>
+            <span className="font-semibold text-slate-700">Governance Review Transition:</span>{' '}
+            <span className="line-through text-slate-400">{currentReviewStatus}</span> → <span className="font-bold text-blue-600">{newStatus}</span>
           </div>
           <div><span className="font-semibold text-slate-700">Authorised By:</span> {currentUser.name} ({currentUser.roleLabel})</div>
         </div>
@@ -494,10 +503,10 @@ export function AssetDetailsView({
       variant: newStatus === 'Approved' ? 'success' : 'warning',
       badge: 'Audit Trail Required',
       onConfirm: () => {
-        updateAsset({ ...asset, status: newStatus })
+        updateAsset({ ...asset, reviewStatus: newStatus, status: newStatus })
         addActivity(
-          `Asset status updated: ${asset.name} → ${newStatus}`,
-          `Status transitioned by ${currentUser.name} (${currentUser.roleLabel})`,
+          `Review clearance updated: ${asset.name} → ${newStatus}`,
+          `Review status transitioned by ${currentUser.name} (${currentUser.roleLabel})`,
           newStatus === 'Approved' ? 'check' : 'alert',
           newStatus === 'Approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700',
           asset.agency,
@@ -505,16 +514,63 @@ export function AssetDetailsView({
             assetId: asset.id,
             assetName: asset.name,
             actionType: 'STATUS_CHANGE',
-            details: `Status transitioned from ${asset.status} to ${newStatus}.`,
+            details: `Review clearance transitioned from ${currentReviewStatus} to ${newStatus}.`,
           }
         )
         fetch(`/api/assets/${asset.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ reviewStatus: newStatus, status: newStatus }),
         }).catch(console.error)
         setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
-        showToast(`Status updated to "${newStatus}" and logged in audit trail.`)
+        showToast(`Review status updated to "${newStatus}" and logged in audit trail.`)
+      },
+    })
+  }
+
+  // Handle Production Status Update with Confirmation & Audit Log
+  const handleUpdateProductionStatus = (newStatus: ProductionStatus) => {
+    setProdStatusMenuOpen(false)
+    if (newStatus === currentProductionStatus) return
+
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Confirm Production Status Transition',
+      description: `Are you sure you want to change the production status of "${asset.name}" from "${currentProductionStatus}" to "${newStatus}"? This operational state change will be logged in the audit trail.`,
+      details: (
+        <div className="space-y-1 text-xs">
+          <div>
+            <span className="font-semibold text-slate-700">Production Lifecycle Transition:</span>{' '}
+            <span className="line-through text-slate-400">{currentProductionStatus}</span> → <span className="font-bold text-blue-600">{newStatus}</span>
+          </div>
+          <div><span className="font-semibold text-slate-700">Authorised By:</span> {currentUser.name} ({currentUser.roleLabel})</div>
+        </div>
+      ),
+      confirmLabel: `Confirm → ${newStatus}`,
+      variant: newStatus === 'In Production' ? 'success' : 'warning',
+      badge: 'Lifecycle Transition',
+      onConfirm: () => {
+        updateAsset({ ...asset, productionStatus: newStatus })
+        addActivity(
+          `Production status updated: ${asset.name} → ${newStatus}`,
+          `Operational status changed by ${currentUser.name} (${currentUser.roleLabel})`,
+          'link',
+          newStatus === 'In Production' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700',
+          asset.agency,
+          {
+            assetId: asset.id,
+            assetName: asset.name,
+            actionType: 'STATUS_CHANGE',
+            details: `Production status transitioned from ${currentProductionStatus} to ${newStatus}.`,
+          }
+        )
+        fetch(`/api/assets/${asset.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productionStatus: newStatus }),
+        }).catch(console.error)
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }))
+        showToast(`Production status updated to "${newStatus}" and logged in audit trail.`)
       },
     })
   }
@@ -620,40 +676,98 @@ export function AssetDetailsView({
 
           {/* Right: Quick Action Controls */}
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-            {/* Status Selector Dropdown */}
+            {/* Review Status Selector Dropdown */}
             <div className="relative">
               <button
-                id="asset-status-toggle"
-                onClick={() => setStatusMenuOpen(!statusMenuOpen)}
+                id="asset-review-status-toggle"
+                onClick={() => {
+                  setReviewStatusMenuOpen(!reviewStatusMenuOpen)
+                  setProdStatusMenuOpen(false)
+                }}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition shadow-2xs cursor-pointer',
-                  asset.status === 'Approved'
+                  'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition shadow-2xs cursor-pointer',
+                  currentReviewStatus === 'Approved'
                     ? 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-                    : asset.status === 'Pending'
+                    : currentReviewStatus === 'Pending'
                       ? 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'
-                      : 'border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100'
+                      : currentReviewStatus === 'Requires Attention'
+                        ? 'border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100'
+                        : 'border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100'
                 )}
+                title="Review & Governance Clearance Status"
               >
                 <span className="size-1.5 rounded-full bg-current" />
-                <span>{asset.status}</span>
+                <span className="text-[10px] text-slate-500 font-normal">Review:</span>
+                <span>{currentReviewStatus}</span>
                 <ChevronDown className="size-3 opacity-60" />
               </button>
 
-              {statusMenuOpen && (
-                <div className="absolute right-0 mt-1.5 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-30 space-y-1">
-                  {(['Approved', 'Pending', 'In Review', 'Requires Attention'] as AssetStatus[]).map((st) => (
+              {reviewStatusMenuOpen && (
+                <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-30 space-y-1">
+                  <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Review Status
+                  </div>
+                  {(['Approved', 'In Review', 'Pending', 'Requires Attention'] as ReviewStatus[]).map((st) => (
                     <button
                       key={st}
-                      onClick={() => handleUpdateStatus(st)}
+                      onClick={() => handleUpdateReviewStatus(st)}
                       className={cn(
                         'flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition text-left cursor-pointer',
-                        asset.status === st
+                        currentReviewStatus === st
                           ? 'bg-slate-100 text-slate-900 font-semibold'
                           : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                       )}
                     >
                       <span>{st}</span>
-                      {asset.status === st && <Check className="size-3.5 text-slate-900" />}
+                      {currentReviewStatus === st && <Check className="size-3.5 text-slate-900" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Production Status Selector Dropdown */}
+            <div className="relative">
+              <button
+                id="asset-production-status-toggle"
+                onClick={() => {
+                  setProdStatusMenuOpen(!prodStatusMenuOpen)
+                  setReviewStatusMenuOpen(false)
+                }}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition shadow-2xs cursor-pointer',
+                  currentProductionStatus === 'In Production'
+                    ? 'border-purple-200 bg-purple-50 text-purple-800 hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300'
+                    : currentProductionStatus === 'Yet to Launch'
+                      ? 'border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300'
+                      : 'border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                )}
+                title="Operational Production Status"
+              >
+                <span className="size-1.5 rounded-full bg-current" />
+                <span className="text-[10px] text-slate-500 font-normal">Production:</span>
+                <span>{currentProductionStatus}</span>
+                <ChevronDown className="size-3 opacity-60" />
+              </button>
+
+              {prodStatusMenuOpen && (
+                <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-30 space-y-1">
+                  <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Production Status
+                  </div>
+                  {(['In Production', 'Discontinued', 'Yet to Launch'] as ProductionStatus[]).map((st) => (
+                    <button
+                      key={st}
+                      onClick={() => handleUpdateProductionStatus(st)}
+                      className={cn(
+                        'flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition text-left cursor-pointer',
+                        currentProductionStatus === st
+                          ? 'bg-slate-100 text-slate-900 font-semibold'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      )}
+                    >
+                      <span>{st}</span>
+                      {currentProductionStatus === st && <Check className="size-3.5 text-slate-900" />}
                     </button>
                   ))}
                 </div>
@@ -965,7 +1079,7 @@ export function AssetDetailsView({
               )}
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-blue-100 dark:border-white/10 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-3 border-t border-blue-100 dark:border-white/10 text-xs">
               <div>
                 <span className="text-slate-500 dark:text-slate-400 text-[10px] block">Rights Scope</span>
                 <span className="font-semibold text-slate-800 dark:text-slate-100 truncate block">
@@ -985,12 +1099,26 @@ export function AssetDetailsView({
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 dark:text-slate-400 text-[10px] block">Clearance Status</span>
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block">Review Status</span>
                 <span className={cn(
                   "font-bold block",
-                  asset.status === 'Approved' ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
+                  currentReviewStatus === 'Approved' ? "text-emerald-600 dark:text-emerald-400" :
+                  currentReviewStatus === 'Requires Attention' ? "text-rose-600 dark:text-rose-400" :
+                  currentReviewStatus === 'In Review' ? "text-blue-600 dark:text-blue-400" :
+                  "text-amber-600 dark:text-amber-400"
                 )}>
-                  {asset.status}
+                  {currentReviewStatus}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block">Production Status</span>
+                <span className={cn(
+                  "font-bold block",
+                  currentProductionStatus === 'In Production' ? "text-purple-600 dark:text-purple-400" :
+                  currentProductionStatus === 'Yet to Launch' ? "text-sky-600 dark:text-sky-400" :
+                  "text-slate-500 dark:text-slate-400"
+                )}>
+                  {currentProductionStatus}
                 </span>
               </div>
             </div>

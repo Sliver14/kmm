@@ -966,13 +966,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         ? (data.territoryClearanceStatus || 'Pending Clearance')
         : 'Pending Clearance'
 
-      const resolvedStatus = hasGovernanceInput ? 'Pending' : (data.status || 'Draft')
+      const resolvedProductionStatus = data.productionStatus || 'In Production'
+      const resolvedReviewStatus = data.reviewStatus || (hasGovernanceInput ? 'Pending' : (data.status === 'In Production' || data.status === 'Discontinued' || data.status === 'Yet to Launch' ? 'Pending' : (data.status || 'Draft')))
+      const resolvedStatus = resolvedReviewStatus
 
       const newAssetItem: AssetData = {
         ...data,
         id: autoId,
         createdDate: dateStr,
         createdTime: timeStr,
+        productionStatus: resolvedProductionStatus,
+        reviewStatus: resolvedReviewStatus,
         status: resolvedStatus,
         agency: assignedAgency,
         unit: assignedAgency,
@@ -1097,6 +1101,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           creatorSkill: newAssetItem.creatorSkill,
           contributors: newAssetItem.contributors,
           status: newAssetItem.status,
+          productionStatus: newAssetItem.productionStatus,
+          reviewStatus: newAssetItem.reviewStatus,
           description: newAssetItem.description,
           tags: newAssetItem.tags,
           attributes: newAssetItem.attributes,
@@ -1216,11 +1222,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const bulkApproveAssets = useCallback(
     (ids: string[]) => {
       setMasterAssets((prev) =>
-        prev.map((a) => (ids.includes(a.id) ? { ...a, status: 'Approved' } : a))
+        prev.map((a) => (ids.includes(a.id) ? { ...a, status: 'Approved', reviewStatus: 'Approved' } : a))
       )
       setMasterApprovals((prev) =>
         prev.map((app) => (ids.includes(app.assetId) ? { ...app, status: 'Approved', currentStep: app.totalSteps } : app))
       )
+      ids.forEach((id) => {
+        fetch(`/api/assets/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewStatus: 'Approved', status: 'Approved' }),
+        }).catch(console.error)
+      })
       addActivity(
         `Batch approved ${ids.length} assets`,
         `Authorised by ${currentUser.name} (${currentUser.roleLabel})`,
@@ -1288,6 +1301,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       // 1. Update Asset in masterAssets
       const updatedAssetFields: Partial<AssetData> = {
         status: 'Pending',
+        reviewStatus: 'Pending',
         ...(payload.owner ? { owner: payload.owner, rightsHolder: payload.owner } : {}),
         ...(payload.ownerCertificateRef !== undefined ? { ownerCertificateRef: payload.ownerCertificateRef } : {}),
         ...(payload.trademarkStatus ? { trademarkStatus: payload.trademarkStatus } : {}),
@@ -1932,11 +1946,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const targetApp = masterApprovals.find((a) => a.id === approvalId)
       if (targetApp) {
         setMasterAssets((prev) =>
-          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'Approved' } : asset))
+          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'Approved', reviewStatus: 'Approved' } : asset))
         )
         setMasterRightsRecords((prev) =>
           prev.map((r) => (r.assetId === targetApp.assetId ? { ...r, status: 'Cleared', governanceScore: 100 } : r))
         )
+        fetch(`/api/assets/${targetApp.assetId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewStatus: 'Approved', status: 'Approved' }),
+        }).catch(console.error)
         fetch('/api/approvals', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -2021,8 +2040,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const targetApp = masterApprovals.find((a) => a.id === approvalId)
       if (targetApp) {
         setMasterAssets((prev) =>
-          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'Requires Attention' } : asset))
+          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'Requires Attention', reviewStatus: 'Requires Attention' } : asset))
         )
+        fetch(`/api/assets/${targetApp.assetId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewStatus: 'Requires Attention', status: 'Requires Attention' }),
+        }).catch(console.error)
         addActivity(
           `Declined review: ${targetApp.assetName}`,
           `Declined by ${currentUser.name}: "${reason}"`,
@@ -2095,8 +2119,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const targetApp = masterApprovals.find((a) => a.id === approvalId)
       if (targetApp) {
         setMasterAssets((prev) =>
-          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'In Review' } : asset))
+          prev.map((asset) => (asset.id === targetApp.assetId ? { ...asset, status: 'In Review', reviewStatus: 'In Review' } : asset))
         )
+        fetch(`/api/assets/${targetApp.assetId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewStatus: 'In Review', status: 'In Review' }),
+        }).catch(console.error)
         addActivity(
           `Reviewer requested feedback: ${targetApp.assetName}`,
           `Notes from ${currentUser.name}: "${feedbackNotes}"`,
@@ -2183,7 +2212,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
       setMasterApprovals((prev) => [newApproval, ...prev.filter((a) => a.assetId !== assetId)])
       setMasterAssets((prev) =>
-        prev.map((a) => (a.id === assetId ? { ...a, status: 'In Review' } : a))
+        prev.map((a) => (a.id === assetId ? { ...a, status: 'In Review', reviewStatus: 'In Review' } : a))
       )
 
       // Persist to Neon DB
@@ -2214,7 +2243,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       fetch(`/api/assets/${assetId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'In Review' }),
+        body: JSON.stringify({ status: 'In Review', reviewStatus: 'In Review' }),
       }).catch(console.error)
 
       addActivity(

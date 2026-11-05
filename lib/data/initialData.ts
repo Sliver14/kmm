@@ -10,6 +10,8 @@ import {
   AssetContributor,
   Agency,
   AssetStatus,
+  ProductionStatus,
+  ReviewStatus,
   ContentProvenance,
 } from '@/types'
 import type { MinistryOnboardingRequest } from '@/types'
@@ -2274,6 +2276,8 @@ const rawAssetsData: AssetData[] = [
 export const initialAssetsData: AssetData[] = sortDiscontinuedToBottom(
   attorneyGeneralAssetsData.map((a) => ({
     ...a,
+    productionStatus: a.productionStatus || (a.status === 'Discontinued' ? 'Discontinued' : a.status === 'Yet to Launch' ? 'Yet to Launch' : 'In Production'),
+    reviewStatus: a.reviewStatus || (['Approved', 'Pending', 'In Review', 'Under Review', 'Requires Attention', 'Draft'].includes(a.status) ? (a.status as ReviewStatus) : 'Pending'),
     archive: a.archive || generateAssetArchive(a),
   }))
 )

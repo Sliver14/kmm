@@ -18,7 +18,9 @@ export async function GET(req: NextRequest) {
           id, ministry_id as "ministryId", name, type, category, 
           category_group as "categoryGroup", subcategory, agency, unit,
           creator_name as "creatorName", creator_role as "creatorRole",
-          creator_skill as "creatorSkill", contributors, status, 
+          creator_skill as "creatorSkill", contributors, status,
+          COALESCE(production_status, 'In Production') as "productionStatus",
+          COALESCE(review_status, status, 'Pending') as "reviewStatus",
           created_date as "createdDate", created_time as "createdTime",
           thumb_type as "thumbType", poster_url as "posterUrl",
           rights_holder as "rightsHolder", description, tags, attributes,
@@ -34,7 +36,9 @@ export async function GET(req: NextRequest) {
           id, ministry_id as "ministryId", name, type, category, 
           category_group as "categoryGroup", subcategory, agency, unit,
           creator_name as "creatorName", creator_role as "creatorRole",
-          creator_skill as "creatorSkill", contributors, status, 
+          creator_skill as "creatorSkill", contributors, status,
+          COALESCE(production_status, 'In Production') as "productionStatus",
+          COALESCE(review_status, status, 'Pending') as "reviewStatus",
           created_date as "createdDate", created_time as "createdTime",
           thumb_type as "thumbType", poster_url as "posterUrl",
           rights_holder as "rightsHolder", description, tags, attributes,
@@ -76,6 +80,8 @@ export async function POST(req: NextRequest) {
       creatorSkill = 'animation',
       contributors = [],
       status = 'Draft',
+      productionStatus = body.productionStatus || 'In Production',
+      reviewStatus: rawReviewStatus = body.reviewStatus,
       createdDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       createdTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       thumbType = body.thumbType || null,
@@ -110,7 +116,8 @@ export async function POST(req: NextRequest) {
       Boolean(contentProvenance && contentProvenance !== 'Fully Custom') ||
       Boolean(songWriter && songWriter.trim() !== '')
 
-    const resolvedStatus = hasGovernanceInput ? 'Pending' : status
+    const resolvedReviewStatus = rawReviewStatus || (hasGovernanceInput ? 'Pending' : (status || 'Draft'))
+    const resolvedStatus = resolvedReviewStatus
     const resolvedClearanceStatus = hasGovernanceInput ? (territoryClearanceStatus === 'None' ? 'Pending Clearance' : territoryClearanceStatus) : territoryClearanceStatus
 
     const assetId = id || `LT-${Date.now().toString().slice(-6)}`
@@ -136,12 +143,12 @@ export async function POST(req: NextRequest) {
       INSERT INTO assets (
         id, ministry_id, name, type, category, category_group, subcategory,
         agency, unit, creator_name, creator_role, creator_skill, contributors,
-        status, created_date, created_time, thumb_type, poster_url,
+        production_status, review_status, status, created_date, created_time, thumb_type, poster_url,
         rights_holder, description, tags, attributes, archive_status
       ) VALUES (
         ${assetId}, ${ministryId}, ${name}, ${type}, ${category}, ${categoryGroup}, ${subcategory},
         ${agency}, ${unit}, ${creatorName}, ${creatorRole}, ${creatorSkill}, ${contributorsJson}::jsonb,
-        ${resolvedStatus}, ${createdDate}, ${createdTime}, ${thumbType}, ${posterUrl},
+        ${productionStatus}, ${resolvedReviewStatus}, ${resolvedStatus}, ${createdDate}, ${createdTime}, ${thumbType}, ${posterUrl},
         ${owner || rightsHolder}, ${description}, ${tagsJson}::jsonb, ${attributesJson}::jsonb, 'pending_cloud_storage'
       )
       ON CONFLICT (id) DO UPDATE SET
@@ -152,6 +159,8 @@ export async function POST(req: NextRequest) {
         subcategory = EXCLUDED.subcategory,
         agency = EXCLUDED.agency,
         unit = EXCLUDED.unit,
+        production_status = COALESCE(EXCLUDED.production_status, assets.production_status),
+        review_status = COALESCE(EXCLUDED.review_status, assets.review_status),
         status = EXCLUDED.status,
         description = EXCLUDED.description,
         tags = EXCLUDED.tags,

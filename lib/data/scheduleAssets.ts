@@ -1,4 +1,4 @@
-import { AssetData, AssetStatus, Agency, AssetEpisode } from '@/types'
+import { AssetData, AssetStatus, Agency, AssetEpisode, ProductionStatus, ReviewStatus } from '@/types'
 
 export interface RawScheduleEntry {
   sn: number
@@ -276,18 +276,25 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
     posterUrl = '/kmm-logo.png'
   }
 
-  // 2. Status mapping strictly based on schedule document: In Production, Discontinued, or Yet to Launch
-  let status: AssetStatus = 'In Production'
+  // 2. Separate Production Status and Review Status based on schedule document
+  let productionStatus: ProductionStatus = 'In Production'
   const stRaw = entry.docStatus.toLowerCase()
 
   if (stRaw.includes('discontinued')) {
-    status = 'Discontinued'
-  } else if (stRaw.includes('yet to launch') || stRaw.includes('potential') || stRaw.includes('under review')) {
-    status = 'Yet to Launch'
+    productionStatus = 'Discontinued'
+  } else if (stRaw.includes('yet to launch') || stRaw.includes('potential')) {
+    productionStatus = 'Yet to Launch'
   } else {
     // Active, Current, In Use
-    status = 'In Production'
+    productionStatus = 'In Production'
   }
+
+  let reviewStatus: ReviewStatus = 'Pending'
+  if (stRaw.includes('under review')) {
+    reviewStatus = 'In Review'
+  }
+
+  const status: AssetStatus = reviewStatus
 
   // 3. Contributor & Creator Assignment - left empty as requested ("without adding contributor, every other details would be added later")
   const creatorName = ''
@@ -405,6 +412,8 @@ export function mapScheduleEntryToAsset(entry: RawScheduleEntry): AssetData {
     creatorName,
     creatorRole,
     creatorSkill,
+    productionStatus,
+    reviewStatus,
     status,
     createdDate: 'Jan 15, 2025',
     createdTime: '09:00 AM',

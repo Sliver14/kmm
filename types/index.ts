@@ -46,16 +46,20 @@ export interface UserProfile {
   bio?: string
 }
 
-export type AssetStatus =
+export type ProductionStatus =
   | 'In Production'
   | 'Discontinued'
   | 'Yet to Launch'
-  | 'Under Review'
+
+export type ReviewStatus =
   | 'Approved'
+  | 'In Review'
+  | 'Under Review'
   | 'Pending'
   | 'Requires Attention'
-  | 'In Review'
   | 'Draft'
+
+export type AssetStatus = ProductionStatus | ReviewStatus
 
 export type AssetThumbType =
   | 'tv_series'
@@ -201,6 +205,8 @@ export interface AssetData {
   creatorRole?: string
   creatorSkill?: UserSkill
   contributors: AssetContributor[]
+  productionStatus?: ProductionStatus
+  reviewStatus?: ReviewStatus
   status: AssetStatus
   createdDate: string
   createdTime: string

@@ -68,6 +68,8 @@ import {
   UserProfile,
   AssetThumbType,
   AssetStatus,
+  ProductionStatus,
+  ReviewStatus,
   RiskTier,
   AssetRiskAssessment,
   GovernanceGateStatus,
@@ -1275,6 +1277,85 @@ function CategoryBadgeIcon({ category }: { category: string }) {
   )
 }
 
+function ReviewStatusPill({ status }: { status?: string }) {
+  const st = status || 'Pending'
+  switch (st) {
+    case 'Approved':
+    case 'Cleared':
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200/80 shadow-2xs" title="Governance Clearance: Approved">
+          <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          Approved
+        </span>
+      )
+    case 'In Review':
+    case 'Under Review':
+    case 'Review':
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200/80 shadow-2xs" title="Governance Clearance: In Review">
+          <span className="size-1.5 rounded-full bg-blue-500" />
+          In Review
+        </span>
+      )
+    case 'Pending':
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200/80 shadow-2xs" title="Governance Clearance: Pending">
+          <span className="size-1.5 rounded-full bg-amber-500" />
+          Pending
+        </span>
+      )
+    case 'Requires Attention':
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 border border-rose-200/80 shadow-2xs" title="Governance Clearance: Requires Attention">
+          <span className="size-1.5 rounded-full bg-rose-500" />
+          Attention
+        </span>
+      )
+    case 'Draft':
+    default:
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 border border-slate-200/80 shadow-2xs" title={`Governance Clearance: ${st}`}>
+          <span className="size-1.5 rounded-full bg-slate-400" />
+          {st}
+        </span>
+      )
+  }
+}
+
+function ProductionStatusPill({ status }: { status?: string }) {
+  const st = status || 'In Production'
+  switch (st) {
+    case 'In Production':
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 border border-purple-200/80 shadow-2xs" title="Production Lifecycle: In Production">
+          <span className="size-1.5 rounded-full bg-purple-500" />
+          In Production
+        </span>
+      )
+    case 'Yet to Launch':
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 border border-sky-200/80 shadow-2xs" title="Production Lifecycle: Yet to Launch">
+          <span className="size-1.5 rounded-full bg-sky-500" />
+          Yet to Launch
+        </span>
+      )
+    case 'Discontinued':
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 border border-slate-300 shadow-2xs" title="Production Lifecycle: Discontinued (Remains intellectual asset in register)">
+          <span className="size-1.5 rounded-full bg-slate-400" />
+          Discontinued
+        </span>
+      )
+    default:
+      return (
+        <span className="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-600 border border-slate-200 shadow-2xs" title={`Production Lifecycle: ${st}`}>
+          <span className="size-1.5 rounded-full bg-slate-400" />
+          {st}
+        </span>
+      )
+  }
+}
+
 function StatusPill({ status }: { status: AssetStatus | 'Active' | 'Inactive' | 'Cleared' | 'Review' }) {
   switch (status) {
     case 'In Production':
@@ -2471,6 +2552,8 @@ function AssetsPage({
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('All Subcategories')
   const [selectedRisk, setSelectedRisk] = useState<string>('All Risks')
   const [selectedAgency, setSelectedAgency] = useState<string>('All Agencies')
+  const [selectedProductionStatus, setSelectedProductionStatus] = useState<string>('All')
+  const [selectedReviewStatus, setSelectedReviewStatus] = useState<string>('All')
   const riskMetrics = useMemo(() => getPortfolioRiskMetrics(assets, rightsRecords, approvals), [assets, rightsRecords, approvals])
   const [newContributorName, setNewContributorName] = useState('')
   const [newContributorRole, setNewContributorRole] = useState('Lead 3D Animator')
@@ -2556,6 +2639,7 @@ function AssetsPage({
     subcategory: string
     agency: Agency
     unit?: Agency
+    productionStatus: ProductionStatus
     contributors: AssetContributor[]
     rightsHolder: string
     owner: string
@@ -2582,6 +2666,7 @@ function AssetsPage({
     subcategory: '',
     agency: currentUser.agency || 'Lovetoons',
     unit: currentUser.agency || 'Lovetoons',
+    productionStatus: 'In Production',
     contributors: [],
     rightsHolder: '',
     owner: '',
@@ -2657,6 +2742,18 @@ function AssetsPage({
       if (selectedAgency !== 'All Agencies' && (item.agency || item.unit) !== selectedAgency) {
         return false
       }
+      if (selectedProductionStatus !== 'All') {
+        const prod = item.productionStatus || (item.status === 'Discontinued' ? 'Discontinued' : item.status === 'Yet to Launch' ? 'Yet to Launch' : 'In Production')
+        if (prod !== selectedProductionStatus) {
+          return false
+        }
+      }
+      if (selectedReviewStatus !== 'All') {
+        const rev = item.reviewStatus || (item.status === 'Approved' || item.status === 'In Review' || item.status === 'Requires Attention' || item.status === 'Draft' ? item.status : 'Pending')
+        if (rev !== selectedReviewStatus) {
+          return false
+        }
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase()
         const match =
@@ -2674,7 +2771,7 @@ function AssetsPage({
     })
 
     return sortDiscontinuedToBottom(list)
-  }, [assets, selectedCategory, selectedSubcategory, selectedRisk, selectedAgency, searchQuery, rightsRecords, approvals])
+  }, [assets, selectedCategory, selectedSubcategory, selectedRisk, selectedAgency, selectedProductionStatus, selectedReviewStatus, searchQuery, rightsRecords, approvals])
 
   const handleAddAssetSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -2708,7 +2805,9 @@ function AssetsPage({
       agency: isGlobalViewer ? newAssetForm.agency : (currentUser.agency || 'Lovetoons'),
       unit: isGlobalViewer ? newAssetForm.agency : (currentUser.agency || 'Lovetoons'),
       contributors: newAssetForm.contributors,
-      status: 'In Production',
+      productionStatus: newAssetForm.productionStatus || 'In Production',
+      reviewStatus: 'Pending',
+      status: 'Pending',
       posterUrl: newAssetForm.posterUrl.trim() ? newAssetForm.posterUrl.trim() : undefined,
       owner: 'Esteemed Executive Minister (Super Admin)',
       rightsHolder: 'Esteemed Executive Minister (Super Admin)',
@@ -2733,6 +2832,7 @@ function AssetsPage({
       subcategory: '',
       agency: currentUser.agency || 'Lovetoons',
       unit: currentUser.agency || 'Lovetoons',
+      productionStatus: 'In Production',
       contributors: [],
       rightsHolder: 'Esteemed Executive Minister (Super Admin)',
       owner: 'Esteemed Executive Minister (Super Admin)',
@@ -2813,9 +2913,9 @@ function AssetsPage({
 
       {/* SEARCH AND FILTER BAR */}
       <div className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2.5 text-xs">
           {/* Search Box */}
-          <div className="relative lg:col-span-2">
+          <div className="relative sm:col-span-2 md:col-span-3 lg:col-span-2">
             <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
             <input
               value={searchQuery}
@@ -2830,7 +2930,7 @@ function AssetsPage({
             <select
               value={selectedCategory}
               onChange={(e) => handleCategoryDropdownChange(e.target.value)}
-              className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition"
+              className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition cursor-pointer"
             >
               <option value="All Categories">All Categories</option>
               {categories.map((c) => (
@@ -2838,6 +2938,39 @@ function AssetsPage({
                   {c.name}
                 </option>
               ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-slate-400" />
+          </div>
+
+          {/* Production Status Filter */}
+          <div className="relative">
+            <select
+              id="asset-production-status-filter-select"
+              value={selectedProductionStatus}
+              onChange={(e) => setSelectedProductionStatus(e.target.value)}
+              className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition cursor-pointer"
+            >
+              <option value="All">All Production</option>
+              <option value="In Production">In Production</option>
+              <option value="Discontinued">Discontinued</option>
+              <option value="Yet to Launch">Yet to Launch</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-slate-400" />
+          </div>
+
+          {/* Review Status Filter */}
+          <div className="relative">
+            <select
+              id="asset-review-status-filter-select"
+              value={selectedReviewStatus}
+              onChange={(e) => setSelectedReviewStatus(e.target.value)}
+              className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition cursor-pointer"
+            >
+              <option value="All">All Reviews</option>
+              <option value="Approved">Approved</option>
+              <option value="In Review">In Review</option>
+              <option value="Pending">Pending</option>
+              <option value="Requires Attention">Requires Attention</option>
             </select>
             <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-slate-400" />
           </div>
@@ -2866,7 +2999,7 @@ function AssetsPage({
                 <select
                   value={selectedAgency}
                   onChange={(e) => setSelectedAgency(e.target.value)}
-                  className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition"
+                  className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition cursor-pointer"
                 >
                   <option value="All Agencies">All Agencies ({assets.length})</option>
                   {agencies.map((agency) => (
@@ -2900,7 +3033,7 @@ function AssetsPage({
                 <th className="px-4 py-3">Agency</th>
                 <th className="px-4 py-3">Contributors</th>
                 <th className="px-4 py-3">Owner / Rights Holder</th>
-                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Status (Review / Production)</th>
                 <th className="px-4 py-3">Created On</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -3023,7 +3156,10 @@ function AssetsPage({
 
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-1 items-start">
-                          <StatusPill status={asset.status} />
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <ReviewStatusPill status={asset.reviewStatus || (asset.status === 'Approved' || asset.status === 'In Review' || asset.status === 'Requires Attention' || asset.status === 'Draft' ? asset.status : 'Pending')} />
+                            <ProductionStatusPill status={asset.productionStatus || (asset.status === 'Discontinued' ? 'Discontinued' : asset.status === 'Yet to Launch' ? 'Yet to Launch' : 'In Production')} />
+                          </div>
                           {(() => {
                             const assessment = getAssetRiskAssessment(asset, rightsRecords, approvals)
                             return (
@@ -3206,6 +3342,24 @@ function AssetsPage({
                         {currentUser.agency || 'Lovetoons'}
                       </div>
                     )}
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Production Status *</label>
+                    <select
+                      value={newAssetForm.productionStatus}
+                      onChange={(e) =>
+                        setNewAssetForm((prev) => ({
+                          ...prev,
+                          productionStatus: e.target.value as ProductionStatus,
+                        }))
+                      }
+                      className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 px-3 text-xs outline-none focus:border-blue-400 font-semibold"
+                    >
+                      <option value="In Production" className="dark:bg-slate-900 dark:text-white">In Production</option>
+                      <option value="Yet to Launch" className="dark:bg-slate-900 dark:text-white">Yet to Launch</option>
+                      <option value="Discontinued" className="dark:bg-slate-900 dark:text-white">Discontinued</option>
+                    </select>
                   </div>
                 </div>
 

@@ -10,7 +10,9 @@ export async function GET(
     const rows = await sql`
       SELECT 
         id, name, ministry_id as "ministryId", agency, category, subcategory, 
-        status, registration_date as "registrationDate", version, tags, 
+        status, COALESCE(production_status, 'In Production') as "productionStatus",
+        COALESCE(review_status, status, 'Pending') as "reviewStatus",
+        registration_date as "registrationDate", version, tags, 
         description, thumb_type as "thumbType", poster_url as "posterUrl",
         media_type as "mediaType", created_at as "createdAt", updated_at as "updatedAt"
       FROM assets
@@ -46,6 +48,8 @@ export async function PUT(
     const {
       name,
       status,
+      productionStatus,
+      reviewStatus,
       agency,
       category,
       subcategory,
@@ -71,7 +75,9 @@ export async function PUT(
       UPDATE assets
       SET 
         name = COALESCE(${name ?? null}, name),
-        status = COALESCE(${status ?? null}, status),
+        production_status = COALESCE(${productionStatus ?? null}, production_status),
+        review_status = COALESCE(${reviewStatus ?? (['Approved', 'Pending', 'In Review', 'Under Review', 'Requires Attention', 'Draft'].includes(status) ? status : null)}, review_status),
+        status = COALESCE(${status ?? reviewStatus ?? null}, status),
         agency = COALESCE(${agency ?? null}, agency),
         unit = COALESCE(${agency ?? null}, unit),
         category = COALESCE(${category ?? null}, category),

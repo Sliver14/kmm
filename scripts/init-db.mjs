@@ -79,6 +79,8 @@ async function main() {
       creator_role TEXT NOT NULL,
       creator_skill TEXT,
       contributors JSONB DEFAULT '[]'::jsonb,
+      production_status TEXT DEFAULT 'In Production',
+      review_status TEXT DEFAULT 'Pending',
       status TEXT NOT NULL,
       created_date TEXT,
       created_time TEXT,
