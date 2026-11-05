@@ -288,14 +288,6 @@ export default function AuthPage() {
     }
   }
 
-  // Quick 1-click demo selection
-  const selectDemoUser = (user: TrainingUser) => {
-    setMode('signin')
-    setSignInEmail(user.email)
-    setSignInPassword('admin123')
-    setErrorMessage(null)
-  }
-
   return (
     <div
       className={`min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 lg:p-8 relative overflow-hidden transition-colors duration-300 ${
@@ -328,11 +320,11 @@ export default function AuthPage() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/training-portal"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors border-amber-500/40 text-amber-500 hover:bg-amber-500/10"
+            href="/"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
           >
             <ArrowLeft className="size-3.5" />
-            <span>Training Portal</span>
+            <span>Back to KMM Home</span>
           </Link>
 
           <button
@@ -513,32 +505,6 @@ export default function AuthPage() {
                 </>
               )}
             </button>
-
-            {/* Quick Demo Accounts Selection */}
-            <div className="pt-4 border-t border-slate-200/60 dark:border-white/10">
-              <div className="flex items-center justify-between text-[11px] mb-2 font-semibold text-slate-500 dark:text-slate-400">
-                <span>Quick Demo Accounts:</span>
-                <span className="text-[10px] text-amber-500 font-bold">(1-Click Fill)</span>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                {DEFAULT_DEMO_USERS.map((user) => (
-                  <button
-                    key={user.id}
-                    type="button"
-                    onClick={() => selectDemoUser(user)}
-                    className="flex items-center justify-between p-2 rounded-lg text-left text-xs bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200/70 dark:border-white/5 transition cursor-pointer"
-                  >
-                    <div className="min-w-0">
-                      <div className="font-bold text-slate-900 dark:text-white truncate">{user.name}</div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{user.agency}</div>
-                    </div>
-                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider shrink-0 ml-2">
-                      Auto-Fill &rarr;
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </form>
         ) : (
           /* MODE 2: SIGN UP FORM */
@@ -703,13 +669,10 @@ export default function AuthPage() {
           >
             <span>Interested Ministry or Department? Join Waitlist &rarr;</span>
           </Link>
-          <div className="flex items-center justify-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-1">
-            <Link href="/training-portal" className="hover:text-amber-500 transition-colors">
-              Enter as Guest
-            </Link>
-            <span>&bull;</span>
-            <Link href="/" className="hover:text-amber-500 transition-colors">
-              Return to Website
+          <div className="flex items-center justify-center text-xs font-semibold text-slate-500 dark:text-slate-400 pt-1">
+            <Link href="/" className="hover:text-amber-500 transition-colors inline-flex items-center gap-1.5">
+              <ArrowLeft className="size-3.5" />
+              <span>Back to KMM Home</span>
             </Link>
           </div>
         </div>
