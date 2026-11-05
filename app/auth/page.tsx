@@ -107,6 +107,7 @@ export default function AuthPage() {
 
   // Status & feedback
   const [isLoading, setIsLoading] = useState(false)
+  const [redirectNotice, setRedirectNotice] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
@@ -114,6 +115,13 @@ export default function AuthPage() {
     setIsMounted(true)
     const savedTheme = localStorage.getItem('kmm_training_theme')
     setIsDark(savedTheme === 'dark')
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('redirect') === '/training-portal') {
+        setRedirectNotice(true)
+      }
+    }
 
     // Initialize registered demo users in localStorage if not already present
     try {
@@ -378,6 +386,14 @@ export default function AuthPage() {
               : 'Register to record your personal training progress and receive verifiable accreditation certificates.'}
           </p>
         </div>
+
+        {/* Redirect Notice */}
+        {redirectNotice && (
+          <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 p-3.5 text-xs text-amber-900 dark:text-amber-200">
+            <ShieldCheck className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <span>Officer authentication required to access Training Portal curriculums and accreditation tools.</span>
+          </div>
+        )}
 
         {/* Tab Switcher: Sign In vs Sign Up */}
         <div className="flex rounded-xl p-1 mb-6 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10">
