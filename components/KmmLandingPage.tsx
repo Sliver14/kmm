@@ -132,6 +132,11 @@ export default function KmmLandingPage() {
                 </a>
               </li>
               <li>
+                <a href="#training" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
+                  Training & Tools
+                </a>
+              </li>
+              <li>
                 <a href="#governance" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
                   Governance
                 </a>
@@ -238,7 +243,7 @@ export default function KmmLandingPage() {
               </li>
               <li>
                 <Link
-                  href="/auth"
+                  href="/training-portal"
                   className="px-4 py-2 rounded-full font-bold text-sm bg-[var(--kmm-orange)] text-[#10233F] hover:brightness-95 transition-all shadow-xs"
                 >
                   Training Portal
@@ -319,6 +324,17 @@ export default function KmmLandingPage() {
                   🛡
                 </span>
                 <span>Mandate & Responsibilities</span>
+              </a>
+
+              <a
+                href="#training"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
+              >
+                <span className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm">
+                  🎓
+                </span>
+                <span>Training, Tools & Docs</span>
               </a>
 
               <a
@@ -432,7 +448,7 @@ export default function KmmLandingPage() {
               {/* Portal CTA Cards in Drawer */}
               <div className="pt-4 mt-2 border-t border-[var(--kmm-line)] flex flex-col gap-3">
                 <Link
-                  href="/auth"
+                  href="/training-portal"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center justify-between p-4 rounded-2xl font-bold bg-[var(--kmm-orange)] text-[#10233F] shadow-md hover:brightness-105 active:scale-98 transition-all"
                 >
@@ -442,10 +458,10 @@ export default function KmmLandingPage() {
                     </span>
                     <div className="text-left">
                       <div className="text-sm font-extrabold" style={{ fontFamily: 'var(--kmm-display)' }}>
-                        Training Portal & Academy
+                        Training Portal & Resources
                       </div>
                       <div className="text-[11px] font-semibold opacity-85">
-                        Officer accreditation & video modules
+                        Training materials, tools & supporting documents
                       </div>
                     </div>
                   </div>
@@ -514,15 +530,15 @@ export default function KmmLandingPage() {
                 </em>
               </h1>
               <p className="lead kmm-animate-rise !text-white" style={{ color: '#ffffff' }}>
-                Kiddies Media Ministry provides the governance framework, policies, standards, and guidance that support responsible, consistent, and purpose-driven children's content across Loveworld Kingdom.
+                The official website provides basic information about Kiddies Media Ministry (KMM) and its role, alongside an institutional Training section with training materials and tools, and helpful supporting documents for children&apos;s content across Loveworld Kingdom. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2 kmm-animate-rise">
                 <a href="#mandate" className="kmm-btn kmm-btn-p">
                   Explore Our Mandate
                 </a>
-                <Link href="/auth" className="kmm-btn kmm-btn-s">
-                  Access Training Portal
+                <Link href="/training-portal" className="kmm-btn kmm-btn-s">
+                  Access Training & Tools
                 </Link>
                 <Link href="/ip-portal" className="kmm-btn kmm-btn-o" title="Intellectual Property & Asset Management Platform">
                   Launch IP Portal
@@ -582,38 +598,83 @@ export default function KmmLandingPage() {
         </section>
 
         {/* =========================================================================
-            WHO WE ARE SECTION
+            WHO WE ARE SECTION (KMM & ITS ROLE)
             ========================================================================= */}
         <section className="py-20 scroll-mt-20" id="about">
-          <div className="kmm-wrap grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div>
-              <p className="eyebrow mb-3">Who we are</p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold">The framework that children's media works within</h2>
+          <div className="kmm-wrap space-y-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+              <div>
+                <p className="eyebrow mb-3">About KMM & Its Role</p>
+                <h2 className="text-3xl sm:text-4xl font-extrabold">The framework that children&apos;s media works within</h2>
+              </div>
+              <div className="space-y-6">
+                <p className="lead">
+                  Kiddies Media Ministry (KMM) provides the governance, policy, and standards framework for children&apos;s content across Loveworld Kingdom.
+                </p>
+                <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
+                  The website provides basic information about KMM and its role to guide, coordinate, and set expectations for children&apos;s media initiatives. Our mission equips ministry departments, animation studios, and creative teams with official training materials, actionable compliance tools, and helpful supporting documents so they can create and share content with clarity, spiritual fidelity, and confidence.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="rounded-3xl p-6 bg-[var(--kmm-blue)] text-white shadow-md">
+                    <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
+                      What KMM does
+                    </b>
+                    <span className="text-sm leading-relaxed block text-white/90">
+                      Guides, coordinates, and establishes the expectations, training materials, practical tools, and supporting documents children&apos;s media initiatives follow.
+                    </span>
+                  </div>
+                  <div className="rounded-3xl p-6 bg-[var(--kmm-gold)] text-[#10233F] shadow-md">
+                    <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
+                      What KMM is not
+                    </b>
+                    <span className="text-sm leading-relaxed block text-[#10233F]/90">
+                      A standalone studio that simply produces entertainment content without institutional governance.
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="space-y-6">
-              <p className="lead">
-                KMM provides the governance, policy, and standards framework for children's content across Loveworld Kingdom.
-              </p>
-              <p className="text-base text-[var(--kmm-muted)] leading-relaxed">
-                Our purpose is to guide, coordinate, and set expectations for children's media initiatives, so that teams across the ministry can create and share content with clarity and confidence.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="rounded-3xl p-6 bg-[var(--kmm-blue)] text-white shadow-md">
-                  <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
-                    What KMM does
-                  </b>
-                  <span className="text-sm leading-relaxed block text-white/90">
-                    Guides, coordinates and establishes the expectations children's media initiatives follow.
-                  </span>
+
+            {/* 4 Pillars of KMM's Role */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-4">
+              <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
+                <div className="size-10 rounded-2xl bg-[var(--kmm-blue)]/15 text-[var(--kmm-blue)] flex items-center justify-center font-bold text-lg">
+                  ⚖
                 </div>
-                <div className="rounded-3xl p-6 bg-[var(--kmm-gold)] text-[#10233F] shadow-md">
-                  <b className="block font-bold text-lg mb-2" style={{ fontFamily: 'var(--kmm-display)' }}>
-                    What KMM is not
-                  </b>
-                  <span className="text-sm leading-relaxed block text-[#10233F]/90">
-                    A studio that simply produces entertainment content.
-                  </span>
+                <h3 className="font-extrabold text-base">Policy & Governance</h3>
+                <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
+                  Establishes statutory child safeguarding covenants, broadcast standards, and operational guidelines across all channels.
+                </p>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
+                <div className="size-10 rounded-2xl bg-[var(--kmm-gold)]/20 text-[#10233F] dark:text-[var(--kmm-gold)] flex items-center justify-center font-bold text-lg">
+                  📚
                 </div>
+                <h3 className="font-extrabold text-base">Training Materials</h3>
+                <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
+                  Delivers structured curriculum modules, masterclasses, and production playbooks for animators and creators.
+                </p>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
+                <div className="size-10 rounded-2xl bg-[var(--kmm-orange)]/15 text-[var(--kmm-orange)] flex items-center justify-center font-bold text-lg">
+                  🛠
+                </div>
+                <h3 className="font-extrabold text-base">Practical Tools</h3>
+                <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
+                  Provides interactive safeguarding audit checklists, age-rating calculators, and IP clearance verification tools.
+                </p>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-xs space-y-2.5">
+                <div className="size-10 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
+                  📋
+                </div>
+                <h3 className="font-extrabold text-base">Supporting Documents</h3>
+                <p className="text-xs text-[var(--kmm-muted)] leading-relaxed">
+                  Publishes legal covenants, minor contributor release deeds, and stewards children&apos;s intellectual property.
+                </p>
               </div>
             </div>
           </div>
@@ -685,8 +746,8 @@ export default function KmmLandingPage() {
                 <svg className="size-9 mb-10 text-[#10233F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5zM4 19a2 2 0 0 1 2-2h13" />
                 </svg>
-                <h3 className="text-xl font-bold mb-2">Legal Accreditation</h3>
-                <p className="text-sm leading-relaxed text-[#10233F]/90">Institutional training and regulatory qualification for ministry legal counsels, child safeguarding auditors, and broadcast reviewers.</p>
+                <h3 className="text-xl font-bold mb-2">Training & Tools</h3>
+                <p className="text-sm leading-relaxed text-[#10233F]/90">Institutional training materials, interactive compliance tools, and qualification for children&apos;s media producers, safeguarding auditors, and broadcast reviewers.</p>
               </article>
 
               {/* 7 */}
@@ -951,62 +1012,165 @@ export default function KmmLandingPage() {
         </section>
 
         {/* =========================================================================
-            TRAINING & ACADEMY SECTION
+            TRAINING SECTION (MATERIALS, TOOLS & SUPPORTING DOCUMENTS)
             ========================================================================= */}
         <section className="py-20 scroll-mt-20" id="training">
-          <div className="kmm-wrap">
-            <div className="rounded-[48px] p-8 sm:p-14 bg-[var(--kmm-navy)] text-white shadow-2xl grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative overflow-hidden">
-              <div className="lg:col-span-7 space-y-6">
-                <p className="eyebrow !text-[var(--kmm-gold)]">KMM Governance, Legal & Policy Academy</p>
+          <div className="kmm-wrap space-y-12">
+            {/* Header Box */}
+            <div className="rounded-[40px] p-8 sm:p-12 bg-[var(--kmm-navy)] text-white shadow-2xl relative overflow-hidden">
+              <div className="max-w-3xl space-y-4 relative z-10">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--kmm-gold)] text-[#10233F]">
+                  <span>KMM Institutional Training & Resources</span>
+                </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-                  Institutional accreditation & compliance portal
+                  Training Materials, Practical Tools & Supporting Documents
                 </h2>
                 <p className="text-sm sm:text-base leading-relaxed text-white/85">
-                  The academy is the official institutional learning environment dedicated exclusively to Governance, Legal Jurisprudence, Statutory Child Protection, and Intellectual Property Policy. Ministry legal counsels, safeguarding auditors, and broadcast compliance reviewers complete mandatory accreditation to enforce zero-defect standards across all Loveworld media channels.
+                  The website provides basic information about KMM and its role, alongside an institutional Training section with training materials and tools, and helpful supporting documents. The training portal equips ministry departments, animation studios, and creative teams with the knowledge, interactive utilities, and official templates needed to uphold zero-defect standards for children&apos;s media.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-4">
-                  <Link href="/auth" className="kmm-btn kmm-btn-p">
-                    Sign In to Training Portal
+                  <Link href="/training-portal" className="kmm-btn kmm-btn-p">
+                    Launch Training Portal &rarr;
                   </Link>
-                  <Link href="/auth" className="kmm-btn kmm-btn-s">
-                    Officer Authentication
+                  <Link href="/training-portal?tab=tools" className="kmm-btn kmm-btn-s">
+                    Practical Tools
                   </Link>
-                  <Link href="/ip-portal" className="kmm-btn kmm-btn-o !text-white border-white/40 hover:bg-white/10">
-                    Switch to IP Portal &rarr;
+                  <Link href="/training-portal?tab=documents" className="kmm-btn kmm-btn-o !text-white border-white/40 hover:bg-white/10">
+                    Supporting Documents
+                  </Link>
+                  <Link href="/auth" className="px-4 py-2.5 rounded-full text-xs font-bold text-white/80 hover:text-white hover:underline transition-colors ml-auto sm:ml-0">
+                    Officer Sign In &rarr;
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* 3 Main Pillars Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Card 1: Training Materials */}
+              <div className="p-8 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="space-y-4">
+                  <div className="size-12 rounded-2xl bg-[var(--kmm-blue)]/15 text-[var(--kmm-blue)] flex items-center justify-center font-bold text-xl">
+                    📚
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-blue)] block mb-1">
+                      Curriculum & Modules
+                    </span>
+                    <h3 className="text-xl font-bold">Training Materials</h3>
+                  </div>
+                  <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
+                    Comprehensive learning modules covering Child Safeguarding in Media, Broadcast & Visual Excellence, Scriptural Fidelity, and Intellectual Property Clearance.
+                  </p>
+                  <ul className="text-xs text-[var(--kmm-muted)] space-y-2 pt-2 border-t border-[var(--kmm-line)]">
+                    <li className="flex items-center gap-2">
+                      <span className="text-[var(--kmm-blue)] font-bold">✓</span>
+                      <span>8 Core masterclasses & curriculum outlines</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[var(--kmm-blue)] font-bold">✓</span>
+                      <span>Biblical anchors & statutory citations</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[var(--kmm-blue)] font-bold">✓</span>
+                      <span>Lesson takeaways & production checkpoints</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-6">
+                  <Link
+                    href="/training-portal?tab=materials"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
+                  >
+                    <span>Explore Training Materials</span>
+                    <span>&rarr;</span>
                   </Link>
                 </div>
               </div>
 
-              <div className="lg:col-span-5 space-y-4">
-                <div className="rounded-3xl p-6 bg-[var(--kmm-cream)] text-[#10233F] shadow-lg flex items-start gap-4">
-                  <svg className="size-7 shrink-0 text-[#10233F] mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" />
-                  </svg>
-                  <div>
-                    <b className="block font-bold text-base mb-1" style={{ fontFamily: 'var(--kmm-display)' }}>
-                      Public Governance Charters
-                    </b>
-                    <span className="text-xs leading-relaxed block text-[#10233F]/85">
-                      Access published statutory child safeguarding protocols, age ratings, broadcast compliance guidelines, and board circulars.
-                    </span>
+              {/* Card 2: Practical Tools */}
+              <div className="p-8 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="space-y-4">
+                  <div className="size-12 rounded-2xl bg-[var(--kmm-gold)]/20 text-[#10233F] dark:text-[var(--kmm-gold)] flex items-center justify-center font-bold text-xl">
+                    🛠
                   </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-gold)] block mb-1">
+                      Interactive Utilities
+                    </span>
+                    <h3 className="text-xl font-bold">Practical Tools</h3>
+                  </div>
+                  <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
+                    Interactive utilities designed for everyday production verification, safeguarding audits, and content age-rating assessments.
+                  </p>
+                  <ul className="text-xs text-[var(--kmm-muted)] space-y-2 pt-2 border-t border-[var(--kmm-line)]">
+                    <li className="flex items-center gap-2">
+                      <span className="text-amber-500 font-bold">✓</span>
+                      <span>Child Safeguarding Audit Tool with live score</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-amber-500 font-bold">✓</span>
+                      <span>Age-Rating & Sensitivity Advisory Calculator</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-amber-500 font-bold">✓</span>
+                      <span>5-Point IP Clearance & Licensing Verifier</span>
+                    </li>
+                  </ul>
                 </div>
 
-                <div className="rounded-3xl p-6 bg-[var(--kmm-orange)] text-[#10233F] shadow-lg flex items-start gap-4">
-                  <svg className="size-7 shrink-0 text-[#10233F] mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                  <div>
-                    <b className="block font-bold text-base mb-1" style={{ fontFamily: 'var(--kmm-display)' }}>
-                      Inside the Academy
-                    </b>
-                    <span className="text-xs leading-relaxed block text-[#10233F]/85">
-                      Interactive compliance case player, defect classification matrices (Critical vs Minor), character copyright registers, and board diplomas.
-                    </span>
+                <div className="pt-6">
+                  <Link
+                    href="/training-portal?tab=tools"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
+                  >
+                    <span>Launch Practical Tools</span>
+                    <span>&rarr;</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Card 3: Supporting Documents */}
+              <div className="p-8 rounded-3xl bg-[var(--kmm-surface)] border border-[var(--kmm-line)] shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="space-y-4">
+                  <div className="size-12 rounded-2xl bg-[var(--kmm-orange)]/15 text-[var(--kmm-orange)] flex items-center justify-center font-bold text-xl">
+                    📋
                   </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--kmm-orange)] block mb-1">
+                      Charters & Templates
+                    </span>
+                    <h3 className="text-xl font-bold">Helpful Supporting Documents</h3>
+                  </div>
+                  <p className="text-sm text-[var(--kmm-muted)] leading-relaxed">
+                    Official gazetted charters, policy covenants, talent release deeds, and compliance templates ready for immediate reading and download.
+                  </p>
+                  <ul className="text-xs text-[var(--kmm-muted)] space-y-2 pt-2 border-t border-[var(--kmm-line)]">
+                    <li className="flex items-center gap-2">
+                      <span className="text-[var(--kmm-orange)] font-bold">✓</span>
+                      <span>Official Child Safeguarding Policy Manual</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[var(--kmm-orange)] font-bold">✓</span>
+                      <span>Minor Talent & Voice Contributor Release Deeds</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[var(--kmm-orange)] font-bold">✓</span>
+                      <span>COPPA Digital Safety & Broadcast Standards</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-6">
+                  <Link
+                    href="/training-portal?tab=documents"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
+                  >
+                    <span>View Supporting Documents</span>
+                    <span>&rarr;</span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -1159,11 +1323,12 @@ export default function KmmLandingPage() {
             <div className="md:col-span-3 space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--kmm-gold)]">Explore</h4>
               <ul className="list-none m-0 p-0 space-y-2 text-sm text-white/90">
-                <li><a href="#about" className="hover:text-[var(--kmm-gold)] transition-colors">About KMM</a></li>
-                <li><a href="#governance" className="hover:text-[var(--kmm-gold)] transition-colors">Governance & Policies</a></li>
-                <li><a href="#updates" className="hover:text-[var(--kmm-gold)] transition-colors">Resources & Updates</a></li>
-                <li><Link href="/auth" className="hover:text-[var(--kmm-gold)] transition-colors">Training Portal (Sign In)</Link></li>
-                <li><Link href="/training-portal" className="hover:text-[var(--kmm-gold)] transition-colors">KMM Video Academy</Link></li>
+                <li><a href="#about" className="hover:text-[var(--kmm-gold)] transition-colors">About KMM &amp; Its Role</a></li>
+                <li><a href="#mandate" className="hover:text-[var(--kmm-gold)] transition-colors">Mandate &amp; Responsibilities</a></li>
+                <li><a href="#training" className="hover:text-[var(--kmm-gold)] transition-colors">Training, Tools &amp; Docs</a></li>
+                <li><Link href="/training-portal" className="hover:text-[var(--kmm-gold)] transition-colors">Training Portal Hub</Link></li>
+                <li><a href="#governance" className="hover:text-[var(--kmm-gold)] transition-colors">Governance &amp; Policies</a></li>
+                <li><a href="#updates" className="hover:text-[var(--kmm-gold)] transition-colors">Resources &amp; Updates</a></li>
               </ul>
             </div>
 
