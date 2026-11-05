@@ -120,25 +120,13 @@ export default function KmmLandingPage() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:block">
-            <ul className="flex items-center gap-1.5 list-none m-0 p-0">
+            <ul className="flex items-center gap-2 list-none m-0 p-0">
               <li>
-                <a href="#about" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
+                <a
+                  href="#about"
+                  className="px-4 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]"
+                >
                   About
-                </a>
-              </li>
-              <li>
-                <a href="#mandate" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
-                  Mandate
-                </a>
-              </li>
-              <li>
-                <a href="#training" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
-                  Training & Tools
-                </a>
-              </li>
-              <li>
-                <a href="#governance" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
-                  Governance
                 </a>
               </li>
               <li className="relative" ref={agenciesDropdownRef}>
@@ -146,7 +134,7 @@ export default function KmmLandingPage() {
                   type="button"
                   onClick={() => setAgenciesDropdownOpen((prev) => !prev)}
                   onMouseEnter={() => setAgenciesDropdownOpen(true)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full font-semibold text-sm transition-colors text-[var(--kmm-fg)] cursor-pointer ${agenciesDropdownOpen ? 'bg-[var(--kmm-band)]' : 'hover:bg-[var(--kmm-band)]'
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-sm transition-colors text-[var(--kmm-fg)] cursor-pointer ${agenciesDropdownOpen ? 'bg-[var(--kmm-band)]' : 'hover:bg-[var(--kmm-band)]'
                     }`}
                   aria-expanded={agenciesDropdownOpen}
                   aria-haspopup="true"
@@ -222,26 +210,16 @@ export default function KmmLandingPage() {
                 )}
               </li>
               <li>
-                <a href="#updates" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
-                  Updates
-                </a>
-              </li>
-              <li>
-                <a href="#contact" className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)]">
-                  Contact
-                </a>
-              </li>
-              <li>
                 <Link
                   href="/onboarding"
-                  className="px-3.5 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)] inline-flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-full font-semibold text-sm hover:bg-[var(--kmm-band)] transition-colors text-[var(--kmm-fg)] inline-flex items-center gap-1.5"
                   title="Ministry & Department Onboarding Waitlist"
                 >
                   <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
                   <span>Onboard</span>
                 </Link>
               </li>
-              <li>
+              <li className="ml-2">
                 <Link
                   href="/training-portal"
                   className="px-4 py-2 rounded-full font-bold text-sm bg-[var(--kmm-orange)] text-[#10233F] hover:brightness-95 transition-all shadow-xs"
@@ -303,7 +281,7 @@ export default function KmmLandingPage() {
         {/* Mobile Navigation Drawer */}
         {menuOpen && (
           <nav className="fixed top-[64px] sm:top-[72px] left-0 right-0 z-50 max-h-[calc(100vh-64px)] sm:max-h-[calc(100vh-72px)] overflow-y-auto border-b border-[var(--kmm-line)] bg-[var(--kmm-bg)] px-5 py-6 shadow-2xl animate-in slide-in-from-top-3 duration-250 lg:hidden">
-            <div className="flex flex-col gap-1.5 list-none m-0 p-0">
+            <div className="flex flex-col gap-2 list-none m-0 p-0">
               <a
                 href="#about"
                 onClick={() => setMenuOpen(false)}
@@ -313,39 +291,6 @@ export default function KmmLandingPage() {
                   ℹ
                 </span>
                 <span>About KMM</span>
-              </a>
-
-              <a
-                href="#mandate"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
-              >
-                <span className="size-8 rounded-xl bg-[var(--kmm-orange)]/15 text-[var(--kmm-orange)] flex items-center justify-center font-bold text-sm">
-                  🛡
-                </span>
-                <span>Mandate & Responsibilities</span>
-              </a>
-
-              <a
-                href="#training"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
-              >
-                <span className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm">
-                  🎓
-                </span>
-                <span>Training, Tools & Docs</span>
-              </a>
-
-              <a
-                href="#governance"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
-              >
-                <span className="size-8 rounded-xl bg-[var(--kmm-gold)]/20 text-[#10233F] dark:text-[var(--kmm-gold)] flex items-center justify-center font-bold text-sm">
-                  ⚖
-                </span>
-                <span>Governance Framework</span>
               </a>
 
               {/* Agencies Dropdown Accordion */}
@@ -406,28 +351,6 @@ export default function KmmLandingPage() {
                 )}
               </div>
 
-              <a
-                href="#updates"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
-              >
-                <span className="size-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">
-                  📢
-                </span>
-                <span>Policy Updates & Gazettes</span>
-              </a>
-
-              <a
-                href="#contact"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-base hover:bg-[var(--kmm-band)] active:bg-[var(--kmm-band)] text-[var(--kmm-fg)] transition-colors"
-              >
-                <span className="size-8 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-sm">
-                  ✉
-                </span>
-                <span>Institutional Enquiries</span>
-              </a>
-
               <Link
                 href="/onboarding"
                 onClick={() => setMenuOpen(false)}
@@ -458,10 +381,10 @@ export default function KmmLandingPage() {
                     </span>
                     <div className="text-left">
                       <div className="text-sm font-extrabold" style={{ fontFamily: 'var(--kmm-display)' }}>
-                        Training Portal & Resources
+                        Training Portal &amp; Resources
                       </div>
                       <div className="text-[11px] font-semibold opacity-85">
-                        Training materials, tools & supporting documents
+                        Training materials, tools &amp; supporting documents
                       </div>
                     </div>
                   </div>
@@ -479,15 +402,34 @@ export default function KmmLandingPage() {
                     </span>
                     <div className="text-left">
                       <div className="text-sm font-extrabold" style={{ fontFamily: 'var(--kmm-display)' }}>
-                        IP & Asset Management Portal
+                        IP &amp; Asset Management Portal
                       </div>
                       <div className="text-[11px] font-semibold opacity-85">
-                        Digital assets, approvals & governance
+                        Digital assets, approvals &amp; governance
                       </div>
                     </div>
                   </div>
                   <span className="text-sm font-black">&rarr;</span>
                 </Link>
+              </div>
+
+              {/* Quick Secondary Links */}
+              <div className="pt-3 border-t border-[var(--kmm-line)] flex items-center justify-between text-xs text-[var(--kmm-muted)] px-2">
+                <a
+                  href="#updates"
+                  onClick={() => setMenuOpen(false)}
+                  className="hover:text-[var(--kmm-fg)] transition-colors"
+                >
+                  Policy Updates
+                </a>
+                <span>&bull;</span>
+                <a
+                  href="#contact"
+                  onClick={() => setMenuOpen(false)}
+                  className="hover:text-[var(--kmm-fg)] transition-colors"
+                >
+                  Institutional Enquiries
+                </a>
               </div>
             </div>
           </nav>
