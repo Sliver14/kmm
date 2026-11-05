@@ -255,26 +255,17 @@ export function AddContributorModal({
 
           {/* Agency & Ministry Email Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Originating Agency */}
+            {/* Originating Agency - Locked to Authenticated Entity */}
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Assigned Agency / Unit *
+                Assigned Agency / Ministry *
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                  <Building2 className="size-4" />
-                </div>
-                <select
-                  value={agency}
-                  onChange={(e) => setAgency(e.target.value as Agency)}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] dark:text-white pl-9 pr-3 text-xs outline-none focus:border-[#2f80ed] cursor-pointer"
-                >
-                  {ALL_AGENCIES.map((ag) => (
-                    <option key={ag} value={ag} className="dark:bg-[#1c202c] dark:text-white">
-                      {ag}
-                    </option>
-                  ))}
-                </select>
+              <div className="flex items-center gap-2 h-10 px-3 rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-[#141622] text-xs font-semibold text-slate-900 dark:text-white">
+                <Building2 className="size-4 text-amber-500 shrink-0" />
+                <span className="truncate">{agency || defaultAgency}</span>
+                <span className="ml-auto text-[10px] px-2 py-0.5 rounded-md font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
+                  Authenticated
+                </span>
               </div>
             </div>
 

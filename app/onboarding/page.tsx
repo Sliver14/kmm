@@ -93,7 +93,7 @@ export default function OnboardingPage() {
                 {/* Eyebrow Pill */}
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border bg-amber-500/10 border-amber-500/30 text-amber-700 transition-colors">
                   <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span>Ministry &amp; Department Onboarding Waitlist</span>
+                  <span>Peer Agency Registration • Immediate IP Portal Access</span>
                 </div>
 
                 {/* Display Headline */}
@@ -106,9 +106,7 @@ export default function OnboardingPage() {
 
                 {/* Description */}
                 <p className="text-sm sm:text-base leading-relaxed text-slate-600">
-                  Register your ministry or department to access the{' '}
-                  <strong className="text-slate-950">IP Portal</strong> — the official
-                  platform for documenting and stewarding children’s media content and related intellectual property.
+                  Register your ministry or department on the same level as Lovetoons to receive immediate portal access credentials and start documenting and stewarding your children’s media intellectual property.
                 </p>
 
                 {/* 3 Pillars Summary */}

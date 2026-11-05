@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Building2,
   User,
@@ -15,6 +16,12 @@ import {
   ShieldCheck,
   Send,
   HelpCircle,
+  Copy,
+  Check,
+  KeyRound,
+  MapPin,
+  ExternalLink,
+  Lock,
 } from 'lucide-react'
 import { useLovetoonsData } from '@/lib/store/DataContext'
 import type { MinistryOnboardingRequest } from '@/types'
@@ -43,7 +50,7 @@ const GOAL_OPTIONS = [
   'Official Copyright & IP Rights Protection',
   'Curriculum & Sunday School distribution',
   'Creative co-production & character licensing',
-  'General ministerial waitlist & accreditation',
+  'General ministerial registration & peer agency accreditation',
 ]
 
 interface MinistryOnboardingFormProps {
@@ -59,9 +66,11 @@ export function MinistryOnboardingForm({
   className = '',
   isDark = true,
 }: MinistryOnboardingFormProps) {
-  const { addOnboardingRequest } = useLovetoonsData()
+  const router = useRouter()
+  const { addOnboardingRequest, loginAsMinistry, showToast } = useLovetoonsData()
 
   const [ministryName, setMinistryName] = useState('')
+  const [zoneRegion, setZoneRegion] = useState('')
   const [contactPerson, setContactPerson] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -73,6 +82,7 @@ export function MinistryOnboardingForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submittedRequest, setSubmittedRequest] = useState<MinistryOnboardingRequest | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,6 +108,7 @@ export function MinistryOnboardingForm({
     try {
       const created = await addOnboardingRequest({
         ministryName: ministryName.trim(),
+        zoneRegion: zoneRegion.trim() || undefined,
         contactPerson: contactPerson.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim() || undefined,
@@ -120,6 +131,7 @@ export function MinistryOnboardingForm({
 
   const handleReset = () => {
     setMinistryName('')
+    setZoneRegion('')
     setContactPerson('')
     setEmail('')
     setPhone('')
@@ -129,80 +141,163 @@ export function MinistryOnboardingForm({
     setNotes('')
     setSubmittedRequest(null)
     setErrorMessage(null)
+    setCopied(false)
   }
 
-  // Confirmation Success View
+  const handleCopyCredentials = () => {
+    if (!submittedRequest) return
+    const textToCopy = [
+      `=== KIDDIES MEDIA MINISTRIES - PORTAL ACCESS DETAILS ===`,
+      `Ministry / Entity: ${submittedRequest.ministryName}`,
+      `Zone / Region: ${submittedRequest.zoneRegion || 'Regional Headquarters'}`,
+      `Entity Identifier Code: ${submittedRequest.assignedCode || 'KMM-NEW'}`,
+      `Portal Login Email: ${submittedRequest.portalLoginEmail || submittedRequest.email}`,
+      `Secure Access Key: ${submittedRequest.accessKey || 'KMM-ACCESS-KEY'}`,
+      `Status: Full Agency Peer Status (Equal to Lovetoons)`,
+      `Portal URL: ${typeof window !== 'undefined' ? window.location.origin : ''}/ip-portal`,
+    ].join('\n')
+
+    navigator.clipboard.writeText(textToCopy)
+    setCopied(true)
+    showToast?.('Portal access credentials copied to clipboard!')
+    setTimeout(() => setCopied(false), 3000)
+  }
+
+  const handleEnterPortal = () => {
+    if (!submittedRequest) return
+    loginAsMinistry(submittedRequest)
+    router.push('/ip-portal')
+  }
+
+  // Confirmation Success View with Direct Access Details
   if (submittedRequest) {
     return (
       <div
-        className={`rounded-[30px] sm:rounded-[36px] border p-8 sm:p-12 text-center transition-all animate-in fade-in zoom-in-95 duration-300 shadow-2xl ${
+        className={`rounded-[30px] sm:rounded-[36px] border p-6 sm:p-10 text-center transition-all animate-in fade-in zoom-in-95 duration-300 shadow-2xl ${
           isDark
             ? 'border-emerald-500/30 bg-[#0E1520] text-white'
-            : 'border-emerald-500/30 bg-emerald-50/80 text-slate-900'
+            : 'border-emerald-500/30 bg-white text-slate-900'
         } ${className}`}
       >
-        <div className="size-16 sm:size-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/25 mb-6">
+        <div className="size-16 sm:size-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/25 mb-4">
           <CheckCircle2 className="size-9 sm:size-11 stroke-[2.2]" />
         </div>
 
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 mb-4">
-          <span>Reference ID:</span>
-          <span className="uppercase">{submittedRequest.id}</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 mb-3">
+          <ShieldCheck className="size-3.5" />
+          <span>Full Agency Peer Status Granted • Equal to Lovetoons</span>
         </div>
 
         <h3
-          className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3"
+          className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2"
           style={{ fontFamily: 'Bricolage Grotesque, -apple-system, sans-serif' }}
         >
-          You&apos;re on the Kiddies Media Ministry Onboarding Waitlist!
+          Ministry Registered & Portal Access Issued!
         </h3>
 
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed mb-8">
-          Thank you, <strong className="text-slate-900 dark:text-white">{submittedRequest.contactPerson}</strong>. We have logged{' '}
-          <strong className="text-slate-900 dark:text-white">{submittedRequest.ministryName}</strong> into our central department registry.
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed mb-6">
+          Welcome aboard, <strong className="text-slate-900 dark:text-white">{submittedRequest.contactPerson}</strong>.{' '}
+          <strong className="text-slate-900 dark:text-white">{submittedRequest.ministryName}</strong> is now registered as an active peer entity on the Kiddies Media Ministries IP Portal.
         </p>
 
-        {/* What Happens Next Steps */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 max-w-2xl mx-auto text-left mb-8">
-          <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-4 space-y-1.5 shadow-xs">
-            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Step 01</span>
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Admin Review</div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
-              Super Admin & Secretariat review your media profile and jurisdiction.
-            </p>
+        {/* Portal Access Details Card */}
+        <div className="max-w-xl mx-auto rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900/90 p-5 text-left mb-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+            <div className="flex items-center gap-2">
+              <KeyRound className="size-4 text-amber-500" />
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                Portal Access Credentials
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyCredentials}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/15 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer shadow-2xs"
+            >
+              {copied ? (
+                <>
+                  <Check className="size-3.5 text-emerald-500" />
+                  <span className="text-emerald-600 dark:text-emerald-400">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="size-3.5" />
+                  <span>Copy Details</span>
+                </>
+              )}
+            </button>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-4 space-y-1.5 shadow-xs">
-            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Step 02</span>
-            <div className="text-xs font-bold text-slate-900 dark:text-white">Consultation Call</div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
-              We reach out to {submittedRequest.email} to align on documentation standards and IP onboarding protocols.
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+            <div className="rounded-xl bg-white dark:bg-slate-800/80 p-3 border border-slate-200/80 dark:border-white/5">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Ministry / Entity Name</span>
+              <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm block truncate">
+                {submittedRequest.ministryName}
+              </span>
+            </div>
+
+            <div className="rounded-xl bg-white dark:bg-slate-800/80 p-3 border border-slate-200/80 dark:border-white/5">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Zone / Region</span>
+              <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm block truncate">
+                {submittedRequest.zoneRegion || 'Regional Headquarters'}
+              </span>
+            </div>
+
+            <div className="rounded-xl bg-white dark:bg-slate-800/80 p-3 border border-slate-200/80 dark:border-white/5">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Portal Login Email</span>
+              <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-xs sm:text-sm block truncate">
+                {submittedRequest.portalLoginEmail || submittedRequest.email}
+              </span>
+            </div>
+
+            <div className="rounded-xl bg-white dark:bg-slate-800/80 p-3 border border-slate-200/80 dark:border-white/5">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Entity Identifier Code</span>
+              <span className="font-mono font-bold text-purple-600 dark:text-purple-400 text-xs sm:text-sm block truncate">
+                {submittedRequest.assignedCode || `KMM-${submittedRequest.id.slice(-4).toUpperCase()}`}
+              </span>
+            </div>
+
+            <div className="sm:col-span-2 rounded-xl bg-amber-500/10 border border-amber-500/25 p-3">
+              <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400 block mb-1">
+                Generated Secure Access Key (Password)
+              </span>
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-black text-amber-700 dark:text-amber-300 text-sm tracking-wider">
+                  {submittedRequest.accessKey || 'KMM-ACCESS-KEY'}
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  Role: Agency Admin
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-slate-900/90 p-4 space-y-1.5 shadow-xs">
-            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Step 03</span>
-            <div className="text-xs font-bold text-slate-900 dark:text-white">IP Portal Access</div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
-              Your unit receives dedicated access to the IP Portal — an important resource for documenting and stewarding children’s media content and related intellectual property.
-            </p>
+          <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 p-3 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
+            <Lock className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+            <div className="text-[11px] leading-relaxed">
+              <strong>Zero-Selection Context:</strong> The portal automatically recognizes your entity ({submittedRequest.ministryName}) across all modals and forms. You will never have to select your ministry from a dropdown when adding intellectual properties.
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xl mx-auto">
+          <button
+            type="button"
+            onClick={handleEnterPortal}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-extrabold transition shadow-lg shadow-emerald-600/25 cursor-pointer active:scale-98"
+          >
+            <span>Log In & Start Adding Intellectual Properties</span>
+            <ArrowRight className="size-4" />
+          </button>
+
           <button
             type="button"
             onClick={handleReset}
-            className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer shadow-xs"
+            className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer shadow-xs"
           >
-            Submit Another Department
+            Register Another Department
           </button>
-          <Link
-            href="/"
-            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition shadow-sm"
-          >
-            Return to Homepage
-          </Link>
         </div>
       </div>
     )
@@ -218,7 +313,7 @@ export function MinistryOnboardingForm({
       <div className="border-b border-slate-950/15 pb-5 mb-6">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-extrabold bg-slate-950/10 border border-slate-950/15 text-slate-950 mb-3 uppercase tracking-wider">
           <Sparkles className="size-3.5 text-slate-950" />
-          <span>Expression of Interest • Ministry Waitlist</span>
+          <span>Peer Agency Registration • Immediate IP Portal Access</span>
         </div>
         <h3
           className="text-xl sm:text-2xl lg:text-[26px] font-black text-slate-950 tracking-tight leading-tight"
@@ -227,7 +322,7 @@ export function MinistryOnboardingForm({
           Onboard Your Ministry or Department
         </h3>
         <p className="text-xs sm:text-sm text-slate-950/80 font-medium mt-1.5 leading-relaxed">
-          Join the Kiddies Media Ministry ecosystem and gain access to the <strong className="text-slate-950 font-bold">IP Portal</strong>. The portal is an important resource for documenting and stewarding children’s media content and related intellectual property.
+          Register your ministry entity on the same level as Lovetoons to receive immediate portal access details and start documenting and stewarding your intellectual properties.
         </p>
       </div>
 
@@ -239,21 +334,39 @@ export function MinistryOnboardingForm({
       )}
 
       <div className="space-y-4 sm:space-y-5 text-left">
-        {/* Row 1: Ministry / Department Name (Prominent Full Width) */}
-        <div>
-          <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-950 mb-1.5">
-            Ministry / Department Name <span className="text-red-700">*</span>
-          </label>
-          <div className="relative">
-            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-800/70" />
-            <input
-              type="text"
-              required
-              value={ministryName}
-              onChange={(e) => setMinistryName(e.target.value)}
-              placeholder="e.g. Loveworld Children's Ministry International"
-              className="w-full pl-10 pr-4 py-3 rounded-2xl border text-xs sm:text-sm font-semibold border-amber-600/25 bg-[#FFE380]/85 text-slate-950 placeholder-slate-700/60 outline-hidden focus:bg-white focus:ring-2 focus:ring-slate-950/20 transition-all shadow-inner/10"
-            />
+        {/* Row 1: Ministry / Church Entity Name & Zone / Region (Paired 2-Columns) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-950 mb-1.5">
+              Ministry / Church Entity Name <span className="text-red-700">*</span>
+            </label>
+            <div className="relative">
+              <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-800/70" />
+              <input
+                type="text"
+                required
+                value={ministryName}
+                onChange={(e) => setMinistryName(e.target.value)}
+                placeholder="e.g. Children's Ministry - CE Lagos Zone 5"
+                className="w-full pl-10 pr-4 py-3 rounded-2xl border text-xs sm:text-sm font-semibold border-amber-600/25 bg-[#FFE380]/85 text-slate-950 placeholder-slate-700/60 outline-hidden focus:bg-white focus:ring-2 focus:ring-slate-950/20 transition-all shadow-inner/10"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-950 mb-1.5">
+              Zone / Region / Jurisdiction
+            </label>
+            <div className="relative">
+              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-800/70" />
+              <input
+                type="text"
+                value={zoneRegion}
+                onChange={(e) => setZoneRegion(e.target.value)}
+                placeholder="e.g. Lagos Zone 5 / Nigeria South"
+                className="w-full pl-10 pr-4 py-3 rounded-2xl border text-xs sm:text-sm font-semibold border-amber-600/25 bg-[#FFE380]/85 text-slate-950 placeholder-slate-700/60 outline-hidden focus:bg-white focus:ring-2 focus:ring-slate-950/20 transition-all shadow-inner/10"
+              />
+            </div>
           </div>
         </div>
 
@@ -278,7 +391,7 @@ export function MinistryOnboardingForm({
 
           <div>
             <label className="block text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-950 mb-1.5">
-              Contact Email / Kingschat <span className="text-red-700">*</span>
+              Official Email / Kingschat Handle <span className="text-red-700">*</span>
             </label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-800/70" />
@@ -381,38 +494,29 @@ export function MinistryOnboardingForm({
           />
         </div>
 
-        {/* Submit Pill Button - Mode aware mirroring reference design */}
+        {/* Submit Pill Button */}
         <div className="pt-3">
           <button
             type="submit"
             disabled={isSubmitting}
             className={`group w-full sm:w-auto inline-flex items-center justify-center gap-3.5 pl-3 pr-6 py-2.5 sm:py-3 rounded-full font-black text-xs sm:text-sm transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
               isDark
-                ? 'bg-slate-950 text-white hover:bg-slate-900 shadow-xl shadow-slate-950/25 active:scale-98'
-                : 'bg-white text-slate-950 hover:bg-slate-50 shadow-lg shadow-black/10 active:scale-98'
+                ? 'bg-slate-950 text-white hover:bg-slate-900 shadow-xl shadow-slate-950/30'
+                : 'bg-slate-950 text-white hover:bg-slate-800 shadow-xl shadow-slate-950/20'
             }`}
           >
-            <span
-              className={`size-8 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
-                isDark ? 'bg-white text-slate-950' : 'bg-slate-950 text-white'
-              }`}
-            >
+            <div className="size-8 sm:size-9 rounded-full bg-[#FFBA00] text-slate-950 flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shrink-0">
               {isSubmitting ? (
-                <span className="size-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                <div className="size-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
               ) : (
-                <Send className="size-3.5 stroke-[2.5]" />
+                <Send className="size-3.5 sm:size-4" />
               )}
-            </span>
+            </div>
             <span>
-              {isSubmitting ? 'Registering on Waitlist...' : 'Submit Expression of Interest'}
+              {isSubmitting ? 'Registering Ministry & Generating Access...' : 'Register Ministry & Generate Portal Access'}
             </span>
+            <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
           </button>
-        </div>
-
-        {/* Security & Confidentiality Tag */}
-        <div className="flex items-center justify-center sm:justify-start gap-2 text-[11px] font-semibold text-slate-950/75 pt-1">
-          <ShieldCheck className="size-3.5 text-slate-950" />
-          <span>All submissions are reviewed confidentially by Kiddies Media Ministry Secretariat &amp; Super Admin</span>
         </div>
       </div>
     </form>

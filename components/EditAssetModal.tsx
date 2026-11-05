@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { X, Check, UploadCloud, Plus, Trash2, Image as ImageIcon } from 'lucide-react'
+import { X, Check, UploadCloud, Plus, Trash2, Image as ImageIcon, Building2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AssetData, CategoryItem, SubcategoryItem, Agency, AssetContributor } from '@/types'
 import { isEpisodeCategory, getCategoryGovernance } from '@/lib/categoryGovernance'
@@ -220,24 +220,18 @@ export function EditAssetModal({
           {/* Agency & Rights Holder */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">Originating Agency</label>
-              {isGlobalViewer ? (
-                <select
-                  value={agency}
-                  onChange={(e) => setAgency(e.target.value as Agency)}
-                  className="h-9 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 text-xs outline-none focus:border-blue-400 font-semibold"
-                >
-                  {agencies.map((a) => (
-                    <option key={a} value={a} className="dark:bg-slate-800 dark:text-white">
-                      {a}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <div className="flex h-9 items-center rounded-xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-slate-800/60 px-3 text-xs font-bold text-slate-700 dark:text-slate-200">
-                  {agency}
+              <label className="block font-bold text-slate-700 dark:text-slate-200 mb-1">
+                Originating Entity / Agency
+              </label>
+              <div className="flex h-9 items-center justify-between rounded-xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-slate-800/60 px-3 text-xs font-bold text-slate-800 dark:text-slate-200">
+                <div className="flex items-center gap-2 truncate">
+                  <Building2 className="size-3.5 text-amber-500 shrink-0" />
+                  <span className="truncate">{agency || asset.agency || 'Lovetoons'}</span>
                 </div>
-              )}
+                <span className="text-[10px] px-2 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 ml-2">
+                  Authenticated
+                </span>
+              </div>
             </div>
 
             <div>
@@ -411,17 +405,12 @@ export function EditAssetModal({
                 </select>
               </div>
               <div className="sm:col-span-1">
-                <select
-                  value={newContribAgency}
-                  onChange={(e) => setNewContribAgency(e.target.value as Agency)}
-                  className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
+                <div
+                  className="h-8 w-full rounded-md border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-2 text-xs flex items-center font-semibold truncate"
+                  title={agency || 'Lovetoons'}
                 >
-                  {agencies.map((a) => (
-                    <option key={a} value={a} className="dark:bg-slate-800">
-                      {a}
-                    </option>
-                  ))}
-                </select>
+                  <span className="truncate">{agency || 'Lovetoons'}</span>
+                </div>
               </div>
               <div className="sm:col-span-1">
                 <button

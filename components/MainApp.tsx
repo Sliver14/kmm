@@ -2544,7 +2544,7 @@ function AssetsPage({
   isAddModalOpen?: boolean
   setIsAddModalOpen?: (v: boolean) => void
 }) {
-  const { assets, allAssets, addAsset, bulkApproveAssets, bulkDeleteAssets, categories, subcategories, currentUser, showToast, isGlobalViewer, userAgency, availableUsers, rightsRecords, approvals } = useLovetoonsData()
+  const { assets, allAssets, addAsset, bulkApproveAssets, bulkDeleteAssets, categories, subcategories, currentUser, showToast, isGlobalViewer, userAgency, availableUsers, allAgencies, rightsRecords, approvals } = useLovetoonsData()
 
   const [selectedPill, setSelectedPill] = useState<string>('All Assets')
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -2688,6 +2688,18 @@ function AssetsPage({
     docType: 'PDF',
     docNotes: '',
   })
+
+  // Automatically bind form entity and contributor agency to authenticated session (Zero-Selection)
+  useEffect(() => {
+    if (currentUser?.agency) {
+      setNewAssetForm((prev) => ({
+        ...prev,
+        agency: currentUser.agency,
+        unit: currentUser.agency,
+      }))
+      setNewContributorAgency(currentUser.agency)
+    }
+  }, [currentUser?.agency])
 
   // Dynamic subcategories list matching the selected category in the modal
   const availableSubcategoriesForForm = useMemo(() => {
@@ -3002,7 +3014,7 @@ function AssetsPage({
                   className="h-9 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition cursor-pointer"
                 >
                   <option value="All Agencies">All Agencies ({assets.length})</option>
-                  {agencies.map((agency) => (
+                  {(allAgencies || agencies).map((agency) => (
                     <option key={agency} value={agency}>
                       {agency}
                     </option>
@@ -3318,30 +3330,18 @@ function AssetsPage({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Originating Agency *</label>
-                    {isGlobalViewer ? (
-                      <select
-                        value={newAssetForm.agency}
-                        onChange={(e) =>
-                          setNewAssetForm((prev) => ({
-                            ...prev,
-                            agency: e.target.value as Agency,
-                            unit: e.target.value as Agency,
-                          }))
-                        }
-                        className="h-9 w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 px-3 text-xs outline-none focus:border-blue-400 font-semibold"
-                      >
-                        {agencies.map((agency) => (
-                          <option key={agency} value={agency} className="dark:bg-slate-900 dark:text-white">
-                            {agency}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <div className="flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 px-3 text-xs font-bold text-slate-700">
-                        {currentUser.agency || 'Lovetoons'}
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Originating Entity / Agency *
+                    </label>
+                    <div className="flex h-9 items-center justify-between rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/80 px-3 text-xs font-bold text-slate-800 dark:text-slate-100">
+                      <div className="flex items-center gap-2 truncate">
+                        <Building2 className="size-3.5 text-amber-500 shrink-0" />
+                        <span className="truncate">{newAssetForm.agency || currentUser.agency || 'Lovetoons'}</span>
                       </div>
-                    )}
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold uppercase tracking-wider shrink-0 ml-2">
+                        Authenticated
+                      </span>
+                    </div>
                   </div>
 
                   <div>
@@ -3587,17 +3587,12 @@ function AssetsPage({
                       </select>
                     </div>
                     <div className="sm:col-span-1">
-                      <select
-                        value={newContributorAgency}
-                        onChange={(e) => setNewContributorAgency(e.target.value as Agency)}
-                        className="h-8 w-full rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white px-2 text-xs outline-none focus:border-blue-400"
+                      <div
+                        className="h-8 w-full rounded-md border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-2 text-xs flex items-center font-semibold truncate"
+                        title={newContributorAgency || currentUser.agency || 'Lovetoons'}
                       >
-                        {agencies.map((agency) => (
-                          <option key={agency} value={agency} className="dark:bg-slate-900 dark:text-white">
-                            {agency}
-                          </option>
-                        ))}
-                      </select>
+                        <span className="truncate">{newContributorAgency || currentUser.agency || 'Lovetoons'}</span>
+                      </div>
                     </div>
                     <div className="sm:col-span-1">
                       <button
@@ -7555,7 +7550,7 @@ function ReportsPage({
 // AUDIT TRAIL PAGE (IMMUTABLE RECORD LEDGER & COMPLIANCE LOG)
 // -------------------------------------------------------------
 function AuditTrailPage({ setActiveNav }: { setActiveNav?: (nav: string) => void }) {
-  const { activities, assets, currentUser, isGlobalViewer, userAgency, showToast } = useLovetoonsData()
+  const { activities, assets, currentUser, isGlobalViewer, userAgency, allAgencies, showToast } = useLovetoonsData()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedActionType, setSelectedActionType] = useState<string>('All Actions')
   const [selectedAgency, setSelectedAgency] = useState<string>('All Agencies')
@@ -7738,7 +7733,7 @@ function AuditTrailPage({ setActiveNav }: { setActiveNav?: (nav: string) => void
                   className="h-8.5 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-700 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition"
                 >
                   <option value="All Agencies">All Agencies</option>
-                  {agencies.map((agency) => (
+                  {(allAgencies || agencies).map((agency) => (
                     <option key={agency} value={agency}>
                       {agency}
                     </option>

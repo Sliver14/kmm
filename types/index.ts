@@ -16,6 +16,7 @@ export type Agency =
   | 'Digital Agency'
   | 'Academy Agency'
   | 'Educational Agency'
+  | (string & {})
 
 // Backward-compatibility alias
 export type OperationalUnit = Agency
@@ -514,6 +515,10 @@ export interface MinistryOnboardingRequest {
   submittedAt: string
   reviewedAt?: string
   reviewedBy?: string
+  assignedCode?: string
+  accessKey?: string
+  portalLoginEmail?: string
+  role?: string
 }
 
 

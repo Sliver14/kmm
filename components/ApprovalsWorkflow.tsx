@@ -5,7 +5,7 @@ import {
   ClipboardCheck, CheckCircle2, Clock, AlertTriangle, FileText, Check, X,
   Eye, Download, Search, ArrowUpDown, ShieldCheck, Sparkles, ChevronDown,
   MessageSquare, Calendar, User, Globe2, Lock, ShieldAlert, Layers,
-  Flame, Shield, ListChecks, Music, Film, Play, RotateCcw, CheckSquare, Square
+  Flame, Shield, ListChecks, Music, Film, Play, RotateCcw, CheckSquare, Square, Building2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLovetoonsData } from '@/lib/store/DataContext'
@@ -93,6 +93,8 @@ export function ApprovalsWorkflow() {
     requestFeedback,
     canApprove,
     currentUser,
+    isGlobalViewer,
+    userAgency,
     showToast,
     rightsRecords,
     updateRightsRecord,
@@ -600,18 +602,25 @@ export function ApprovalsWorkflow() {
           {/* Agency Filter */}
           <div className="flex items-center gap-1.5 text-xs">
             <span className="text-[11px] font-semibold text-slate-400 uppercase hidden md:inline">Agency:</span>
-            <select
-              id="filter-agency"
-              value={selectedAgency}
-              onChange={(e) => setSelectedAgency(e.target.value)}
-              className="h-8.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 outline-none focus:border-slate-400 transition cursor-pointer"
-            >
-              {agencies.map((agency) => (
-                <option key={agency} value={agency}>
-                  {agency === 'All' ? 'All Agencies' : agency}
-                </option>
-              ))}
-            </select>
+            {!isGlobalViewer ? (
+              <div className="flex h-8.5 items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-xs font-semibold text-slate-700">
+                <Building2 className="size-3.5 text-amber-500" />
+                <span>{currentUser.agency || userAgency || 'Lovetoons'}</span>
+              </div>
+            ) : (
+              <select
+                id="filter-agency"
+                value={selectedAgency}
+                onChange={(e) => setSelectedAgency(e.target.value)}
+                className="h-8.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 outline-none focus:border-slate-400 transition cursor-pointer"
+              >
+                {agencies.map((agency) => (
+                  <option key={agency} value={agency}>
+                    {agency === 'All' ? 'All Agencies' : agency}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Priority Filter */}
