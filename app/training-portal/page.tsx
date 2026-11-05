@@ -48,8 +48,21 @@ import {
   CheckCircle,
   Info,
   Layers,
+  LogIn,
+  LogOut,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem, ComplianceToolKey } from '@/lib/data/trainingVideosData'
+
+export interface TrainingUser {
+  id: string
+  name: string
+  email: string
+  agency: string
+  role: string
+  initials: string
+  avatar?: string
+  registeredAt: string
+}
 
 export interface SupportingDocument {
   id: string
@@ -284,6 +297,10 @@ COORDINATED BY: Kiddies Media Ministry Content Operations Directorate`,
 export default function TrainingPortalPage() {
   const [isDark, setIsDark] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [currentUser, setCurrentUser] = useState<TrainingUser | null>(null)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement | null>(null)
+
   const [officerEmail, setOfficerEmail] = useState('Barrister Lillian')
   const [activeFilter, setActiveFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'in-progress'>('all')
@@ -336,6 +353,17 @@ export default function TrainingPortalPage() {
 
   const playTimerRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   useEffect(() => {
     setIsMounted(true)
     const savedTheme = localStorage.getItem('kmm_training_theme')
@@ -349,15 +377,43 @@ export default function TrainingPortalPage() {
       }
     }
 
-    const auth = localStorage.getItem('kmm_auth_officer')
-    if (auth) {
-      const name = auth.split('@')[0]
-      setOfficerEmail(name.charAt(0).toUpperCase() + name.slice(1))
+    // Load authenticated training user
+    let userKey = 'guest'
+    try {
+      const storedUserRaw = localStorage.getItem('kmm_training_user')
+      if (storedUserRaw) {
+        const user: TrainingUser = JSON.parse(storedUserRaw)
+        setCurrentUser(user)
+        setOfficerEmail(user.name)
+        userKey = user.id
+      } else {
+        const legacyAuth = localStorage.getItem('kmm_auth_officer')
+        if (legacyAuth) {
+          const name = legacyAuth.split('@')[0]
+          const capitalized = name.charAt(0).toUpperCase() + name.slice(1)
+          const fallbackUser: TrainingUser = {
+            id: 'TP-LOV-001',
+            name: capitalized,
+            email: legacyAuth.includes('@') ? legacyAuth : 'officer@lovetoons.tv',
+            agency: 'Lovetoons Content Operations',
+            role: 'Statutory Child Safeguarding Director',
+            initials: capitalized.slice(0, 2).toUpperCase(),
+            registeredAt: new Date().toISOString(),
+          }
+          setCurrentUser(fallbackUser)
+          setOfficerEmail(capitalized)
+          userKey = fallbackUser.id
+        }
+      }
+    } catch {
+      // ignore
     }
 
-    // Load completed modules from storage
+    // Load completed modules from storage (user-specific or global)
     try {
-      const savedModules = localStorage.getItem('kmm_completed_modules')
+      const savedModules =
+        localStorage.getItem(`kmm_completed_modules_${userKey}`) ||
+        localStorage.getItem('kmm_completed_modules')
       if (savedModules) {
         setCompletedModules(JSON.parse(savedModules))
       }
@@ -386,6 +442,17 @@ export default function TrainingPortalPage() {
       }
     }
   }, [])
+
+  const handleSignOut = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('kmm_training_user')
+      localStorage.removeItem('kmm_auth_officer')
+    }
+    setCurrentUser(null)
+    setOfficerEmail('Guest Officer')
+    setUserMenuOpen(false)
+    showToast('Signed out of training portal session.')
+  }
 
 
   // Auto playback simulation
@@ -446,9 +513,15 @@ export default function TrainingPortalPage() {
   const toggleModuleCompletion = (moduleId: string) => {
     setCompletedModules((prev) => {
       const next = { ...prev, [moduleId]: !prev[moduleId] }
-      localStorage.setItem('kmm_completed_modules', JSON.stringify(next))
+      const userKey = currentUser?.id || 'guest'
+      try {
+        localStorage.setItem(`kmm_completed_modules_${userKey}`, JSON.stringify(next))
+        localStorage.setItem('kmm_completed_modules', JSON.stringify(next))
+      } catch {
+        // ignore
+      }
       if (next[moduleId]) {
-        showToast('Module marked as Completed & Accredited!')
+        showToast(`Accreditation verified for ${currentUser?.name || officerEmail}!`)
       }
       return next
     })
@@ -500,9 +573,12 @@ export default function TrainingPortalPage() {
 
   const copySafeguardReport = () => {
     const checkedCount = Object.values(safeguardChecks).filter(Boolean).length
+    const officerDesc = currentUser
+      ? `${currentUser.name} (${currentUser.role}, ${currentUser.agency}) [ID: ${currentUser.id}]`
+      : `Officer ${officerEmail}`
     const text = `KIDDIES MEDIA MINISTRY CHILD SAFEGUARDING AUDIT VERIFICATION REPORT
 Module: ${currentVideo ? `${currentVideo.code} - ${currentVideo.title}` : 'General Compliance Audit'}
-Generated by: Officer ${officerEmail}
+Generated by: ${officerDesc}
 Compliance Score: ${safeguardScore}% (${checkedCount} of 6 Checks Passed)
 Status: ${safeguardScore === 100 ? 'CLEARED FOR SATELLITE & DIGITAL BROADCAST' : 'ATTENTION REQUIRED - INCOMPLETE REMEDIATION'}
 
@@ -697,17 +773,107 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
               </div>
             </div>
 
-            {/* Officer Profile Badge */}
-            <div
-              className={`hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs ${
-                isDark ? 'bg-slate-900 border-white/10 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-              }`}
-            >
-              <UserCheck className="size-3.5 text-amber-500 shrink-0" />
-              <span className={`font-bold truncate max-w-[120px] ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
-                {officerEmail}
-              </span>
-            </div>
+            {/* Authenticated Officer Profile Widget & Dropdown */}
+            {currentUser ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((prev) => !prev)}
+                  className={`flex items-center gap-2 py-1 pl-1.5 pr-3 rounded-full border text-xs transition-all cursor-pointer ${
+                    isDark
+                      ? 'bg-slate-900 border-white/10 hover:border-amber-400/50 text-slate-200'
+                      : 'bg-white border-slate-200 hover:border-amber-400 text-slate-800 shadow-2xs'
+                  }`}
+                  aria-expanded={userMenuOpen}
+                >
+                  <div className="size-7 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-extrabold flex items-center justify-center text-[11px] shadow-2xs shrink-0">
+                    {currentUser.initials || 'KM'}
+                  </div>
+                  <div className="hidden sm:block text-left min-w-0">
+                    <div className="font-bold text-xs truncate max-w-[130px] leading-tight">
+                      {currentUser.name}
+                    </div>
+                    <div className="text-[10px] text-amber-600 dark:text-amber-400 truncate max-w-[130px] font-semibold leading-none">
+                      {currentUser.agency}
+                    </div>
+                  </div>
+                  <ChevronDown className={`size-3 text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Profile Dropdown Card */}
+                {userMenuOpen && (
+                  <div
+                    className={`absolute right-0 top-full mt-2 w-72 rounded-2xl p-4 border shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150 ${
+                      isDark
+                        ? 'bg-slate-900 border-white/10 text-slate-100 shadow-black/60'
+                        : 'bg-white border-slate-200 text-slate-900 shadow-slate-300/50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-white/10">
+                      <div className="size-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-extrabold flex items-center justify-center text-sm shadow-md shrink-0">
+                        {currentUser.initials || 'KM'}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-sm truncate">{currentUser.name}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{currentUser.email}</div>
+                        <div className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 truncate max-w-full">
+                          {currentUser.agency}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="py-2.5 text-xs space-y-1.5 border-b border-slate-100 dark:border-white/10">
+                      <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                        <span>Role:</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[140px] text-right">
+                          {currentUser.role}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                        <span>Officer ID:</span>
+                        <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">{currentUser.id}</span>
+                      </div>
+                      <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                        <span>Accreditations:</span>
+                        <span className="font-bold text-amber-600 dark:text-amber-400">
+                          {completedCount} of {ARCHIVED_TRAINING_VIDEOS.length} Certified
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2.5 space-y-1">
+                      <Link
+                        href="/auth"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 w-full p-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition"
+                      >
+                        <UserCheck className="size-3.5 text-amber-500" />
+                        <span>Switch Officer Account</span>
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="flex items-center gap-2 w-full p-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
+                      >
+                        <LogOut className="size-3.5" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/auth"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 shadow-xs transition"
+                >
+                  <LogIn className="size-3.5" />
+                  <span>Sign In / Register</span>
+                </Link>
+              </div>
+            )}
 
 
             {/* Dark / Light Toggle */}
@@ -767,11 +933,49 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
             }`}
           >
             <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
-              <span className="text-xs text-slate-500">Authenticated Officer:</span>
-              <span className={`font-bold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>{officerEmail}</span>
+              <span className="text-xs text-slate-500">Officer Session:</span>
+              <div className="text-right">
+                <div className={`font-bold text-xs ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
+                  {currentUser?.name || officerEmail}
+                </div>
+                {currentUser?.agency && (
+                  <div className="text-[10px] text-slate-400">{currentUser.agency}</div>
+                )}
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            {currentUser ? (
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <Link
+                  href="/auth"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 py-1.5 px-3 text-center rounded-lg text-xs font-semibold border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200"
+                >
+                  Switch Officer
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSignOut()
+                    setMobileMenuOpen(false)
+                  }}
+                  className="py-1.5 px-3 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/auth"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2 rounded-xl text-center text-xs font-bold bg-amber-500 text-slate-950 flex items-center justify-center gap-1.5"
+              >
+                <LogIn className="size-3.5" />
+                <span>Sign In / Register</span>
+              </Link>
+            )}
+
+            <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <Link
                 href="/"
                 className="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200"
@@ -1526,7 +1730,7 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
                               onClick={() => {
                                 const count = Object.values(ipChecks).filter(Boolean).length
                                 navigator.clipboard.writeText(
-                                  `Kiddies Media Ministry IP Clearance Log: ${count} of 5 Verification Pillars Cleared for ${currentVideo.code}. Registered by ${officerEmail}.`
+                                  `Kiddies Media Ministry IP Clearance Log: ${count} of 5 Verification Pillars Cleared for ${currentVideo.code}. Registered by ${currentUser?.name || officerEmail} (${currentUser?.agency || 'Lovetoons'}).`
                                 )
                                 showToast('IP Clearance summary copied!')
                               }}
@@ -1674,29 +1878,70 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
                       </div>
 
                       {/* Official Digital Certificate Card */}
-                      <div className="p-6 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-transparent to-amber-500/5 space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="size-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
-                            <Award className="size-5" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                              KMM Academy Accreditation Record
+                      <div className="p-6 sm:p-7 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-transparent to-amber-500/5 space-y-4">
+                        <div className="flex items-start justify-between gap-3 flex-wrap">
+                          <div className="flex items-center gap-3.5">
+                            <div className="size-12 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center font-bold shadow-md shrink-0">
+                              <Award className="size-6" />
                             </div>
-                            <div className="font-extrabold text-sm sm:text-base">
-                              Certified Officer: {officerEmail}
+                            <div>
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                KMM Academy Accreditation Certificate
+                              </div>
+                              <div className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
+                                {currentUser?.name || officerEmail}
+                              </div>
+                              <div className="text-xs text-[var(--kmm-muted)] font-medium">
+                                {currentUser?.role || 'Child Safeguarding Reviewer'} &bull; <span className="font-bold text-amber-600 dark:text-amber-400">{currentUser?.agency || 'Lovetoons Content Operations'}</span>
+                              </div>
                             </div>
                           </div>
+
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                            completedModules[currentVideo.id]
+                              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                              : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                          }`}>
+                            {completedModules[currentVideo.id] ? '✓ Certified & Registered' : 'Pending Verification'}
+                          </span>
                         </div>
 
                         <div className="text-xs text-[var(--kmm-muted)] leading-relaxed">
-                          This digital credential confirms that the candidate has completed all statutory compliance benchmarks under <b>{currentVideo.code}: {currentVideo.title}</b> in accordance with Loveworld Kingdom children safeguarding directives.
+                          This verifiable digital credential confirms that <b>{currentUser?.name || officerEmail}</b> has completed all statutory compliance benchmarks under <b>{currentVideo.code}: {currentVideo.title}</b> in accordance with Loveworld Kingdom children safeguarding directives.
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-amber-500/20 text-xs">
-                          <span className="font-mono text-[11px] text-[var(--kmm-muted)]">
-                            Hash: KMM-ACR-{currentVideo.id}-2026
-                          </span>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-[11px] border-t border-amber-500/20">
+                          <div>
+                            <span className="block text-slate-400 text-[10px] uppercase font-bold">Officer ID</span>
+                            <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{currentUser?.id || 'TP-OFFICER-2026'}</span>
+                          </div>
+                          <div>
+                            <span className="block text-slate-400 text-[10px] uppercase font-bold">Certificate Hash</span>
+                            <span className="font-mono font-bold text-amber-600 dark:text-amber-400">KMM-ACR-{currentVideo.id}-2026</span>
+                          </div>
+                          <div>
+                            <span className="block text-slate-400 text-[10px] uppercase font-bold">Issued Authority</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">KMM Academy Directorate</span>
+                          </div>
+                          <div>
+                            <span className="block text-slate-400 text-[10px] uppercase font-bold">Verification Status</span>
+                            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                              {completedModules[currentVideo.id] ? 'Active & Signed' : 'Ready to Issue'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-amber-500/20 text-xs">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              window.print()
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer transition text-xs"
+                          >
+                            <Printer className="size-3.5 text-amber-500" />
+                            <span>Print / Save Certificate PDF</span>
+                          </button>
 
                           <button
                             onClick={() => toggleModuleCompletion(currentVideo.id)}

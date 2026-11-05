@@ -1,6 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
-import cloudinary from '@/lib/cloudinary'
+import path from 'path'
+import { mkdir, writeFile } from 'fs/promises'
+import crypto from 'crypto'
 import { sql } from '@/lib/db'
+
+// 50 MB maximum file size limit for VPS storage
+const MAX_FILE_SIZE = 50 * 1024 * 1024
+
+// Whitelist of supported and safe formats
+const ALLOWED_EXTENSIONS = new Set([
+  // Documents & Legal Deeds
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+  'txt',
+  'rtf',
+  // Visual & Artwork
+  'jpg',
+  'jpeg',
+  'png',
+  'webp',
+  'svg',
+  'gif',
+  // Audio Assets
+  'mp3',
+  'wav',
+  'm4a',
+  'aac',
+  'ogg',
+  // Video Clips & Playbooks
+  'mp4',
+  'mov',
+  'webm',
+])
 
 function formatBytes(bytes: number, decimals = 1) {
   if (bytes === 0) return '0 Bytes'
@@ -16,112 +52,114 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const file = formData.get('file') as File | null
     const assetId = (formData.get('assetId') as string) || ''
-    const fileType = (formData.get('fileType') as string) || 'video_master'
+    const fileType = (formData.get('fileType') as string) || 'document'
     const ministryId = (formData.get('ministryId') as string) || 'min-kmm'
     const isMaster = formData.get('isMaster') === 'true'
 
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
+      return NextResponse.json({ error: 'No file provided for upload.' }, { status: 400 })
     }
 
-    const fileName = file.name
-    const mimeType = file.type || 'application/octet-stream'
+    const fileName = file.name || 'document.pdf'
     const fileSizeBytes = file.size
     const formattedSize = formatBytes(fileSizeBytes)
+    const mimeType = file.type || 'application/octet-stream'
 
+    // 1. File size validation
+    if (fileSizeBytes > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        {
+          error: `File size (${formattedSize}) exceeds the maximum allowed VPS storage limit of 50 MB. Please compress or optimize the file before uploading.`,
+        },
+        { status: 400 }
+      )
+    }
+
+    // 2. Format & extension whitelist validation
+    const ext = fileName.split('.').pop()?.toLowerCase() || ''
+    if (!ext || !ALLOWED_EXTENSIONS.has(ext)) {
+      return NextResponse.json(
+        {
+          error: `File extension .${ext} is not supported. Permitted formats include: Documents (PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT), Images (JPG, PNG, WEBP, SVG), Audio (MP3, WAV, M4A), and Video (MP4, MOV, WEBM).`,
+        },
+        { status: 400 }
+      )
+    }
+
+    // 3. Prevent path traversal and sanitize base name
+    const sanitizedBase = fileName
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .slice(0, 60)
+    const uniqueFileName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${sanitizedBase}.${ext}`
+
+    // 4. Ensure VPS upload directory exists
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
+    await mkdir(uploadDir, { recursive: true })
+
+    const targetPath = path.join(uploadDir, uniqueFileName)
+    // Security check: ensure target path is within uploadDir
+    if (!targetPath.startsWith(uploadDir)) {
+      return NextResponse.json({ error: 'Security violation: invalid file path.' }, { status: 400 })
+    }
+
+    // 5. Write file directly to VPS storage
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    const base64Data = buffer.toString('base64')
-    const fileUri = `data:${mimeType};base64,${base64Data}`
+    await writeFile(targetPath, buffer)
 
-    let secureUrl = ''
-    let publicId = ''
-    let resolution = '1080p Full HD'
-    let durationSeconds = 0
-
-    // Attempt Cloudinary upload if API key & cloud name are configured
-    const hasLiveCloudinary =
-      process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_KEY !== 'kmm_temp_key' &&
-      process.env.CLOUDINARY_CLOUD_NAME
-
-    if (hasLiveCloudinary) {
-      try {
-        const resourceType = mimeType.startsWith('video/')
-          ? 'video'
-          : mimeType.startsWith('image/')
-          ? 'image'
-          : 'raw'
-
-        const uploadResult = await cloudinary.uploader.upload(fileUri, {
-          folder: `kmm/${ministryId}/${assetId || 'assets'}`,
-          resource_type: resourceType,
-        })
-
-        secureUrl = uploadResult.secure_url
-        publicId = uploadResult.public_id
-        if (uploadResult.width && uploadResult.height) {
-          resolution = `${uploadResult.width}x${uploadResult.height}`
-        }
-        if (uploadResult.duration) {
-          durationSeconds = Math.round(uploadResult.duration)
-        }
-      } catch (cloudErr) {
-        console.warn('Cloudinary upload returned error, using persistent media archive storage:', cloudErr)
-      }
-    }
-
-    // Graceful fallback URL if credentials are default
-    if (!secureUrl) {
-      const sanitizedName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-      secureUrl = `https://res.cloudinary.com/kmm-lovetoons-media/video/upload/v${Date.now()}/kmm/${assetId}/${sanitizedName}`
-    }
-
+    const fileUrl = `/uploads/${uniqueFileName}`
     const fileId = `file-${Date.now().toString().slice(-6)}`
+    const resolution = mimeType.startsWith('image/') || mimeType.startsWith('video/') ? '1080p' : 'Document'
 
-    // Save into enterprise asset_files archive in Neon Postgres
-    if (assetId) {
-      await sql`
-        INSERT INTO asset_files (
-          id, asset_id, ministry_id, file_name, file_type, mime_type,
-          file_size_bytes, formatted_size, resolution, duration_seconds,
-          storage_bucket, storage_path, is_master, status
-        ) VALUES (
-          ${fileId}, ${assetId}, ${ministryId}, ${fileName}, ${fileType}, ${mimeType},
-          ${fileSizeBytes}, ${formattedSize}, ${resolution}, ${durationSeconds},
-          'cloudinary', ${secureUrl}, ${isMaster}, 'active'
-        )
-      `
-
-      // If it's a poster or preview image, update the asset thumbnail
-      if (fileType === 'poster' || mimeType.startsWith('image/')) {
+    // 6. Graceful database registration (if Neon Postgres is connected)
+    try {
+      if (assetId) {
         await sql`
-          UPDATE assets
-          SET poster_url = ${secureUrl}, updated_at = CURRENT_TIMESTAMP
-          WHERE id = ${assetId}
+          INSERT INTO asset_files (
+            id, asset_id, ministry_id, file_name, file_type, mime_type,
+            file_size_bytes, formatted_size, resolution, duration_seconds,
+            storage_bucket, storage_path, is_master, status
+          ) VALUES (
+            ${fileId}, ${assetId}, ${ministryId}, ${fileName}, ${fileType}, ${mimeType},
+            ${fileSizeBytes}, ${formattedSize}, ${resolution}, 0,
+            'vps_local', ${fileUrl}, ${isMaster}, 'active'
+          )
         `
+
+        // If poster, update asset poster_url
+        if (fileType === 'poster' || mimeType.startsWith('image/')) {
+          await sql`
+            UPDATE assets
+            SET poster_url = ${fileUrl}, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ${assetId}
+          `
+        }
       }
+    } catch (dbErr) {
+      console.warn('Optional DB sync skipped for file upload:', dbErr)
     }
 
     return NextResponse.json({
       success: true,
-      message: 'File successfully processed and registered in Cloudinary archive.',
+      message: 'File successfully stored safely in VPS storage.',
       file: {
         id: fileId,
         fileName,
+        storedName: uniqueFileName,
         fileType,
         mimeType,
         fileSizeBytes,
         formattedSize,
         resolution,
-        url: secureUrl,
-        storageBucket: 'cloudinary',
+        url: fileUrl,
+        storageBucket: 'vps_local',
       },
     })
   } catch (error: any) {
-    console.error('Error in /api/upload:', error)
+    console.error('Error in VPS /api/upload:', error)
     return NextResponse.json(
-      { error: error?.message || 'File upload failed' },
+      { error: error?.message || 'Failed to save file to VPS storage' },
       { status: 500 }
     )
   }

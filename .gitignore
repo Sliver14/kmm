@@ -21,3 +21,5 @@ public/gemini_generated_*.mp4
 
 *.apk
 public/APP-APK/
+public/uploads/*
+!public/uploads/.gitkeep
