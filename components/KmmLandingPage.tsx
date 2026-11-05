@@ -613,7 +613,9 @@ export default function KmmLandingPage() {
             HERO SECTION - Catchy, Clean & Welcoming (No complicated bg stripes)
             ========================================================================= */}
         <section className="relative overflow-hidden py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-[#F0FAFD] via-white to-[#F0FAFD]/60">
-          {/* Clean ambient light glows - no stripes or ribbons */}
+          {/* Subtle tactile micro-dots texture overlay with soft radial vignette */}
+          <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial pointer-events-none opacity-60" aria-hidden="true" />
+          {/* Clean ambient light glows */}
           <div className="absolute top-10 left-1/4 -translate-x-1/2 size-[420px] rounded-full bg-amber-300/15 blur-[120px] pointer-events-none" />
           <div className="absolute top-20 right-1/4 translate-x-1/2 size-[420px] rounded-full bg-sky-300/15 blur-[120px] pointer-events-none" />
 
@@ -776,8 +778,11 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             WHO WE ARE SECTION (KMM & ITS ROLE)
             ========================================================================= */}
-        <section className="py-20 scroll-mt-20" id="about">
-          <div className="kmm-wrap space-y-12">
+        <section className="py-20 scroll-mt-20 relative overflow-hidden bg-white" id="about">
+          {/* Subtle structural grid texture */}
+          <div className="absolute inset-0 kmm-pattern-grid kmm-mask-linear-y pointer-events-none opacity-50" aria-hidden="true" />
+          <div className="absolute -top-24 right-10 size-80 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
+          <div className="kmm-wrap relative z-10 space-y-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div>
                 <p className="eyebrow mb-3">About Kiddies Media Ministry &amp; Its Role</p>
@@ -859,8 +864,11 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             MANDATE SECTION (8 AREAS OF RESPONSIBILITY)
             ========================================================================= */}
-        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors" id="mandate">
-          <div className="kmm-wrap">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors relative overflow-hidden" id="mandate">
+          {/* Tactile dual-stipple texture overlay */}
+          <div className="absolute inset-0 kmm-pattern-playful kmm-mask-linear-y pointer-events-none opacity-80" aria-hidden="true" />
+          <div className="absolute -bottom-24 left-1/4 size-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+          <div className="kmm-wrap relative z-10">
             <div className="max-w-2xl space-y-3 mb-12">
               <p className="eyebrow">Our mandate</p>
               <h2 className="text-3xl sm:text-4xl font-extrabold">Eight areas of responsibility</h2>
@@ -956,9 +964,11 @@ export default function KmmLandingPage() {
             GOVERNANCE FRAMEWORK SECTION
             ========================================================================= */}
         <section
-          className="py-24 scroll-mt-20 relative overflow-hidden bg-gradient-to-b from-transparent via-[var(--kmm-surface)]/40 to-transparent transition-colors"
+          className="py-24 scroll-mt-20 relative overflow-hidden bg-gradient-to-b from-white via-[var(--kmm-surface)] to-white transition-colors"
           id="governance"
         >
+          {/* Architectural Blueprint Grid Pattern Overlay */}
+          <div className="absolute inset-0 kmm-pattern-grid kmm-mask-radial pointer-events-none opacity-60" aria-hidden="true" />
           {/* Top ambient glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[750px] h-[340px] bg-gradient-to-b from-[var(--kmm-blue)]/10 via-[var(--kmm-gold)]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
@@ -1401,11 +1411,14 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             AGENCIES & LOVETOONS ECOSYSTEM SECTION
             ========================================================================= */}
-        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors" id="agencies">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors relative overflow-hidden" id="agencies">
+          {/* Subtle Dual Stipple Pattern Overlay */}
+          <div className="absolute inset-0 kmm-pattern-cross kmm-mask-linear-y pointer-events-none opacity-60" aria-hidden="true" />
+          <div className="absolute -top-20 right-1/4 size-96 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
           {/* Legacy anchor compatibility */}
           <div id="lovetoons" className="relative -top-24 pointer-events-none" />
 
-          <div className="kmm-wrap">
+          <div className="kmm-wrap relative z-10">
             <div className="max-w-2xl space-y-3 mb-12">
               <p className="eyebrow">Operational Directorate & Agencies</p>
               <h2 className="text-3xl sm:text-4xl font-extrabold">The specialized agencies powering children's media</h2>
@@ -1590,8 +1603,11 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             TRAINING SECTION (MATERIALS, TOOLS & SUPPORTING DOCUMENTS)
             ========================================================================= */}
-        <section className="py-20 scroll-mt-20" id="training">
-          <div className="kmm-wrap space-y-12">
+        <section className="py-20 scroll-mt-20 relative overflow-hidden bg-white" id="training">
+          {/* Subtle Dot Mesh Pattern Overlay */}
+          <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial pointer-events-none opacity-50" aria-hidden="true" />
+          <div className="absolute -bottom-20 right-10 size-80 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+          <div className="kmm-wrap relative z-10 space-y-12">
             {/* Header Box */}
             <div className="rounded-[40px] p-8 sm:p-12 bg-gradient-to-br from-[#0E1E38] via-[#142646] to-[#0E1E38] text-white shadow-2xl relative overflow-hidden border border-white/10">
               <div className="max-w-3xl space-y-4 relative z-10">
@@ -1756,8 +1772,10 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             LATEST UPDATES SECTION
             ========================================================================= */}
-        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors" id="updates">
-          <div className="kmm-wrap">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors relative overflow-hidden" id="updates">
+          {/* Tactile Playful Multi-Tone Pattern */}
+          <div className="absolute inset-0 kmm-pattern-playful kmm-mask-linear-y pointer-events-none opacity-60" aria-hidden="true" />
+          <div className="kmm-wrap relative z-10">
             <div className="max-w-2xl space-y-3 mb-12">
               <p className="eyebrow">Latest updates</p>
               <h2 className="text-3xl sm:text-4xl font-extrabold">Policy updates, announcements and new guidelines</h2>
@@ -1809,8 +1827,12 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             MINISTRY & DEPARTMENT ONBOARDING WAITLIST SECTION
             ========================================================================= */}
-        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors" id="onboarding">
-          <div className="kmm-wrap space-y-10">
+        <section className="py-20 scroll-mt-20 bg-[var(--kmm-band)] transition-colors relative overflow-hidden" id="onboarding">
+          {/* Subtle Geometric Texture Overlay */}
+          <div className="absolute inset-0 kmm-pattern-grid kmm-mask-radial pointer-events-none opacity-60" aria-hidden="true" />
+          <div className="absolute top-1/2 left-10 size-96 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-10 size-96 rounded-full bg-sky-400/15 blur-3xl pointer-events-none" />
+          <div className="kmm-wrap relative z-10 space-y-10">
             <div className="max-w-3xl space-y-3">
               <p className="eyebrow">Institutional Access & Waitlist</p>
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
@@ -1883,8 +1905,10 @@ export default function KmmLandingPage() {
         {/* =========================================================================
             CONTACT / ENQUIRIES SECTION
             ========================================================================= */}
-        <section className="py-20 scroll-mt-20" id="contact">
-          <div className="kmm-wrap space-y-8">
+        <section className="py-20 scroll-mt-20 relative overflow-hidden bg-white" id="contact">
+          {/* Subtle Dot Matrix Texture */}
+          <div className="absolute inset-0 kmm-pattern-dots kmm-mask-radial pointer-events-none opacity-45" aria-hidden="true" />
+          <div className="kmm-wrap relative z-10 space-y-8">
             <div className="max-w-2xl space-y-3">
               <p className="eyebrow">Contact</p>
               <h2 className="text-3xl sm:text-4xl font-extrabold">Institutional enquiries</h2>
