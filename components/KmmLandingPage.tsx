@@ -1287,12 +1287,6 @@ export default function KmmLandingPage() {
                   >
                     <span>Begin Onboarding &rarr;</span>
                   </Link>
-                  <Link
-                    href={trainingPortalHref}
-                    className="kmm-btn kmm-btn-o text-center font-bold"
-                  >
-                    <span>View Training &amp; Guidelines</span>
-                  </Link>
                   <p className="text-[11px] text-[var(--kmm-muted)] text-center">
                     Simple 2-minute registration • Verified by Secretariat
                   </p>
