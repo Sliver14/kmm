@@ -351,7 +351,7 @@ export default function AuthPage() {
         {/* Badge & Title */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 bg-amber-500/15 border border-amber-500/30 text-amber-500">
-            <span>🎬</span> Content Safeguarding & Accreditation
+            Content Safeguarding & Accreditation
           </div>
 
           <h1
@@ -624,7 +624,6 @@ export default function AuthPage() {
                 <div className="size-5 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" />
               ) : (
                 <>
-                  <Sparkles className="size-4" />
                   <span>Create Account &amp; Begin Accreditation</span>
                 </>
               )}
@@ -634,12 +633,6 @@ export default function AuthPage() {
 
         {/* Footer Navigation Links */}
         <div className="mt-6 pt-5 border-t border-slate-200/60 dark:border-white/10 flex flex-col gap-2 text-center">
-          <Link
-            href="/onboarding"
-            className="text-xs font-bold text-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors inline-flex items-center justify-center gap-1.5 py-1 px-3 rounded-lg bg-amber-500/10 border border-amber-500/20"
-          >
-            <span>Interested Ministry or Department? Join Waitlist &rarr;</span>
-          </Link>
           <div className="flex items-center justify-center text-xs font-semibold text-slate-500 dark:text-slate-400 pt-1">
             <Link href="/" className="hover:text-amber-500 transition-colors inline-flex items-center gap-1.5">
               <ArrowLeft className="size-3.5" />
