@@ -688,14 +688,6 @@ export function AssetDetailsView({
                     <span>{currentAsset.ipPriorityTier}</span>
                   </span>
                 )}
-
-                {/* Estimated Audience Reach */}
-                {currentAsset.estimatedAudienceReach && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200/80 dark:border-white/10">
-                    <Globe2 className="size-3 text-[#0284C7]" />
-                    <span>{currentAsset.estimatedAudienceReach}</span>
-                  </span>
-                )}
               </div>
 
               <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900 pt-1">

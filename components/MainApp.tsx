@@ -1951,7 +1951,7 @@ function Dashboard({
             {portfolioIntelligence.tier1Count} Flagships
           </div>
           <p className="text-[10px] text-amber-900/80 dark:text-amber-300/80 font-medium truncate">
-            1.5M+ Global Broadcast Reach
+            Highest Protection Priority
           </p>
         </div>
 
@@ -2005,13 +2005,13 @@ function Dashboard({
             <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
               Protection Gap Health
             </span>
-            <Globe2 className="size-3.5 text-purple-500" />
+            <ShieldCheck className="size-3.5 text-purple-500" />
           </div>
           <div className="text-xl font-black text-slate-900 dark:text-white">
-            2.3M+ Reach
+            0 Critical Gaps
           </div>
           <p className="text-[10px] text-purple-900/80 dark:text-purple-300/80 font-medium truncate">
-            0 Critical Rights Expirations
+            All Key Titles Protected
           </p>
         </div>
       </div>
@@ -2507,7 +2507,7 @@ function Dashboard({
                     {portfolioIntelligence.tier1Count}
                   </div>
                   <div className="text-[10px] text-amber-900/80 dark:text-amber-300/80 font-medium">
-                    1.5M+ Global Reach
+                    Highest Legal Priority
                   </div>
                 </div>
 
@@ -2523,7 +2523,7 @@ function Dashboard({
                     {portfolioIntelligence.tier2Count}
                   </div>
                   <div className="text-[10px] text-sky-900/80 dark:text-sky-300/80 font-medium">
-                    450K+ Learners
+                    Curriculum &amp; Broadcast
                   </div>
                 </div>
 
@@ -2539,7 +2539,7 @@ function Dashboard({
                     {portfolioIntelligence.tier3Count}
                   </div>
                   <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                    150K+ Viewers
+                    Special &amp; Seasonal Media
                   </div>
                 </div>
 
@@ -3415,13 +3415,6 @@ function AssetsPage({
                               >
                                 {asset.aiDeclaration?.isAIAssisted ? '⚡ AI-Assisted' : '✦ 100% Human'}
                               </span>
-
-                              {asset.estimatedAudienceReach && (
-                                <span className="text-[9px] text-slate-400 dark:text-slate-500 flex items-center gap-0.5 font-medium hidden sm:inline-flex">
-                                  <Globe2 className="size-2.5 text-[#0284C7]" />
-                                  <span>{asset.estimatedAudienceReach}</span>
-                                </span>
-                              )}
                             </div>
                           </div>
                         </div>

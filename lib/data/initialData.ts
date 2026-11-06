@@ -2384,19 +2384,6 @@ function resolveSourceProvenance(a: any): SourceMaterialProvenance {
   }
 }
 
-function resolveAudienceReach(tier: IPPriorityTier): string {
-  switch (tier) {
-    case 'Tier 1 - Sovereign Flagship':
-      return '1.5M+ Children Globally'
-    case 'Tier 2 - Core Ministry':
-      return '450,000+ Young Learners'
-    case 'Tier 3 - Supporting / Seasonal':
-      return '150,000+ Viewers'
-    default:
-      return '35,000+ Regional Participants'
-  }
-}
-
 function resolveCommercialScore(tier: IPPriorityTier): number {
   switch (tier) {
     case 'Tier 1 - Sovereign Flagship':
@@ -2418,7 +2405,6 @@ export function enrichAssetWithInstitutionalData(a: any): AssetData {
     reviewStatus: a.reviewStatus || (['Approved', 'Pending', 'In Review', 'Under Review', 'Requires Attention', 'Draft'].includes(a.status) ? (a.status as ReviewStatus) : 'Pending'),
     ipPriorityTier: priorityTier,
     commercialPotentialScore: a.commercialPotentialScore || resolveCommercialScore(priorityTier),
-    estimatedAudienceReach: a.estimatedAudienceReach || resolveAudienceReach(priorityTier),
     aiDeclaration: a.aiDeclaration || resolveAIDeclaration(a),
     sourceProvenance: a.sourceProvenance || resolveSourceProvenance(a),
   }
