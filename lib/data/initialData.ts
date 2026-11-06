@@ -13,6 +13,9 @@ import {
   ProductionStatus,
   ReviewStatus,
   ContentProvenance,
+  IPPriorityTier,
+  AIDeclaration,
+  SourceMaterialProvenance,
 } from '@/types'
 import type { MinistryOnboardingRequest } from '@/types'
 import { generateAssetArchive } from './assetArchiveData'
@@ -2273,13 +2276,155 @@ const rawAssetsData: AssetData[] = [
   },
 ]
 
+// Institutional Governance Data Resolution Helpers
+function resolvePriorityTier(a: any): IPPriorityTier {
+  const name = (a.name || '').toLowerCase()
+  const cat = (a.category || '').toLowerCase()
+  if (
+    name.includes('lovetoons') ||
+    name.includes('brave boy') ||
+    name.includes('tilly') ||
+    name.includes('golden shield') ||
+    name.includes('rhap-a-thon') ||
+    name.includes('rhapsody')
+  ) {
+    return 'Tier 1 - Sovereign Flagship'
+  }
+  if (cat.includes('animated') || cat.includes('tv') || cat.includes('curriculum') || cat.includes('bible') || cat.includes('publishing')) {
+    return 'Tier 2 - Core Ministry'
+  }
+  if (cat.includes('event') || cat.includes('outreach') || cat.includes('theme song') || cat.includes('special')) {
+    return 'Tier 3 - Supporting / Seasonal'
+  }
+  return 'Tier 4 - Regional / Local'
+}
+
+function resolveAIDeclaration(a: any): AIDeclaration {
+  const isVideo = (a.category || '').toLowerCase().includes('tv') || (a.category || '').toLowerCase().includes('animation')
+  const isAudio = (a.category || '').toLowerCase().includes('music') || (a.category || '').toLowerCase().includes('audio')
+
+  if (isAudio) {
+    return {
+      isAIAssisted: false,
+      toolsUsed: [],
+      scopeOfUse: [],
+      humanContributionPercent: 100,
+      humanContributionDescription: '100% human-composed original orchestration, score, lyrics, live instruments, and studio vocal performance.',
+      externalMaterialIntroduced: false,
+      complianceSignoff: true,
+      declaredDate: a.createdDate || 'Jan 15, 2026',
+      declaredBy: a.creatorName || 'Head of Audio Ministry',
+    }
+  }
+
+  if (isVideo) {
+    return {
+      isAIAssisted: true,
+      toolsUsed: ['Midjourney v6', 'Runway Gen-3', 'ElevenLabs (Scratch Track)'],
+      scopeOfUse: ['concept_art', 'backgrounds', 'voice_synthesis'],
+      humanContributionPercent: 78,
+      humanContributionDescription: 'Human animators executed all character keyframes, 3D rigs, expressions, and final voice acting. AI utilized for early environment concept ideation and matte background generation.',
+      externalMaterialIntroduced: false,
+      externalMaterialNotes: 'No third-party copyrighted training material introduced. All concepts guided by proprietary Lovetoons model sheets.',
+      complianceSignoff: true,
+      declaredDate: a.createdDate || 'Jan 20, 2026',
+      declaredBy: 'Barrister Lillian Okoye (Legal Reviewer)',
+    }
+  }
+
+  return {
+    isAIAssisted: false,
+    toolsUsed: [],
+    scopeOfUse: [],
+    humanContributionPercent: 100,
+    humanContributionDescription: 'Original human authoring, scriptwriting, and illustration.',
+    externalMaterialIntroduced: false,
+    complianceSignoff: true,
+    declaredDate: a.createdDate || 'Jan 18, 2026',
+    declaredBy: a.creatorName || 'Editorial Director',
+  }
+}
+
+function resolveSourceProvenance(a: any): SourceMaterialProvenance {
+  const cat = (a.category || '').toLowerCase()
+  const name = (a.name || '').toLowerCase()
+
+  if (name.includes('bible') || cat.includes('scripture') || name.includes('david') || name.includes('noah') || name.includes('daniel')) {
+    return {
+      sourceType: 'Scripture Adaptation',
+      sourceTitle: 'The Holy Bible (King James Version / Loveworld Translation Notes)',
+      adaptationNotes: 'Faithfully adapted for child comprehension with scriptural fidelity audits signed off by Doctrinal Review.',
+      scriptureReference: 'Old & New Testament Canonical Scriptures',
+    }
+  }
+
+  if (name.includes('rhapsody') || cat.includes('devotional') || name.includes('kiddies')) {
+    return {
+      sourceType: 'Ministry Publication Adaptation',
+      sourceTitle: 'Rhapsody of Realities for Kids / Early Readers',
+      originalAuthor: 'Pastor Chris Oyakhilome D.Sc., D.D.',
+      adaptationNotes: 'Adapted directly from canonical ministry publications with authorized copyright assignment.',
+    }
+  }
+
+  if (name.includes('lovetoons') || name.includes('brave boy') || name.includes('tilly')) {
+    return {
+      sourceType: 'Original Creation',
+      sourceTitle: 'Lovetoons Original Character & Narrative Universe',
+      originalAuthor: 'Lovetoons Creative Team & Executive Directorate',
+      chainOfTitleNotes: '100% in-house work-for-hire assignment vested perpetually in Esteemed Executive Minister.',
+    }
+  }
+
+  return {
+    sourceType: 'Original Creation',
+    sourceTitle: a.name,
+    originalAuthor: a.creatorName || 'KMM Creative Unit',
+    chainOfTitleNotes: 'Work-for-hire assignment executed and archived.',
+  }
+}
+
+function resolveAudienceReach(tier: IPPriorityTier): string {
+  switch (tier) {
+    case 'Tier 1 - Sovereign Flagship':
+      return '1.5M+ Children Globally'
+    case 'Tier 2 - Core Ministry':
+      return '450,000+ Young Learners'
+    case 'Tier 3 - Supporting / Seasonal':
+      return '150,000+ Viewers'
+    default:
+      return '35,000+ Regional Participants'
+  }
+}
+
+function resolveCommercialScore(tier: IPPriorityTier): number {
+  switch (tier) {
+    case 'Tier 1 - Sovereign Flagship':
+      return 5
+    case 'Tier 2 - Core Ministry':
+      return 4
+    case 'Tier 3 - Supporting / Seasonal':
+      return 3
+    default:
+      return 2
+  }
+}
+
 export const initialAssetsData: AssetData[] = sortDiscontinuedToBottom(
-  attorneyGeneralAssetsData.map((a) => ({
-    ...a,
-    productionStatus: a.productionStatus || (a.status === 'Discontinued' ? 'Discontinued' : a.status === 'Yet to Launch' ? 'Yet to Launch' : 'In Production'),
-    reviewStatus: a.reviewStatus || (['Approved', 'Pending', 'In Review', 'Under Review', 'Requires Attention', 'Draft'].includes(a.status) ? (a.status as ReviewStatus) : 'Pending'),
-    archive: a.archive || generateAssetArchive(a),
-  }))
+  attorneyGeneralAssetsData.map((a) => {
+    const priorityTier = resolvePriorityTier(a)
+    return {
+      ...a,
+      productionStatus: a.productionStatus || (a.status === 'Discontinued' ? 'Discontinued' : a.status === 'Yet to Launch' ? 'Yet to Launch' : 'In Production'),
+      reviewStatus: a.reviewStatus || (['Approved', 'Pending', 'In Review', 'Under Review', 'Requires Attention', 'Draft'].includes(a.status) ? (a.status as ReviewStatus) : 'Pending'),
+      archive: a.archive || generateAssetArchive(a),
+      ipPriorityTier: priorityTier,
+      commercialPotentialScore: resolveCommercialScore(priorityTier),
+      estimatedAudienceReach: resolveAudienceReach(priorityTier),
+      aiDeclaration: resolveAIDeclaration(a),
+      sourceProvenance: resolveSourceProvenance(a),
+    }
+  })
 )
 
 export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.map((a) => {
@@ -2319,6 +2464,7 @@ export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.ma
         date: 'Jan 15, 2026',
         type: 'CERT',
         targetScope: 'asset',
+        isPerpetual: true,
         notes: 'Official Title Certificate vested in Esteemed Executive Minister (Super Admin)',
       },
       {
@@ -2328,7 +2474,22 @@ export const initialRightsRecords: RightsRecord[] = attorneyGeneralAssetsData.ma
         date: 'Jan 20, 2026',
         type: 'LICENSE',
         targetScope: 'asset',
+        isPerpetual: false,
+        expiryDate: '2028-12-31',
         notes: 'Exclusive Ministry Global Distribution Deed & clearance terms',
+      },
+      {
+        id: `rel-${a.id}-talent`,
+        name: `Minor_Talent_and_Performer_Release_${a.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+        size: '980 KB',
+        date: 'Jan 22, 2026',
+        type: 'TALENT_RELEASE',
+        targetScope: 'asset',
+        isPerpetual: false,
+        expiryDate: '2026-06-30',
+        minorTalentAge: 11,
+        parentGuardianName: 'Verified Parent / Chaperone',
+        notes: 'Statutory child performer release deed with parental consent',
       },
     ],
     governanceChecks: {},

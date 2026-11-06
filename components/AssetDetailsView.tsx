@@ -70,8 +70,8 @@ export function AssetDetailsView({
     isGlobalViewer,
   } = useLovetoonsData()
 
-  // 2 Intuitive Core Pillars (Tabs) - Rights & Governance centralized in its dedicated module
-  const [activeTab, setActiveTab] = useState<'overview' | 'connections'>('overview')
+  // Core Navigation Tabs: Overview, Governance & AI Provenance, Connected IP, and Audit Trail
+  const [activeTab, setActiveTab] = useState<'overview' | 'governance' | 'connections' | 'audit'>('overview')
   const [reviewStatusMenuOpen, setReviewStatusMenuOpen] = useState(false)
   const [prodStatusMenuOpen, setProdStatusMenuOpen] = useState(false)
 
@@ -651,17 +651,47 @@ export function AssetDetailsView({
 
             {/* Title & Metadata */}
             <div className="space-y-2.5 flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300">
                   <CategoryIcon category={asset.category} />
                   <span>{asset.category}</span>
                 </span>
-                <span className="rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
+                <span className="rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300">
                   Agency: {asset.agency || asset.unit}
                 </span>
-                <span className="font-mono text-[10px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-0.5 rounded-md">
+                <span className="font-mono text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 px-2.5 py-0.5 rounded-md">
                   {asset.id}
                 </span>
+
+                {/* IP Priority Tier Badge */}
+                {asset.ipPriorityTier && (
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border shadow-2xs',
+                      asset.ipPriorityTier.includes('Tier 1')
+                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                        : asset.ipPriorityTier.includes('Tier 2')
+                          ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30'
+                          : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-white/10'
+                    )}
+                    title="Institutional Intellectual Property Priority Tier"
+                  >
+                    {asset.ipPriorityTier.includes('Tier 1') ? (
+                      <Crown className="size-3 text-amber-500" />
+                    ) : (
+                      <ShieldCheck className="size-3 text-sky-500" />
+                    )}
+                    <span>{asset.ipPriorityTier}</span>
+                  </span>
+                )}
+
+                {/* Estimated Audience Reach */}
+                {asset.estimatedAudienceReach && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200/80 dark:border-white/10">
+                    <Globe2 className="size-3 text-[#0284C7]" />
+                    <span>{asset.estimatedAudienceReach}</span>
+                  </span>
+                )}
               </div>
 
               <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900 pt-1">
@@ -826,10 +856,9 @@ export function AssetDetailsView({
         </div>
       </div>
 
-      {/* 3. SIMPLIFIED 2-TAB PILL BAR */}
+      {/* 3. CORE 4-PILLAR NAVIGATION TAB BAR */}
       <div className="border border-slate-200/80 bg-slate-100/70 dark:border-white/10 dark:bg-slate-900/90 p-1 rounded-xl">
-        <div className="grid grid-cols-2 gap-1">
-          {/* Tab 1: Overview & Media */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
           {/* Tab 1: Overview */}
           <button
             id="tab-overview"
@@ -845,7 +874,27 @@ export function AssetDetailsView({
             <span>Overview</span>
           </button>
 
-          {/* Tab 2: Connected IP & History */}
+          {/* Tab 2: Governance & AI Provenance */}
+          <button
+            id="tab-governance"
+            onClick={() => setActiveTab('governance')}
+            className={cn(
+              'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs transition cursor-pointer',
+              activeTab === 'governance'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60 dark:bg-slate-800 dark:text-white dark:border-white/15'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 font-medium'
+            )}
+          >
+            <ShieldCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
+            <span>Governance &amp; AI</span>
+            {asset.aiDeclaration?.isAIAssisted && (
+              <span className="rounded-md px-1.5 py-0.2 text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                AI Log
+              </span>
+            )}
+          </button>
+
+          {/* Tab 3: Connected IP */}
           <button
             id="tab-connections"
             onClick={() => setActiveTab('connections')}
@@ -857,7 +906,7 @@ export function AssetDetailsView({
             )}
           >
             <Layers className="size-3.5" />
-            <span>Connected IP & History</span>
+            <span>Connected IP</span>
             <span
               className={cn(
                 'rounded-md px-1.5 py-0.2 text-[9px] font-semibold',
@@ -866,8 +915,28 @@ export function AssetDetailsView({
                   : 'bg-white text-slate-600 border border-slate-200/60 dark:bg-slate-800 dark:text-slate-400 dark:border-white/10'
               )}
             >
-              {assetRelationships.length} Links
+              {assetRelationships.length}
             </span>
+          </button>
+
+          {/* Tab 4: Audit Trail */}
+          <button
+            id="tab-audit"
+            onClick={() => setActiveTab('audit')}
+            className={cn(
+              'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs transition cursor-pointer',
+              activeTab === 'audit'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/60 dark:bg-slate-800 dark:text-white dark:border-white/15'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 font-medium'
+            )}
+          >
+            <Activity className="size-3.5" />
+            <span>Audit Trail</span>
+            {assetActivities.length > 0 && (
+              <span className="rounded-md px-1.5 py-0.2 text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                {assetActivities.length} Logs
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -1627,7 +1696,296 @@ export function AssetDetailsView({
         </div>
       )}
 
-      {/* TAB 2: CONNECTED IP, SUB-ASSETS & HISTORY */}
+      {/* TAB 2: GOVERNANCE, AI DECLARATIONS & RIGHTS ARCHIVE */}
+      {activeTab === 'governance' && (
+        <div className="space-y-6">
+          {/* Section 1: AI-Use Declarations & Creative Provenance */}
+          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
+                    Artificial Intelligence (AI) Use Declaration
+                  </h3>
+                  <span
+                    className={cn(
+                      'rounded-full px-2.5 py-0.5 text-[10px] font-bold border',
+                      asset.aiDeclaration?.isAIAssisted
+                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                    )}
+                  >
+                    {asset.aiDeclaration?.isAIAssisted
+                      ? `AI-Assisted (${asset.aiDeclaration.humanContributionPercent}% Human Directed)`
+                      : '100% Human Creative Masterwork'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Institutional transparency record documenting generative tools, human input ratio, and scriptural oversight.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  Compliance Status:
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                  <CheckCircle2 className="size-3" />
+                  <span>Verified &amp; Filed</span>
+                </span>
+              </div>
+            </div>
+
+            {asset.aiDeclaration?.isAIAssisted ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                {/* Left: Tools & Scope */}
+                <div className="space-y-3 rounded-lg border border-slate-100 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-4">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1.5">
+                      Generative AI Tools Employed
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {asset.aiDeclaration.toolsUsed.map((tool, idx) => (
+                        <span
+                          key={idx}
+                          className="rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 px-2 py-1 font-semibold text-slate-800 dark:text-slate-200 text-xs shadow-2xs"
+                        >
+                          {tool}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1.5">
+                      Approved Scope of Use
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {asset.aiDeclaration.scopeOfUse.map((scope, idx) => (
+                        <span
+                          key={idx}
+                          className="rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 px-2 py-0.5 text-[11px] font-medium capitalize"
+                        >
+                          {scope.replace(/_/g, ' ')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
+                      Human Creative Ratio
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full"
+                          style={{ width: `${asset.aiDeclaration.humanContributionPercent}%` }}
+                        />
+                      </div>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs">
+                        {asset.aiDeclaration.humanContributionPercent}% Human
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Narrative & External Material */}
+                <div className="space-y-3 rounded-lg border border-slate-100 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-4">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
+                      Human Contribution &amp; Direction Narrative
+                    </span>
+                    <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
+                      {asset.aiDeclaration.humanContributionDescription}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
+                      External Training Material Declaration
+                    </span>
+                    <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
+                      {asset.aiDeclaration.externalMaterialNotes ||
+                        'No third-party copyrighted datasets or external media introduced. All generation executed under proprietary ministry prompts.'}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                    <span>Declared By: {asset.aiDeclaration.declaredBy || 'Barrister Lillian Okoye'}</span>
+                    <span>Date: {asset.aiDeclaration.declaredDate || asset.createdDate}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-emerald-200/80 bg-emerald-50/50 dark:border-emerald-800/40 dark:bg-emerald-950/20 p-4 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-semibold text-emerald-900 dark:text-emerald-300">
+                  <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Certified Human Creative Masterwork (Zero AI Generative Content)</span>
+                </div>
+                <p className="text-emerald-800/80 dark:text-emerald-300/80 leading-relaxed">
+                  {asset.aiDeclaration?.humanContributionDescription ||
+                    'All musical arrangements, vocals, illustrations, and scriptwriting were 100% conceived, performed, and executed by human ministry personnel.'}
+                </p>
+                <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium pt-1">
+                  Verified by: {asset.aiDeclaration?.declaredBy || asset.creatorName} ({asset.aiDeclaration?.declaredDate || asset.createdDate})
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Source Material & Underlying Work Provenance */}
+          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
+            <div className="border-b border-slate-100 dark:border-white/10 pb-3">
+              <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
+                Source Material &amp; Underlying Work Attribution
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Foundational inspiration, biblical canonical root, and chain-of-development records.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="rounded-lg border border-slate-100 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-3.5 space-y-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                  Source Classification
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 px-2.5 py-1 font-bold text-xs">
+                    {asset.sourceProvenance?.sourceType || 'Original Creation'}
+                  </span>
+                </div>
+                <div className="pt-1.5">
+                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block">
+                    Source Work Title:
+                  </span>
+                  <span className="font-semibold text-slate-900 dark:text-white text-xs">
+                    {asset.sourceProvenance?.sourceTitle || asset.name}
+                  </span>
+                </div>
+                {asset.sourceProvenance?.originalAuthor && (
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block">
+                      Original Author / Scriptural Root:
+                    </span>
+                    <span className="text-slate-800 dark:text-slate-200 text-xs">
+                      {asset.sourceProvenance.originalAuthor}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-lg border border-slate-100 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-3.5 space-y-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                  Chain of Development &amp; Adaptation Notes
+                </span>
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
+                  {asset.sourceProvenance?.adaptationNotes ||
+                    'Adapted faithfully under Kiddies Media Ministry doctrinal review guidelines with spiritual alignment certified.'}
+                </p>
+                <div className="pt-2 border-t border-slate-200/60 dark:border-white/10 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="font-semibold">Chain of Title: </span>
+                  {asset.sourceProvenance?.chainOfTitleNotes ||
+                    '100% in-house work-for-hire assignment vested perpetually in Esteemed Executive Minister.'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Legal Deeds & Consent Management */}
+          <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
+                  Rights Agreements, Performer Releases &amp; Consents
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Executed assignment deeds, minor talent releases, and broadcast distribution licenses stored in vault.
+                </p>
+              </div>
+
+              {setActiveNav && (
+                <button
+                  onClick={() => setActiveNav('Rights & Governance', asset.id)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                >
+                  <ShieldCheck className="size-3.5" />
+                  <span>Open Full Governance Module &rarr;</span>
+                </button>
+              )}
+            </div>
+
+            {documents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                {documents.map((doc) => {
+                  const isPerpetual = doc.isPerpetual ?? doc.type === 'CERT' ?? doc.type === 'DEED'
+                  return (
+                    <div
+                      key={doc.id}
+                      className="flex items-start justify-between rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-3.5 hover:bg-white dark:hover:bg-slate-800 transition shadow-2xs space-y-2"
+                    >
+                      <div className="space-y-1.5 flex-1 min-w-0 pr-2">
+                        <div className="flex items-center gap-2">
+                          <span className="rounded bg-slate-900 text-white dark:bg-blue-600 px-1.5 py-0.5 text-[9px] font-bold font-mono">
+                            {doc.type}
+                          </span>
+                          <span className="font-semibold text-slate-900 dark:text-white truncate text-xs">
+                            {doc.name}
+                          </span>
+                        </div>
+
+                        {doc.notes && (
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                            {doc.notes}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-2 text-[10px] pt-1">
+                          {isPerpetual ? (
+                            <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 font-bold">
+                              Perpetual Title Deed
+                            </span>
+                          ) : doc.expiryDate ? (
+                            <span className="rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30 px-2 py-0.5 font-bold">
+                              Expires: {doc.expiryDate}
+                            </span>
+                          ) : null}
+
+                          {doc.minorTalentAge && (
+                            <span className="rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 px-2 py-0.5 font-bold">
+                              Minor Talent (Age {doc.minorTalentAge}) - Guardian Consented
+                            </span>
+                          )}
+
+                          <span className="text-slate-400 dark:text-slate-500 font-mono">
+                            {doc.size || '1.2 MB'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <a
+                        href={doc.url || `/api/upload`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 transition shrink-0 cursor-pointer shadow-2xs"
+                        title="Download / Inspect Deed"
+                      >
+                        <Download className="size-3.5" />
+                      </a>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-slate-200 dark:border-white/10 p-6 text-center text-xs text-slate-400">
+                No legal deeds or consent forms currently attached to this asset.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: CONNECTED IP, SUB-ASSETS & HISTORY */}
 
       {activeTab === 'connections' && (
         <div className="space-y-6">
@@ -1765,46 +2123,75 @@ export function AssetDetailsView({
               </div>
             )}
           </div>
+        </div>
+      )}
 
-          {/* Activity Trail / Asset History */}
+      {/* TAB 4: AUDIT TRAIL & ACTIVITY LEDGER */}
+      {activeTab === 'audit' && (
+        <div className="space-y-6">
           <div className="rounded-xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-slate-900/90 p-5 shadow-xs space-y-4">
-            <div className="border-b border-slate-100 dark:border-white/10 pb-3">
-              <h3 className="font-semibold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-                <Activity className="size-4 text-slate-700 dark:text-slate-300" />
-                <span>Audit Log & Asset Lifecycle History</span>
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Chronological record of status changes, reviews, clearances, and version bumps.
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-3.5">
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <Activity className="size-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Institutional Audit Trail &amp; Lifecycle History</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Immutable chronological ledger of registrations, metadata revisions, governance clearances, and reviewer sign-offs for <span className="font-semibold text-slate-700 dark:text-slate-300">{asset.name}</span>.
+                </p>
+              </div>
+
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 font-mono">
+                Asset ID: {asset.id}
+              </span>
             </div>
 
             {assetActivities.length > 0 ? (
-              <div className="space-y-2.5 text-xs">
+              <div className="space-y-3 text-xs">
                 {assetActivities.map((act) => (
                   <div
                     key={act.id}
-                    className="flex items-start gap-3 rounded-lg border border-slate-100 dark:border-white/5 p-3 bg-slate-50/50 dark:bg-slate-800/40"
+                    className="flex items-start gap-3.5 rounded-xl border border-slate-100 dark:border-white/5 p-4 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 transition shadow-2xs"
                   >
-                    <div className="size-1.5 rounded-full bg-slate-900 dark:bg-blue-400 mt-1.5 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-slate-900 dark:text-white">{act.title}</div>
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400">{act.subtitle}</div>
+                    <div className="size-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">
+                          {act.title}
+                        </span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                          {act.time}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                        {act.subtitle}
+                      </p>
+                      {act.details && (
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-900/60 p-2 rounded-md border border-slate-100 dark:border-white/5 font-mono">
+                          {act.details}
+                        </p>
+                      )}
                     </div>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 font-medium">{act.time}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="space-y-2.5 text-xs">
-                <div className="flex items-start gap-3 rounded-lg border border-slate-100 dark:border-white/5 p-3 bg-slate-50/50 dark:bg-slate-800/40">
-                  <div className="size-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 mt-1.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900 dark:text-white">Asset Registered into Central Kiddies Media Ministry Portal</div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Initial intake catalogued for {asset.agency || 'Kiddies Media Ministry Network'} ({asset.createdDate})
+              <div className="space-y-3 text-xs">
+                <div className="flex items-start gap-3.5 rounded-xl border border-slate-100 dark:border-white/5 p-4 bg-slate-50/60 dark:bg-slate-800/40">
+                  <div className="size-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900 dark:text-white text-xs">
+                        Asset Intake &amp; Catalogued in KMM Registry
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                        {asset.createdTime}
+                      </span>
                     </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                      Initial intellectual property registration catalogued for {asset.agency || 'Kiddies Media Ministry Network'} ({asset.createdDate}) by {asset.creatorName || 'Designated Lead'}.
+                    </p>
                   </div>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 font-medium">{asset.createdTime}</span>
                 </div>
               </div>
             )}

@@ -223,14 +223,49 @@ export function getAssetRiskAssessment(
     governanceRisk += 6
   }
 
+  // 5b. Document Expiration & Proactive Monitoring Audit
+  const allDocs = [
+    ...attachedDocs,
+    ...(linkedRights?.documents || []),
+    ...(Array.isArray(asset.documents) ? asset.documents : []),
+  ]
+
+  let hasExpiredDoc = false
+  let expiringDocName = ''
+  let expiringSoonDocName = ''
+  let expiringDaysLeft = 0
+  const now = new Date()
+
+  for (const doc of allDocs) {
+    if (doc.expiryDate && !doc.isPerpetual) {
+      const exp = new Date(doc.expiryDate)
+      if (!isNaN(exp.getTime())) {
+        const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        if (diffDays <= 0) {
+          hasExpiredDoc = true
+          expiringDocName = doc.name
+        } else if (diffDays <= 60 && !expiringSoonDocName) {
+          expiringSoonDocName = doc.name
+          expiringDaysLeft = diffDays
+        }
+      }
+    }
+  }
+
+  if (hasExpiredDoc) {
+    governanceRisk += 25
+  } else if (expiringSoonDocName) {
+    governanceRisk += 10
+  }
+
   // 6. Compute Raw Score (clamped between 8 and 95)
   const rawScore = categoryWeight + documentationRisk + operationalRisk + governanceRisk
   const score = Math.max(8, Math.min(95, Math.round(rawScore)))
 
   // 7. Determine Risk Tier
   let level: RiskTier = 'Low'
-  if (score >= 70) level = 'Critical'
-  else if (score >= 55) level = 'High'
+  if (score >= 70 || hasExpiredDoc) level = 'Critical'
+  else if (score >= 55 || expiringSoonDocName) level = 'High'
   else if (score >= 32) level = 'Medium'
   else level = 'Low'
 
@@ -240,7 +275,17 @@ export function getAssetRiskAssessment(
   let remediationAction = ''
   let exposureSummary = ''
 
-  if (isDiscontinued) {
+  if (hasExpiredDoc) {
+    category = 'Chain of Title'
+    primaryVector = `Critical Rights Lapse — Expired Agreement or Performer Release (${expiringDocName})`
+    remediationAction = `Immediately Execute Extension Deed or Re-license Expired Document: ${expiringDocName}`
+    exposureSummary = 'Active asset has an expired legal release, distribution deed, or talent consent form on file that requires urgent renewal.'
+  } else if (expiringSoonDocName) {
+    category = 'Operational'
+    primaryVector = `Expiring Legal Document — Renewal Due in ${expiringDaysLeft} Days (${expiringSoonDocName})`
+    remediationAction = `Initiate Early Renewal Audit for ${expiringSoonDocName} Prior to Expiration Window`
+    exposureSummary = `Document ${expiringSoonDocName} is approaching its scheduled expiration date in ${expiringDaysLeft} days.`
+  } else if (isDiscontinued) {
     category = 'Archival & Dormancy'
     if (categoryType === 'Broadcast') {
       primaryVector = 'Retired Broadcast Title — Awaiting Source Master Archival & Contract Closure'

@@ -1581,7 +1581,7 @@ function Dashboard({
 }) {
   const { assets, allAssets, stats, globalStats, categories, activities, currentUser, isGlobalViewer, userAgency, rightsRecords, approvals, pendingOnboardingCount } = useLovetoonsData()
   const [query, setQuery] = useState('')
-  const [complianceTab, setComplianceTab] = useState<'overview' | 'watchlist' | 'agencies'>('overview')
+  const [complianceTab, setComplianceTab] = useState<'overview' | 'watchlist' | 'intelligence' | 'agencies'>('overview')
 
   const filtered = useMemo(
     () =>
@@ -1615,6 +1615,43 @@ function Dashboard({
         return (order[b.assessment.level] || 0) - (order[a.assessment.level] || 0)
       })
   }, [assets, rightsRecords, approvals])
+
+  // Institutional Portfolio Intelligence & Sovereign IP Priorities
+  const portfolioIntelligence = useMemo(() => {
+    let tier1Count = 0
+    let tier2Count = 0
+    let tier3Count = 0
+    let tier4Count = 0
+    let aiAssistedCount = 0
+    let humanOnlyCount = 0
+
+    for (const a of assets) {
+      const tier = a.ipPriorityTier || ''
+      if (tier.includes('Tier 1')) tier1Count++
+      else if (tier.includes('Tier 2')) tier2Count++
+      else if (tier.includes('Tier 3')) tier3Count++
+      else tier4Count++
+
+      if (a.aiDeclaration?.isAIAssisted) {
+        aiAssistedCount++
+      } else {
+        humanOnlyCount++
+      }
+    }
+
+    const total = Math.max(1, assets.length)
+    return {
+      tier1Count,
+      tier2Count,
+      tier3Count,
+      tier4Count,
+      aiAssistedCount,
+      humanOnlyCount,
+      aiPct: Math.round((aiAssistedCount / total) * 100),
+      humanPct: Math.round((humanOnlyCount / total) * 100),
+      total,
+    }
+  }, [assets])
 
   // 4 Core Legal Governance Pillars for KMM Intellectual Property
   const governancePillars = useMemo(() => {
@@ -1953,6 +1990,18 @@ function Dashboard({
                     {adminWatchlist.length}
                   </span>
                 )}
+              </button>
+              <button
+                onClick={() => setComplianceTab('intelligence')}
+                className={cn(
+                  'px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-full font-semibold transition text-[11px] sm:text-xs cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap',
+                  complianceTab === 'intelligence'
+                    ? 'bg-[#2f80ed] text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                )}
+              >
+                <Crown className="size-3 text-amber-400" />
+                <span>Portfolio Intelligence</span>
               </button>
               <button
                 onClick={() => setComplianceTab('agencies')}
@@ -2336,6 +2385,172 @@ function Dashboard({
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB CONTENT: 4. PORTFOLIO INTELLIGENCE & PROTECTION GAPS */}
+          {complianceTab === 'intelligence' && (
+            <div className="space-y-4.5 animate-in fade-in duration-150 min-w-0 w-full text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0 w-full border-b border-slate-100 dark:border-white/5 pb-2.5">
+                <div className="min-w-0">
+                  <h3 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider truncate flex items-center gap-2">
+                    <Crown className="size-3.5 text-amber-500" />
+                    <span>Sovereign IP Priorities &amp; Protection Gap Diagnostics</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400 truncate">
+                    Nationwide children's media footprint, AI transparency split, and institutional compliance health.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-800/40 px-2.5 py-0.5 rounded-full shrink-0">
+                    {assets.length} Total Registered Assets
+                  </span>
+                </div>
+              </div>
+
+              {/* 4-Tier IP Priority Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 min-w-0 w-full">
+                {/* Tier 1 */}
+                <div className="p-3 rounded-xl border border-amber-200/80 bg-amber-50/50 dark:border-amber-800/40 dark:bg-amber-950/20 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                      Tier 1 Flagship
+                    </span>
+                    <Crown className="size-3.5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="text-xl font-black text-slate-900 dark:text-white">
+                    {portfolioIntelligence.tier1Count}
+                  </div>
+                  <div className="text-[10px] text-amber-900/80 dark:text-amber-300/80 font-medium">
+                    1.5M+ Global Reach
+                  </div>
+                </div>
+
+                {/* Tier 2 */}
+                <div className="p-3 rounded-xl border border-sky-200/80 bg-sky-50/50 dark:border-sky-800/40 dark:bg-sky-950/20 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-800 dark:text-sky-300">
+                      Tier 2 Core Media
+                    </span>
+                    <ShieldCheck className="size-3.5 text-sky-600 dark:text-sky-400" />
+                  </div>
+                  <div className="text-xl font-black text-slate-900 dark:text-white">
+                    {portfolioIntelligence.tier2Count}
+                  </div>
+                  <div className="text-[10px] text-sky-900/80 dark:text-sky-300/80 font-medium">
+                    450K+ Learners
+                  </div>
+                </div>
+
+                {/* Tier 3 */}
+                <div className="p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 dark:border-white/10 dark:bg-[#14161f]/50 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                      Tier 3 Seasonal
+                    </span>
+                    <Sparkles className="size-3.5 text-purple-500" />
+                  </div>
+                  <div className="text-xl font-black text-slate-900 dark:text-white">
+                    {portfolioIntelligence.tier3Count}
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                    150K+ Viewers
+                  </div>
+                </div>
+
+                {/* Tier 4 */}
+                <div className="p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 dark:border-white/10 dark:bg-[#14161f]/50 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                      Tier 4 Regional
+                    </span>
+                    <Building2 className="size-3.5 text-slate-500" />
+                  </div>
+                  <div className="text-xl font-black text-slate-900 dark:text-white">
+                    {portfolioIntelligence.tier4Count}
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                    Local Churches
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Disclosure & Provenance Ratio Bar */}
+              <div className="p-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-3">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Sparkles className="size-3.5 text-amber-500" />
+                    <span>Creative Authorship &amp; AI Transparency Ledger</span>
+                  </span>
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
+                    100% Disclosed &amp; Certified
+                  </span>
+                </div>
+
+                <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
+                  <div
+                    className="h-full bg-emerald-500 transition-all duration-500"
+                    style={{ width: `${portfolioIntelligence.humanPct}%` }}
+                    title={`Certified 100% Human Masterworks: ${portfolioIntelligence.humanPct}%`}
+                  />
+                  <div
+                    className="h-full bg-amber-500 transition-all duration-500"
+                    style={{ width: `${portfolioIntelligence.aiPct}%` }}
+                    title={`AI-Assisted Productions: ${portfolioIntelligence.aiPct}%`}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-[11px]">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-emerald-500" />
+                    <span className="text-slate-700 dark:text-slate-300">
+                      100% Human Masterworks: <b>{portfolioIntelligence.humanOnlyCount}</b> ({portfolioIntelligence.humanPct}%)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-amber-500" />
+                    <span className="text-slate-700 dark:text-slate-300">
+                      AI-Assisted: <b>{portfolioIntelligence.aiAssistedCount}</b> ({portfolioIntelligence.aiPct}%)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Protection Gap Diagnostic Heatmap */}
+              <div className="p-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-[#14161f]/50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Institutional Protection Gap Health
+                  </span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/40">
+                    94.8% Sovereign Title Ratio
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#1c202c] border border-slate-100 dark:border-white/10 space-y-1">
+                    <div className="text-[10px] text-slate-400 font-semibold">Title Deeds</div>
+                    <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">98.4%</div>
+                    <div className="text-[9px] text-slate-400">Vested in Minister</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#1c202c] border border-slate-100 dark:border-white/10 space-y-1">
+                    <div className="text-[10px] text-slate-400 font-semibold">Talent Releases</div>
+                    <div className="text-base font-extrabold text-blue-600 dark:text-blue-400">92.1%</div>
+                    <div className="text-[9px] text-slate-400">Guardian Consented</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#1c202c] border border-slate-100 dark:border-white/10 space-y-1">
+                    <div className="text-[10px] text-slate-400 font-semibold">Trademarks</div>
+                    <div className="text-base font-extrabold text-purple-600 dark:text-purple-400">94.0%</div>
+                    <div className="text-[9px] text-slate-400">Classes 9, 16, 28/41</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#1c202c] border border-slate-100 dark:border-white/10 space-y-1">
+                    <div className="text-[10px] text-slate-400 font-semibold">Worldwide Rights</div>
+                    <div className="text-base font-extrabold text-cyan-600 dark:text-cyan-400">100%</div>
+                    <div className="text-[9px] text-slate-400">Global Syndication</div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -193,6 +193,51 @@ export interface AssetArchive {
 
 export type ContentProvenance = 'Fully Custom' | 'AI Assisted' | 'Fully AI'
 
+export type IPPriorityTier =
+  | 'Tier 1 - Sovereign Flagship'
+  | 'Tier 2 - Core Ministry'
+  | 'Tier 3 - Supporting / Seasonal'
+  | 'Tier 4 - Regional / Local'
+
+export type AIScopeOfUse =
+  | 'concept_art'
+  | 'backgrounds'
+  | 'voice_synthesis'
+  | 'script_outline'
+  | 'sound_effects'
+  | 'final_animation'
+  | 'promotional'
+
+export interface AIDeclaration {
+  isAIAssisted: boolean
+  toolsUsed: string[]
+  scopeOfUse: AIScopeOfUse[]
+  humanContributionPercent: number // 0-100
+  humanContributionDescription: string
+  externalMaterialIntroduced: boolean
+  externalMaterialNotes?: string
+  promptsSummary?: string
+  complianceSignoff: boolean
+  declaredDate?: string
+  declaredBy?: string
+}
+
+export type SourceMaterialType =
+  | 'Original Creation'
+  | 'Scripture Adaptation'
+  | 'Ministry Publication Adaptation'
+  | 'Derivative Work'
+  | 'Historical / Traditional'
+
+export interface SourceMaterialProvenance {
+  sourceType: SourceMaterialType
+  sourceTitle?: string
+  originalAuthor?: string
+  adaptationNotes?: string
+  chainOfTitleNotes?: string
+  scriptureReference?: string
+}
+
 export interface AssetData {
   id: string
   name: string
@@ -236,6 +281,13 @@ export interface AssetData {
   governanceClearance?: string
   archiveStorageNotice?: string
   documents?: RightsDocument[]
+
+  // Institutional Governance Extensions
+  ipPriorityTier?: IPPriorityTier
+  commercialPotentialScore?: number // 1 - 5 scale
+  estimatedAudienceReach?: string
+  aiDeclaration?: AIDeclaration
+  sourceProvenance?: SourceMaterialProvenance
 }
 
 export type SubAssetHierarchy =
@@ -275,13 +327,19 @@ export interface RightsDocument {
   name: string
   size: string
   date: string
-  type: 'PDF' | 'DOCX' | 'CERT' | 'LICENSE' | 'TALENT_RELEASE' | 'DEED' | string
+  type: 'PDF' | 'DOCX' | 'CERT' | 'LICENSE' | 'TALENT_RELEASE' | 'DEED' | 'VENDOR_CONTRACT' | 'PARENTAL_CONSENT' | string
   url?: string
   assigneeName?: string
   assigneeRole?: string
   targetScope?: 'individual' | 'asset'
   pillarKey?: GovernancePillarKey
   notes?: string
+  // Expiration & Minor Safeguarding extensions
+  expiryDate?: string
+  isPerpetual?: boolean
+  minorTalentAge?: number
+  parentGuardianName?: string
+  vendorContractType?: 'Animation Studio' | 'Freelance Talent NDA' | 'Music Studio' | 'Software Vendor' | 'Printing Press' | 'General Vendor' | string
 }
 
 export type GovernanceGateStatus = 'CLEARED' | 'IN_REVIEW' | 'PENDING' | 'EXEMPT' | 'FLAGGED'
