@@ -107,7 +107,6 @@ export default function AuthPage() {
 
   // Status & feedback
   const [isLoading, setIsLoading] = useState(false)
-  const [redirectNotice, setRedirectNotice] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
@@ -115,13 +114,6 @@ export default function AuthPage() {
     setIsMounted(true)
     const savedTheme = localStorage.getItem('kmm_training_theme')
     setIsDark(savedTheme === 'dark')
-
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      if (params.get('redirect') === '/training-portal') {
-        setRedirectNotice(true)
-      }
-    }
 
     // Initialize registered demo users in localStorage if not already present
     try {
@@ -290,9 +282,8 @@ export default function AuthPage() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 lg:p-8 relative overflow-hidden transition-colors duration-300 ${
-        isDark ? 'bg-slate-950 text-slate-100' : 'bg-[#F0FAFD] text-slate-900'
-      }`}
+      className={`min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 lg:p-8 relative overflow-hidden transition-colors duration-300 ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-[#F0FAFD] text-slate-900'
+        }`}
       style={{
         fontFamily: 'Figtree, -apple-system, sans-serif',
       }}
@@ -330,11 +321,10 @@ export default function AuthPage() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle dark/light theme"
-            className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 border text-xs font-semibold transition-all cursor-pointer ${
-              isDark
-                ? 'bg-slate-900/80 border-white/10 text-amber-400 hover:bg-slate-800'
-                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs'
-            }`}
+            className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 border text-xs font-semibold transition-all cursor-pointer ${isDark
+              ? 'bg-slate-900/80 border-white/10 text-amber-400 hover:bg-slate-800'
+              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs'
+              }`}
           >
             {isMounted && isDark ? (
               <>
@@ -353,11 +343,10 @@ export default function AuthPage() {
 
       {/* Main Authentication Card */}
       <main
-        className={`w-full max-w-lg my-auto p-6 sm:p-9 rounded-3xl relative z-10 border shadow-2xl backdrop-blur-xl transition-all animate-in fade-in zoom-in-95 duration-200 ${
-          isDark
-            ? 'bg-slate-900/90 border-white/10 shadow-black/50'
-            : 'bg-white/95 border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(2,132,199,0.12)]'
-        }`}
+        className={`w-full max-w-lg my-auto p-6 sm:p-9 rounded-3xl relative z-10 border shadow-2xl backdrop-blur-xl transition-all animate-in fade-in zoom-in-95 duration-200 ${isDark
+          ? 'bg-slate-900/90 border-white/10 shadow-black/50'
+          : 'bg-white/95 border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(2,132,199,0.12)]'
+          }`}
       >
         {/* Badge & Title */}
         <div className="text-center mb-6">
@@ -379,14 +368,6 @@ export default function AuthPage() {
           </p>
         </div>
 
-        {/* Redirect Notice */}
-        {redirectNotice && (
-          <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 p-3.5 text-xs text-amber-900 dark:text-amber-200">
-            <ShieldCheck className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-            <span>Officer authentication required to access Training Portal curriculums and accreditation tools.</span>
-          </div>
-        )}
-
         {/* Tab Switcher: Sign In vs Sign Up */}
         <div className="flex rounded-xl p-1 mb-6 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10">
           <button
@@ -396,11 +377,10 @@ export default function AuthPage() {
               setErrorMessage(null)
               setSuccessMessage(null)
             }}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              mode === 'signin'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-            }`}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${mode === 'signin'
+              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+              : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
           >
             Sign In
           </button>
@@ -411,11 +391,10 @@ export default function AuthPage() {
               setErrorMessage(null)
               setSuccessMessage(null)
             }}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              mode === 'signup'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-            }`}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${mode === 'signup'
+              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+              : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              }`}
           >
             Create Account (Sign Up)
           </button>
@@ -452,11 +431,10 @@ export default function AuthPage() {
                   placeholder="officer@lovetoons.tv"
                   autoComplete="username"
                   required
-                  className={`w-full h-11 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${
-                    isDark
-                      ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                  }`}
+                  className={`w-full h-11 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
+                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
+                    }`}
                 />
               </div>
             </div>
@@ -474,11 +452,10 @@ export default function AuthPage() {
                   placeholder="••••••••••••"
                   autoComplete="current-password"
                   required
-                  className={`w-full h-11 pl-10 pr-10 rounded-xl border font-medium text-xs transition-all outline-hidden ${
-                    isDark
-                      ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                  }`}
+                  className={`w-full h-11 pl-10 pr-10 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
+                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
+                    }`}
                 />
                 <button
                   type="button"
@@ -521,11 +498,10 @@ export default function AuthPage() {
                   onChange={(e) => setSignUpName(e.target.value)}
                   placeholder="e.g. Pastor Sarah Williams"
                   required
-                  className={`w-full h-10 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${
-                    isDark
-                      ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                  }`}
+                  className={`w-full h-10 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
+                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
+                    }`}
                 />
               </div>
             </div>
@@ -542,11 +518,10 @@ export default function AuthPage() {
                   onChange={(e) => setSignUpEmail(e.target.value)}
                   placeholder="name@lovetoons.tv or ministry.org"
                   required
-                  className={`w-full h-10 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${
-                    isDark
-                      ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                  }`}
+                  className={`w-full h-10 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
+                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
+                    }`}
                 />
               </div>
             </div>
@@ -561,11 +536,10 @@ export default function AuthPage() {
                   <select
                     value={signUpAgency}
                     onChange={(e) => setSignUpAgency(e.target.value)}
-                    className={`w-full h-10 pl-9 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden appearance-none cursor-pointer ${
-                      isDark
-                        ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
-                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
-                    }`}
+                    className={`w-full h-10 pl-9 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden appearance-none cursor-pointer ${isDark
+                      ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                      }`}
                   >
                     {MINISTRIES_AND_AGENCIES.map((ag) => (
                       <option key={ag} value={ag} className="dark:bg-slate-900">
@@ -581,11 +555,10 @@ export default function AuthPage() {
                     onChange={(e) => setCustomAgency(e.target.value)}
                     placeholder="Enter ministry / department name"
                     required
-                    className={`w-full h-9 mt-1.5 px-3 rounded-lg border font-medium text-xs transition-all outline-hidden ${
-                      isDark
-                        ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
-                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
-                    }`}
+                    className={`w-full h-9 mt-1.5 px-3 rounded-lg border font-medium text-xs transition-all outline-hidden ${isDark
+                      ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                      }`}
                   />
                 )}
               </div>
@@ -599,11 +572,10 @@ export default function AuthPage() {
                   <select
                     value={signUpRole}
                     onChange={(e) => setSignUpRole(e.target.value)}
-                    className={`w-full h-10 pl-9 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden appearance-none cursor-pointer ${
-                      isDark
-                        ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
-                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
-                    }`}
+                    className={`w-full h-10 pl-9 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden appearance-none cursor-pointer ${isDark
+                      ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                      }`}
                   >
                     {STANDARD_ROLES.map((role) => (
                       <option key={role} value={role} className="dark:bg-slate-900">
@@ -627,11 +599,10 @@ export default function AuthPage() {
                   onChange={(e) => setSignUpPassword(e.target.value)}
                   placeholder="••••••••••••"
                   required
-                  className={`w-full h-10 pl-10 pr-10 rounded-xl border font-medium text-xs transition-all outline-hidden ${
-                    isDark
-                      ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                  }`}
+                  className={`w-full h-10 pl-10 pr-10 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
+                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
+                    }`}
                 />
                 <button
                   type="button"

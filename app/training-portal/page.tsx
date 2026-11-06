@@ -419,8 +419,7 @@ export default function TrainingPortalPage() {
     }
 
     if (!authenticatedUser) {
-      setIsAuthenticating(false)
-      router.replace('/auth?redirect=/training-portal')
+      router.replace('/auth')
       return
     }
 
@@ -697,45 +696,15 @@ Verified via Kiddies Media Ministry Compliance & Training Portal (https://portal
   const completedCount = Object.values(completedModules).filter(Boolean).length
   const progressPercentTotal = Math.round((completedCount / ARCHIVED_TRAINING_VIDEOS.length) * 100)
 
-  // Authentication Guard: strictly block unauthenticated viewing and show guard screen
+  // Authentication Guard: strictly block unauthenticated viewing and redirect silently
   if (isAuthenticating || !currentUser) {
     return (
       <div
-        className={`min-h-screen flex flex-col items-center justify-center p-6 ${
-          isDark ? 'bg-slate-950 text-white' : 'bg-[#F0FAFD] text-slate-900'
+        className={`min-h-screen flex items-center justify-center ${
+          isDark ? 'bg-slate-950 text-slate-400' : 'bg-[#F0FAFD] text-slate-500'
         }`}
       >
-        <div className="w-full max-w-md p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="size-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20">
-            <GraduationCap className="size-8" />
-          </div>
-          <div className="space-y-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-              Officer Authentication Required
-            </span>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white" style={{ fontFamily: 'var(--kmm-display)' }}>
-              KMM Training &amp; Accreditation Portal
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Official regulatory masterclasses, compliance audit tools, and statutory certification charters are restricted to accredited ministry officers and authorized personnel.
-            </p>
-          </div>
-          <div className="pt-2 flex flex-col gap-2.5">
-            <Link
-              href="/auth?redirect=/training-portal"
-              className="w-full h-11 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 hover:brightness-110 shadow-md transition-all"
-            >
-              <LogIn className="size-4" />
-              <span>Sign In / Register Officer Account</span>
-            </Link>
-            <Link
-              href="/"
-              className="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
-            >
-              &larr; Return to KMM Main Website
-            </Link>
-          </div>
-        </div>
+        <div className="size-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
       </div>
     )
   }

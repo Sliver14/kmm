@@ -55,15 +55,19 @@ export default function KmmLandingPage() {
   const [agenciesDropdownOpen, setAgenciesDropdownOpen] = useState(false)
   const [mobileAgenciesOpen, setMobileAgenciesOpen] = useState(false)
   const [isApkModalOpen, setIsApkModalOpen] = useState(false)
+  const [hasTrainingAuth, setHasTrainingAuth] = useState(false)
   const agenciesDropdownRef = React.useRef<HTMLLIElement>(null)
   const currentYear = new Date().getFullYear()
 
-  // Ensure landing page renders in light theme
+  // Ensure landing page renders in light theme & sync training auth
   useEffect(() => {
     if (typeof window !== 'undefined') {
       document.documentElement.classList.remove('dark')
+      setHasTrainingAuth(Boolean(localStorage.getItem('kmm_training_user')))
     }
   }, [])
+
+  const trainingPortalHref = hasTrainingAuth ? '/training-portal' : '/auth'
 
   // Close agencies dropdown when clicking outside
   useEffect(() => {
@@ -247,7 +251,7 @@ export default function KmmLandingPage() {
               </li>
               <li className="ml-2">
                 <Link
-                  href="/training-portal"
+                  href={trainingPortalHref}
                   className="px-4 py-2 rounded-full font-black text-sm bg-[#FFC700] text-slate-950 hover:bg-[#FFB800] transition-all shadow-xs"
                 >
                   Training Portal
@@ -407,7 +411,7 @@ export default function KmmLandingPage() {
               {/* Portal CTA Cards in Drawer */}
               <div className="pt-4 mt-2 border-t border-[var(--kmm-line)] flex flex-col gap-3">
                 <Link
-                  href="/training-portal"
+                  href={trainingPortalHref}
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center justify-between p-4 rounded-2xl font-black bg-[#FFC700] text-slate-950 shadow-md hover:bg-[#FFB800] active:scale-98 transition-all"
                 >
@@ -520,7 +524,7 @@ export default function KmmLandingPage() {
 
               <div className="flex flex-wrap items-center gap-3 pt-2 kmm-animate-rise">
                 <Link
-                  href="/training-portal"
+                  href={trainingPortalHref}
                   className="kmm-btn kmm-btn-p font-black shadow-lg shadow-amber-500/25 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
                 >
                   <span>Access Training &amp; Tools</span>
@@ -1018,13 +1022,13 @@ export default function KmmLandingPage() {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-4">
-                  <Link href="/training-portal" className="kmm-btn kmm-btn-p">
+                  <Link href={trainingPortalHref} className="kmm-btn kmm-btn-p">
                     Launch Training Portal &rarr;
                   </Link>
-                  <Link href="/training-portal?tab=tools" className="kmm-btn kmm-btn-s">
+                  <Link href={hasTrainingAuth ? '/training-portal?tab=tools' : '/auth'} className="kmm-btn kmm-btn-s">
                     Practical Tools
                   </Link>
-                  <Link href="/training-portal?tab=documents" className="kmm-btn kmm-btn-o !text-white border-white/40 hover:bg-white/10">
+                  <Link href={hasTrainingAuth ? '/training-portal?tab=documents' : '/auth'} className="kmm-btn kmm-btn-o !text-white border-white/40 hover:bg-white/10">
                     Supporting Documents
                   </Link>
                   <Link href="/auth" className="px-4 py-2.5 rounded-full text-xs font-bold text-white/80 hover:text-white hover:underline transition-colors ml-auto sm:ml-0">
@@ -1069,7 +1073,7 @@ export default function KmmLandingPage() {
 
                 <div className="pt-6">
                   <Link
-                    href="/training-portal?tab=materials"
+                    href={hasTrainingAuth ? '/training-portal?tab=materials' : '/auth'}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
                   >
                     <span>Explore Training Materials</span>
@@ -1111,7 +1115,7 @@ export default function KmmLandingPage() {
 
                 <div className="pt-6">
                   <Link
-                    href="/training-portal?tab=tools"
+                    href={hasTrainingAuth ? '/training-portal?tab=tools' : '/auth'}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
                   >
                     <span>Launch Practical Tools</span>
@@ -1153,7 +1157,7 @@ export default function KmmLandingPage() {
 
                 <div className="pt-6">
                   <Link
-                    href="/training-portal?tab=documents"
+                    href={hasTrainingAuth ? '/training-portal?tab=documents' : '/auth'}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--kmm-link)] hover:underline"
                   >
                     <span>View Supporting Documents</span>
@@ -1284,7 +1288,7 @@ export default function KmmLandingPage() {
                     <span>Begin Onboarding &rarr;</span>
                   </Link>
                   <Link
-                    href="/training-portal"
+                    href={trainingPortalHref}
                     className="kmm-btn kmm-btn-o text-center font-bold"
                   >
                     <span>View Training &amp; Guidelines</span>
@@ -1375,7 +1379,7 @@ export default function KmmLandingPage() {
                 <li><a href="#about" className="hover:text-[var(--kmm-gold)] transition-colors">About Kiddies Media Ministry &amp; Its Role</a></li>
                 <li><a href="#mandate" className="hover:text-[var(--kmm-gold)] transition-colors">Mandate &amp; Responsibilities</a></li>
                 <li><a href="#training" className="hover:text-[var(--kmm-gold)] transition-colors">Training, Tools &amp; Docs</a></li>
-                <li><Link href="/training-portal" className="hover:text-[var(--kmm-gold)] transition-colors">Training Portal</Link></li>
+                <li><Link href={trainingPortalHref} className="hover:text-[var(--kmm-gold)] transition-colors">Training Portal</Link></li>
                 <li><a href="#updates" className="hover:text-[var(--kmm-gold)] transition-colors">Resources &amp; Updates</a></li>
               </ul>
             </div>
