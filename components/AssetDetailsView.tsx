@@ -20,6 +20,7 @@ import { AddContributorModal } from '@/components/AddContributorModal'
 import { AssetData, AssetStatus, ProductionStatus, ReviewStatus, RelationshipItem, RightsDocument, ApprovalRequest, AssetEpisode, GovernancePillarKey } from '@/types'
 import { getAssetRiskAssessment } from '@/lib/risk'
 import { getCategoryGovernance, isEpisodeCategory } from '@/lib/categoryGovernance'
+import { enrichAssetWithInstitutionalData } from '@/lib/data/initialData'
 
 interface AssetDetailsViewProps {
   asset: AssetData
@@ -69,6 +70,9 @@ export function AssetDetailsView({
     subcategories,
     isGlobalViewer,
   } = useLovetoonsData()
+
+  // Ensure asset is guaranteed to have all institutional fields (Tier, AI, Source Provenance)
+  const currentAsset = useMemo(() => enrichAssetWithInstitutionalData(asset), [asset])
 
   // Core Navigation Tabs: Overview, Governance & AI Provenance, Connected IP, and Audit Trail
   const [activeTab, setActiveTab] = useState<'overview' | 'governance' | 'connections' | 'audit'>('overview')
@@ -664,32 +668,32 @@ export function AssetDetailsView({
                 </span>
 
                 {/* IP Priority Tier Badge */}
-                {asset.ipPriorityTier && (
+                {currentAsset.ipPriorityTier && (
                   <span
                     className={cn(
                       'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border shadow-2xs',
-                      asset.ipPriorityTier.includes('Tier 1')
+                      currentAsset.ipPriorityTier.includes('Tier 1')
                         ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                        : asset.ipPriorityTier.includes('Tier 2')
+                        : currentAsset.ipPriorityTier.includes('Tier 2')
                           ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30'
                           : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-white/10'
                     )}
                     title="Institutional Intellectual Property Priority Tier"
                   >
-                    {asset.ipPriorityTier.includes('Tier 1') ? (
+                    {currentAsset.ipPriorityTier.includes('Tier 1') ? (
                       <Crown className="size-3 text-amber-500" />
                     ) : (
                       <ShieldCheck className="size-3 text-sky-500" />
                     )}
-                    <span>{asset.ipPriorityTier}</span>
+                    <span>{currentAsset.ipPriorityTier}</span>
                   </span>
                 )}
 
                 {/* Estimated Audience Reach */}
-                {asset.estimatedAudienceReach && (
+                {currentAsset.estimatedAudienceReach && (
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-200/80 dark:border-white/10">
                     <Globe2 className="size-3 text-[#0284C7]" />
-                    <span>{asset.estimatedAudienceReach}</span>
+                    <span>{currentAsset.estimatedAudienceReach}</span>
                   </span>
                 )}
               </div>
@@ -887,7 +891,7 @@ export function AssetDetailsView({
           >
             <ShieldCheck className="size-3.5 text-blue-600 dark:text-blue-400" />
             <span>Governance &amp; AI</span>
-            {asset.aiDeclaration?.isAIAssisted && (
+            {currentAsset.aiDeclaration?.isAIAssisted && (
               <span className="rounded-md px-1.5 py-0.2 text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                 AI Log
               </span>
@@ -1710,13 +1714,13 @@ export function AssetDetailsView({
                   <span
                     className={cn(
                       'rounded-full px-2.5 py-0.5 text-[10px] font-bold border',
-                      asset.aiDeclaration?.isAIAssisted
+                      currentAsset.aiDeclaration?.isAIAssisted
                         ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
                         : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
                     )}
                   >
-                    {asset.aiDeclaration?.isAIAssisted
-                      ? `AI-Assisted (${asset.aiDeclaration.humanContributionPercent}% Human Directed)`
+                    {currentAsset.aiDeclaration?.isAIAssisted
+                      ? `AI-Assisted (${currentAsset.aiDeclaration.humanContributionPercent}% Human Directed)`
                       : '100% Human Creative Masterwork'}
                   </span>
                 </div>
@@ -1736,7 +1740,7 @@ export function AssetDetailsView({
               </div>
             </div>
 
-            {asset.aiDeclaration?.isAIAssisted ? (
+            {currentAsset.aiDeclaration?.isAIAssisted ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 {/* Left: Tools & Scope */}
                 <div className="space-y-3 rounded-lg border border-slate-100 dark:border-white/10 bg-slate-50/60 dark:bg-slate-800/40 p-4">
@@ -1745,7 +1749,7 @@ export function AssetDetailsView({
                       Generative AI Tools Employed
                     </span>
                     <div className="flex flex-wrap gap-1.5">
-                      {asset.aiDeclaration.toolsUsed.map((tool, idx) => (
+                      {currentAsset.aiDeclaration.toolsUsed.map((tool, idx) => (
                         <span
                           key={idx}
                           className="rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 px-2 py-1 font-semibold text-slate-800 dark:text-slate-200 text-xs shadow-2xs"
@@ -1761,7 +1765,7 @@ export function AssetDetailsView({
                       Approved Scope of Use
                     </span>
                     <div className="flex flex-wrap gap-1.5">
-                      {asset.aiDeclaration.scopeOfUse.map((scope, idx) => (
+                      {currentAsset.aiDeclaration.scopeOfUse.map((scope, idx) => (
                         <span
                           key={idx}
                           className="rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 px-2 py-0.5 text-[11px] font-medium capitalize"
@@ -1780,11 +1784,11 @@ export function AssetDetailsView({
                       <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full"
-                          style={{ width: `${asset.aiDeclaration.humanContributionPercent}%` }}
+                          style={{ width: `${currentAsset.aiDeclaration.humanContributionPercent}%` }}
                         />
                       </div>
                       <span className="font-bold text-slate-900 dark:text-white text-xs">
-                        {asset.aiDeclaration.humanContributionPercent}% Human
+                        {currentAsset.aiDeclaration.humanContributionPercent}% Human
                       </span>
                     </div>
                   </div>
@@ -1797,7 +1801,7 @@ export function AssetDetailsView({
                       Human Contribution &amp; Direction Narrative
                     </span>
                     <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
-                      {asset.aiDeclaration.humanContributionDescription}
+                      {currentAsset.aiDeclaration.humanContributionDescription}
                     </p>
                   </div>
 
@@ -1806,14 +1810,14 @@ export function AssetDetailsView({
                       External Training Material Declaration
                     </span>
                     <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
-                      {asset.aiDeclaration.externalMaterialNotes ||
+                      {currentAsset.aiDeclaration.externalMaterialNotes ||
                         'No third-party copyrighted datasets or external media introduced. All generation executed under proprietary ministry prompts.'}
                     </p>
                   </div>
 
                   <div className="pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                    <span>Declared By: {asset.aiDeclaration.declaredBy || 'Barrister Lillian Okoye'}</span>
-                    <span>Date: {asset.aiDeclaration.declaredDate || asset.createdDate}</span>
+                    <span>Declared By: {currentAsset.aiDeclaration.declaredBy || 'Barrister Lillian Okoye'}</span>
+                    <span>Date: {currentAsset.aiDeclaration.declaredDate || currentAsset.createdDate}</span>
                   </div>
                 </div>
               </div>
@@ -1824,11 +1828,11 @@ export function AssetDetailsView({
                   <span>Certified Human Creative Masterwork (Zero AI Generative Content)</span>
                 </div>
                 <p className="text-emerald-800/80 dark:text-emerald-300/80 leading-relaxed">
-                  {asset.aiDeclaration?.humanContributionDescription ||
+                  {currentAsset.aiDeclaration?.humanContributionDescription ||
                     'All musical arrangements, vocals, illustrations, and scriptwriting were 100% conceived, performed, and executed by human ministry personnel.'}
                 </p>
                 <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium pt-1">
-                  Verified by: {asset.aiDeclaration?.declaredBy || asset.creatorName} ({asset.aiDeclaration?.declaredDate || asset.createdDate})
+                  Verified by: {currentAsset.aiDeclaration?.declaredBy || currentAsset.creatorName} ({currentAsset.aiDeclaration?.declaredDate || currentAsset.createdDate})
                 </div>
               </div>
             )}
@@ -1852,7 +1856,7 @@ export function AssetDetailsView({
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 px-2.5 py-1 font-bold text-xs">
-                    {asset.sourceProvenance?.sourceType || 'Original Creation'}
+                    {currentAsset.sourceProvenance?.sourceType || 'Original Creation'}
                   </span>
                 </div>
                 <div className="pt-1.5">
@@ -1860,16 +1864,16 @@ export function AssetDetailsView({
                     Source Work Title:
                   </span>
                   <span className="font-semibold text-slate-900 dark:text-white text-xs">
-                    {asset.sourceProvenance?.sourceTitle || asset.name}
+                    {currentAsset.sourceProvenance?.sourceTitle || currentAsset.name}
                   </span>
                 </div>
-                {asset.sourceProvenance?.originalAuthor && (
+                {currentAsset.sourceProvenance?.originalAuthor && (
                   <div>
                     <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block">
                       Original Author / Scriptural Root:
                     </span>
                     <span className="text-slate-800 dark:text-slate-200 text-xs">
-                      {asset.sourceProvenance.originalAuthor}
+                      {currentAsset.sourceProvenance.originalAuthor}
                     </span>
                   </div>
                 )}
@@ -1880,12 +1884,12 @@ export function AssetDetailsView({
                   Chain of Development &amp; Adaptation Notes
                 </span>
                 <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
-                  {asset.sourceProvenance?.adaptationNotes ||
+                  {currentAsset.sourceProvenance?.adaptationNotes ||
                     'Adapted faithfully under Kiddies Media Ministry doctrinal review guidelines with spiritual alignment certified.'}
                 </p>
                 <div className="pt-2 border-t border-slate-200/60 dark:border-white/10 text-[11px] text-slate-500 dark:text-slate-400">
                   <span className="font-semibold">Chain of Title: </span>
-                  {asset.sourceProvenance?.chainOfTitleNotes ||
+                  {currentAsset.sourceProvenance?.chainOfTitleNotes ||
                     '100% in-house work-for-hire assignment vested perpetually in Esteemed Executive Minister.'}
                 </div>
               </div>

@@ -1933,6 +1933,89 @@ function Dashboard({
         </div>
       </div>
 
+      {/* INSTITUTIONAL SOVEREIGN IP & AI PROVENANCE EXECUTIVE STRIP */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500/10 via-sky-500/10 to-emerald-500/10 border border-slate-200/80 dark:border-white/10 shadow-xs">
+        {/* Metric 1: Sovereign Flagships */}
+        <div
+          onClick={() => setComplianceTab('intelligence')}
+          className="p-3 rounded-xl bg-white/80 dark:bg-[#14161f]/80 border border-amber-200/60 dark:border-amber-500/30 space-y-1 cursor-pointer hover:border-amber-400 transition shadow-2xs"
+          title="Click to view full Portfolio Intelligence"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+              Sovereign Flagships
+            </span>
+            <Crown className="size-3.5 text-amber-500" />
+          </div>
+          <div className="text-xl font-black text-slate-900 dark:text-white">
+            {portfolioIntelligence.tier1Count} Flagships
+          </div>
+          <p className="text-[10px] text-amber-900/80 dark:text-amber-300/80 font-medium truncate">
+            1.5M+ Global Broadcast Reach
+          </p>
+        </div>
+
+        {/* Metric 2: Creative Provenance Split */}
+        <div
+          onClick={() => setComplianceTab('intelligence')}
+          className="p-3 rounded-xl bg-white/80 dark:bg-[#14161f]/80 border border-emerald-200/60 dark:border-emerald-500/30 space-y-1 cursor-pointer hover:border-emerald-400 transition shadow-2xs"
+          title="Click to view AI disclosure ledger"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+              Creative Authorship
+            </span>
+            <Sparkles className="size-3.5 text-emerald-500" />
+          </div>
+          <div className="text-xl font-black text-slate-900 dark:text-white">
+            {portfolioIntelligence.humanPct}% Human Authored
+          </div>
+          <p className="text-[10px] text-emerald-900/80 dark:text-emerald-300/80 font-medium truncate">
+            {portfolioIntelligence.aiAssistedCount} AI-Assisted ({portfolioIntelligence.aiPct}%) • 100% Disclosed
+          </p>
+        </div>
+
+        {/* Metric 3: Sovereign Title Ratio */}
+        <div
+          onClick={() => setComplianceTab('overview')}
+          className="p-3 rounded-xl bg-white/80 dark:bg-[#14161f]/80 border border-sky-200/60 dark:border-sky-500/30 space-y-1 cursor-pointer hover:border-sky-400 transition shadow-2xs"
+          title="Click to view Title Deeds"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
+              Sovereign Title Ratio
+            </span>
+            <ShieldCheck className="size-3.5 text-sky-500" />
+          </div>
+          <div className="text-xl font-black text-slate-900 dark:text-white">
+            94.8% Vested
+          </div>
+          <p className="text-[10px] text-sky-900/80 dark:text-sky-300/80 font-medium truncate">
+            Perpetual Deeds in Minister
+          </p>
+        </div>
+
+        {/* Metric 4: Protection Gap Health */}
+        <div
+          onClick={() => setComplianceTab('intelligence')}
+          className="p-3 rounded-xl bg-white/80 dark:bg-[#14161f]/80 border border-purple-200/60 dark:border-purple-500/30 space-y-1 cursor-pointer hover:border-purple-400 transition shadow-2xs"
+          title="Click to view Protection Gaps"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+              Protection Gap Health
+            </span>
+            <Globe2 className="size-3.5 text-purple-500" />
+          </div>
+          <div className="text-xl font-black text-slate-900 dark:text-white">
+            2.3M+ Reach
+          </div>
+          <p className="text-[10px] text-purple-900/80 dark:text-purple-300/80 font-medium truncate">
+            0 Critical Rights Expirations
+          </p>
+        </div>
+      </div>
+
       {/* ROW 2: ELEVATED PORTFOLIO TITLE & COMPLIANCE COMMAND CENTER & SUPER ADMIN RAIL */}
       <div className="grid gap-5 sm:gap-6 xl:grid-cols-[1.72fr_.78fr] min-w-0 w-full">
         {/* Left Column (1.72fr): Elevated Portfolio Title & Compliance Command Center */}
@@ -3297,6 +3380,47 @@ function AssetsPage({
                                   <span>•</span>
                                   <span className="text-slate-500 font-sans">{asset.type}</span>
                                 </>
+                              )}
+                            </div>
+
+                            {/* IP Priority Tier & Creative Authorship Tags */}
+                            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                              {asset.ipPriorityTier && (
+                                <span
+                                  className={cn(
+                                    'inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold border',
+                                    asset.ipPriorityTier.includes('Tier 1')
+                                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                                      : asset.ipPriorityTier.includes('Tier 2')
+                                        ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30'
+                                        : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200'
+                                  )}
+                                >
+                                  {asset.ipPriorityTier.includes('Tier 1') ? (
+                                    <Crown className="size-2.5 text-amber-500" />
+                                  ) : (
+                                    <ShieldCheck className="size-2.5 text-sky-500" />
+                                  )}
+                                  <span>{asset.ipPriorityTier.split(' - ')[0]}</span>
+                                </span>
+                              )}
+
+                              <span
+                                className={cn(
+                                  'inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold border',
+                                  asset.aiDeclaration?.isAIAssisted
+                                    ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40'
+                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40'
+                                )}
+                              >
+                                {asset.aiDeclaration?.isAIAssisted ? '⚡ AI-Assisted' : '✦ 100% Human'}
+                              </span>
+
+                              {asset.estimatedAudienceReach && (
+                                <span className="text-[9px] text-slate-400 dark:text-slate-500 flex items-center gap-0.5 font-medium hidden sm:inline-flex">
+                                  <Globe2 className="size-2.5 text-[#0284C7]" />
+                                  <span>{asset.estimatedAudienceReach}</span>
+                                </span>
                               )}
                             </div>
                           </div>

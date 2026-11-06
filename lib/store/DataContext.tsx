@@ -29,6 +29,7 @@ import {
   initialApprovals,
   initialActivityLogs,
   initialOnboardingRequests,
+  enrichAssetWithInstitutionalData,
 } from '@/lib/data/initialData'
 import { sortDiscontinuedToBottom } from '@/lib/risk'
 
@@ -373,7 +374,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         ])
 
         if (assetsRes?.success && Array.isArray(assetsRes.assets) && assetsRes.assets.length > 0) {
-          setMasterAssets(assetsRes.assets)
+          setMasterAssets(assetsRes.assets.map(enrichAssetWithInstitutionalData))
         }
         if (rightsRes?.success && Array.isArray(rightsRes.records) && rightsRes.records.length > 0) {
           const sanitizedRecords = rightsRes.records.map((r: any) => ({
@@ -1178,7 +1179,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         documents: initialDocs,
       }
 
-      setMasterAssets((prev) => [newAssetItem, ...prev])
+      const enrichedNewAsset = enrichAssetWithInstitutionalData(newAssetItem)
+      setMasterAssets((prev) => [enrichedNewAsset, ...prev])
 
       // Update Category asset counts
       setCategories((prev) =>
@@ -1340,7 +1342,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const updateAsset = useCallback(
     (asset: AssetData) => {
       setMasterAssets((prev) =>
-        prev.map((a) => (a.id === asset.id ? { ...asset, agency: asset.agency || a.agency, unit: asset.agency || a.agency } : a))
+        prev.map((a) => (a.id === asset.id ? enrichAssetWithInstitutionalData({ ...a, ...asset, agency: asset.agency || a.agency, unit: asset.agency || a.agency }) : a))
       )
       fetch(`/api/assets/${asset.id}`, {
         method: 'PUT',

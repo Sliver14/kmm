@@ -2410,20 +2410,27 @@ function resolveCommercialScore(tier: IPPriorityTier): number {
   }
 }
 
+export function enrichAssetWithInstitutionalData(a: any): AssetData {
+  const priorityTier: IPPriorityTier = a.ipPriorityTier || resolvePriorityTier(a)
+  return {
+    ...a,
+    productionStatus: a.productionStatus || (a.status === 'Discontinued' ? 'Discontinued' : a.status === 'Yet to Launch' ? 'Yet to Launch' : 'In Production'),
+    reviewStatus: a.reviewStatus || (['Approved', 'Pending', 'In Review', 'Under Review', 'Requires Attention', 'Draft'].includes(a.status) ? (a.status as ReviewStatus) : 'Pending'),
+    ipPriorityTier: priorityTier,
+    commercialPotentialScore: a.commercialPotentialScore || resolveCommercialScore(priorityTier),
+    estimatedAudienceReach: a.estimatedAudienceReach || resolveAudienceReach(priorityTier),
+    aiDeclaration: a.aiDeclaration || resolveAIDeclaration(a),
+    sourceProvenance: a.sourceProvenance || resolveSourceProvenance(a),
+  }
+}
+
 export const initialAssetsData: AssetData[] = sortDiscontinuedToBottom(
   attorneyGeneralAssetsData.map((a) => {
-    const priorityTier = resolvePriorityTier(a)
-    return {
+    const base = {
       ...a,
-      productionStatus: a.productionStatus || (a.status === 'Discontinued' ? 'Discontinued' : a.status === 'Yet to Launch' ? 'Yet to Launch' : 'In Production'),
-      reviewStatus: a.reviewStatus || (['Approved', 'Pending', 'In Review', 'Under Review', 'Requires Attention', 'Draft'].includes(a.status) ? (a.status as ReviewStatus) : 'Pending'),
       archive: a.archive || generateAssetArchive(a),
-      ipPriorityTier: priorityTier,
-      commercialPotentialScore: resolveCommercialScore(priorityTier),
-      estimatedAudienceReach: resolveAudienceReach(priorityTier),
-      aiDeclaration: resolveAIDeclaration(a),
-      sourceProvenance: resolveSourceProvenance(a),
     }
+    return enrichAssetWithInstitutionalData(base)
   })
 )
 
