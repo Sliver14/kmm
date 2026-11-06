@@ -126,34 +126,31 @@ export function WelcomeSplash({
 
       {/* Main Content Showcase */}
       <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-xl mx-auto">
-        {/* Animated Medallion Container */}
-        <div className="relative group">
-          {/* Pulsing golden halo ring */}
-          <div className="absolute -inset-2.5 rounded-full bg-gradient-to-tr from-amber-500/40 via-yellow-400/30 to-amber-600/40 blur-xl opacity-75 group-hover:opacity-100 transition duration-700 animate-pulse" />
+        {/* Video — free-floating, no circle frame */}
+        <div className="relative w-full max-w-sm sm:max-w-md group">
+          {/* Subtle ambient glow behind video */}
+          <div className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-yellow-400/10 to-amber-600/20 blur-2xl opacity-70 group-hover:opacity-90 transition duration-700 animate-pulse pointer-events-none" />
 
-          {/* Golden bezel border */}
-          <div className="relative p-1 rounded-full bg-gradient-to-b from-amber-300/80 via-yellow-500/40 to-amber-600/80 shadow-[0_0_60px_rgba(245,158,11,0.35)]">
-            <div className="relative size-56 sm:size-72 md:size-80 rounded-full overflow-hidden bg-slate-950">
-              <video
-                ref={videoRef}
-                src="/kmm-welcome-animation.mp4"
-                autoPlay
-                muted={isMuted}
-                playsInline
-                loop={false}
-                onLoadedData={() => setVideoLoaded(true)}
-                onEnded={onClose}
-                className="size-full object-cover rounded-full"
+          <div className="relative rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(245,158,11,0.25)] border border-white/10 bg-slate-950">
+            <video
+              ref={videoRef}
+              src="/kmm-welcome-animation.mp4"
+              autoPlay
+              muted={isMuted}
+              playsInline
+              loop={false}
+              onLoadedData={() => setVideoLoaded(true)}
+              onEnded={onClose}
+              className="w-full h-auto object-cover"
+            />
+            {/* Fallback image if video is buffering */}
+            {!videoLoaded && (
+              <img
+                src="/kmm-logo.png"
+                alt="Kiddies Media Ministry"
+                className="absolute inset-0 size-full object-contain p-8 animate-pulse"
               />
-              {/* Fallback image if video is buffering */}
-              {!videoLoaded && (
-                <img
-                  src="/kmm-logo.png"
-                  alt="Kiddies Media Ministry"
-                  className="absolute inset-0 size-full object-contain p-6 animate-pulse"
-                />
-              )}
-            </div>
+            )}
           </div>
         </div>
 
