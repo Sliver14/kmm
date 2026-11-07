@@ -63,188 +63,6 @@ export interface TrainingUser {
   registeredAt: string
 }
 
-export interface SupportingDocument {
-  id: string
-  code: string
-  title: string
-  category: string
-  categoryLabel: string
-  classification: string
-  revisedDate: string
-  pages: string
-  desc: string
-  content: string
-}
-
-const SUPPORTING_DOCUMENTS: SupportingDocument[] = [
-  {
-    id: 'doc-1',
-    code: 'KMM-DOC-001',
-    title: 'Kiddies Media Ministry Official Child Safeguarding Policy Manual',
-    category: 'protection',
-    categoryLabel: 'Child Protection & Safety',
-    classification: 'Statutory Institutional Policy',
-    revisedDate: 'Quarter 1, 2026',
-    pages: '18 Pages',
-    desc: 'Mandatory institutional framework governing on-set physical safety, chaperone presence, emotional welfare, and reporting protocols for minors involved in media productions.',
-    content: `KIDDIES MEDIA MINISTRY
-INSTITUTIONAL DIRECTIVE: CHILD SAFEGUARDING & WELFARE MANUAL
-DOCUMENT CODE: KMM-DOC-001 / STATUTORY SERIES
-
-PREAMBLE
-The Kiddies Media Ministry establishes this Child Safeguarding Policy Manual under divine biblical stewardship and statutory child protection jurisprudence. Every media production, voice recording, live studio appearance, and digital broadcast involving minors across Loveworld Kingdom must comply unconditionally with these directives.
-
-ARTICLE I: PRINCIPLES OF CHILD SAFETY
-1.1 Absolute Primacy of Child Welfare: In any conflict between production schedules, deadlines, or budget and the welfare of a minor, the safety and emotional health of the minor shall immediately take precedence.
-1.2 Zero Tolerance for Abuse: Kiddies Media Ministry maintains a zero-tolerance policy regarding emotional humiliation, verbal harshness, inappropriate physical contact, or psychological manipulation of minors.
-1.3 Certified Chaperone Mandate: No child actor, voice talent, or student contributor shall remain unaccompanied in a studio, editing bay, sound booth, or stage without a designated parent, legal guardian, or certified Kiddies Media Ministry safeguarding officer present.
-
-ARTICLE II: ON-SET & STUDIO PRODUCTION STANDARDS
-2.1 Continuous Session Limits: Recording or filming sessions for children under 10 years of age shall not exceed 45 continuous minutes without a mandatory 15-minute rest and hydration pause.
-2.2 Daily Maximum Window: The maximum cumulative studio engagement per 24-hour cycle is capped at four (4) hours for minors aged 6-12, and six (6) hours for minors aged 13-17.
-2.3 Acoustic & Lighting Safety: Sound recording levels delivered to child headphone feeds must not exceed 75 dBA SPL. Strobe effects and harsh directional lighting must be shielded.
-
-ARTICLE III: SENSORY & EMOTIONAL CONTENT PROTECTION
-3.1 Screen Safety & Strobe Thresholds: In compliance with ITU-R BT.1702, animations and broadcast footage must never exceed three (3) flashes or luminance jumps per second.
-3.2 Fear & Anxiety Safeguard: Narrative storylines must not expose children to demonic horror, existential dread, or morbid themes contrary to the peace, joy, and victory of the New Creation in Christ Jesus.
-
-ARTICLE IV: INCIDENT REPORTING & COMPLIANCE
-4.1 Duty to Report: Any production staff who observes non-compliance or potential child distress is legally and spiritually bound to notify the Kiddies Media Ministry Safeguarding Board within twelve (12) hours.
-4.2 Audit & Sanctions: Failure to observe safeguarding covenants results in immediate revocation of Kiddies Media Ministry Broadcast Accreditation.
-
-ISSUED BY: Kiddies Media Ministry Directorate of Legal Jurisprudence & Child Safeguarding
-APPROVED FOR BROADCAST RELEASE ACROSS ALL LOVEWORLD CHANNELS`,
-  },
-  {
-    id: 'doc-2',
-    code: 'KMM-DOC-002',
-    title: 'Institutional Broadcast & Animation Standards Charter',
-    category: 'broadcast',
-    categoryLabel: 'Broadcast Standards',
-    classification: 'Technical & Creative Charter',
-    revisedDate: 'Quarter 1, 2026',
-    pages: '14 Pages',
-    desc: 'Technical video specifications, EBU R128 audio loudness thresholds, visual motion pacing, and zero-defect broadcast quality requirements for terrestrial and satellite playout.',
-    content: `KIDDIES MEDIA MINISTRY
-TECHNICAL QUALITY CHARTER: BROADCAST & ANIMATION SPECIFICATIONS
-DOCUMENT CODE: KMM-DOC-002 / BROADCAST SERIES
-
-1. OVERVIEW & SCOPE
-This Charter governs all visual animation masters, live-action kid segments, musical interludes, and interstitials submitted for distribution across Loveworld satellite networks, mobile apps, and syndicated partners.
-
-2. VIDEO DELIVERY SPECIFICATIONS
-2.1 Master Playout Format: Apple ProRes 422 HQ or Avid DNxHR HQX at native raster (1920x1080p or 3840x2160p Ultra HD).
-2.2 Frame Rate Standards: 25.00 fps for PAL/European/African feeds; 29.97 fps / 59.94p for North American/Global syndication.
-2.3 Color Gamut: Rec. 709 for HD masters; Rec. 2020 / HDR10 PQ for 4K releases with maximum luminance ceiling of 1000 nits.
-2.4 Cadence & Motion Blur: Animation rendering must maintain fluid motion interpolation. Excessive frame dropping or jitter exceeding 2 frames is classified as a Critical Technical Defect.
-
-3. AUDIO LOUDNESS & MIX BALANCE
-3.1 Integrated Loudness Target: -24.0 LKFS/LUFS (±0.5 LUFS tolerance) in strict compliance with EBU R128 and ATSC A/85.
-3.2 True Peak Maximum: Shall not exceed -1.0 dBTP on digital playout servers.
-3.3 Dialogue Intelligibility: Voiceover speech must be mixed at a minimum of +6 dB above ambient background music stems.
-
-4. DEFECT CLASSIFICATION MATRIX
-- Critical Defects (Automatic Rejection): Audio distortion/clipping, strobe flashes >3 Hz, unrendered frames, missing voiceover stems.
-- Major Defects (48-Hour Remediation): Lip-sync drift >2 frames, incorrect lower-third titles, audio level drift ±2 LUFS.
-- Minor Notes: Slight color grading inconsistency between scene cuts.
-
-SANCTIONED BY: Kiddies Media Ministry Broadcast Quality Assurance Committee`,
-  },
-  {
-    id: 'doc-3',
-    code: 'KMM-DOC-003',
-    title: 'Minor Contributor & Voice Talent Release Deed Template',
-    category: 'copyright',
-    categoryLabel: 'Copyright & IP',
-    classification: 'Legal Deed & Contributor Covenant',
-    revisedDate: 'Quarter 1, 2026',
-    pages: '4 Pages',
-    desc: 'Official covenant template executed by parents and legal guardians granting irrevocable, worldwide, perpetual broadcast and likeness rights for child voice performers.',
-    content: `DEED OF CONTRIBUTION & TALENT RELEASE FOR MINORS
-KIDDIES MEDIA MINISTRY / LOVEWORLD KINGDOM
-DOCUMENT CODE: KMM-DOC-003 / LEGAL SERIES
-
-THIS DEED OF RELEASE is executed between:
-1. THE PARENT/LEGAL GUARDIAN: __________________________________________________
-   Residential Address: ________________________________________________________
-   Telephone: ______________________ Email: ___________________________________
-   On behalf of Minor Performer (Name): ________________________________________
-   Date of Birth: ___________________ (the "Minor Talent")
-
-AND
-2. KIDDIES MEDIA MINISTRY, representing Loveworld Media Holdings (the "Ministry").
-
-1. GRANT OF RIGHTS & PERMISSIONS
-The undersigned Parent/Legal Guardian hereby unconditionally grants to the Ministry the irrevocable, perpetual, worldwide, royalty-free license and authority to:
-(a) Record, reproduce, edit, dub, translate, and broadcast the Minor Talent's voice, dialogue, singing, performance, and creative contributions.
-(b) Synchronize said performances with animation assets, musical compositions, sound effects, and visual graphics.
-(c) Publish and distribute the resulting content across television channels, mobile applications (including LoveToons Mobile App), digital portals, physical media, and educational materials.
-
-2. WORK-FOR-HIRE & OWNERSHIP COVENANT
-The Parent/Legal Guardian affirms that all performances rendered constitute a "Work-for-Hire" under international copyright law. All intellectual property, trademarks, recordings, master files, and derivative rights shall belong exclusively and perpetually to the Kiddies Media Ministry.
-
-3. PRIVACY & CHILD PROTECTION
-The Ministry agrees to protect the Minor Talent's personal privacy by using character credits or first-name aliases where requested to safeguard the child's identity from public search algorithms.
-
-SIGNED, SEALED AND DELIVERED:
-Parent/Guardian Signature: _______________________ Date: ____________________
-Kiddies Media Ministry Commissioning Officer Signature: ________________ Date: _________________`,
-  },
-  {
-    id: 'doc-4',
-    code: 'KMM-DOC-004',
-    title: 'Digital Minor Data Privacy & COPPA Compliance Directive',
-    category: 'protection',
-    categoryLabel: 'Child Protection & Safety',
-    classification: 'Regulatory Digital Directive',
-    revisedDate: 'Quarter 1, 2026',
-    pages: '12 Pages',
-    desc: 'Statutory rules for kid-facing mobile apps and websites, strictly prohibiting third-party advertising, commercial tracking, voice storage, and unverified data collection.',
-    content: `DIGITAL PRIVACY & CHILD DATA PROTECTION DIRECTIVE
-KIDDIES MEDIA MINISTRY / DIGITAL DIVISION
-DOCUMENT CODE: KMM-DOC-004 / REGULATORY SERIES
-
-1. PURPOSE & JURISDICTION
-This Directive establishes mandatory compliance for all mobile applications, interactive websites, and digital games produced under the Loveworld Kiddies umbrella, ensuring compliance with the Children's Online Privacy Protection Act (COPPA, 16 C.F.R. Part 312), GDPR-K (Article 8), and Kiddies Media Ministry Institutional Covenants.
-
-2. MANDATORY ARCHITECTURAL PRINCIPLES
-2.1 Zero Commercial Ad Networks: Kid apps (including LoveToons Mobile App) are strictly prohibited from embedding third-party behavioral advertising SDKs or programmatic ad exchanges.
-2.2 No Cross-App Behavioral Tracking: Apps must not access advertising IDs (IDFA, GAID) or fingerprint user hardware across external digital platforms.
-2.3 Verifiable Parental Consent Gates: Account creation, in-app interactions, and access to external web links must be guarded by cryptographic adult verification challenges (e.g., adult cognitive test or parent email authorization).
-
-3. TELEMETRY & DATA RETENTION LIMITS
-3.1 Minimalist Telemetry: Only anonymous, aggregated diagnostic telemetry necessary for crash reporting and app performance may be collected.
-3.2 Voice Data Protection: Interactive games utilizing microphone inputs must process voice commands locally on-device. No audio recordings of minors may be transmitted or permanently archived on remote cloud servers.
-3.3 90-Day Telemetry Purge: Any telemetry logs containing session identifiers must be permanently and irreversibly purged after ninety (90) days.
-
-APPROVED BY: Kiddies Media Ministry Digital Transformation & Cyber Safeguarding Directorate`,
-  },
-  {
-    id: 'doc-5',
-    code: 'KMM-DOC-005',
-    title: 'Scriptural Review & Doctrinal Integrity Protocol',
-    category: 'doctrinal',
-    categoryLabel: 'Scriptural Review',
-    classification: 'Theological & Pastoral Protocol',
-    revisedDate: 'Quarter 1, 2026',
-    pages: '10 Pages',
-    desc: 'Standards for biblical fidelity, theological accuracy, age-graded doctrine, and editorial review processes to anchor children in the unadulterated Word of God.',
-    content: `SCRIPTURAL INTEGRITY & DOCTRINAL REVIEW PROTOCOL
-KIDDIES MEDIA MINISTRY / PASTORAL REVIEW COUNCIL
-DOCUMENT CODE: KMM-DOC-005 / THEOLOGICAL SERIES
-
-1. THEOLOGICAL VISION
-Children's minds are fertile spiritual soil. The Kiddies Media Ministry is mandated to impart the pure, uncompromised Word of God, establishing children in their identity as Kings and Priests in Christ Jesus through the revelations of the New Creation.
-
-2. DOCTRINAL GUIDELINES FOR SCRIPTWRITERS
-2.1 Pure Scriptural Fidelity: All scriptural quotations, prophecies, and gospel narratives must align strictly with King James Bible standards and the doctrinal teachings of our Man of God.
-2.2 Identity in Christ: Stories must emphasize faith, love, divine health, righteous courage, and the authority of the Believer over darkness.
-2.3 No Legalism or Fear: Characters must not be governed by condemnation, demonic fear, or superstitious bondage. The finished works of Christ must shine through every episode.
-
-APPROVED BY: Pastoral Review Board & Editorial Directorate`,
-  },
-]
-
 export default function TrainingPortalPage() {
   const router = useRouter()
   const [isDark, setIsDark] = useState(false)
@@ -253,8 +71,8 @@ export default function TrainingPortalPage() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement | null>(null)
 
-  // Navigation tab: 'overview' | 'video' | 'documents' | 'tools' | 'accreditation'
-  const [activeTab, setActiveTab] = useState<'overview' | 'video' | 'documents' | 'tools' | 'accreditation'>('overview')
+  // Navigation tab: 'overview' | 'video' | 'accreditation'
+  const [activeTab, setActiveTab] = useState<'overview' | 'video' | 'accreditation'>('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [showRightDetails, setShowRightDetails] = useState(true)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
@@ -270,43 +88,11 @@ export default function TrainingPortalPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [activeChapterIndex, setActiveChapterIndex] = useState(0)
 
-  // Document Modal state
-  const [readingDoc, setReadingDoc] = useState<SupportingDocument | null>(null)
-  const [copiedDocId, setCopiedDocId] = useState<string | null>(null)
-
   // Completed modules tracking
   const [completedModules, setCompletedModules] = useState<Record<string, boolean>>({
     'vid-1': true,
   })
 
-  // Tool 1: Child Safeguarding Audit Checklist State
-  const [safeguardChecks, setSafeguardChecks] = useState<Record<string, boolean>>({
-    consent: true,
-    strobe: true,
-    loudness: true,
-    tone: true,
-    music: false,
-    privacy: false,
-  })
-
-  // Tool 2: Content Age-Rating & Sensitivity Calculator State
-  const [ageCalc, setAgeCalc] = useState({
-    ageBand: '4-7',
-    conflict: 'none',
-    pacing: 'calm',
-    doctrine: 'foundational',
-  })
-
-  // Tool 3: IP Clearance Verifier State
-  const [ipChecks, setIpChecks] = useState<Record<string, boolean>>({
-    voice: true,
-    music: true,
-    character: true,
-    script: true,
-    territory: true,
-  })
-
-  const [activeToolTab, setActiveToolTab] = useState<'ip-clearance' | 'safeguard' | 'age-rating'>('ip-clearance')
   const [toastMessage, setToastMessage] = useState('')
 
   const chapters = useMemo(
@@ -366,13 +152,11 @@ export default function TrainingPortalPage() {
       setCurrentUser(defaultUser)
     }
 
-    // Check query params for tab switching (e.g. ?tab=tools or ?tab=documents)
+    // Check query params for tab switching (e.g. ?tab=video or ?tab=accreditation)
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const tabParam = urlParams.get('tab')
-      if (tabParam === 'tools') setActiveTab('tools')
-      else if (tabParam === 'documents' || tabParam === 'materials') setActiveTab('documents')
-      else if (tabParam === 'video' || tabParam === 'watch') setActiveTab('video')
+      if (tabParam === 'video' || tabParam === 'watch') setActiveTab('video')
       else if (tabParam === 'accreditation') setActiveTab('accreditation')
     }
   }, [])
@@ -433,18 +217,6 @@ export default function TrainingPortalPage() {
     const s = Math.floor(sec % 60)
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
-
-  const filteredDocs = useMemo(() => {
-    if (!searchQuery.trim()) return SUPPORTING_DOCUMENTS
-    const q = searchQuery.toLowerCase()
-    return SUPPORTING_DOCUMENTS.filter(
-      (d) =>
-        d.title.toLowerCase().includes(q) ||
-        d.code.toLowerCase().includes(q) ||
-        d.categoryLabel.toLowerCase().includes(q) ||
-        d.desc.toLowerCase().includes(q)
-    )
-  }, [searchQuery])
 
   if (!isMounted) {
     return (
@@ -539,36 +311,6 @@ export default function TrainingPortalPage() {
               >
                 <Tv className={`size-4 ${activeTab === 'video' ? 'text-amber-500' : 'text-slate-400'}`} />
                 <span>Masterclass Video</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setActiveTab('documents')
-                  setMobileSidebarOpen(false)
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeTab === 'documents'
-                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
-                }`}
-              >
-                <FileText className={`size-4 ${activeTab === 'documents' ? 'text-amber-500' : 'text-slate-400'}`} />
-                <span>Supporting Docs</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setActiveTab('tools')
-                  setMobileSidebarOpen(false)
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeTab === 'tools'
-                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
-                }`}
-              >
-                <Sliders className={`size-4 ${activeTab === 'tools' ? 'text-amber-500' : 'text-slate-400'}`} />
-                <span>Compliance Tools</span>
               </button>
 
               <button
@@ -775,21 +517,21 @@ export default function TrainingPortalPage() {
                   </div>
                 </div>
 
-                {/* Course 2: Statutory Policy Charters */}
+                {/* Course 2: Sovereign Title & Deeds */}
                 <div
-                  onClick={() => setActiveTab('documents')}
+                  onClick={() => setActiveTab('video')}
                   className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-sky-500/50 dark:hover:border-sky-400/50 transition cursor-pointer space-y-4 group"
                 >
                   <div className="flex items-start gap-3.5">
                     <div className="size-11 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/20 group-hover:scale-105 transition-transform">
-                      <Scroll className="size-5" />
+                      <ShieldCheck className="size-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
-                        INSTITUTIONAL DIRECTIVES
+                        SOVEREIGN WORK-FOR-HIRE
                       </div>
                       <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                        Child Safeguarding &amp; Broadcast Charters
+                        Chain of Title &amp; Legal Deeds Masterclass
                       </h3>
                     </div>
                   </div>
@@ -801,18 +543,18 @@ export default function TrainingPortalPage() {
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                       <span className="flex items-center gap-1">
-                        <FileText className="size-3 text-sky-500" />
-                        <span>5 Statutory Documents</span>
+                        <BookOpen className="size-3 text-sky-500" />
+                        <span>6 Key Chapters</span>
                       </span>
                       <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                         <CheckCircle2 className="size-3" />
-                        <span>All Available</span>
+                        <span>Certified Curriculum</span>
                       </span>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
-                    <span>Browse Policy Manuals</span>
+                    <span>Review Covenants</span>
                     <span className="group-hover:translate-x-1 transition-transform">➔</span>
                   </div>
                 </div>
@@ -1024,274 +766,6 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
             </section>
-
-            {/* ======================================================= */}
-            {/* SECTION 3: STATUTORY SUPPORTING DOCUMENTS               */}
-            {/* ======================================================= */}
-            <section id="documents" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                    Statutory Supporting Documents &amp; Legal Deeds
-                  </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Official policy manuals, talent covenants, and compliance directives.
-                  </p>
-                </div>
-                <span className="text-xs font-bold text-slate-400">
-                  {filteredDocs.length} Documents
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredDocs.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between space-y-4 hover:border-slate-300 dark:hover:border-white/20 transition"
-                  >
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between text-[10px] font-mono font-bold text-slate-400">
-                        <span>{doc.code}</span>
-                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                          {doc.pages}
-                        </span>
-                      </div>
-                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-white leading-snug line-clamp-2">
-                        {doc.title}
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed">
-                        {doc.desc}
-                      </p>
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                      <span className="text-[10px] font-semibold text-slate-400">
-                        {doc.classification}
-                      </span>
-                      <button
-                        onClick={() => setReadingDoc(doc)}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-[#0284C7] dark:text-sky-400 hover:underline cursor-pointer"
-                      >
-                        <span>Read Full Text</span>
-                        <ChevronRight className="size-3" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* ======================================================= */}
-            {/* SECTION 4: INTERACTIVE COMPLIANCE TOOLS                */}
-            {/* ======================================================= */}
-            <section id="tools" className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                    Pre-Playout Compliance Tools
-                  </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Verify statutory clearance benchmarks prior to master export and satellite transmission.
-                  </p>
-                </div>
-
-                {/* Tool Tabs */}
-                <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs">
-                  <button
-                    onClick={() => setActiveToolTab('ip-clearance')}
-                    className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-                      activeToolTab === 'ip-clearance'
-                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
-                    }`}
-                  >
-                    IP Clearance
-                  </button>
-                  <button
-                    onClick={() => setActiveToolTab('safeguard')}
-                    className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-                      activeToolTab === 'safeguard'
-                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
-                    }`}
-                  >
-                    Child Safeguards
-                  </button>
-                  <button
-                    onClick={() => setActiveToolTab('age-rating')}
-                    className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-                      activeToolTab === 'age-rating'
-                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
-                    }`}
-                  >
-                    Age-Rating Calculator
-                  </button>
-                </div>
-              </div>
-
-              {/* Active Tool Panel */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs">
-                {activeToolTab === 'ip-clearance' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
-                      <div>
-                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                          Statutory IP Clearance Checklist
-                        </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Verify that all component stems, recordings, and character likenesses hold executed deeds.
-                        </p>
-                      </div>
-                      <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
-                        {Object.values(ipChecks).filter(Boolean).length} / 5 Cleared
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      {[
-                        { key: 'voice', label: 'Executed Minor Talent Release Deed on file for all child voice actors' },
-                        { key: 'music', label: 'Work-for-Hire Assignment deed executed for musical composition and stems' },
-                        { key: 'character', label: 'Registered character silhouette & trademark likeness clearance' },
-                        { key: 'script', label: 'Original script copyright assignment vested in Kiddies Media Ministries' },
-                        { key: 'territory', label: 'Worldwide perpetual broadcast & digital syndication rights secured' },
-                      ].map((item) => (
-                        <label
-                          key={item.key}
-                          className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200/80 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={!!ipChecks[item.key]}
-                            onChange={(e) =>
-                              setIpChecks({ ...ipChecks, [item.key]: e.target.checked })
-                            }
-                            className="size-4 mt-0.5 rounded text-amber-500 focus:ring-amber-500/30"
-                          />
-                          <span className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                            {item.label}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {activeToolTab === 'safeguard' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
-                      <div>
-                        <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                          Child Safeguarding &amp; Broadcast Quality Audit
-                        </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Confirm compliance with ITU-R BT.1702 strobe limits and EBU R128 loudness.
-                        </p>
-                      </div>
-                      <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full">
-                        {Object.values(safeguardChecks).filter(Boolean).length} / 6 Audited
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      {[
-                        { key: 'consent', label: 'Parent/Guardian chaperone accompanied child in studio session' },
-                        { key: 'strobe', label: 'No visual strobe transitions exceeding 3 flashes per second (ITU-R BT.1702)' },
-                        { key: 'loudness', label: 'Dialogue mix balanced at -24 LKFS with +6 dB voice intelligibility headroom' },
-                        { key: 'tone', label: 'Doctrinal review completed: zero fear, morbid existential dread or superstition' },
-                        { key: 'music', label: 'Headphone monitoring did not exceed safe 75 dBA SPL studio ceiling' },
-                        { key: 'privacy', label: 'Child voice performer identity shielded with character alias in credits' },
-                      ].map((item) => (
-                        <label
-                          key={item.key}
-                          className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200/80 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={!!safeguardChecks[item.key]}
-                            onChange={(e) =>
-                              setSafeguardChecks({ ...safeguardChecks, [item.key]: e.target.checked })
-                            }
-                            className="size-4 mt-0.5 rounded text-amber-500 focus:ring-amber-500/30"
-                          />
-                          <span className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                            {item.label}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {activeToolTab === 'age-rating' && (
-                  <div className="space-y-4">
-                    <div className="border-b border-slate-100 dark:border-white/5 pb-3">
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                        Content Age-Rating &amp; Sensitivity Calculator
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Compute official KMM broadcast rating based on audience age and pacing.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                      <div className="space-y-1.5">
-                        <label className="font-bold text-slate-700 dark:text-slate-300">Target Age Bracket</label>
-                        <select
-                          value={ageCalc.ageBand}
-                          onChange={(e) => setAgeCalc({ ...ageCalc, ageBand: e.target.value })}
-                          className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-                        >
-                          <option value="2-4">Ages 2-4 (Early Preschool)</option>
-                          <option value="4-7">Ages 4-7 (Primary Faith Foundations)</option>
-                          <option value="8-12">Ages 8-12 (Junior Champions)</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="font-bold text-slate-700 dark:text-slate-300">Visual Pacing</label>
-                        <select
-                          value={ageCalc.pacing}
-                          onChange={(e) => setAgeCalc({ ...ageCalc, pacing: e.target.value })}
-                          className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-                        >
-                          <option value="calm">Calm &amp; Soothing (Preschool)</option>
-                          <option value="dynamic">Dynamic &amp; Animated (Standard)</option>
-                          <option value="high-energy">High-Energy Praise &amp; Action</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="font-bold text-slate-700 dark:text-slate-300">Theological Depth</label>
-                        <select
-                          value={ageCalc.doctrine}
-                          onChange={(e) => setAgeCalc({ ...ageCalc, doctrine: e.target.value })}
-                          className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-                        >
-                          <option value="foundational">Foundational (God loves me, prayer)</option>
-                          <option value="revelational">New Creation Realities &amp; Authority</option>
-                          <option value="scriptural">Scripture Memory &amp; Confessions</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          Recommended Rating
-                        </span>
-                        <div className="font-black text-base text-emerald-600 dark:text-emerald-400">
-                          KMM-G (Universal Children Broadcast)
-                        </div>
-                      </div>
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/30">
-                        Safe for Satellite Playout
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
           </div>
         </main>
 
@@ -1414,11 +888,11 @@ export default function TrainingPortalPage() {
 
                 <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700/40 border border-slate-200/60 dark:border-white/5 space-y-1">
                   <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
-                    <FileText className="size-3 text-sky-500" />
-                    <span>Policies</span>
+                    <ShieldCheck className="size-3 text-sky-500" />
+                    <span>Curriculum</span>
                   </div>
                   <div className="font-black text-sm text-slate-900 dark:text-white">
-                    5 Approved
+                    6 Chapters
                   </div>
                 </div>
               </div>
@@ -1498,69 +972,6 @@ export default function TrainingPortalPage() {
           </aside>
         )}
       </div>
-
-      {/* ========================================================= */}
-      {/* FULL DOCUMENT READER MODAL                                */}
-      {/* ========================================================= */}
-      {readingDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-3xl max-h-[90vh] bg-white dark:bg-[#151928] rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden">
-            {/* Modal Header */}
-            <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-white/10 flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400">
-                  <span>{readingDoc.code}</span>
-                  <span>&bull;</span>
-                  <span>{readingDoc.classification}</span>
-                  <span>&bull;</span>
-                  <span>{readingDoc.pages}</span>
-                </div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white pt-1">
-                  {readingDoc.title}
-                </h3>
-              </div>
-              <button
-                onClick={() => setReadingDoc(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-5 sm:p-6 overflow-y-auto font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line bg-slate-50/50 dark:bg-slate-950/30">
-              {readingDoc.content}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-[#151928]">
-              <span className="text-xs text-slate-400 hidden sm:inline">
-                Statutory Series &bull; Kiddies Media Ministries
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(readingDoc.content)
-                    setCopiedDocId(readingDoc.id)
-                    setTimeout(() => setCopiedDocId(null), 2000)
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition"
-                >
-                  {copiedDocId === readingDoc.id ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-                  <span>{copiedDocId === readingDoc.id ? 'Copied' : 'Copy Text'}</span>
-                </button>
-                <button
-                  onClick={() => window.print()}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition"
-                >
-                  <Printer className="size-3.5" />
-                  <span>Print Document</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ========================================================= */}
       {/* ACCREDITATION CERTIFICATE MODAL VIEW                      */}
