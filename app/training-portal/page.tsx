@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import {
   Play,
@@ -477,13 +478,20 @@ export default function TrainingPortalPage() {
             {/* Brand Logo & Header */}
             <div className="flex items-center justify-between pb-2">
               <Link href="/" className="flex items-center gap-3 group">
-                <div className="size-9 rounded-xl bg-gradient-to-tr from-[#0284C7] to-amber-500 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
-                  <ShieldCheck className="size-5" />
+                <div className="relative size-10 shrink-0 rounded-xl overflow-hidden bg-white p-1 border border-slate-200/80 dark:border-white/10 shadow-xs group-hover:scale-105 transition-transform flex items-center justify-center">
+                  <Image
+                    src="/kmm-logo.png"
+                    alt="Kiddies Media Ministry"
+                    width={40}
+                    height={40}
+                    priority
+                    className="object-contain"
+                  />
                 </div>
                 <div>
-                  <div className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
+                  <div className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
                     <span>KMM</span>
-                    <span className="text-[#0284C7] dark:text-sky-400">Academy</span>
+                    <span className="text-[#0284C7] dark:text-sky-400 font-black">Academy</span>
                   </div>
                   <div className="text-[10px] text-slate-400 font-medium">Training &amp; IP Governance</div>
                 </div>
@@ -627,6 +635,15 @@ export default function TrainingPortalPage() {
               >
                 <Menu className="size-4" />
               </button>
+              <div className="relative size-8 shrink-0 rounded-lg overflow-hidden bg-white p-0.5 border border-slate-200/80 dark:border-white/10 hidden sm:flex items-center justify-center shadow-2xs">
+                <Image
+                  src="/kmm-logo.png"
+                  alt="KMM Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                />
+              </div>
               <div>
                 <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white">
                   Training Academy
@@ -1560,8 +1577,14 @@ export default function TrainingPortalPage() {
 
             {/* Certificate Header */}
             <div className="text-center space-y-2 border-b border-amber-500/20 pb-5">
-              <div className="size-14 mx-auto rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center font-bold shadow-lg">
-                <Award className="size-7" />
+              <div className="relative size-16 mx-auto rounded-2xl bg-white p-2 border border-amber-500/40 flex items-center justify-center shadow-lg">
+                <Image
+                  src="/kmm-logo.png"
+                  alt="Kiddies Media Ministry"
+                  width={56}
+                  height={56}
+                  className="object-contain"
+                />
               </div>
               <div className="text-[11px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
                 Kiddies Media Ministry Academy
