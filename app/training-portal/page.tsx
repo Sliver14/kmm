@@ -1166,19 +1166,19 @@ export default function TrainingPortalPage() {
                 </div>
 
                 {/* Section: Other Curriculum Masterclasses */}
-                <section className="space-y-4 pt-4 border-t border-slate-200/80 dark:border-white/10">
-                  <div className="flex items-center justify-between">
+                <section className="space-y-4 pt-6 border-t border-slate-200/80 dark:border-white/10">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                        Other Masterclasses in Curriculum ({ARCHIVED_TRAINING_VIDEOS.length})
+                      <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-tight">
+                        Other Masterclasses in Curriculum ({ARCHIVED_TRAINING_VIDEOS.length - 1})
                       </h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Switch to any other video to review its recording, points, and syllabus.
+                        Explore more specialized training modules on sovereign copyright, safeguarding deeds, and media compliance.
                       </p>
                     </div>
                     <button
                       onClick={() => setSelectedVideo(null)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer w-fit"
                     >
                       <span>View All in Library</span>
                       <ChevronRight className="size-3.5" />
@@ -1186,36 +1186,81 @@ export default function TrainingPortalPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {ARCHIVED_TRAINING_VIDEOS.map((v) => (
+                    {ARCHIVED_TRAINING_VIDEOS.filter((v) => v.id !== selectedVideo.id).map((v) => (
                       <div
                         key={v.id}
                         onClick={() => handleSelectVideo(v)}
-                        className={`p-3.5 rounded-2xl border transition cursor-pointer flex flex-col justify-between space-y-3 ${
-                          selectedVideo.id === v.id
-                            ? 'bg-amber-500/10 border-amber-500 ring-2 ring-amber-500/20'
-                            : 'bg-white dark:bg-[#151928] border-slate-200/80 dark:border-white/10 hover:border-slate-300'
-                        }`}
+                        className="rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 hover:border-amber-500/50 dark:hover:border-amber-400/50 transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-2xs hover:shadow-md hover:-translate-y-0.5 duration-200"
                       >
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between text-[10px] font-mono font-bold">
-                            <span className="text-amber-600 dark:text-amber-400">{v.code}</span>
-                            <span className="text-slate-400">{v.duration}</span>
+                        {/* Video Thumbnail Box */}
+                        <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+                          <video
+                            src="/kmm-welcome-animation.mp4"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            muted
+                          />
+                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <div className="size-10 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                              <Play className="size-4 fill-current ml-0.5" />
+                            </div>
                           </div>
-                          <h4 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-2 leading-snug">
-                            {v.title}
-                          </h4>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                            {v.desc}
-                          </p>
+
+                          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-black/80 text-amber-400 border border-amber-500/30 backdrop-blur-xs">
+                            {v.code}
+                          </span>
+
+                          <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-black/80 text-white backdrop-blur-xs">
+                            {v.duration}
+                          </span>
+
+                          {completedModules[v.id] && (
+                            <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500 text-white flex items-center gap-1 shadow-md">
+                              <Check className="size-2.5 stroke-3" />
+                              <span>Completed</span>
+                            </span>
+                          )}
                         </div>
 
-                        <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px]">
-                          <span className="text-slate-600 dark:text-slate-300 font-medium truncate max-w-[120px]">
-                            {v.speaker}
-                          </span>
-                          <span className="font-bold text-xs text-amber-600 dark:text-amber-400">
-                            {selectedVideo.id === v.id ? '▶ Now Playing' : 'Watch →'}
-                          </span>
+                        {/* Video Details */}
+                        <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                {v.categoryLabel}
+                              </span>
+                              <span className="font-mono text-slate-400 text-[9px]">
+                                {v.res}
+                              </span>
+                            </div>
+                            <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                              {v.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                              {v.desc}
+                            </p>
+                          </div>
+
+                          <div className="space-y-2 pt-2.5 border-t border-slate-100 dark:border-white/5">
+                            <div className="flex items-center justify-between text-[11px]">
+                              <span className="text-slate-600 dark:text-slate-300 font-medium truncate max-w-[120px]">
+                                {v.speaker}
+                              </span>
+                              <span className="font-bold text-amber-500 shrink-0">
+                                ★ 5.0
+                              </span>
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSelectVideo(v)
+                              }}
+                              className="w-full py-1.5 px-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500 group-hover:bg-amber-500 text-amber-700 dark:text-amber-300 group-hover:text-slate-950 font-bold text-xs flex items-center justify-center gap-1 transition cursor-pointer"
+                            >
+                              <span>Watch Masterclass</span>
+                              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
