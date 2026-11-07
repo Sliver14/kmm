@@ -7,7 +7,34 @@ export default function TrainingPortalAdminRedirect() {
   const router = useRouter()
 
   useEffect(() => {
-    router.replace('/training-portal?tab=admin')
+    try {
+      const stored = localStorage.getItem('kmm_training_user')
+      if (!stored) {
+        router.replace('/auth?redirect=/training-portal?tab=admin')
+        return
+      }
+      const user = JSON.parse(stored)
+      const isPortalAdmin = Boolean(
+        user.isPortalAdmin ||
+        user.role === 'portal_admin' ||
+        user.role === 'portal admn' ||
+        user.role?.toLowerCase() === 'portal admin' ||
+        user.role?.toLowerCase() === 'portal admn' ||
+        user.roleLabel?.toLowerCase().includes('portal admin') ||
+        user.roleLabel?.toLowerCase().includes('portal admn') ||
+        user.email?.toLowerCase() === 'portaladmin@kiddiesmedia.org' ||
+        user.email?.toLowerCase() === 'admin@kmmtraining.org' ||
+        user.role === 'super_admin'
+      )
+
+      if (isPortalAdmin) {
+        router.replace('/training-portal?tab=admin')
+      } else {
+        router.replace('/training-portal')
+      }
+    } catch {
+      router.replace('/auth?redirect=/training-portal?tab=admin')
+    }
   }, [router])
 
   return (

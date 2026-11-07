@@ -17,6 +17,41 @@ export async function POST(req: NextRequest) {
     const normalizedEmail = email.toLowerCase().trim()
     let user: any = null
 
+    // Pre-seeded system accounts with bcrypt-hashed credentials
+    const PRESEEDED_SYSTEM_USERS: Record<string, any> = {
+      'portaladmin@kiddiesmedia.org': {
+        id: 'usr-portal-admin',
+        name: 'Portal Administrator',
+        email: 'portaladmin@kiddiesmedia.org',
+        role: 'portal_admin',
+        roleLabel: 'Portal Admin',
+        agency: 'KMM Training Directorate',
+        unit: 'Curriculum & Governance',
+        initials: 'PA',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        // Hash for "PortalAdmin2026!"
+        password_hash: '$2b$10$98fpe23jR5.ghvcK9E.frekjP0sIn0XsRfb1HEg3/MFmR6P6wpuom',
+        isAdmin: true,
+        isPortalAdmin: true,
+        created_at: '2026-01-01T00:00:00.000Z',
+      },
+      'admin@kmmtraining.org': {
+        id: 'usr-portal-admin-alt',
+        name: 'Portal Administrator',
+        email: 'admin@kmmtraining.org',
+        role: 'portal_admin',
+        roleLabel: 'Portal Admin',
+        agency: 'KMM Training Directorate',
+        unit: 'Curriculum & Governance',
+        initials: 'PA',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        password_hash: '$2b$10$98fpe23jR5.ghvcK9E.frekjP0sIn0XsRfb1HEg3/MFmR6P6wpuom',
+        isAdmin: true,
+        isPortalAdmin: true,
+        created_at: '2026-01-01T00:00:00.000Z',
+      },
+    }
+
     // 1. Try querying Neon Postgres database
     try {
       const users = await sql`
@@ -33,13 +68,34 @@ export async function POST(req: NextRequest) {
       console.warn('Database lookup offline or skipped:', dbErr)
     }
 
-    // 2. Check fallback registered user with hashed password (from secure client store)
+    // 2. Check built-in system pre-seeded users
+    if (!user && PRESEEDED_SYSTEM_USERS[normalizedEmail]) {
+      user = PRESEEDED_SYSTEM_USERS[normalizedEmail]
+      // Attempt to sync to DB in background
+      try {
+        await sql`
+          INSERT INTO users (
+            id, name, email, role, role_label, agency, unit, ministry_id, initials, password_hash
+          ) VALUES (
+            ${user.id}, ${user.name}, ${user.email}, ${user.role},
+            ${user.roleLabel}, ${user.agency}, ${user.unit}, 'min-kmm', ${user.initials}, ${user.password_hash}
+          )
+          ON CONFLICT (email) DO UPDATE SET role = ${user.role}, role_label = ${user.roleLabel}
+        `
+      } catch (syncErr) {
+        // Safe to ignore if DB is offline or table constraints differ
+      }
+    }
+
+    // 3. Check fallback registered user with hashed password (from secure client store)
     if (!user && body.fallbackUser && body.fallbackUser.password_hash) {
       if (body.fallbackUser.email?.toLowerCase().trim() === normalizedEmail) {
+        const isPortalRole = body.fallbackUser.role === 'portal_admin' || body.fallbackUser.role === 'portal admn' || body.fallbackUser.roleLabel?.toLowerCase().includes('portal admin')
         user = {
           ...body.fallbackUser,
-          role: body.fallbackUser.role || (normalizedEmail.includes('admin') ? 'admin' : 'reviewer'),
+          role: isPortalRole ? 'portal_admin' : (body.fallbackUser.role || (normalizedEmail.includes('admin') ? 'agency_admin' : 'reviewer')),
           roleLabel: body.fallbackUser.roleLabel || body.fallbackUser.role || 'Officer',
+          isPortalAdmin: isPortalRole,
         }
       }
     }
@@ -92,6 +148,7 @@ export async function POST(req: NextRequest) {
         email: user.email,
         role: user.role,
         roleLabel: user.roleLabel,
+        isPortalAdmin: Boolean(user.role === 'portal_admin' || user.role === 'portal admn' || user.roleLabel?.toLowerCase().includes('portal admin') || user.isPortalAdmin),
         agency: user.agency,
         unit: user.unit,
         initials: user.initials,

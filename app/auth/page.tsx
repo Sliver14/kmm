@@ -27,10 +27,12 @@ export interface TrainingUser {
   email: string
   agency: string
   role: string
+  roleLabel?: string
   initials: string
   avatar?: string
   password_hash?: string
   isAdmin?: boolean
+  isPortalAdmin?: boolean
   registeredAt: string
 }
 
@@ -48,6 +50,7 @@ const MINISTRIES_AND_AGENCIES = [
 ]
 
 const STANDARD_ROLES = [
+  'Portal Admin',
   'Administrator & Directorate Lead',
   'Child Safeguarding Officer',
   'Content Reviewer & Policy Officer',
@@ -87,6 +90,36 @@ export default function AuthPage() {
     setIsMounted(true)
     const savedTheme = localStorage.getItem('kmm_training_theme')
     setIsDark(savedTheme === 'dark')
+
+    // Pre-seed Portal Admin in client storage if not already present
+    try {
+      const storedUsersRaw = localStorage.getItem('kmm_registered_training_users')
+      let users: TrainingUser[] = storedUsersRaw ? JSON.parse(storedUsersRaw) : []
+      if (!Array.isArray(users)) users = []
+
+      const portalAdminExists = users.some(
+        (u) => u.email.toLowerCase() === 'portaladmin@kiddiesmedia.org'
+      )
+      if (!portalAdminExists) {
+        users.push({
+          id: 'usr-portal-admin',
+          name: 'Portal Administrator',
+          email: 'portaladmin@kiddiesmedia.org',
+          agency: 'KMM Training Directorate',
+          role: 'portal_admin',
+          roleLabel: 'Portal Admin',
+          initials: 'PA',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          password_hash: '$2b$10$98fpe23jR5.ghvcK9E.frekjP0sIn0XsRfb1HEg3/MFmR6P6wpuom',
+          isAdmin: true,
+          isPortalAdmin: true,
+          registeredAt: '2026-01-01T00:00:00.000Z',
+        })
+        localStorage.setItem('kmm_registered_training_users', JSON.stringify(users))
+      }
+    } catch (seedErr) {
+      console.warn('Could not pre-seed portal admin in local cache:', seedErr)
+    }
   }, [])
 
   const toggleTheme = () => {
@@ -152,14 +185,27 @@ export default function AuthPage() {
         throw new Error(data?.error || 'Invalid credentials. Password incorrect.')
       }
 
+      const isUserPortalAdmin = Boolean(
+        data.user?.isPortalAdmin ||
+        data.user?.role === 'portal_admin' ||
+        data.user?.role === 'portal admn' ||
+        data.user?.roleLabel?.toLowerCase().includes('portal admin') ||
+        data.user?.roleLabel?.toLowerCase().includes('portal admn') ||
+        matchedUser?.isPortalAdmin ||
+        email === 'portaladmin@kiddiesmedia.org' ||
+        email === 'admin@kmmtraining.org'
+      )
+
       const authenticatedUser: TrainingUser = {
         id: data.user?.id || matchedUser?.id || `TP-${Date.now().toString().slice(-6)}`,
         name: data.user?.name || matchedUser?.name || email.split('@')[0],
         email: data.user?.email || email,
         agency: data.user?.agency || matchedUser?.agency || 'Lovetoons Content Operations',
-        role: data.user?.roleLabel || data.user?.role || matchedUser?.role || 'Child Safeguarding Officer',
-        initials: data.user?.initials || matchedUser?.initials || 'KM',
-        isAdmin: data.user?.role === 'admin' || (data.user?.roleLabel?.toLowerCase().includes('admin')) || matchedUser?.isAdmin || false,
+        role: isUserPortalAdmin ? 'portal_admin' : (data.user?.roleLabel || data.user?.role || matchedUser?.role || 'Child Safeguarding Officer'),
+        roleLabel: isUserPortalAdmin ? 'Portal Admin' : (data.user?.roleLabel || data.user?.role || matchedUser?.role || 'Child Safeguarding Officer'),
+        initials: data.user?.initials || matchedUser?.initials || (isUserPortalAdmin ? 'PA' : 'KM'),
+        isAdmin: isUserPortalAdmin || data.user?.role === 'admin' || (data.user?.roleLabel?.toLowerCase().includes('admin')) || matchedUser?.isAdmin || false,
+        isPortalAdmin: isUserPortalAdmin,
         registeredAt: data.user?.created_at || matchedUser?.registeredAt || new Date().toISOString(),
       }
 
@@ -193,7 +239,9 @@ export default function AuthPage() {
         : signUpAgency.trim() || "Children's Ministry"
     const role = signUpRole.trim() || 'Child Safeguarding Officer'
     const password = signUpPassword
-    const isAdmin = role.toLowerCase().includes('admin') || email.includes('admin')
+    const isPortalAdmin = role === 'Portal Admin' || role === 'portal_admin' || email.includes('portaladmin')
+    const isAdmin = isPortalAdmin || role.toLowerCase().includes('admin') || email.includes('admin')
+    const finalRoleKey = isPortalAdmin ? 'portal_admin' : (role.toLowerCase().includes('admin') ? 'agency_admin' : 'reviewer')
 
     if (!name) {
       setErrorMessage('Please provide your full name or title.')
@@ -238,9 +286,11 @@ export default function AuthPage() {
         name,
         email,
         agency,
-        role,
+        role: finalRoleKey,
+        roleLabel: role,
         initials,
         isAdmin,
+        isPortalAdmin,
         password_hash: data.user?.password_hash,
         avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
         registeredAt: new Date().toISOString(),

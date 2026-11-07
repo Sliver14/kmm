@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
 
     let createdInDb = false
 
+    const isPortalAdmin = userRole === 'Portal Admin' || userRole === 'portal_admin' || normalizedEmail.includes('portaladmin')
+    const dbRole = isPortalAdmin ? 'portal_admin' : (userRole.toLowerCase().includes('admin') ? 'agency_admin' : 'reviewer')
+
     // Attempt registration in Neon Postgres
     try {
       const existingUsers = await sql`
@@ -56,7 +59,7 @@ export async function POST(req: NextRequest) {
         INSERT INTO users (
           id, name, email, role, role_label, agency, unit, ministry_id, initials, password_hash
         ) VALUES (
-          ${newUserId}, ${trimmedName}, ${normalizedEmail}, 'reviewer',
+          ${newUserId}, ${trimmedName}, ${normalizedEmail}, ${dbRole},
           ${userRole}, ${userAgency}, ${userAgency}, 'min-kmm', ${initials}, ${hashedPassword}
         )
       `
@@ -78,7 +81,7 @@ export async function POST(req: NextRequest) {
       normalizedEmail.includes('admin') ||
       body.isAdmin === true
 
-    const userRoleKey = isAdmin ? 'admin' : 'reviewer'
+    const userRoleKey = isPortalAdmin ? 'portal_admin' : (isAdmin ? 'agency_admin' : 'reviewer')
 
     const userProfile = {
       id: newUserId,
@@ -92,6 +95,7 @@ export async function POST(req: NextRequest) {
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(trimmedName)}`,
       password_hash: hashedPassword,
       isAdmin,
+      isPortalAdmin,
       createdInDb,
       registeredAt: new Date().toISOString(),
     }

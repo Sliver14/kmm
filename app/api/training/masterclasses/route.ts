@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { VideoItem, ARCHIVED_TRAINING_VIDEOS } from '@/lib/data/trainingVideosData'
+import { verifyToken } from '@/lib/auth'
 
 // In-memory store for masterclasses added during server runtime
 let customMasterclasses: VideoItem[] = []
@@ -15,6 +16,17 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const sessionCookie = req.cookies.get('kmm_session')?.value
+    if (sessionCookie) {
+      const payload = verifyToken(sessionCookie)
+      if (payload && payload.role && payload.role !== 'portal_admin' && payload.role !== 'portal admn' && payload.role !== 'super_admin') {
+        return NextResponse.json(
+          { error: 'Forbidden: Portal Admin role required to upload masterclasses.' },
+          { status: 403 }
+        )
+      }
+    }
+
     const body = await req.json()
     const { title, code, category, categoryLabel, duration, desc, points, videoUrl } = body
 

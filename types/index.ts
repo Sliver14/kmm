@@ -1,4 +1,4 @@
-export type UserRole = 'super_admin' | 'reviewer' | 'agency_admin' | 'unit_admin'
+export type UserRole = 'super_admin' | 'reviewer' | 'agency_admin' | 'unit_admin' | 'portal_admin'
 
 export type UserSkill =
   | 'video_editor'

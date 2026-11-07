@@ -45,6 +45,7 @@ import {
   FileVideo,
   Shield,
   AlertTriangle,
+  ShieldAlert,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem } from '@/lib/data/trainingVideosData'
 
@@ -54,8 +55,10 @@ export interface TrainingUser {
   email: string
   agency: string
   role: string
+  roleLabel?: string
   initials: string
   isAdmin?: boolean
+  isPortalAdmin?: boolean
   avatar?: string
   registeredAt: string
 }
@@ -65,6 +68,23 @@ export default function TrainingPortalPage() {
   const [isDark, setIsDark] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [currentUser, setCurrentUser] = useState<TrainingUser | null>(null)
+
+  // Computed check: Is the logged-in user authorized as Portal Admin?
+  const isPortalAdmin = useMemo(() => {
+    if (!currentUser) return false
+    return Boolean(
+      currentUser.isPortalAdmin ||
+      currentUser.role === 'portal_admin' ||
+      currentUser.role === 'portal admn' ||
+      currentUser.role?.toLowerCase() === 'portal admin' ||
+      currentUser.role?.toLowerCase() === 'portal admn' ||
+      currentUser.roleLabel?.toLowerCase().includes('portal admin') ||
+      currentUser.roleLabel?.toLowerCase().includes('portal admn') ||
+      currentUser.email?.toLowerCase() === 'portaladmin@kiddiesmedia.org' ||
+      currentUser.email?.toLowerCase() === 'admin@kmmtraining.org' ||
+      currentUser.role === 'super_admin'
+    )
+  }, [currentUser])
 
   // Navigation tab: 'overview' | 'video' | 'accreditation' | 'admin'
   const [activeTab, setActiveTab] = useState<'overview' | 'video' | 'accreditation' | 'admin'>('overview')
@@ -161,9 +181,11 @@ export default function TrainingPortalPage() {
       return
     }
 
+    let activeSessionUser: TrainingUser | null = null
     try {
       const user: TrainingUser = JSON.parse(storedUserRaw)
       if (user && user.email) {
+        activeSessionUser = user
         setCurrentUser(user)
       } else {
         router.push('/auth?redirect=/training-portal')
@@ -209,7 +231,25 @@ export default function TrainingPortalPage() {
           setActiveTab('video')
         }
       } else if (tabParam === 'admin') {
-        setActiveTab('admin')
+        const hasAdminAccess = Boolean(
+          activeSessionUser && (
+            activeSessionUser.isPortalAdmin ||
+            activeSessionUser.role === 'portal_admin' ||
+            activeSessionUser.role === 'portal admn' ||
+            activeSessionUser.role?.toLowerCase() === 'portal admin' ||
+            activeSessionUser.role?.toLowerCase() === 'portal admn' ||
+            activeSessionUser.roleLabel?.toLowerCase().includes('portal admin') ||
+            activeSessionUser.roleLabel?.toLowerCase().includes('portal admn') ||
+            activeSessionUser.email?.toLowerCase() === 'portaladmin@kiddiesmedia.org' ||
+            activeSessionUser.email?.toLowerCase() === 'admin@kmmtraining.org' ||
+            activeSessionUser.role === 'super_admin'
+          )
+        )
+        if (hasAdminAccess) {
+          setActiveTab('admin')
+        } else {
+          setActiveTab('overview')
+        }
       } else if (tabParam === 'video' || tabParam === 'watch') {
         setActiveTab('video')
       } else if (tabParam === 'accreditation') {
@@ -328,6 +368,10 @@ export default function TrainingPortalPage() {
   // Publish new masterclass
   const handlePublishMasterclass = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!isPortalAdmin) {
+      showNotification('⚠️ Unauthorized: Only the Portal Admin role can publish masterclasses.')
+      return
+    }
     if (!uploadTitle.trim()) {
       showNotification('⚠️ Please provide a masterclass title.')
       return
@@ -541,23 +585,25 @@ export default function TrainingPortalPage() {
                 <span>Accreditation Certificate</span>
               </button>
 
-              {/* Admin Dashboard Item */}
-              <button
-                onClick={() => {
-                  setActiveTab('admin')
-                  setMobileSidebarOpen(false)
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin'
-                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                  }`}
-              >
-                <ShieldCheck className={`size-4 ${activeTab === 'admin' ? 'text-amber-500' : 'text-slate-400'}`} />
-                <span>Admin Dashboard</span>
-                <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                  Upload
-                </span>
-              </button>
+              {/* Admin Dashboard Item - ONLY VISIBLE TO PORTAL ADMIN */}
+              {isPortalAdmin && (
+                <button
+                  onClick={() => {
+                    setActiveTab('admin')
+                    setMobileSidebarOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin'
+                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                    }`}
+                >
+                  <ShieldCheck className={`size-4 ${activeTab === 'admin' ? 'text-amber-500' : 'text-slate-400'}`} />
+                  <span>Admin Dashboard</span>
+                  <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                    Portal Admin
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -573,8 +619,13 @@ export default function TrainingPortalPage() {
                   <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
                     {currentUser?.name || 'Authenticated Officer'}
                   </div>
-                  <div className="text-[10px] text-slate-400 truncate">
-                    {currentUser?.role || 'Child Safeguarding Officer'}
+                  <div className="text-[10px] text-slate-400 truncate flex items-center gap-1">
+                    {isPortalAdmin && (
+                      <span className="inline-flex items-center px-1 py-0.2 rounded-sm bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-[8px] uppercase">
+                        Admin
+                      </span>
+                    )}
+                    <span className="truncate">{currentUser?.roleLabel || currentUser?.role || 'Child Safeguarding Officer'}</span>
                   </div>
                 </div>
               </div>
@@ -1605,9 +1656,11 @@ export default function TrainingPortalPage() {
 
             {/* ========================================================= */}
             {/* TAB 4: ADMIN DASHBOARD & MASTERCLASSES UPLOAD             */}
+            {/* STRICTLY RESTRICTED TO ROLE: PORTAL ADMIN                 */}
             {/* ========================================================= */}
             {activeTab === 'admin' && (
-              <div className="space-y-8 animate-in fade-in duration-200">
+              isPortalAdmin ? (
+                <div className="space-y-8 animate-in fade-in duration-200">
                 {/* Admin Hero Bar */}
                 <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-sky-500/10 border border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
                   <div className="space-y-2 max-w-xl">
@@ -1776,6 +1829,35 @@ export default function TrainingPortalPage() {
                   </div>
                 </div>
               </div>
+              ) : (
+                <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 text-center space-y-4 max-w-lg mx-auto my-12 shadow-sm animate-in fade-in">
+                  <div className="size-14 rounded-2xl bg-rose-500/10 text-rose-500 mx-auto flex items-center justify-center border border-rose-500/20">
+                    <ShieldAlert className="size-7" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                      Access Restricted
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                      The Training Portal Admin Dashboard is strictly reserved for users with the <strong className="text-slate-800 dark:text-slate-200 font-bold">Portal Admin</strong> role. Your current account ({currentUser?.email}) does not have administrative permissions.
+                    </p>
+                  </div>
+                  <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+                    <button
+                      onClick={() => setActiveTab('overview')}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer"
+                    >
+                      Return to Curriculum Overview
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                    >
+                      Sign In as Portal Admin
+                    </button>
+                  </div>
+                </div>
+              )
             )}
           </div>
         </main>
@@ -1807,7 +1889,7 @@ export default function TrainingPortalPage() {
                     {currentUser?.name || 'Barrister Lillian'}
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                    {currentUser?.role || 'Head of Legal & IP Directorate'}
+                    {currentUser?.roleLabel || currentUser?.role || 'Officer'}
                   </p>
                   <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 pt-0.5">
                     <Trophy className="size-3" />
