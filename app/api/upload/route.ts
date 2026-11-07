@@ -4,8 +4,8 @@ import { mkdir, writeFile } from 'fs/promises'
 import crypto from 'crypto'
 import { sql } from '@/lib/db'
 
-// 50 MB maximum file size limit for VPS storage
-const MAX_FILE_SIZE = 50 * 1024 * 1024
+// 500 MB maximum file size limit for VPS storage (videos, masterclasses & media assets)
+const MAX_FILE_SIZE = 500 * 1024 * 1024
 
 // Whitelist of supported and safe formats
 const ALLOWED_EXTENSIONS = new Set([

@@ -42,6 +42,7 @@ import {
   Plus,
   Trash2,
   Pencil,
+  Link2,
   LogOut,
   FileVideo,
   Shield,
@@ -117,6 +118,8 @@ export default function TrainingPortalPage() {
   const [uploadDuration, setUploadDuration] = useState('20:00')
   const [uploadDesc, setUploadDesc] = useState('')
   const [uploadVideoUrl, setUploadVideoUrl] = useState('')
+  const [uploadVideoSourceType, setUploadVideoSourceType] = useState<'upload' | 'url'>('upload')
+  const [uploadVideoFile, setUploadVideoFile] = useState<File | null>(null)
   const [uploadedFileName, setUploadedFileName] = useState('')
   const [uploadedFileSize, setUploadedFileSize] = useState('')
   const [uploadPoints, setUploadPoints] = useState<string[]>([
@@ -135,6 +138,8 @@ export default function TrainingPortalPage() {
   const [editDuration, setEditDuration] = useState('20:00')
   const [editDesc, setEditDesc] = useState('')
   const [editVideoUrl, setEditVideoUrl] = useState('')
+  const [editVideoSourceType, setEditVideoSourceType] = useState<'upload' | 'url'>('upload')
+  const [editVideoFile, setEditVideoFile] = useState<File | null>(null)
   const [editUploadedFileName, setEditUploadedFileName] = useState('')
   const [editUploadedFileSize, setEditUploadedFileSize] = useState('')
   const [editPoints, setEditPoints] = useState<string[]>([])
@@ -371,6 +376,26 @@ export default function TrainingPortalPage() {
     return Object.values(completedModules).filter(Boolean).length
   }, [completedModules])
 
+  // Helper to upload a video file directly to the VPS server
+  const uploadVideoToServer = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('fileType', 'video')
+    formData.append('ministryId', 'min-kmm')
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    })
+
+    const data = await res.json()
+    if (!res.ok || !data.file?.url) {
+      throw new Error(data?.error || 'Failed to upload video to VPS server.')
+    }
+
+    return data.file.url
+  }
+
   // Video File attachment handler
   const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -379,12 +404,11 @@ export default function TrainingPortalPage() {
         showNotification('⚠️ Please select a valid video file (MP4, WebM, MOV)')
         return
       }
-      const objectUrl = URL.createObjectURL(file)
-      setUploadVideoUrl(objectUrl)
+      setUploadVideoFile(file)
       setUploadedFileName(file.name)
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
       setUploadedFileSize(`${sizeMb} MB`)
-      showNotification(`✓ Video file "${file.name}" attached successfully!`)
+      showNotification(`✓ Video file "${file.name}" selected. Will be saved to VPS server.`)
     }
   }
 
@@ -406,6 +430,28 @@ export default function TrainingPortalPage() {
 
     setIsUploading(true)
 
+    // Handle video URL based on selected source type
+    let finalVideoUrl = uploadVideoUrl.trim()
+
+    if (uploadVideoSourceType === 'upload') {
+      if (uploadVideoFile) {
+        showNotification('⏳ Uploading video file to VPS server storage...')
+        try {
+          finalVideoUrl = await uploadVideoToServer(uploadVideoFile)
+        } catch (uploadErr: any) {
+          showNotification(`⚠️ Video upload failed: ${uploadErr.message}`)
+          setIsUploading(false)
+          return
+        }
+      } else if (!finalVideoUrl) {
+        finalVideoUrl = '/kmm-welcome-animation.mp4'
+      }
+    } else {
+      if (!finalVideoUrl) {
+        finalVideoUrl = '/kmm-welcome-animation.mp4'
+      }
+    }
+
     const categoryLabels: Record<string, string> = {
       copyright: 'Copyright & Sovereign IP',
       protection: 'Child Protection & Safeguards',
@@ -422,7 +468,7 @@ export default function TrainingPortalPage() {
       categoryLabel: categoryLabels[uploadCategory] || 'Sovereign Masterclass',
       duration: uploadDuration.trim() || '15:00',
       avatarBg: 'linear-gradient(135deg, #0284C7, #F59E0B)',
-      videoUrl: uploadVideoUrl || '/kmm-welcome-animation.mp4',
+      videoUrl: finalVideoUrl,
       desc: uploadDesc.trim() || 'Institutional training module for media contributors.',
       gradient: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%)',
       glow: 'radial-gradient(circle at 50% 40%, rgba(2, 132, 199, 0.35) 0%, rgba(245, 158, 11, 0.2) 40%, transparent 75%)',
@@ -462,8 +508,10 @@ export default function TrainingPortalPage() {
     setUploadCode('')
     setUploadDesc('')
     setUploadVideoUrl('')
+    setUploadVideoFile(null)
     setUploadedFileName('')
     setUploadedFileSize('')
+    setUploadVideoSourceType('upload')
     showNotification('🎉 Masterclass uploaded & published to curriculum library!')
   }
 
@@ -520,6 +568,8 @@ export default function TrainingPortalPage() {
     setEditDuration(video.duration || '15:00')
     setEditDesc(video.desc || '')
     setEditVideoUrl(video.videoUrl || '/kmm-welcome-animation.mp4')
+    setEditVideoSourceType(video.videoUrl?.startsWith('/uploads/') ? 'upload' : 'url')
+    setEditVideoFile(null)
     setEditPoints(video.points && video.points.length > 0 ? [...video.points] : [
       'Statutory Work-for-Hire protocol executed and archived.',
       'Parental consent documentation verified for all minor voices.',
@@ -533,12 +583,13 @@ export default function TrainingPortalPage() {
   const handleEditVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setEditVideoFile(file)
       const objectUrl = URL.createObjectURL(file)
       setEditVideoUrl(objectUrl)
       setEditUploadedFileName(file.name)
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
       setEditUploadedFileSize(`${sizeMb} MB`)
-      showNotification(`✓ New video attached: "${file.name}"`)
+      showNotification(`✓ New video attached: "${file.name}" (will upload to VPS upon saving)`)
     }
   }
 
@@ -561,6 +612,19 @@ export default function TrainingPortalPage() {
 
     setIsSavingEdit(true)
 
+    // Handle VPS file upload if a new file was chosen in 'upload' mode
+    let finalVideoUrl = editVideoUrl.trim() || editingVideo.videoUrl || '/kmm-welcome-animation.mp4'
+    if (editVideoSourceType === 'upload' && editVideoFile) {
+      showNotification('⏳ Uploading updated video file to VPS server storage...')
+      try {
+        finalVideoUrl = await uploadVideoToServer(editVideoFile)
+      } catch (uploadErr: any) {
+        showNotification(`⚠️ Video upload failed: ${uploadErr.message}`)
+        setIsSavingEdit(false)
+        return
+      }
+    }
+
     const categoryLabels: Record<string, string> = {
       copyright: 'Copyright & Sovereign IP',
       protection: 'Child Protection & Safeguards',
@@ -577,7 +641,7 @@ export default function TrainingPortalPage() {
       categoryLabel: categoryLabels[editCategory] || editingVideo.categoryLabel || 'Sovereign Masterclass',
       duration: editDuration.trim() || editingVideo.duration || '15:00',
       desc: editDesc.trim() || editingVideo.desc,
-      videoUrl: editVideoUrl || editingVideo.videoUrl || '/kmm-welcome-animation.mp4',
+      videoUrl: finalVideoUrl,
       points: editPoints.filter(Boolean),
     }
 
@@ -608,6 +672,7 @@ export default function TrainingPortalPage() {
 
     setIsSavingEdit(false)
     setEditingVideo(null)
+    setEditVideoFile(null)
     showNotification('✓ Masterclass updated and published to curriculum!')
   }
 
@@ -2381,41 +2446,101 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
 
-              {/* Video File Upload Dropzone */}
-              <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                  Masterclass Video File (MP4, WebM, MOV) &bull; Protected Streaming
-                </label>
-                <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
-                  <input
-                    type="file"
-                    accept="video/mp4,video/webm,video/quicktime"
-                    onChange={handleVideoFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                  <div className="space-y-2 pointer-events-none">
-                    <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
-                      <FileVideo className="size-5" />
-                    </div>
-                    {uploadedFileName ? (
-                      <div>
-                        <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
-                          ✓ File Attached: {uploadedFileName}
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-mono">{uploadedFileSize}</div>
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="font-bold text-xs text-slate-800 dark:text-slate-200">
-                          Click to browse or drop video file here
-                        </div>
-                        <div className="text-[10px] text-slate-400">
-                          MP4, WebM or MOV (Protected playback, no frontend download)
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              {/* Video Source Selection (Upload to VPS vs Provide URL) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Masterclass Video Source *
+                  </label>
+                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
+                    Protected Streaming &bull; Download Disabled
+                  </span>
                 </div>
+
+                {/* Source Mode Toggle */}
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/60 dark:border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setUploadVideoSourceType('upload')}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                      uploadVideoSourceType === 'upload'
+                        ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Upload className="size-3.5 text-amber-500" />
+                    <span>Upload to Server (VPS)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUploadVideoSourceType('url')}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                      uploadVideoSourceType === 'url'
+                        ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Link2 className="size-3.5 text-amber-500" />
+                    <span>Provide Video URL</span>
+                  </button>
+                </div>
+
+                {/* Mode 1: File Upload (VPS) */}
+                {uploadVideoSourceType === 'upload' ? (
+                  <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/quicktime"
+                      onChange={handleVideoFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    <div className="space-y-2 pointer-events-none">
+                      <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
+                        <FileVideo className="size-5" />
+                      </div>
+                      {uploadedFileName ? (
+                        <div>
+                          <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                            ✓ File Attached: {uploadedFileName}
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-mono">{uploadedFileSize} &bull; Uploads to VPS server</div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                            Click to browse or drop video file here
+                          </div>
+                          <div className="text-[10px] text-slate-400">
+                            MP4, WebM or MOV up to 500MB (Saved to VPS <span className="font-mono text-amber-600 dark:text-amber-400">public/uploads</span>)
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  /* Mode 2: Direct Video URL */
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={uploadVideoUrl}
+                        onChange={(e) => setUploadVideoUrl(e.target.value)}
+                        placeholder="https://.../video.mp4 or /kmm-welcome-animation.mp4"
+                        className="flex-1 h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setUploadVideoUrl('/kmm-welcome-animation.mp4')}
+                        className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 whitespace-nowrap transition cursor-pointer"
+                      >
+                        Default Demo Video
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Provide a direct MP4, HLS, or CDN streaming URL, or a local server path.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -2586,55 +2711,104 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
 
-              {/* Video File Upload / Replace Dropzone */}
-              <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                  Replace Video File (Optional) &bull; Protected Streaming
-                </label>
-                <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
-                  <input
-                    type="file"
-                    accept="video/mp4,video/webm,video/quicktime"
-                    onChange={handleEditVideoFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                  <div className="space-y-2 pointer-events-none">
-                    <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
-                      <FileVideo className="size-5" />
-                    </div>
-                    {editUploadedFileName ? (
-                      <div>
-                        <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
-                          ✓ New File Attached: {editUploadedFileName}
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-mono">{editUploadedFileSize}</div>
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Click to select a replacement video file or drag and drop
-                        </p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
-                          Currently using: <span className="font-mono text-amber-600 dark:text-amber-400 truncate max-w-xs inline-block align-bottom">{editVideoUrl || '/kmm-welcome-animation.mp4'}</span>
-                        </p>
-                      </div>
-                    )}
-                  </div>
+              {/* Video Source Selection (Upload / Replace on VPS vs Provide URL) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Video Source Options *
+                  </label>
+                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
+                    Protected Streaming &bull; Download Disabled
+                  </span>
                 </div>
-              </div>
 
-              {/* Video URL Alternative Field */}
-              <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                  Or Video URL Path
-                </label>
-                <input
-                  type="text"
-                  value={editVideoUrl}
-                  onChange={(e) => setEditVideoUrl(e.target.value)}
-                  placeholder="/kmm-welcome-animation.mp4"
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
-                />
+                {/* Source Mode Toggle */}
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/60 dark:border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setEditVideoSourceType('upload')}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                      editVideoSourceType === 'upload'
+                        ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Upload className="size-3.5 text-amber-500" />
+                    <span>Upload to Server (VPS)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditVideoSourceType('url')}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                      editVideoSourceType === 'url'
+                        ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Link2 className="size-3.5 text-amber-500" />
+                    <span>Provide Video URL</span>
+                  </button>
+                </div>
+
+                {/* Mode 1: File Upload (VPS) */}
+                {editVideoSourceType === 'upload' ? (
+                  <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/quicktime"
+                      onChange={handleEditVideoFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    <div className="space-y-2 pointer-events-none">
+                      <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
+                        <FileVideo className="size-5" />
+                      </div>
+                      {editUploadedFileName ? (
+                        <div>
+                          <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                            ✓ New File Attached: {editUploadedFileName}
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-mono">{editUploadedFileSize} &bull; Will upload to VPS storage on Save</div>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            Click to select a replacement video file or drag and drop
+                          </p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">
+                            Currently using: <span className="font-mono text-amber-600 dark:text-amber-400 truncate max-w-xs inline-block align-bottom">{editVideoUrl || '/kmm-welcome-animation.mp4'}</span>
+                          </p>
+                          <p className="text-[10px] text-slate-400">
+                            MP4, WebM or MOV up to 500MB (Saved to VPS <span className="font-mono text-amber-600 dark:text-amber-400">public/uploads</span>)
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  /* Mode 2: Direct Video URL */
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={editVideoUrl}
+                        onChange={(e) => setEditVideoUrl(e.target.value)}
+                        placeholder="https://.../video.mp4 or /kmm-welcome-animation.mp4"
+                        className="flex-1 h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setEditVideoUrl('/kmm-welcome-animation.mp4')}
+                        className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 whitespace-nowrap transition cursor-pointer"
+                      >
+                        Default Demo Video
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Provide a direct MP4, HLS, or CDN streaming URL, or a local server path.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Description */}
