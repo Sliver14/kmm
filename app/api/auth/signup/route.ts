@@ -73,16 +73,25 @@ export async function POST(req: NextRequest) {
       ministryId: 'min-kmm',
     })
 
+    const isAdmin =
+      userRole.toLowerCase().includes('admin') ||
+      normalizedEmail.includes('admin') ||
+      body.isAdmin === true
+
+    const userRoleKey = isAdmin ? 'admin' : 'reviewer'
+
     const userProfile = {
       id: newUserId,
       name: trimmedName,
       email: normalizedEmail,
-      role: 'reviewer',
+      role: userRoleKey,
       roleLabel: userRole,
       agency: userAgency,
       unit: userAgency,
       initials,
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(trimmedName)}`,
+      password_hash: hashedPassword,
+      isAdmin,
       createdInDb,
       registeredAt: new Date().toISOString(),
     }

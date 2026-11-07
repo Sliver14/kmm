@@ -29,38 +29,10 @@ export interface TrainingUser {
   role: string
   initials: string
   avatar?: string
+  password_hash?: string
+  isAdmin?: boolean
   registeredAt: string
 }
-
-const DEFAULT_DEMO_USERS: TrainingUser[] = [
-  {
-    id: 'TP-LOV-001',
-    name: 'Barrister Lillian',
-    email: 'officer@lovetoons.tv',
-    agency: 'Lovetoons Content Operations',
-    role: 'Statutory Child Safeguarding Director',
-    initials: 'BL',
-    registeredAt: '2026-01-15T09:00:00Z',
-  },
-  {
-    id: 'TP-LOV-002',
-    name: 'Pastor Dave',
-    email: 'dave@lovetoons.tv',
-    agency: 'Lovetoons Animation Studio',
-    role: 'Lead Animation Producer',
-    initials: 'PD',
-    registeredAt: '2026-02-10T11:30:00Z',
-  },
-  {
-    id: 'TP-MIN-003',
-    name: "Sister Grace (Children's Ministry)",
-    email: 'grace@childrensministry.org',
-    agency: "Children's Ministry Directorate",
-    role: 'Curriculum & Video Broadcast Reviewer',
-    initials: 'SG',
-    registeredAt: '2026-03-01T14:20:00Z',
-  },
-]
 
 const MINISTRIES_AND_AGENCIES = [
   "Children's Ministry",
@@ -76,6 +48,7 @@ const MINISTRIES_AND_AGENCIES = [
 ]
 
 const STANDARD_ROLES = [
+  'Administrator & Directorate Lead',
   'Child Safeguarding Officer',
   'Content Reviewer & Policy Officer',
   'Lead Animator / Director',
@@ -91,9 +64,9 @@ export default function AuthPage() {
   const [isDark, setIsDark] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
-  // Sign In state
-  const [signInEmail, setSignInEmail] = useState('officer@lovetoons.tv')
-  const [signInPassword, setSignInPassword] = useState('admin123')
+  // Sign In state (clean, no demo credentials)
+  const [signInEmail, setSignInEmail] = useState('')
+  const [signInPassword, setSignInPassword] = useState('')
   const [showSignInPassword, setShowSignInPassword] = useState(false)
 
   // Sign Up state
@@ -114,16 +87,6 @@ export default function AuthPage() {
     setIsMounted(true)
     const savedTheme = localStorage.getItem('kmm_training_theme')
     setIsDark(savedTheme === 'dark')
-
-    // Initialize registered demo users in localStorage if not already present
-    try {
-      const stored = localStorage.getItem('kmm_registered_training_users')
-      if (!stored) {
-        localStorage.setItem('kmm_registered_training_users', JSON.stringify(DEFAULT_DEMO_USERS))
-      }
-    } catch {
-      // storage unavailable
-    }
   }, [])
 
   const toggleTheme = () => {
@@ -146,47 +109,72 @@ export default function AuthPage() {
     setSuccessMessage(null)
 
     const email = signInEmail.trim().toLowerCase()
-    if (!email) {
-      setErrorMessage('Please enter your email address.')
+    const password = signInPassword
+
+    if (!email || !email.includes('@')) {
+      setErrorMessage('Please enter a valid official email address.')
+      return
+    }
+    if (!password) {
+      setErrorMessage('Please enter your password.')
       return
     }
 
     setIsLoading(true)
 
     try {
-      // 1. Try to find user in local repository of registered training users
+      // 1. Locate locally cached user if any to supply password_hash for secure bcrypt verification
       let matchedUser: TrainingUser | undefined
       try {
         const storedUsersRaw = localStorage.getItem('kmm_registered_training_users')
-        const storedUsers: TrainingUser[] = storedUsersRaw ? JSON.parse(storedUsersRaw) : DEFAULT_DEMO_USERS
-        matchedUser = storedUsers.find((u) => u.email.toLowerCase() === email)
-      } catch {
-        matchedUser = DEFAULT_DEMO_USERS.find((u) => u.email.toLowerCase() === email)
+        if (storedUsersRaw) {
+          const storedUsers: TrainingUser[] = JSON.parse(storedUsersRaw)
+          matchedUser = storedUsers.find((u) => u.email.toLowerCase() === email)
+        }
+      } catch (readErr) {
+        console.warn('Could not read registered users store:', readErr)
       }
 
-      // If matched user found or fallback demo account
-      const effectiveUser: TrainingUser = matchedUser || {
-        id: `TP-${Date.now().toString().slice(-6)}`,
-        name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-        email,
-        agency: email.includes('lovetoons') ? 'Lovetoons' : "Children's Ministry",
-        role: 'Content Reviewer & Safeguarding Officer',
-        initials: (email.split('@')[0].slice(0, 2) || 'KM').toUpperCase(),
-        registeredAt: new Date().toISOString(),
+      // 2. Call backend authentication route
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          fallbackUser: matchedUser,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data?.error || 'Invalid credentials. Password incorrect.')
+      }
+
+      const authenticatedUser: TrainingUser = {
+        id: data.user?.id || matchedUser?.id || `TP-${Date.now().toString().slice(-6)}`,
+        name: data.user?.name || matchedUser?.name || email.split('@')[0],
+        email: data.user?.email || email,
+        agency: data.user?.agency || matchedUser?.agency || 'Lovetoons Content Operations',
+        role: data.user?.roleLabel || data.user?.role || matchedUser?.role || 'Child Safeguarding Officer',
+        initials: data.user?.initials || matchedUser?.initials || 'KM',
+        isAdmin: data.user?.role === 'admin' || (data.user?.roleLabel?.toLowerCase().includes('admin')) || matchedUser?.isAdmin || false,
+        registeredAt: data.user?.created_at || matchedUser?.registeredAt || new Date().toISOString(),
       }
 
       // Save active training session
       if (typeof window !== 'undefined') {
-        localStorage.setItem('kmm_training_user', JSON.stringify(effectiveUser))
-        localStorage.setItem('kmm_auth_officer', effectiveUser.name)
+        localStorage.setItem('kmm_training_user', JSON.stringify(authenticatedUser))
+        localStorage.setItem('kmm_auth_officer', authenticatedUser.name)
       }
 
-      setSuccessMessage(`Welcome back, ${effectiveUser.name}! Loading training curriculum...`)
+      setSuccessMessage(`Welcome back, ${authenticatedUser.name}! Launching Training Portal...`)
       setTimeout(() => {
         router.push('/training-portal')
       }, 500)
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to authenticate officer session.')
+      setErrorMessage(err?.message || 'Authentication failed. Please check your credentials.')
       setIsLoading(false)
     }
   }
@@ -205,6 +193,7 @@ export default function AuthPage() {
         : signUpAgency.trim() || "Children's Ministry"
     const role = signUpRole.trim() || 'Child Safeguarding Officer'
     const password = signUpPassword
+    const isAdmin = role.toLowerCase().includes('admin') || email.includes('admin')
 
     if (!name) {
       setErrorMessage('Please provide your full name or title.')
@@ -222,15 +211,17 @@ export default function AuthPage() {
     setIsLoading(true)
 
     try {
-      // 1. Call backend registration API
-      try {
-        await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, agency, role, password }),
-        })
-      } catch {
-        // graceful offline fallback
+      // 1. Call backend registration API (hashes password with bcrypt)
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, agency, role, password, isAdmin }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data?.error || 'Registration failed.')
       }
 
       // 2. Generate new TrainingUser profile
@@ -243,25 +234,27 @@ export default function AuthPage() {
         .toUpperCase() || 'KM'
 
       const newUser: TrainingUser = {
-        id: `TP-${Date.now().toString().slice(-6)}`,
+        id: data.user?.id || `TP-${Date.now().toString().slice(-6)}`,
         name,
         email,
         agency,
         role,
         initials,
+        isAdmin,
+        password_hash: data.user?.password_hash,
         avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
         registeredAt: new Date().toISOString(),
       }
 
-      // 3. Persist in registered users list
+      // 3. Persist in registered users list with secure password_hash
       try {
         const storedUsersRaw = localStorage.getItem('kmm_registered_training_users')
-        const storedUsers: TrainingUser[] = storedUsersRaw ? JSON.parse(storedUsersRaw) : [...DEFAULT_DEMO_USERS]
+        const storedUsers: TrainingUser[] = storedUsersRaw ? JSON.parse(storedUsersRaw) : []
         const withoutOld = storedUsers.filter((u) => u.email.toLowerCase() !== email)
         withoutOld.push(newUser)
         localStorage.setItem('kmm_registered_training_users', JSON.stringify(withoutOld))
-      } catch {
-        // ignore
+      } catch (storeErr) {
+        console.warn('Storage write error:', storeErr)
       }
 
       // 4. Set active authenticated training session
@@ -270,7 +263,7 @@ export default function AuthPage() {
         localStorage.setItem('kmm_auth_officer', newUser.name)
       }
 
-      setSuccessMessage(`Account created successfully! Welcome to KMM, ${name}!`)
+      setSuccessMessage(`Account registered successfully! Welcome to KMM, ${name}!`)
       setTimeout(() => {
         router.push('/training-portal')
       }, 700)

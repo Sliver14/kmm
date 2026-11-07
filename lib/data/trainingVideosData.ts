@@ -11,6 +11,9 @@ export interface VideoItem {
   speakerRole: string
   initials: string
   avatarBg: string
+  videoUrl?: string
+  createdAt?: string
+  isCustom?: boolean
   res?: string
   desc: string
   gradient: string

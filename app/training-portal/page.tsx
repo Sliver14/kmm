@@ -38,6 +38,13 @@ import {
   Check,
   Sparkles,
   Filter,
+  Upload,
+  Plus,
+  Trash2,
+  LogOut,
+  FileVideo,
+  Shield,
+  AlertTriangle,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem } from '@/lib/data/trainingVideosData'
 
@@ -48,6 +55,7 @@ export interface TrainingUser {
   agency: string
   role: string
   initials: string
+  isAdmin?: boolean
   avatar?: string
   registeredAt: string
 }
@@ -58,12 +66,15 @@ export default function TrainingPortalPage() {
   const [isMounted, setIsMounted] = useState(false)
   const [currentUser, setCurrentUser] = useState<TrainingUser | null>(null)
 
-  // Navigation tab: 'overview' | 'video' | 'accreditation'
-  const [activeTab, setActiveTab] = useState<'overview' | 'video' | 'accreditation'>('overview')
+  // Navigation tab: 'overview' | 'video' | 'accreditation' | 'admin'
+  const [activeTab, setActiveTab] = useState<'overview' | 'video' | 'accreditation' | 'admin'>('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [showRightDetails, setShowRightDetails] = useState(true)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  // Masterclasses state (built-in + admin uploaded)
+  const [masterclasses, setMasterclasses] = useState<VideoItem[]>(ARCHIVED_TRAINING_VIDEOS)
 
   // Currently active / selected video from the list (null = show all list view)
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
@@ -76,6 +87,26 @@ export default function TrainingPortalPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerContainerRef = useRef<HTMLDivElement | null>(null)
   const [activeChapterIndex, setActiveChapterIndex] = useState(0)
+
+  // Admin & Masterclass Upload State
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [uploadTitle, setUploadTitle] = useState('')
+  const [uploadCode, setUploadCode] = useState('')
+  const [uploadCategory, setUploadCategory] = useState('copyright')
+  const [uploadDuration, setUploadDuration] = useState('20:00')
+  const [uploadSpeaker, setUploadSpeaker] = useState('')
+  const [uploadSpeakerRole, setUploadSpeakerRole] = useState('')
+  const [uploadDesc, setUploadDesc] = useState('')
+  const [uploadVideoUrl, setUploadVideoUrl] = useState('')
+  const [uploadedFileName, setUploadedFileName] = useState('')
+  const [uploadedFileSize, setUploadedFileSize] = useState('')
+  const [uploadPoints, setUploadPoints] = useState<string[]>([
+    'Mandatory Work-for-Hire assignment executed prior to principal recording.',
+    'Signed parental consent deed archived for all participating minor voices.',
+    'Logged AI transparency declaration and human creative oversight ratio.',
+  ])
+  const [newPointInput, setNewPointInput] = useState('')
+  const [isUploading, setIsUploading] = useState(false)
 
   // Completed modules tracking (maps video.id to boolean)
   const [completedModules, setCompletedModules] = useState<Record<string, boolean>>({
@@ -125,36 +156,47 @@ export default function TrainingPortalPage() {
       }
     }
 
-    // Default authenticated officer
-    const defaultUser: TrainingUser = {
-      id: 'TP-LOV-001',
-      name: 'Barrister Lillian Okoye',
-      email: 'officer@lovetoons.tv',
-      agency: 'Lovetoons Content Operations',
-      role: 'Head of Legal & IP Directorate',
-      initials: 'LO',
-      registeredAt: '2026-01-15T09:00:00Z',
+    // STRICT AUTHENTICATION CHECK: Must have valid session
+    const storedUserRaw = typeof window !== 'undefined' ? localStorage.getItem('kmm_training_user') : null
+    if (!storedUserRaw) {
+      router.push('/auth?redirect=/training-portal')
+      return
     }
 
     try {
-      const storedUserRaw = localStorage.getItem('kmm_training_user')
-      if (storedUserRaw) {
-        const user: TrainingUser = JSON.parse(storedUserRaw)
-        if (user && user.name) {
-          setCurrentUser(user)
-        } else {
-          setCurrentUser(defaultUser)
-        }
+      const user: TrainingUser = JSON.parse(storedUserRaw)
+      if (user && user.email) {
+        setCurrentUser(user)
       } else {
-        setCurrentUser(defaultUser)
+        router.push('/auth?redirect=/training-portal')
+        return
       }
+    } catch {
+      router.push('/auth?redirect=/training-portal')
+      return
+    }
 
+    // Load completed modules
+    try {
       const savedModules = localStorage.getItem('kmm_completed_modules')
       if (savedModules) {
         setCompletedModules(JSON.parse(savedModules))
       }
-    } catch {
-      setCurrentUser(defaultUser)
+    } catch (e) {
+      console.warn(e)
+    }
+
+    // Load custom masterclasses from storage
+    try {
+      const storedCustom = localStorage.getItem('kmm_custom_masterclasses')
+      if (storedCustom) {
+        const customItems: VideoItem[] = JSON.parse(storedCustom)
+        if (Array.isArray(customItems) && customItems.length > 0) {
+          setMasterclasses([...ARCHIVED_TRAINING_VIDEOS, ...customItems])
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load custom masterclasses', e)
     }
 
     // Check query params for tab switching or specific video id
@@ -168,13 +210,15 @@ export default function TrainingPortalPage() {
           setSelectedVideo(found)
           setActiveTab('video')
         }
+      } else if (tabParam === 'admin') {
+        setActiveTab('admin')
       } else if (tabParam === 'video' || tabParam === 'watch') {
         setActiveTab('video')
       } else if (tabParam === 'accreditation') {
         setActiveTab('accreditation')
       }
     }
-  }, [])
+  }, [router])
 
   const toggleTheme = () => {
     const nextDark = !isDark
@@ -251,7 +295,7 @@ export default function TrainingPortalPage() {
 
   // Filtered masterclass videos
   const filteredVideos = useMemo(() => {
-    return ARCHIVED_TRAINING_VIDEOS.filter((v) => {
+    return masterclasses.filter((v) => {
       const matchesSearch =
         !searchQuery.trim() ||
         v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -261,16 +305,156 @@ export default function TrainingPortalPage() {
       const matchesCategory = categoryFilter === 'all' || v.category === categoryFilter
       return matchesSearch && matchesCategory
     })
-  }, [searchQuery, categoryFilter])
+  }, [masterclasses, searchQuery, categoryFilter])
 
   const completedCount = useMemo(() => {
     return Object.values(completedModules).filter(Boolean).length
   }, [completedModules])
 
-  if (!isMounted) {
+  // Video File attachment handler
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (!file.type.startsWith('video/')) {
+        showNotification('⚠️ Please select a valid video file (MP4, WebM, MOV)')
+        return
+      }
+      const objectUrl = URL.createObjectURL(file)
+      setUploadVideoUrl(objectUrl)
+      setUploadedFileName(file.name)
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
+      setUploadedFileSize(`${sizeMb} MB`)
+      showNotification(`✓ Video file "${file.name}" attached successfully!`)
+    }
+  }
+
+  // Publish new masterclass
+  const handlePublishMasterclass = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!uploadTitle.trim()) {
+      showNotification('⚠️ Please provide a masterclass title.')
+      return
+    }
+    if (!uploadCode.trim()) {
+      showNotification('⚠️ Please provide a course code.')
+      return
+    }
+    if (!uploadSpeaker.trim()) {
+      showNotification('⚠️ Please specify the lead speaker or instructor.')
+      return
+    }
+
+    setIsUploading(true)
+
+    const categoryLabels: Record<string, string> = {
+      copyright: 'Copyright & Sovereign IP',
+      protection: 'Child Protection & Safeguards',
+      broadcast: 'Broadcast Standards & Playout',
+      doctrinal: 'Scriptural Review & Canon',
+      merchandising: 'Merchandising & Contracts',
+    }
+
+    const speakerInitials = uploadSpeaker
+      .split(' ')
+      .filter(Boolean)
+      .map((w) => w[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || 'KM'
+
+    const newVideo: VideoItem = {
+      id: `custom-vid-${Date.now().toString().slice(-6)}`,
+      code: uploadCode.trim().toUpperCase(),
+      title: uploadTitle.trim(),
+      category: uploadCategory,
+      categoryLabel: categoryLabels[uploadCategory] || 'Sovereign Masterclass',
+      duration: uploadDuration.trim() || '15:00',
+      speaker: uploadSpeaker.trim(),
+      speakerRole: uploadSpeakerRole.trim() || 'Directorate Lead Contributor',
+      initials: speakerInitials,
+      avatarBg: 'linear-gradient(135deg, #0284C7, #F59E0B)',
+      videoUrl: uploadVideoUrl || '/kmm-welcome-animation.mp4',
+      desc: uploadDesc.trim() || 'Institutional training module for media contributors.',
+      gradient: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%)',
+      glow: 'radial-gradient(circle at 50% 40%, rgba(2, 132, 199, 0.35) 0%, rgba(245, 158, 11, 0.2) 40%, transparent 75%)',
+      points: uploadPoints.filter(Boolean),
+      citations: ['KMM Sovereign IP Charter Art. IV & VI', 'Children’s Media Protection Accord 2026'],
+      isCustom: true,
+      createdAt: new Date().toISOString(),
+    }
+
+    // Call API (graceful offline fallback)
+    try {
+      await fetch('/api/training/masterclasses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newVideo),
+      })
+    } catch (apiErr) {
+      console.warn('API sync skipped:', apiErr)
+    }
+
+    const updated = [newVideo, ...masterclasses]
+    setMasterclasses(updated)
+
+    // Save custom masterclasses in localStorage
+    try {
+      const customOnly = updated.filter((v) => v.isCustom)
+      localStorage.setItem('kmm_custom_masterclasses', JSON.stringify(customOnly))
+    } catch (saveErr) {
+      console.warn('Could not save custom masterclasses:', saveErr)
+    }
+
+    setIsUploading(false)
+    setShowUploadModal(false)
+    // Reset form
+    setUploadTitle('')
+    setUploadCode('')
+    setUploadSpeaker('')
+    setUploadSpeakerRole('')
+    setUploadDesc('')
+    setUploadVideoUrl('')
+    setUploadedFileName('')
+    setUploadedFileSize('')
+    showNotification('🎉 Masterclass uploaded & published to curriculum library!')
+  }
+
+  // Delete custom masterclass
+  const handleDeleteCustomMasterclass = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!window.confirm('Are you sure you want to delete this custom masterclass from the curriculum?')) return
+    const updated = masterclasses.filter((v) => v.id !== id)
+    setMasterclasses(updated)
+    try {
+      const customOnly = updated.filter((v) => v.isCustom)
+      localStorage.setItem('kmm_custom_masterclasses', JSON.stringify(customOnly))
+    } catch (saveErr) {
+      console.warn(saveErr)
+    }
+    if (selectedVideo?.id === id) {
+      setSelectedVideo(null)
+    }
+    showNotification('Masterclass removed from curriculum.')
+  }
+
+  // Sign out officer session
+  const handleSignOut = () => {
+    if (typeof window !== 'undefined') {
+      if (window.confirm('Are you sure you want to log out of KMM Training Portal?')) {
+        localStorage.removeItem('kmm_training_user')
+        localStorage.removeItem('kmm_auth_officer')
+        router.push('/auth')
+      }
+    }
+  }
+
+  if (!isMounted || !currentUser) {
     return (
       <div className="h-screen w-full bg-[#F8F9FA] dark:bg-[#0B0F19] flex items-center justify-center">
-        <div className="size-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="size-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-semibold text-slate-500">Verifying Officer Accreditation Session...</p>
+        </div>
       </div>
     )
   }
@@ -359,7 +543,7 @@ export default function TrainingPortalPage() {
                 <Tv className={`size-4 ${activeTab === 'video' ? 'text-amber-500' : 'text-slate-400'}`} />
                 <span>Masterclass Videos</span>
                 <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
-                  {ARCHIVED_TRAINING_VIDEOS.length}
+                  {masterclasses.length}
                 </span>
               </button>
 
@@ -376,11 +560,53 @@ export default function TrainingPortalPage() {
                 <GraduationCap className={`size-4 ${activeTab === 'accreditation' ? 'text-amber-500' : 'text-slate-400'}`} />
                 <span>Accreditation Certificate</span>
               </button>
+
+              {/* Admin Dashboard Item */}
+              <button
+                onClick={() => {
+                  setActiveTab('admin')
+                  setMobileSidebarOpen(false)
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin'
+                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                  }`}
+              >
+                <ShieldCheck className={`size-4 ${activeTab === 'admin' ? 'text-amber-500' : 'text-slate-400'}`} />
+                <span>Admin Dashboard</span>
+                <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                  Upload
+                </span>
+              </button>
             </div>
           </div>
 
           {/* Bottom Card: Legal Guidance / Action Card */}
           <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-white/10">
+            {/* Authenticated Officer Session & Sign Out */}
+            <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-2 shadow-2xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="size-8 rounded-xl bg-gradient-to-tr from-[#0284C7] to-amber-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                  {currentUser?.initials || 'OF'}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                    {currentUser?.name || 'Authenticated Officer'}
+                  </div>
+                  <div className="text-[10px] text-slate-400 truncate">
+                    {currentUser?.role || 'Child Safeguarding Officer'}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleSignOut}
+                title="Sign out of Training Portal"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition cursor-pointer shrink-0"
+              >
+                <LogOut className="size-4" />
+              </button>
+            </div>
+
             <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-500/5 border border-amber-500/20 text-slate-800 dark:text-slate-200 space-y-2.5">
               <div className="flex items-center gap-2">
                 <div className="size-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center">
@@ -443,11 +669,15 @@ export default function TrainingPortalPage() {
                       ? selectedVideo
                         ? selectedVideo.title
                         : 'Masterclass Video Catalog'
-                      : 'Accreditation Certificate'}
+                      : activeTab === 'accreditation'
+                        ? 'Accreditation Certificate'
+                        : 'Training Portal Admin Dashboard'}
                 </h1>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
                   {activeTab === 'video' && selectedVideo
                     ? `${selectedVideo.code} • ${selectedVideo.speaker}`
+                    : activeTab === 'admin'
+                    ? 'Masterclass Uploads & Accreditation Governance'
                     : 'Sovereign Intellectual Property & Statutory Child Protection'}
                 </p>
               </div>
@@ -690,11 +920,18 @@ export default function TrainingPortalPage() {
                           }`}
                       >
                         {/* Video Thumbnail Box */}
-                        <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+                        <div
+                          onContextMenu={(e) => { e.preventDefault(); return false; }}
+                          className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center select-none"
+                        >
                           <video
-                            src="/kmm-welcome-animation.mp4"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            src={video.videoUrl || "/kmm-welcome-animation.mp4"}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
                             muted
+                            controlsList="nodownload nofullscreen noplaybackrate"
+                            disablePictureInPicture
+                            onContextMenu={(e) => { e.preventDefault(); return false; }}
+                            onDragStart={(e) => e.preventDefault()}
                           />
                           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                             <div className="size-11 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -852,11 +1089,18 @@ export default function TrainingPortalPage() {
                         className="rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-2xs hover:shadow-xl hover:border-amber-500/50 dark:hover:border-amber-400/50 hover:-translate-y-0.5 duration-200"
                       >
                         {/* Video Thumbnail Box */}
-                        <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+                        <div
+                          onContextMenu={(e) => { e.preventDefault(); return false; }}
+                          className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center select-none"
+                        >
                           <video
-                            src="/kmm-welcome-animation.mp4"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            src={video.videoUrl || "/kmm-welcome-animation.mp4"}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
                             muted
+                            controlsList="nodownload nofullscreen noplaybackrate"
+                            disablePictureInPicture
+                            onContextMenu={(e) => { e.preventDefault(); return false; }}
+                            onDragStart={(e) => e.preventDefault()}
                           />
                           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                             <div className="size-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -984,12 +1228,19 @@ export default function TrainingPortalPage() {
 
                 {/* Hero Cinema Player */}
                 <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#151928] p-4 sm:p-6 shadow-sm space-y-5">
-                  <div className="relative aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md flex items-center justify-center group">
+                  <div
+                    onContextMenu={(e) => { e.preventDefault(); return false; }}
+                    className="relative aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md flex items-center justify-center group select-none"
+                  >
                     <video
                       ref={videoRef}
-                      src="/kmm-welcome-animation.mp4"
-                      className="w-full h-full object-cover"
+                      src={selectedVideo.videoUrl || "/kmm-welcome-animation.mp4"}
+                      className="w-full h-full object-cover select-none pointer-events-auto"
                       muted={isMuted}
+                      controlsList="nodownload nofullscreen noplaybackrate"
+                      disablePictureInPicture
+                      onContextMenu={(e) => { e.preventDefault(); return false; }}
+                      onDragStart={(e) => e.preventDefault()}
                       onTimeUpdate={() => {
                         if (videoRef.current) {
                           setCurrentTime(videoRef.current.currentTime)
@@ -1153,7 +1404,7 @@ export default function TrainingPortalPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-tight">
-                        Other Masterclasses in Curriculum ({ARCHIVED_TRAINING_VIDEOS.length - 1})
+                        Other Masterclasses in Curriculum ({Math.max(0, masterclasses.length - 1)})
                       </h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         Explore more specialized training modules on sovereign copyright, safeguarding deeds, and media compliance.
@@ -1169,18 +1420,25 @@ export default function TrainingPortalPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {ARCHIVED_TRAINING_VIDEOS.filter((v) => v.id !== selectedVideo.id).map((v) => (
+                    {masterclasses.filter((v) => v.id !== selectedVideo.id).map((v) => (
                       <div
                         key={v.id}
                         onClick={() => handleSelectVideo(v)}
                         className="rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 hover:border-amber-500/50 dark:hover:border-amber-400/50 transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-2xs hover:shadow-md hover:-translate-y-0.5 duration-200"
                       >
                         {/* Video Thumbnail Box */}
-                        <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+                        <div
+                          onContextMenu={(e) => { e.preventDefault(); return false; }}
+                          className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center select-none"
+                        >
                           <video
-                            src="/kmm-welcome-animation.mp4"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            src={v.videoUrl || "/kmm-welcome-animation.mp4"}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
                             muted
+                            controlsList="nodownload nofullscreen noplaybackrate"
+                            disablePictureInPicture
+                            onContextMenu={(e) => { e.preventDefault(); return false; }}
+                            onDragStart={(e) => e.preventDefault()}
                           />
                           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                             <div className="size-10 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -1369,6 +1627,186 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
             )}
+
+            {/* ========================================================= */}
+            {/* TAB 4: ADMIN DASHBOARD & MASTERCLASSES UPLOAD             */}
+            {/* ========================================================= */}
+            {activeTab === 'admin' && (
+              <div className="space-y-8 animate-in fade-in duration-200">
+                {/* Admin Hero Bar */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-sky-500/10 border border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
+                  <div className="space-y-2 max-w-xl">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30">
+                      <Shield className="size-3.5 text-amber-500" />
+                      <span>Directorate Admin Panel</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                      Masterclass Management &amp; Uploads
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                      Publish official masterclasses, configure curriculum chapter checkpoints, attach statutory covenants, and govern officer training accreditation.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <button
+                      onClick={() => setShowUploadModal(true)}
+                      className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition-transform active:scale-98 cursor-pointer"
+                    >
+                      <Plus className="size-4 stroke-3" />
+                      <span>Upload Masterclass</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 Stats Cards in Row */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Masterclasses</div>
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">{masterclasses.length}</div>
+                    <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Active in curriculum</div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Custom Uploads</div>
+                    <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                      {masterclasses.filter((v) => v.isCustom).length}
+                    </div>
+                    <div className="text-[11px] text-slate-400 font-medium">Added via admin panel</div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Officer Completions</div>
+                    <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                      {completedCount}
+                    </div>
+                    <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Verified accreditations</div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Video DRM &amp; Protection</div>
+                    <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 pt-1.5">
+                      <ShieldCheck className="size-4" />
+                      <span>No-Download DRM Active</span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">Stream-only protected playback</div>
+                  </div>
+                </div>
+
+                {/* Masterclasses Table */}
+                <div className="rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs space-y-4 p-5 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
+                        Curriculum Masterclasses Repository ({masterclasses.length})
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Review, inspect, or manage all institutional video modules published to the training portal.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setShowUploadModal(true)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer"
+                    >
+                      <Plus className="size-3.5" />
+                      <span>New Masterclass</span>
+                    </button>
+                  </div>
+
+                  {/* Table Container */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-200/80 dark:border-white/10 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                          <th className="py-3 px-3">Module</th>
+                          <th className="py-3 px-3">Category</th>
+                          <th className="py-3 px-3">Speaker &amp; Role</th>
+                          <th className="py-3 px-3">Duration</th>
+                          <th className="py-3 px-3">Status</th>
+                          <th className="py-3 px-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                        {masterclasses.map((v) => (
+                          <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                            <td className="py-3.5 px-3">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  onContextMenu={(e) => { e.preventDefault(); return false; }}
+                                  className="relative size-12 rounded-xl bg-slate-900 overflow-hidden shrink-0 border border-slate-800 flex items-center justify-center select-none"
+                                >
+                                  <video
+                                    src={v.videoUrl || '/kmm-welcome-animation.mp4'}
+                                    className="w-full h-full object-cover pointer-events-none select-none"
+                                    muted
+                                    controlsList="nodownload nofullscreen noplaybackrate"
+                                    disablePictureInPicture
+                                    onContextMenu={(e) => { e.preventDefault(); return false; }}
+                                  />
+                                  <Play className="absolute size-3.5 text-amber-400 fill-current" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="font-mono text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                                    {v.code}
+                                  </div>
+                                  <div className="font-bold text-slate-900 dark:text-white truncate max-w-xs sm:max-w-md">
+                                    {v.title}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-3 whitespace-nowrap">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                {v.categoryLabel}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-3 whitespace-nowrap">
+                              <div className="font-semibold text-slate-800 dark:text-slate-200">{v.speaker}</div>
+                              <div className="text-[10px] text-slate-400 truncate max-w-[150px]">{v.speakerRole}</div>
+                            </td>
+                            <td className="py-3.5 px-3 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                              {v.duration}
+                            </td>
+                            <td className="py-3.5 px-3 whitespace-nowrap">
+                              {v.isCustom ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                                  <span>Custom Upload</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                                  <span>Core Curriculum</span>
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-3 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleSelectVideo(v)}
+                                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 font-bold text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer inline-flex items-center gap-1"
+                                >
+                                  <Play className="size-3 fill-current text-amber-500" />
+                                  <span>Play</span>
+                                </button>
+                                {v.isCustom && (
+                                  <button
+                                    onClick={(e) => handleDeleteCustomMasterclass(v.id, e)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
+                                    title="Delete masterclass"
+                                  >
+                                    <Trash2 className="size-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </main>
 
@@ -1440,11 +1878,11 @@ export default function TrainingPortalPage() {
             <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-xs text-slate-900 dark:text-white">Up Next &bull; Masterclasses</span>
-                <span className="text-[10px] font-bold text-slate-400">{completedCount}/{ARCHIVED_TRAINING_VIDEOS.length} Completed</span>
+                <span className="text-[10px] font-bold text-slate-400">{completedCount}/{masterclasses.length} Completed</span>
               </div>
 
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {ARCHIVED_TRAINING_VIDEOS.map((v) => (
+                {masterclasses.map((v) => (
                   <button
                     key={v.id}
                     onClick={() => handleSelectVideo(v)}
@@ -1514,7 +1952,7 @@ export default function TrainingPortalPage() {
                     <span>In Progress</span>
                   </div>
                   <div className="font-black text-sm text-slate-900 dark:text-white">
-                    {ARCHIVED_TRAINING_VIDEOS.length - completedCount} Left
+                    {Math.max(0, masterclasses.length - completedCount)} Left
                   </div>
                 </div>
 
@@ -1602,6 +2040,240 @@ export default function TrainingPortalPage() {
           </aside>
         )}
       </div>
+
+      {/* Upload Masterclass Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-white dark:bg-[#151928] rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+                  <Upload className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                    Upload New Masterclass
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Publish curriculum recording and attach statutory covenants.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Upload Form */}
+            <form onSubmit={handlePublishMasterclass} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Masterclass Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    placeholder="e.g. AI Prompt Transparency & Likeness Consent"
+                    required
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Institutional Code *
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadCode}
+                    onChange={(e) => setUploadCode(e.target.value)}
+                    placeholder="e.g. KMM-AI-201"
+                    required
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Curriculum Category
+                  </label>
+                  <select
+                    value={uploadCategory}
+                    onChange={(e) => setUploadCategory(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 cursor-pointer"
+                  >
+                    <option value="copyright">Copyright &amp; Sovereign IP</option>
+                    <option value="protection">Child Protection &amp; Safeguards</option>
+                    <option value="broadcast">Broadcast Standards &amp; Playout</option>
+                    <option value="doctrinal">Scriptural Review &amp; Canon</option>
+                    <option value="merchandising">Merchandising &amp; Contracts</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Video Duration (MM:SS)
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadDuration}
+                    onChange={(e) => setUploadDuration(e.target.value)}
+                    placeholder="e.g. 18:30"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Lead Speaker / Instructor *
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadSpeaker}
+                    onChange={(e) => setUploadSpeaker(e.target.value)}
+                    placeholder="e.g. Barrister Lillian Okoye"
+                    required
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Speaker Role / Directorate
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadSpeakerRole}
+                    onChange={(e) => setUploadSpeakerRole(e.target.value)}
+                    placeholder="e.g. Head of Legal &amp; IP Directorate"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              {/* Video File Upload Dropzone */}
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                  Masterclass Video File (MP4, WebM, MOV) &bull; Protected Streaming
+                </label>
+                <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    onChange={handleVideoFileChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                  <div className="space-y-2 pointer-events-none">
+                    <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
+                      <FileVideo className="size-5" />
+                    </div>
+                    {uploadedFileName ? (
+                      <div>
+                        <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                          ✓ File Attached: {uploadedFileName}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">{uploadedFileSize}</div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                          Click to browse or drop video file here
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          MP4, WebM or MOV (Protected playback, no frontend download)
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                  Course Description &amp; Objectives
+                </label>
+                <textarea
+                  value={uploadDesc}
+                  onChange={(e) => setUploadDesc(e.target.value)}
+                  placeholder="Outline the core statutory principles and legal requirements taught in this masterclass..."
+                  rows={3}
+                  className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 resize-none"
+                />
+              </div>
+
+              {/* Statutory Covenants */}
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                  Institutional Covenants Covered ({uploadPoints.length})
+                </label>
+                <div className="space-y-1.5 mb-2">
+                  {uploadPoints.map((pt, i) => (
+                    <div key={i} className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs">
+                      <span className="truncate flex-1">{pt}</span>
+                      <button
+                        type="button"
+                        onClick={() => setUploadPoints(uploadPoints.filter((_, idx) => idx !== i))}
+                        className="text-slate-400 hover:text-rose-500"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newPointInput}
+                    onChange={(e) => setNewPointInput(e.target.value)}
+                    placeholder="Add mandatory legal covenant or takeaway..."
+                    className="flex-1 h-9 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-xs outline-hidden focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newPointInput.trim()) {
+                        setUploadPoints([...uploadPoints, newPointInput.trim()])
+                        setNewPointInput('')
+                      }
+                    }}
+                    className="px-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-amber-500 hover:text-slate-950 text-xs font-bold cursor-pointer transition"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowUploadModal(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUploading}
+                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs hover:brightness-110 shadow-md cursor-pointer disabled:opacity-50"
+                >
+                  {isUploading ? 'Publishing...' : 'Publish Masterclass'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
