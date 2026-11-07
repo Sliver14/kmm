@@ -11,7 +11,7 @@ export interface VideoItem {
   speakerRole: string
   initials: string
   avatarBg: string
-  res: string
+  res?: string
   desc: string
   gradient: string
   glow: string
@@ -33,7 +33,6 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     speakerRole: 'Head of Legal & IP Directorate, Kiddies Media Ministries',
     initials: 'LO',
     avatarBg: 'linear-gradient(135deg, #0284C7, #0369A1)',
-    res: '4K ULTRA HD • OFFICIAL MASTERCLASS',
     desc: "The definitive institutional training masterclass for all children's media producers, writers, animators, and contributing ministries. Master the statutory legal protocols for establishing perpetual chain of title, executing work-for-hire assignment covenants, safeguarding minor voice performers through executed parental consent deeds, and filing transparent AI-use disclosures.",
     gradient: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%)',
     glow: 'radial-gradient(circle at 50% 40%, rgba(2, 132, 199, 0.35) 0%, rgba(245, 158, 11, 0.2) 40%, transparent 75%)',
@@ -63,7 +62,6 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     speakerRole: 'Child Cognitive Safety Board',
     initials: 'SC',
     avatarBg: 'linear-gradient(135deg, #10B981, #059669)',
-    res: '1080p 60fps',
     desc: 'Mandatory guidelines for kid-facing mobile apps, voice logging prohibitions, parental consent walls, and zero-tracking architectures across Lovetoons digital experiences.',
     gradient: 'linear-gradient(135deg, #065F46 0%, #064E3B 100%)',
     glow: 'radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.35) 0%, rgba(6, 95, 70, 0.25) 40%, transparent 75%)',
@@ -88,7 +86,6 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     speakerRole: 'IP & Contracts Lead Counsel',
     initials: 'LO',
     avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
-    res: '4K MASTER',
     desc: 'Legal covenants for composers, voiceover contracts, worldwide distribution licenses, and character likeness copyright protection for all characters in the Lovetoons universe.',
     gradient: 'linear-gradient(135deg, #7C2D12 0%, #431407 100%)',
     glow: 'radial-gradient(circle at 50% 40%, rgba(249, 115, 22, 0.35) 0%, rgba(124, 45, 18, 0.25) 40%, transparent 75%)',
@@ -113,7 +110,6 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     speakerRole: 'Broadcast Quality Assurance Lead',
     initials: 'TA',
     avatarBg: 'linear-gradient(135deg, #6366F1, #4338CA)',
-    res: '1080p HD',
     desc: 'Pre-flight screening protocols for all episode cuts prior to master delivery. Learn how directors and editorial leads audit video masters, EBU R128 audio loudness, and strobe thresholds before satellite playout.',
     gradient: 'linear-gradient(135deg, #3730A3 0%, #1E1B4B 100%)',
     glow: 'radial-gradient(circle at 50% 40%, rgba(99, 102, 241, 0.35) 0%, rgba(55, 48, 163, 0.25) 40%, transparent 75%)',
@@ -138,7 +134,6 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     speakerRole: 'KMM Editorial & Pastoral Director',
     initials: 'VC',
     avatarBg: 'linear-gradient(135deg, #EC4899, #BE185D)',
-    res: '4K ULTRA HD',
     desc: 'Preserving theological integrity while adapting biblical narratives into dynamic animated stories that anchor young hearts in the Word without distortion or fear.',
     gradient: 'linear-gradient(135deg, #831843 0%, #500724 100%)',
     glow: 'radial-gradient(circle at 50% 40%, rgba(236, 72, 153, 0.35) 0%, rgba(131, 24, 67, 0.25) 40%, transparent 75%)',
@@ -163,7 +158,6 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     speakerRole: 'Commercial & Legal Affairs Counsel',
     initials: 'SJ',
     avatarBg: 'linear-gradient(135deg, #14B8A6, #0F766E)',
-    res: '1080p HD',
     desc: 'Legal parameters for physical Lovetoons plushies, coloring books, apparel, and non-hazardous toy manufacturing covenants for overseas export.',
     gradient: 'linear-gradient(135deg, #0F766E 0%, #134E4A 100%)',
     glow: 'radial-gradient(circle at 50% 40%, rgba(20, 184, 166, 0.35) 0%, rgba(15, 118, 110, 0.25) 40%, transparent 75%)',
@@ -188,7 +182,6 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     speakerRole: 'Legal Counsel',
     initials: 'LO',
     avatarBg: 'linear-gradient(135deg, #F59E0B, #EA580C)',
-    res: '1080p HD',
     desc: 'Studio recording regulations, maximum work windows, mandatory certified chaperone attendance, and psychological comfort protocols for young voice talents.',
     gradient: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
     glow: 'radial-gradient(circle at 50% 40%, rgba(56, 189, 248, 0.35) 0%, rgba(30, 41, 59, 0.25) 40%, transparent 75%)',
@@ -213,7 +206,6 @@ export const ARCHIVED_TRAINING_VIDEOS: VideoItem[] = [
     speakerRole: 'International Distribution Lead',
     initials: 'EK',
     avatarBg: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
-    res: '4K MASTER',
     desc: 'Managing multilingual audio stems, dubbing synch standards, and cross-cultural translation reviews across French, Spanish, Swahili, and Arabic Lovetoons networks.',
     gradient: 'linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)',
     glow: 'radial-gradient(circle at 50% 40%, rgba(139, 92, 246, 0.35) 0%, rgba(76, 29, 149, 0.25) 40%, transparent 75%)',

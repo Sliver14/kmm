@@ -199,7 +199,7 @@ export default function TrainingPortalPage() {
     setActiveChapterIndex(0)
     if (videoRef.current) {
       videoRef.current.currentTime = 0
-      videoRef.current.play().catch(() => {})
+      videoRef.current.play().catch(() => { })
       setIsPlaying(true)
     }
     // Smooth scroll to video player
@@ -214,7 +214,7 @@ export default function TrainingPortalPage() {
         videoRef.current.pause()
         setIsPlaying(false)
       } else {
-        videoRef.current.play().catch(() => {})
+        videoRef.current.play().catch(() => { })
         setIsPlaying(true)
       }
     } else {
@@ -228,7 +228,7 @@ export default function TrainingPortalPage() {
     if (videoRef.current) {
       videoRef.current.currentTime = seconds
       if (!isPlaying) {
-        videoRef.current.play().catch(() => {})
+        videoRef.current.play().catch(() => { })
         setIsPlaying(true)
       }
     }
@@ -291,9 +291,8 @@ export default function TrainingPortalPage() {
         {/* LEFT SIDEBAR: FIXED / STATIONARY (Does not move)          */}
         {/* ========================================================= */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-64 h-full bg-white dark:bg-[#121624] border-r border-slate-200/80 dark:border-white/10 flex flex-col justify-between p-5 transition-transform duration-200 md:static md:translate-x-0 shrink-0 overflow-y-auto ${
-            mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
-          }`}
+          className={`fixed inset-y-0 left-0 z-40 w-64 h-full bg-white dark:bg-[#121624] border-r border-slate-200/80 dark:border-white/10 flex flex-col justify-between p-5 transition-transform duration-200 md:static md:translate-x-0 shrink-0 overflow-y-auto ${mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+            }`}
         >
           <div className="space-y-6">
             {/* Brand Logo & Header */}
@@ -337,11 +336,10 @@ export default function TrainingPortalPage() {
                   setActiveTab('overview')
                   setMobileSidebarOpen(false)
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeTab === 'overview'
-                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'overview'
+                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                  }`}
               >
                 <Layers className={`size-4 ${activeTab === 'overview' ? 'text-amber-500' : 'text-slate-400'}`} />
                 <span>Overview</span>
@@ -353,11 +351,10 @@ export default function TrainingPortalPage() {
                   setSelectedVideo(null)
                   setMobileSidebarOpen(false)
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeTab === 'video'
-                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'video'
+                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                  }`}
               >
                 <Tv className={`size-4 ${activeTab === 'video' ? 'text-amber-500' : 'text-slate-400'}`} />
                 <span>Masterclass Videos</span>
@@ -371,11 +368,10 @@ export default function TrainingPortalPage() {
                   setActiveTab('accreditation')
                   setMobileSidebarOpen(false)
                 }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                  activeTab === 'accreditation'
-                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'accreditation'
+                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                  }`}
               >
                 <GraduationCap className={`size-4 ${activeTab === 'accreditation' ? 'text-amber-500' : 'text-slate-400'}`} />
                 <span>Accreditation Certificate</span>
@@ -444,10 +440,10 @@ export default function TrainingPortalPage() {
                   {activeTab === 'overview'
                     ? 'Training Academy Overview'
                     : activeTab === 'video'
-                    ? selectedVideo
-                      ? selectedVideo.title
-                      : 'Masterclass Video Catalog'
-                    : 'Accreditation Certificate'}
+                      ? selectedVideo
+                        ? selectedVideo.title
+                        : 'Masterclass Video Catalog'
+                      : 'Accreditation Certificate'}
                 </h1>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
                   {activeTab === 'video' && selectedVideo
@@ -528,7 +524,6 @@ export default function TrainingPortalPage() {
                 <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500/10 via-sky-500/10 to-transparent border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-800 dark:text-amber-300">
-                      <Sparkles className="size-3" />
                       <span>{completedCount} of {ARCHIVED_TRAINING_VIDEOS.length} Masterclasses Completed</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -672,11 +667,10 @@ export default function TrainingPortalPage() {
                         <button
                           key={cat.id}
                           onClick={() => setCategoryFilter(cat.id)}
-                          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
-                            categoryFilter === cat.id
-                              ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
-                          }`}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${categoryFilter === cat.id
+                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                            }`}
                         >
                           {cat.label}
                         </button>
@@ -690,11 +684,10 @@ export default function TrainingPortalPage() {
                       <div
                         key={video.id}
                         onClick={() => handleSelectVideo(video)}
-                        className={`rounded-2xl bg-white dark:bg-[#151928] border transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-2xs hover:shadow-md ${
-                          selectedVideo?.id === video.id
-                            ? 'border-amber-500 ring-2 ring-amber-500/20'
-                            : 'border-slate-200/80 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-500/40'
-                        }`}
+                        className={`rounded-2xl bg-white dark:bg-[#151928] border transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-2xs hover:shadow-md ${selectedVideo?.id === video.id
+                          ? 'border-amber-500 ring-2 ring-amber-500/20'
+                          : 'border-slate-200/80 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-500/40'
+                          }`}
                       >
                         {/* Video Thumbnail Box */}
                         <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
@@ -766,7 +759,6 @@ export default function TrainingPortalPage() {
                 <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-sky-500/10 border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="space-y-2 max-w-xl">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                      <GraduationCap className="size-3.5" />
                       <span>Institutional Masterclasses Catalog</span>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -822,11 +814,10 @@ export default function TrainingPortalPage() {
                       <button
                         key={cat.id}
                         onClick={() => setCategoryFilter(cat.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
-                          categoryFilter === cat.id
-                            ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                            : 'bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
-                        }`}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${categoryFilter === cat.id
+                          ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                          : 'bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                          }`}
                       >
                         {cat.label}
                       </button>
@@ -896,9 +887,6 @@ export default function TrainingPortalPage() {
                               <span className="font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                                 {video.categoryLabel}
                               </span>
-                              <span className="font-mono text-slate-400">
-                                {video.res}
-                              </span>
                             </div>
                             <h3 className="font-black text-sm text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                               {video.title}
@@ -958,8 +946,8 @@ export default function TrainingPortalPage() {
 
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                          {selectedVideo.code} &bull; {selectedVideo.res}
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 font-mono">
+                          {selectedVideo.code}
                         </span>
                         <span className="text-xs font-semibold text-slate-400">
                           {selectedVideo.categoryLabel}
@@ -974,11 +962,10 @@ export default function TrainingPortalPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleModuleCompletion(selectedVideo.id)}
-                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer shadow-xs ${
-                        completedModules[selectedVideo.id]
-                          ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                          : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
-                      }`}
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer shadow-xs ${completedModules[selectedVideo.id]
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                        }`}
                     >
                       {completedModules[selectedVideo.id] ? (
                         <>
@@ -1017,9 +1004,6 @@ export default function TrainingPortalPage() {
 
                     {/* Top Overlay Badge */}
                     <div className="absolute top-3 left-3 flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-950/80 text-amber-400 border border-amber-500/30 backdrop-blur-md">
-                        {selectedVideo.res}
-                      </span>
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-950/80 text-white backdrop-blur-md">
                         {formatSeconds(currentTime)} / {formatSeconds(totalDuration)}
                       </span>
@@ -1133,11 +1117,10 @@ export default function TrainingPortalPage() {
                         <button
                           key={idx}
                           onClick={() => handleSeek(ch.seconds, idx)}
-                          className={`text-left p-3 rounded-xl border transition text-xs flex flex-col justify-between gap-1 cursor-pointer ${
-                            activeChapterIndex === idx
-                              ? 'bg-amber-500/10 border-amber-500 text-amber-900 dark:text-amber-300 font-bold shadow-2xs'
-                              : 'border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
-                          }`}
+                          className={`text-left p-3 rounded-xl border transition text-xs flex flex-col justify-between gap-1 cursor-pointer ${activeChapterIndex === idx
+                            ? 'bg-amber-500/10 border-amber-500 text-amber-900 dark:text-amber-300 font-bold shadow-2xs'
+                            : 'border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
+                            }`}
                         >
                           <div className="flex items-center justify-between w-full">
                             <span className="truncate">{ch.title}</span>
@@ -1227,9 +1210,6 @@ export default function TrainingPortalPage() {
                             <div className="flex items-center justify-between text-[10px]">
                               <span className="font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                                 {v.categoryLabel}
-                              </span>
-                              <span className="font-mono text-slate-400 text-[9px]">
-                                {v.res}
                               </span>
                             </div>
                             <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
@@ -1468,11 +1448,10 @@ export default function TrainingPortalPage() {
                   <button
                     key={v.id}
                     onClick={() => handleSelectVideo(v)}
-                    className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between gap-2 cursor-pointer ${
-                      selectedVideo?.id === v.id
-                        ? 'bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold'
-                        : 'hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
-                    }`}
+                    className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between gap-2 cursor-pointer ${selectedVideo?.id === v.id
+                      ? 'bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold'
+                      : 'hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
+                      }`}
                   >
                     <div className="min-w-0">
                       <div className="text-[11px] truncate">{v.title}</div>
@@ -1515,11 +1494,10 @@ export default function TrainingPortalPage() {
                   ].map((item, i) => (
                     <div
                       key={i}
-                      className={`py-2 px-1 rounded-xl text-center transition ${
-                        item.active
-                          ? 'bg-gradient-to-b from-amber-500 to-orange-500 text-slate-950 font-black shadow-xs'
-                          : 'bg-white dark:bg-slate-700/60 text-slate-600 dark:text-slate-400'
-                      }`}
+                      className={`py-2 px-1 rounded-xl text-center transition ${item.active
+                        ? 'bg-gradient-to-b from-amber-500 to-orange-500 text-slate-950 font-black shadow-xs'
+                        : 'bg-white dark:bg-slate-700/60 text-slate-600 dark:text-slate-400'
+                        }`}
                     >
                       <div className="text-[8px] uppercase tracking-wider">{item.day}</div>
                       <div className="text-xs font-bold pt-0.5">{item.num}</div>
@@ -1583,11 +1561,10 @@ export default function TrainingPortalPage() {
                   ].map((bar, idx) => (
                     <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                       <div
-                        className={`w-full rounded-t-md transition-all ${
-                          bar.active
-                            ? 'bg-gradient-to-t from-orange-500 to-amber-500 shadow-xs'
-                            : 'bg-slate-200 dark:bg-slate-700/70 hover:bg-slate-300'
-                        }`}
+                        className={`w-full rounded-t-md transition-all ${bar.active
+                          ? 'bg-gradient-to-t from-orange-500 to-amber-500 shadow-xs'
+                          : 'bg-slate-200 dark:bg-slate-700/70 hover:bg-slate-300'
+                          }`}
                         style={{ height: bar.height }}
                       />
                       <span className="text-[9px] font-bold text-slate-400">{bar.day}</span>
