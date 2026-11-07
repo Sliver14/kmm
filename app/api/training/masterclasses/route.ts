@@ -4,13 +4,19 @@ import { verifyToken } from '@/lib/auth'
 
 // In-memory store for masterclasses added during server runtime
 let customMasterclasses: VideoItem[] = []
+let updatedOverrides: Record<string, VideoItem> = {}
+let deletedIds: Set<string> = new Set()
 
 export async function GET() {
+  const baseList = [...ARCHIVED_TRAINING_VIDEOS, ...customMasterclasses]
+    .filter((v) => !deletedIds.has(v.id))
+    .map((v) => updatedOverrides[v.id] || v)
+
   return NextResponse.json({
     success: true,
-    masterclasses: [...ARCHIVED_TRAINING_VIDEOS, ...customMasterclasses],
-    customCount: customMasterclasses.length,
-    totalCount: ARCHIVED_TRAINING_VIDEOS.length + customMasterclasses.length,
+    masterclasses: baseList,
+    customCount: customMasterclasses.filter((v) => !deletedIds.has(v.id)).length,
+    totalCount: baseList.length,
   })
 }
 
@@ -69,6 +75,115 @@ export async function POST(req: NextRequest) {
     console.error('Error uploading masterclass:', error)
     return NextResponse.json(
       { error: error?.message || 'Failed to process masterclass upload.' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const sessionCookie = req.cookies.get('kmm_session')?.value
+    if (sessionCookie) {
+      const payload = verifyToken(sessionCookie)
+      if (payload && payload.role && payload.role !== 'portal_admin' && payload.role !== 'portal admn' && payload.role !== 'super_admin') {
+        return NextResponse.json(
+          { error: 'Forbidden: Portal Admin role required to edit masterclasses.' },
+          { status: 403 }
+        )
+      }
+    }
+
+    const body = await req.json()
+    const { id, title, code, category, categoryLabel, duration, desc, points, videoUrl } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'Masterclass ID is required.' }, { status: 400 })
+    }
+
+    // Find in custom or base
+    const existing = [...ARCHIVED_TRAINING_VIDEOS, ...customMasterclasses].find((v) => v.id === id)
+    if (!existing) {
+      return NextResponse.json({ error: 'Masterclass not found.' }, { status: 404 })
+    }
+
+    const updated: VideoItem = {
+      ...existing,
+      ...(updatedOverrides[id] || {}),
+      title: title?.trim() || existing.title,
+      code: code ? code.trim().toUpperCase() : existing.code,
+      category: category || existing.category,
+      categoryLabel: categoryLabel || existing.categoryLabel,
+      duration: duration || existing.duration,
+      desc: desc !== undefined ? desc.trim() : existing.desc,
+      videoUrl: videoUrl || existing.videoUrl,
+      points: Array.isArray(points) ? points : existing.points,
+      updatedAt: new Date().toISOString(),
+    } as any
+
+    updatedOverrides[id] = updated
+
+    // Also update customMasterclasses array directly if present
+    const customIdx = customMasterclasses.findIndex((v) => v.id === id)
+    if (customIdx >= 0) {
+      customMasterclasses[customIdx] = updated
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Masterclass updated successfully.',
+      masterclass: updated,
+    })
+  } catch (error: any) {
+    console.error('Error editing masterclass:', error)
+    return NextResponse.json(
+      { error: error?.message || 'Failed to update masterclass.' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const sessionCookie = req.cookies.get('kmm_session')?.value
+    if (sessionCookie) {
+      const payload = verifyToken(sessionCookie)
+      if (payload && payload.role && payload.role !== 'portal_admin' && payload.role !== 'portal admn' && payload.role !== 'super_admin') {
+        return NextResponse.json(
+          { error: 'Forbidden: Portal Admin role required to delete masterclasses.' },
+          { status: 403 }
+        )
+      }
+    }
+
+    const url = new URL(req.url)
+    let id = url.searchParams.get('id')
+
+    if (!id) {
+      try {
+        const body = await req.json()
+        id = body?.id
+      } catch {
+        // no body
+      }
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'Masterclass ID is required.' }, { status: 400 })
+    }
+
+    deletedIds.add(id)
+    customMasterclasses = customMasterclasses.filter((v) => v.id !== id)
+    delete updatedOverrides[id]
+
+    return NextResponse.json({
+      success: true,
+      message: 'Masterclass deleted successfully.',
+      deletedId: id,
+    })
+  } catch (error: any) {
+    console.error('Error deleting masterclass:', error)
+    return NextResponse.json(
+      { error: error?.message || 'Failed to delete masterclass.' },
       { status: 500 }
     )
   }

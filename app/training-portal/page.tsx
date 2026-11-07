@@ -41,6 +41,7 @@ import {
   Upload,
   Plus,
   Trash2,
+  Pencil,
   LogOut,
   FileVideo,
   Shield,
@@ -126,6 +127,20 @@ export default function TrainingPortalPage() {
   const [newPointInput, setNewPointInput] = useState('')
   const [isUploading, setIsUploading] = useState(false)
 
+  // Edit Masterclass State
+  const [editingVideo, setEditingVideo] = useState<VideoItem | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editCode, setEditCode] = useState('')
+  const [editCategory, setEditCategory] = useState('copyright')
+  const [editDuration, setEditDuration] = useState('20:00')
+  const [editDesc, setEditDesc] = useState('')
+  const [editVideoUrl, setEditVideoUrl] = useState('')
+  const [editUploadedFileName, setEditUploadedFileName] = useState('')
+  const [editUploadedFileSize, setEditUploadedFileSize] = useState('')
+  const [editPoints, setEditPoints] = useState<string[]>([])
+  const [editNewPointInput, setEditNewPointInput] = useState('')
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
+
   // Completed modules tracking (maps video.id to boolean)
   const [completedModules, setCompletedModules] = useState<Record<string, boolean>>({
     'vid-1': true,
@@ -206,17 +221,25 @@ export default function TrainingPortalPage() {
       console.warn(e)
     }
 
-    // Load custom masterclasses from storage
+    // Load persisted masterclasses catalog from storage
     try {
-      const storedCustom = localStorage.getItem('kmm_custom_masterclasses')
-      if (storedCustom) {
-        const customItems: VideoItem[] = JSON.parse(storedCustom)
-        if (Array.isArray(customItems) && customItems.length > 0) {
-          setMasterclasses([...ARCHIVED_TRAINING_VIDEOS, ...customItems])
+      const storedCatalog = localStorage.getItem('kmm_masterclasses_catalog')
+      if (storedCatalog) {
+        const catalogItems: VideoItem[] = JSON.parse(storedCatalog)
+        if (Array.isArray(catalogItems) && catalogItems.length > 0) {
+          setMasterclasses(catalogItems)
+        }
+      } else {
+        const storedCustom = localStorage.getItem('kmm_custom_masterclasses')
+        if (storedCustom) {
+          const customItems: VideoItem[] = JSON.parse(storedCustom)
+          if (Array.isArray(customItems) && customItems.length > 0) {
+            setMasterclasses([...ARCHIVED_TRAINING_VIDEOS, ...customItems])
+          }
         }
       }
     } catch (e) {
-      console.warn('Could not load custom masterclasses', e)
+      console.warn('Could not load masterclasses catalog', e)
     }
 
     // Check query params for tab switching or specific video id
@@ -423,8 +446,9 @@ export default function TrainingPortalPage() {
     const updated = [newVideo, ...masterclasses]
     setMasterclasses(updated)
 
-    // Save custom masterclasses in localStorage
+    // Save in localStorage
     try {
+      localStorage.setItem('kmm_masterclasses_catalog', JSON.stringify(updated))
       const customOnly = updated.filter((v) => v.isCustom)
       localStorage.setItem('kmm_custom_masterclasses', JSON.stringify(customOnly))
     } catch (saveErr) {
@@ -443,22 +467,148 @@ export default function TrainingPortalPage() {
     showNotification('🎉 Masterclass uploaded & published to curriculum library!')
   }
 
-  // Delete custom masterclass
-  const handleDeleteCustomMasterclass = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (!window.confirm('Are you sure you want to delete this custom masterclass from the curriculum?')) return
+  // Delete masterclass (available for any masterclass when logged in as portal admin)
+  const handleDeleteMasterclass = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    if (!isPortalAdmin) {
+      showNotification('⚠️ Unauthorized: Portal Admin role required to delete masterclasses.')
+      return
+    }
+    const target = masterclasses.find((v) => v.id === id)
+    const targetTitle = target ? `"${target.title}" (${target.code})` : 'this masterclass'
+    if (!window.confirm(`Are you sure you want to delete ${targetTitle} from the curriculum? This will remove the video module.`)) {
+      return
+    }
+
     const updated = masterclasses.filter((v) => v.id !== id)
     setMasterclasses(updated)
+
     try {
+      localStorage.setItem('kmm_masterclasses_catalog', JSON.stringify(updated))
       const customOnly = updated.filter((v) => v.isCustom)
       localStorage.setItem('kmm_custom_masterclasses', JSON.stringify(customOnly))
     } catch (saveErr) {
       console.warn(saveErr)
     }
+
+    // Call backend API
+    try {
+      await fetch(`/api/training/masterclasses?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+    } catch (apiErr) {
+      console.warn('API delete sync skipped:', apiErr)
+    }
+
     if (selectedVideo?.id === id) {
       setSelectedVideo(null)
     }
-    showNotification('Masterclass removed from curriculum.')
+    showNotification(`🗑️ Masterclass ${targetTitle} has been deleted.`)
+  }
+
+  // Open Edit Masterclass Modal
+  const handleOpenEditModal = (video: VideoItem, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    if (!isPortalAdmin) {
+      showNotification('⚠️ Unauthorized: Portal Admin role required to edit masterclasses.')
+      return
+    }
+    setEditingVideo(video)
+    setEditTitle(video.title)
+    setEditCode(video.code)
+    setEditCategory(video.category || 'copyright')
+    setEditDuration(video.duration || '15:00')
+    setEditDesc(video.desc || '')
+    setEditVideoUrl(video.videoUrl || '/kmm-welcome-animation.mp4')
+    setEditPoints(video.points && video.points.length > 0 ? [...video.points] : [
+      'Statutory Work-for-Hire protocol executed and archived.',
+      'Parental consent documentation verified for all minor voices.',
+    ])
+    setEditUploadedFileName('')
+    setEditUploadedFileSize('')
+    setEditNewPointInput('')
+  }
+
+  // Handle Edit Video File
+  const handleEditVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const objectUrl = URL.createObjectURL(file)
+      setEditVideoUrl(objectUrl)
+      setEditUploadedFileName(file.name)
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
+      setEditUploadedFileSize(`${sizeMb} MB`)
+      showNotification(`✓ New video attached: "${file.name}"`)
+    }
+  }
+
+  // Save Edit Masterclass
+  const handleSaveEditMasterclass = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingVideo) return
+    if (!isPortalAdmin) {
+      showNotification('⚠️ Unauthorized: Portal Admin role required.')
+      return
+    }
+    if (!editTitle.trim()) {
+      showNotification('⚠️ Please provide a masterclass title.')
+      return
+    }
+    if (!editCode.trim()) {
+      showNotification('⚠️ Please provide a course code.')
+      return
+    }
+
+    setIsSavingEdit(true)
+
+    const categoryLabels: Record<string, string> = {
+      copyright: 'Copyright & Sovereign IP',
+      protection: 'Child Protection & Safeguards',
+      broadcast: 'Broadcast Standards & Playout',
+      doctrinal: 'Scriptural Review & Canon',
+      merchandising: 'Merchandising & Contracts',
+    }
+
+    const updatedVideo: VideoItem = {
+      ...editingVideo,
+      title: editTitle.trim(),
+      code: editCode.trim().toUpperCase(),
+      category: editCategory,
+      categoryLabel: categoryLabels[editCategory] || editingVideo.categoryLabel || 'Sovereign Masterclass',
+      duration: editDuration.trim() || editingVideo.duration || '15:00',
+      desc: editDesc.trim() || editingVideo.desc,
+      videoUrl: editVideoUrl || editingVideo.videoUrl || '/kmm-welcome-animation.mp4',
+      points: editPoints.filter(Boolean),
+    }
+
+    const updatedList = masterclasses.map((v) => (v.id === editingVideo.id ? updatedVideo : v))
+    setMasterclasses(updatedList)
+
+    if (selectedVideo?.id === editingVideo.id) {
+      setSelectedVideo(updatedVideo)
+    }
+
+    try {
+      localStorage.setItem('kmm_masterclasses_catalog', JSON.stringify(updatedList))
+      const customOnly = updatedList.filter((v) => v.isCustom)
+      localStorage.setItem('kmm_custom_masterclasses', JSON.stringify(customOnly))
+    } catch (saveErr) {
+      console.warn('Could not save edited catalog:', saveErr)
+    }
+
+    try {
+      await fetch('/api/training/masterclasses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedVideo),
+      })
+    } catch (apiErr) {
+      console.warn('API edit sync skipped:', apiErr)
+    }
+
+    setIsSavingEdit(false)
+    setEditingVideo(null)
+    showNotification('✓ Masterclass updated and published to curriculum!')
   }
 
   // Sign out officer session
@@ -1181,16 +1331,36 @@ export default function TrainingPortalPage() {
                               </span>
                             </div>
 
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleSelectVideo(video)
-                              }}
-                              className="w-full py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500 group-hover:bg-amber-500 text-amber-700 dark:text-amber-300 group-hover:text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                            >
-                              <span>{completedModules[video.id] ? 'Rewatch Masterclass' : 'Watch Masterclass'}</span>
-                              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleSelectVideo(video)
+                                }}
+                                className="flex-1 py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500 group-hover:bg-amber-500 text-amber-700 dark:text-amber-300 group-hover:text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                              >
+                                <span>{completedModules[video.id] ? 'Rewatch Masterclass' : 'Watch Masterclass'}</span>
+                                <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+                              </button>
+                              {isPortalAdmin && (
+                                <>
+                                  <button
+                                    onClick={(e) => handleOpenEditModal(video, e)}
+                                    className="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-amber-500/10 hover:border-amber-500/30 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer shrink-0"
+                                    title="Edit Masterclass"
+                                  >
+                                    <Pencil className="size-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => handleDeleteMasterclass(video.id, e)}
+                                    className="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-rose-500/10 hover:border-rose-500/30 text-slate-500 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition cursor-pointer shrink-0"
+                                    title="Delete Masterclass"
+                                  >
+                                    <Trash2 className="size-3.5" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1249,6 +1419,27 @@ export default function TrainingPortalPage() {
                         </>
                       )}
                     </button>
+
+                    {isPortalAdmin && (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleOpenEditModal(selectedVideo)}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold transition cursor-pointer"
+                          title="Edit Masterclass Details"
+                        >
+                          <Pencil className="size-3.5" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMasterclass(selectedVideo.id)}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition cursor-pointer"
+                          title="Delete Masterclass"
+                        >
+                          <Trash2 className="size-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1803,23 +1994,29 @@ export default function TrainingPortalPage() {
                               )}
                             </td>
                             <td className="py-3.5 px-3 text-right whitespace-nowrap">
-                              <div className="flex items-center justify-end gap-2">
+                              <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   onClick={() => handleSelectVideo(v)}
                                   className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 font-bold text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer inline-flex items-center gap-1"
+                                  title="Play Masterclass"
                                 >
                                   <Play className="size-3 fill-current text-amber-500" />
                                   <span>Play</span>
                                 </button>
-                                {v.isCustom && (
-                                  <button
-                                    onClick={(e) => handleDeleteCustomMasterclass(v.id, e)}
-                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
-                                    title="Delete masterclass"
-                                  >
-                                    <Trash2 className="size-3.5" />
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => handleOpenEditModal(v, e)}
+                                  className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-amber-500/10 hover:border-amber-500/30 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
+                                  title="Edit Masterclass"
+                                >
+                                  <Pencil className="size-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => handleDeleteMasterclass(v.id, e)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
+                                  title="Delete Masterclass"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -2292,6 +2489,240 @@ export default function TrainingPortalPage() {
                 >
                   {isUploading ? 'Publishing...' : 'Publish Masterclass'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Masterclass Modal */}
+      {editingVideo && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-white dark:bg-[#151928] rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+                  <Pencil className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                    Edit Masterclass: {editingVideo.code}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Update course metadata, institutional category, legal covenants, or video source.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingVideo(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Edit Form */}
+            <form onSubmit={handleSaveEditMasterclass} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Masterclass Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="e.g. Protecting Intellectual Properties in Children's Media"
+                    required
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Institutional Code *
+                  </label>
+                  <input
+                    type="text"
+                    value={editCode}
+                    onChange={(e) => setEditCode(e.target.value)}
+                    placeholder="e.g. KMM-IP-101"
+                    required
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Curriculum Category
+                  </label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 cursor-pointer"
+                  >
+                    <option value="copyright">Copyright &amp; Sovereign IP</option>
+                    <option value="protection">Child Protection &amp; Safeguards</option>
+                    <option value="broadcast">Broadcast Standards &amp; Playout</option>
+                    <option value="doctrinal">Scriptural Review &amp; Canon</option>
+                    <option value="merchandising">Merchandising &amp; Contracts</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Video Duration (MM:SS)
+                  </label>
+                  <input
+                    type="text"
+                    value={editDuration}
+                    onChange={(e) => setEditDuration(e.target.value)}
+                    placeholder="e.g. 24:30"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              {/* Video File Upload / Replace Dropzone */}
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                  Replace Video File (Optional) &bull; Protected Streaming
+                </label>
+                <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    onChange={handleEditVideoFileChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                  <div className="space-y-2 pointer-events-none">
+                    <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
+                      <FileVideo className="size-5" />
+                    </div>
+                    {editUploadedFileName ? (
+                      <div>
+                        <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                          ✓ New File Attached: {editUploadedFileName}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">{editUploadedFileSize}</div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          Click to select a replacement video file or drag and drop
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          Currently using: <span className="font-mono text-amber-600 dark:text-amber-400 truncate max-w-xs inline-block align-bottom">{editVideoUrl || '/kmm-welcome-animation.mp4'}</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Video URL Alternative Field */}
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                  Or Video URL Path
+                </label>
+                <input
+                  type="text"
+                  value={editVideoUrl}
+                  onChange={(e) => setEditVideoUrl(e.target.value)}
+                  placeholder="/kmm-welcome-animation.mp4"
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                  Masterclass Description / Syllabus Overview
+                </label>
+                <textarea
+                  rows={3}
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  placeholder="Summarize the legal framework, statutory safeguards, and learning objectives..."
+                  className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 resize-none leading-relaxed"
+                />
+              </div>
+
+              {/* Curriculum Safeguard Points / Key Takeaways */}
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                  Mandatory Legal Covenants &amp; Key Safeguards
+                </label>
+                <div className="space-y-2 mb-2 max-h-36 overflow-y-auto">
+                  {editPoints.map((pt, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5 text-xs text-slate-700 dark:text-slate-300"
+                    >
+                      <span className="truncate flex-1">&bull; {pt}</span>
+                      <button
+                        type="button"
+                        onClick={() => setEditPoints(editPoints.filter((_, i) => i !== idx))}
+                        className="p-1 text-slate-400 hover:text-rose-500 cursor-pointer"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={editNewPointInput}
+                    onChange={(e) => setEditNewPointInput(e.target.value)}
+                    placeholder="Add mandatory legal covenant or takeaway..."
+                    className="flex-1 h-9 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-xs outline-hidden focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (editNewPointInput.trim()) {
+                        setEditPoints([...editPoints, editNewPointInput.trim()])
+                        setEditNewPointInput('')
+                      }
+                    }}
+                    className="px-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-amber-500 hover:text-slate-950 text-xs font-bold cursor-pointer transition"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteMasterclass(editingVideo.id)}
+                  className="px-3.5 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <Trash2 className="size-3.5" />
+                  <span>Delete Masterclass</span>
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditingVideo(null)}
+                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingEdit}
+                    className="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs hover:brightness-110 shadow-md cursor-pointer disabled:opacity-50"
+                  >
+                    {isSavingEdit ? 'Saving Changes...' : 'Save Changes'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
