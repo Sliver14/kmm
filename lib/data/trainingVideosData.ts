@@ -7,10 +7,10 @@ export interface VideoItem {
   category: string
   categoryLabel: string
   duration: string
-  speaker: string
-  speakerRole: string
-  initials: string
-  avatarBg: string
+  speaker?: string
+  speakerRole?: string
+  initials?: string
+  avatarBg?: string
   videoUrl?: string
   createdAt?: string
   isCustom?: boolean

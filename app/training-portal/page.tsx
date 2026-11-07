@@ -94,8 +94,6 @@ export default function TrainingPortalPage() {
   const [uploadCode, setUploadCode] = useState('')
   const [uploadCategory, setUploadCategory] = useState('copyright')
   const [uploadDuration, setUploadDuration] = useState('20:00')
-  const [uploadSpeaker, setUploadSpeaker] = useState('')
-  const [uploadSpeakerRole, setUploadSpeakerRole] = useState('')
   const [uploadDesc, setUploadDesc] = useState('')
   const [uploadVideoUrl, setUploadVideoUrl] = useState('')
   const [uploadedFileName, setUploadedFileName] = useState('')
@@ -299,7 +297,6 @@ export default function TrainingPortalPage() {
       const matchesSearch =
         !searchQuery.trim() ||
         v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        v.speaker.toLowerCase().includes(searchQuery.toLowerCase()) ||
         v.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
         v.desc.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = categoryFilter === 'all' || v.category === categoryFilter
@@ -339,10 +336,6 @@ export default function TrainingPortalPage() {
       showNotification('⚠️ Please provide a course code.')
       return
     }
-    if (!uploadSpeaker.trim()) {
-      showNotification('⚠️ Please specify the lead speaker or instructor.')
-      return
-    }
 
     setIsUploading(true)
 
@@ -354,14 +347,6 @@ export default function TrainingPortalPage() {
       merchandising: 'Merchandising & Contracts',
     }
 
-    const speakerInitials = uploadSpeaker
-      .split(' ')
-      .filter(Boolean)
-      .map((w) => w[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase() || 'KM'
-
     const newVideo: VideoItem = {
       id: `custom-vid-${Date.now().toString().slice(-6)}`,
       code: uploadCode.trim().toUpperCase(),
@@ -369,9 +354,6 @@ export default function TrainingPortalPage() {
       category: uploadCategory,
       categoryLabel: categoryLabels[uploadCategory] || 'Sovereign Masterclass',
       duration: uploadDuration.trim() || '15:00',
-      speaker: uploadSpeaker.trim(),
-      speakerRole: uploadSpeakerRole.trim() || 'Directorate Lead Contributor',
-      initials: speakerInitials,
       avatarBg: 'linear-gradient(135deg, #0284C7, #F59E0B)',
       videoUrl: uploadVideoUrl || '/kmm-welcome-animation.mp4',
       desc: uploadDesc.trim() || 'Institutional training module for media contributors.',
@@ -410,8 +392,6 @@ export default function TrainingPortalPage() {
     // Reset form
     setUploadTitle('')
     setUploadCode('')
-    setUploadSpeaker('')
-    setUploadSpeakerRole('')
     setUploadDesc('')
     setUploadVideoUrl('')
     setUploadedFileName('')
@@ -675,7 +655,7 @@ export default function TrainingPortalPage() {
                 </h1>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
                   {activeTab === 'video' && selectedVideo
-                    ? `${selectedVideo.code} • ${selectedVideo.speaker}`
+                    ? `${selectedVideo.code} • ${selectedVideo.title}`
                     : activeTab === 'admin'
                     ? 'Masterclass Uploads & Accreditation Governance'
                     : 'Sovereign Intellectual Property & Statutory Child Protection'}
@@ -689,7 +669,7 @@ export default function TrainingPortalPage() {
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search masterclasses, topics, speakers..."
+                  placeholder="Search masterclasses, topics, covenants..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-10 py-1.5 rounded-full text-xs bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
@@ -970,11 +950,11 @@ export default function TrainingPortalPage() {
                           </div>
 
                           <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px]">
-                            <span className="font-medium text-slate-600 dark:text-slate-300 truncate max-w-[130px]">
-                              {video.speaker}
+                            <span className="font-semibold text-slate-500 dark:text-slate-400">
+                              ★ 5.0 Ministry Certified
                             </span>
-                            <span className="font-bold text-amber-500 flex items-center gap-0.5 shrink-0">
-                              ★ 5.0
+                            <span className="font-mono text-slate-400">
+                              {video.duration}
                             </span>
                           </div>
                         </div>
@@ -1002,7 +982,7 @@ export default function TrainingPortalPage() {
                       Masterclass Video Library
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                      Select any masterclass below to open its dedicated view with cinema video recording, curriculum chapter markers, speaker profile, and statutory legal covenants.
+                      Select any masterclass below to open its dedicated view with cinema video recording, curriculum chapter markers, and statutory legal covenants.
                     </p>
                   </div>
 
@@ -1142,16 +1122,11 @@ export default function TrainingPortalPage() {
 
                           <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-white/5">
                             <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <div className="size-6 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold flex items-center justify-center text-slate-600 dark:text-slate-300">
-                                  {video.initials}
-                                </div>
-                                <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[120px] text-[11px]">
-                                  {video.speaker}
-                                </span>
-                              </div>
-                              <span className="font-bold text-amber-500 text-[11px] shrink-0">
-                                ★ 5.0
+                              <span className="font-bold text-amber-500 text-[11px] flex items-center gap-1">
+                                <span>★ 5.0 Curriculum Certified</span>
+                              </span>
+                              <span className="font-mono text-[11px] text-slate-400">
+                                {video.duration}
                               </span>
                             </div>
 
@@ -1327,18 +1302,18 @@ export default function TrainingPortalPage() {
                     </div>
                   </div>
 
-                  {/* Speaker & Meta Info */}
+                  {/* Curriculum & Meta Info */}
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-white/10">
-                    <div className="flex items-center gap-3.5">
-                      <div className="size-12 rounded-2xl bg-gradient-to-tr from-[#0284C7] to-amber-500 text-white font-bold flex items-center justify-center text-sm shadow-md shrink-0">
-                        {selectedVideo.initials}
+                    <div className="flex items-center gap-3">
+                      <div className="size-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold flex items-center justify-center text-sm shadow-2xs shrink-0 border border-amber-500/20">
+                        <Scale className="size-5" />
                       </div>
                       <div>
-                        <div className="font-bold text-sm text-slate-900 dark:text-white">
-                          {selectedVideo.speaker}
+                        <div className="font-extrabold text-sm text-slate-900 dark:text-white">
+                          KMM Institutional Curriculum
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
-                          {selectedVideo.speakerRole}
+                          {selectedVideo.categoryLabel} &bull; {selectedVideo.duration}
                         </div>
                       </div>
                     </div>
@@ -1480,11 +1455,11 @@ export default function TrainingPortalPage() {
 
                           <div className="space-y-2 pt-2.5 border-t border-slate-100 dark:border-white/5">
                             <div className="flex items-center justify-between text-[11px]">
-                              <span className="text-slate-600 dark:text-slate-300 font-medium truncate max-w-[120px]">
-                                {v.speaker}
+                              <span className="font-bold text-amber-500 shrink-0 flex items-center gap-1">
+                                ★ 5.0 Certified
                               </span>
-                              <span className="font-bold text-amber-500 shrink-0">
-                                ★ 5.0
+                              <span className="font-mono text-slate-400 text-[10px]">
+                                {v.duration}
                               </span>
                             </div>
 
@@ -1721,7 +1696,6 @@ export default function TrainingPortalPage() {
                         <tr className="border-b border-slate-200/80 dark:border-white/10 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
                           <th className="py-3 px-3">Module</th>
                           <th className="py-3 px-3">Category</th>
-                          <th className="py-3 px-3">Speaker &amp; Role</th>
                           <th className="py-3 px-3">Duration</th>
                           <th className="py-3 px-3">Status</th>
                           <th className="py-3 px-3 text-right">Actions</th>
@@ -1760,10 +1734,6 @@ export default function TrainingPortalPage() {
                               <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                                 {v.categoryLabel}
                               </span>
-                            </td>
-                            <td className="py-3.5 px-3 whitespace-nowrap">
-                              <div className="font-semibold text-slate-800 dark:text-slate-200">{v.speaker}</div>
-                              <div className="text-[10px] text-slate-400 truncate max-w-[150px]">{v.speakerRole}</div>
                             </td>
                             <td className="py-3.5 px-3 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
                               {v.duration}
@@ -1893,7 +1863,7 @@ export default function TrainingPortalPage() {
                   >
                     <div className="min-w-0">
                       <div className="text-[11px] truncate">{v.title}</div>
-                      <div className="text-[9px] text-slate-400">{v.duration} &bull; {v.speaker.split(' ')[0]}</div>
+                      <div className="text-[9px] text-slate-400">{v.code} &bull; {v.duration}</div>
                     </div>
                     {completedModules[v.id] ? (
                       <CheckCircle2 className="size-3 text-emerald-500 shrink-0" />
@@ -2128,35 +2098,6 @@ export default function TrainingPortalPage() {
                     onChange={(e) => setUploadDuration(e.target.value)}
                     placeholder="e.g. 18:30"
                     className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                    Lead Speaker / Instructor *
-                  </label>
-                  <input
-                    type="text"
-                    value={uploadSpeaker}
-                    onChange={(e) => setUploadSpeaker(e.target.value)}
-                    placeholder="e.g. Barrister Lillian Okoye"
-                    required
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                    Speaker Role / Directorate
-                  </label>
-                  <input
-                    type="text"
-                    value={uploadSpeakerRole}
-                    onChange={(e) => setUploadSpeakerRole(e.target.value)}
-                    placeholder="e.g. Head of Legal &amp; IP Directorate"
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
                   />
                 </div>
               </div>

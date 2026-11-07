@@ -16,22 +16,14 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { title, code, category, categoryLabel, duration, speaker, speakerRole, desc, points, videoUrl } = body
+    const { title, code, category, categoryLabel, duration, desc, points, videoUrl } = body
 
-    if (!title || !code || !speaker) {
+    if (!title || !code) {
       return NextResponse.json(
-        { error: 'Title, code, and speaker are required fields.' },
+        { error: 'Title and code are required fields.' },
         { status: 400 }
       )
     }
-
-    const initials = speaker
-      .split(' ')
-      .filter(Boolean)
-      .map((w: string) => w[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase() || 'KM'
 
     const newVideo: VideoItem = {
       id: `custom-vid-${Date.now().toString().slice(-6)}`,
@@ -40,9 +32,6 @@ export async function POST(req: NextRequest) {
       category: category || 'copyright',
       categoryLabel: categoryLabel || 'Copyright & Sovereign IP',
       duration: duration || '15:00',
-      speaker: speaker.trim(),
-      speakerRole: speakerRole?.trim() || 'Directorate Contributor',
-      initials,
       avatarBg: 'linear-gradient(135deg, #0284C7, #F59E0B)',
       videoUrl: videoUrl || '/kmm-welcome-animation.mp4',
       desc: desc?.trim() || 'Institutional training module for media contributors.',
@@ -72,3 +61,4 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
