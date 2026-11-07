@@ -13,6 +13,7 @@ import {
   Moon,
   Menu,
   ChevronRight,
+  ArrowLeft,
   Home,
   GraduationCap,
   ShieldCheck,
@@ -64,8 +65,8 @@ export default function TrainingPortalPage() {
   const [showRightDetails, setShowRightDetails] = useState(true)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
-  // Currently active / selected video from the list
-  const [selectedVideo, setSelectedVideo] = useState<VideoItem>(ARCHIVED_TRAINING_VIDEOS[0])
+  // Currently active / selected video from the list (null = show all list view)
+  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
 
   // Video Player state
   const [isPlaying, setIsPlaying] = useState(false)
@@ -86,6 +87,7 @@ export default function TrainingPortalPage() {
 
   // Video Chapters for selected video
   const currentChapters = useMemo(() => {
+    if (!selectedVideo) return []
     if (selectedVideo.id === 'vid-1') {
       return [
         { time: '00:00', seconds: 0, title: 'Introduction: The Sacred Trust of Children’s IP', desc: 'Understanding the divine stewardship of children’s media and statutory copyright.' },
@@ -348,6 +350,7 @@ export default function TrainingPortalPage() {
               <button
                 onClick={() => {
                   setActiveTab('video')
+                  setSelectedVideo(null)
                   setMobileSidebarOpen(false)
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
@@ -441,11 +444,15 @@ export default function TrainingPortalPage() {
                   {activeTab === 'overview'
                     ? 'Training Academy Overview'
                     : activeTab === 'video'
-                    ? selectedVideo.title
+                    ? selectedVideo
+                      ? selectedVideo.title
+                      : 'Masterclass Video Catalog'
                     : 'Accreditation Certificate'}
                 </h1>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-                  Sovereign Intellectual Property &amp; Statutory Child Protection
+                  {activeTab === 'video' && selectedVideo
+                    ? `${selectedVideo.code} • ${selectedVideo.speaker}`
+                    : 'Sovereign Intellectual Property & Statutory Child Protection'}
                 </p>
               </div>
             </div>
@@ -552,9 +559,9 @@ export default function TrainingPortalPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Course 1: The Selected Masterclass */}
+                    {/* Course 1: The Introductory IP Masterclass */}
                     <div
-                      onClick={() => handleSelectVideo(selectedVideo)}
+                      onClick={() => handleSelectVideo(ARCHIVED_TRAINING_VIDEOS[0])}
                       className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-amber-500/50 dark:hover:border-amber-400/50 transition cursor-pointer space-y-4 group"
                     >
                       <div className="flex items-start gap-3.5">
@@ -563,10 +570,10 @@ export default function TrainingPortalPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                            {selectedVideo.categoryLabel}
+                            {ARCHIVED_TRAINING_VIDEOS[0].categoryLabel}
                           </div>
                           <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                            {selectedVideo.title}
+                            {ARCHIVED_TRAINING_VIDEOS[0].title}
                           </h3>
                         </div>
                       </div>
@@ -576,23 +583,23 @@ export default function TrainingPortalPage() {
                         <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
-                            style={{ width: completedModules[selectedVideo.id] ? '100%' : '65%' }}
+                            style={{ width: completedModules[ARCHIVED_TRAINING_VIDEOS[0].id] ? '100%' : '65%' }}
                           />
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                           <span className="flex items-center gap-1">
                             <BookOpen className="size-3 text-amber-500" />
-                            <span>{selectedVideo.code} &bull; {selectedVideo.duration}</span>
+                            <span>{ARCHIVED_TRAINING_VIDEOS[0].code} &bull; {ARCHIVED_TRAINING_VIDEOS[0].duration}</span>
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="size-3 text-slate-400" />
-                            <span>{completedModules[selectedVideo.id] ? 'Completed' : 'In Progress'}</span>
+                            <span>{completedModules[ARCHIVED_TRAINING_VIDEOS[0].id] ? 'Completed' : 'In Progress'}</span>
                           </span>
                         </div>
                       </div>
 
                       <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
-                        <span>{completedModules[selectedVideo.id] ? 'Review Video' : 'Resume Masterclass'}</span>
+                        <span>{completedModules[ARCHIVED_TRAINING_VIDEOS[0].id] ? 'Review Video' : 'Resume Masterclass'}</span>
                         <span className="group-hover:translate-x-1 transition-transform">➔</span>
                       </div>
                     </div>
@@ -684,7 +691,7 @@ export default function TrainingPortalPage() {
                         key={video.id}
                         onClick={() => handleSelectVideo(video)}
                         className={`rounded-2xl bg-white dark:bg-[#151928] border transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-2xs hover:shadow-md ${
-                          selectedVideo.id === video.id
+                          selectedVideo?.id === video.id
                             ? 'border-amber-500 ring-2 ring-amber-500/20'
                             : 'border-slate-200/80 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-500/40'
                         }`}
@@ -749,24 +756,219 @@ export default function TrainingPortalPage() {
             )}
 
             {/* ========================================================= */}
-            {/* TAB 2: MASTERCLASS VIDEO PLAYER (Full Detail View)        */}
+            {/* TAB 2: MASTERCLASS VIDEOS                                 */}
+            {/* Case A: !selectedVideo -> Masterclass Library / Catalog    */}
+            {/* Case B: selectedVideo  -> Detailed Cinema Video Player     */}
             {/* ========================================================= */}
-            {activeTab === 'video' && (
-              <div className="space-y-8 animate-in fade-in duration-200">
-                {/* Header with Switcher info */}
-                <div ref={playerContainerRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                        {selectedVideo.code} &bull; {selectedVideo.res}
-                      </span>
-                      <span className="text-xs font-semibold text-slate-400">
-                        {selectedVideo.categoryLabel}
-                      </span>
+            {activeTab === 'video' && !selectedVideo && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                {/* Catalog Hero Banner */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-sky-500/10 border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-2 max-w-xl">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                      <GraduationCap className="size-3.5" />
+                      <span>Institutional Masterclasses Catalog</span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                      {selectedVideo.title}
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                      Masterclass Video Library
                     </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                      Select any masterclass below to open its dedicated view with cinema video recording, curriculum chapter markers, speaker profile, and statutory legal covenants.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
+                    <div className="p-4 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs text-center min-w-[110px]">
+                      <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                        {ARCHIVED_TRAINING_VIDEOS.length}
+                      </div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Masterclasses
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs text-center min-w-[110px]">
+                      <div className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                        {completedCount}
+                      </div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Completed
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Filter and Category Strip */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-black text-slate-900 dark:text-white">
+                      Curriculum Masterclasses ({filteredVideos.length})
+                    </span>
+                    {searchQuery && (
+                      <span className="text-xs text-slate-400">
+                        matching &ldquo;{searchQuery}&rdquo;
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Category Filter Pills */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
+                    {[
+                      { id: 'all', label: 'All Categories' },
+                      { id: 'copyright', label: 'Sovereign IP' },
+                      { id: 'protection', label: 'Safeguards' },
+                      { id: 'broadcast', label: 'Broadcast' },
+                      { id: 'doctrinal', label: 'Scriptural' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setCategoryFilter(cat.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                          categoryFilter === cat.id
+                            ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                            : 'bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Masterclasses Grid View */}
+                {filteredVideos.length === 0 ? (
+                  <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#151928] border border-dashed border-slate-300 dark:border-white/10 space-y-3">
+                    <Tv className="size-10 text-slate-400 mx-auto" />
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white">No Masterclasses Found</h3>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      No video modules match your current filter or search criteria.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setCategoryFilter('all')
+                        setSearchQuery('')
+                      }}
+                      className="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs cursor-pointer"
+                    >
+                      Reset Filters
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {filteredVideos.map((video) => (
+                      <div
+                        key={video.id}
+                        onClick={() => handleSelectVideo(video)}
+                        className="rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-2xs hover:shadow-xl hover:border-amber-500/50 dark:hover:border-amber-400/50 hover:-translate-y-0.5 duration-200"
+                      >
+                        {/* Video Thumbnail Box */}
+                        <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+                          <video
+                            src="/kmm-welcome-animation.mp4"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            muted
+                          />
+                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <div className="size-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                              <Play className="size-5 fill-current ml-0.5" />
+                            </div>
+                          </div>
+
+                          <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-md text-[9px] font-mono font-bold bg-black/80 text-amber-400 border border-amber-500/30 backdrop-blur-xs">
+                            {video.code}
+                          </span>
+
+                          <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-[9px] font-mono font-bold bg-black/80 text-white backdrop-blur-xs">
+                            {video.duration}
+                          </span>
+
+                          {completedModules[video.id] && (
+                            <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500 text-white flex items-center gap-1 shadow-md">
+                              <Check className="size-2.5 stroke-3" />
+                              <span>Completed</span>
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Video Details */}
+                        <div className="p-4 sm:p-5 space-y-3 flex-1 flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                {video.categoryLabel}
+                              </span>
+                              <span className="font-mono text-slate-400">
+                                {video.res}
+                              </span>
+                            </div>
+                            <h3 className="font-black text-sm text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                              {video.title}
+                            </h3>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                              {video.desc}
+                            </p>
+                          </div>
+
+                          <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-white/5">
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className="size-6 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                  {video.initials}
+                                </div>
+                                <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[120px] text-[11px]">
+                                  {video.speaker}
+                                </span>
+                              </div>
+                              <span className="font-bold text-amber-500 text-[11px] shrink-0">
+                                ★ 5.0
+                              </span>
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSelectVideo(video)
+                              }}
+                              className="w-full py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500 group-hover:bg-amber-500 text-amber-700 dark:text-amber-300 group-hover:text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            >
+                              <span>{completedModules[video.id] ? 'Rewatch Masterclass' : 'Watch Masterclass'}</span>
+                              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Case B: Detail View with Cinema Video Player */}
+            {activeTab === 'video' && selectedVideo && (
+              <div className="space-y-8 animate-in fade-in duration-200">
+                {/* Back to Catalog Button & Header Bar */}
+                <div ref={playerContainerRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 dark:border-white/10">
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setSelectedVideo(null)}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer w-fit group"
+                    >
+                      <ArrowLeft className="size-3.5 group-hover:-translate-x-1 transition-transform text-amber-500" />
+                      <span>Back to Masterclass Library</span>
+                    </button>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                          {selectedVideo.code} &bull; {selectedVideo.res}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-400">
+                          {selectedVideo.categoryLabel}
+                        </span>
+                      </div>
+                      <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                        {selectedVideo.title}
+                      </h2>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -963,17 +1165,24 @@ export default function TrainingPortalPage() {
                   </div>
                 </div>
 
-                {/* Section: Select Another Masterclass Video */}
+                {/* Section: Other Curriculum Masterclasses */}
                 <section className="space-y-4 pt-4 border-t border-slate-200/80 dark:border-white/10">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                        All Curriculum Masterclasses ({ARCHIVED_TRAINING_VIDEOS.length})
+                        Other Masterclasses in Curriculum ({ARCHIVED_TRAINING_VIDEOS.length})
                       </h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         Switch to any other video to review its recording, points, and syllabus.
                       </p>
                     </div>
+                    <button
+                      onClick={() => setSelectedVideo(null)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                    >
+                      <span>View All in Library</span>
+                      <ChevronRight className="size-3.5" />
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -1005,7 +1214,7 @@ export default function TrainingPortalPage() {
                             {v.speaker}
                           </span>
                           <span className="font-bold text-xs text-amber-600 dark:text-amber-400">
-                            {selectedVideo.id === v.id ? '▶ Playing' : 'Watch →'}
+                            {selectedVideo.id === v.id ? '▶ Now Playing' : 'Watch →'}
                           </span>
                         </div>
                       </div>
@@ -1077,7 +1286,7 @@ export default function TrainingPortalPage() {
                       {currentUser?.agency || 'Lovetoons Content Operations'}
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed pt-3">
-                      Has satisfactorily completed all curricular requirements under <b>{selectedVideo.code}: {selectedVideo.title}</b>, validating sovereign chain of title, Work-for-Hire covenants, parental consent deeds, and AI transparency.
+                      Has satisfactorily completed all curricular requirements under <b>{(selectedVideo || ARCHIVED_TRAINING_VIDEOS[0]).code}: {(selectedVideo || ARCHIVED_TRAINING_VIDEOS[0]).title}</b>, validating sovereign chain of title, Work-for-Hire covenants, parental consent deeds, and AI transparency.
                     </p>
                   </div>
 
@@ -1089,7 +1298,7 @@ export default function TrainingPortalPage() {
                     </div>
                     <div>
                       <span className="block text-slate-400 text-[10px] uppercase font-bold">Certificate Hash</span>
-                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">KMM-ACR-2026-{selectedVideo.id.toUpperCase()}</span>
+                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">KMM-ACR-2026-{(selectedVideo || ARCHIVED_TRAINING_VIDEOS[0]).id.toUpperCase()}</span>
                     </div>
                     <div>
                       <span className="block text-slate-400 text-[10px] uppercase font-bold">Authority</span>
@@ -1105,7 +1314,8 @@ export default function TrainingPortalPage() {
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-white/10">
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`https://kmm-portal.internal/verify/KMM-ACR-2026-${selectedVideo.id.toUpperCase()}`)
+                        const hashId = (selectedVideo || ARCHIVED_TRAINING_VIDEOS[0]).id.toUpperCase()
+                        navigator.clipboard.writeText(`https://kmm-portal.internal/verify/KMM-ACR-2026-${hashId}`)
                         setCopiedHash(true)
                         setTimeout(() => setCopiedHash(false), 2000)
                       }}
@@ -1214,7 +1424,7 @@ export default function TrainingPortalPage() {
                     key={v.id}
                     onClick={() => handleSelectVideo(v)}
                     className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between gap-2 cursor-pointer ${
-                      selectedVideo.id === v.id
+                      selectedVideo?.id === v.id
                         ? 'bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold'
                         : 'hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
                     }`}
