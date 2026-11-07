@@ -36,6 +36,7 @@ import {
   Copy,
   Check,
   Sparkles,
+  Filter,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem } from '@/lib/data/trainingVideosData'
 
@@ -59,11 +60,12 @@ export default function TrainingPortalPage() {
   // Navigation tab: 'overview' | 'video' | 'accreditation'
   const [activeTab, setActiveTab] = useState<'overview' | 'video' | 'accreditation'>('overview')
   const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
   const [showRightDetails, setShowRightDetails] = useState(true)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
-  // The single official masterclass video
-  const masterclass = ARCHIVED_TRAINING_VIDEOS[0]
+  // Currently active / selected video from the list
+  const [selectedVideo, setSelectedVideo] = useState<VideoItem>(ARCHIVED_TRAINING_VIDEOS[0])
 
   // Video Player state
   const [isPlaying, setIsPlaying] = useState(false)
@@ -71,9 +73,10 @@ export default function TrainingPortalPage() {
   const [currentTime, setCurrentTime] = useState(230) // 03:50 into video
   const totalDuration = 1470 // 24:30
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const playerContainerRef = useRef<HTMLDivElement | null>(null)
   const [activeChapterIndex, setActiveChapterIndex] = useState(0)
 
-  // Completed modules tracking
+  // Completed modules tracking (maps video.id to boolean)
   const [completedModules, setCompletedModules] = useState<Record<string, boolean>>({
     'vid-1': true,
   })
@@ -81,17 +84,31 @@ export default function TrainingPortalPage() {
   const [toastMessage, setToastMessage] = useState('')
   const [copiedHash, setCopiedHash] = useState(false)
 
-  const chapters = useMemo(
-    () => [
-      { time: '00:00', seconds: 0, title: 'Introduction: The Sacred Trust of Children’s IP', desc: 'Understanding the divine stewardship of children’s media and statutory copyright.' },
-      { time: '04:15', seconds: 255, title: 'Statutory Chain of Title & Work-for-Hire', desc: 'Executing unconditional assignments for writers, composers, and animators.' },
-      { time: '09:30', seconds: 570, title: 'Minor Performer & Voice Likeness Consent', desc: 'Step-by-step parental release deeds and on-set chaperone protocols.' },
-      { time: '14:45', seconds: 885, title: 'AI Transparency & Prompt Preservation', desc: 'Mandatory logging of AI tools, human oversight %, and external training data.' },
-      { time: '19:20', seconds: 1160, title: 'Character Silhouette & Trademark Defense', desc: 'Securing character names, vocal signatures, and visual models against infringement.' },
-      { time: '23:10', seconds: 1390, title: 'Playout Sign-off & Legal Accreditation', desc: 'Directorate quality sign-off and satellite broadcast certificate generation.' },
-    ],
-    []
-  )
+  // Video Chapters for selected video
+  const currentChapters = useMemo(() => {
+    if (selectedVideo.id === 'vid-1') {
+      return [
+        { time: '00:00', seconds: 0, title: 'Introduction: The Sacred Trust of Children’s IP', desc: 'Understanding the divine stewardship of children’s media and statutory copyright.' },
+        { time: '04:15', seconds: 255, title: 'Statutory Chain of Title & Work-for-Hire', desc: 'Executing unconditional assignments for writers, composers, and animators.' },
+        { time: '09:30', seconds: 570, title: 'Minor Performer & Voice Likeness Consent', desc: 'Step-by-step parental release deeds and on-set chaperone protocols.' },
+        { time: '14:45', seconds: 885, title: 'AI Transparency & Prompt Preservation', desc: 'Mandatory logging of AI tools, human oversight %, and external training data.' },
+        { time: '19:20', seconds: 1160, title: 'Character Silhouette & Trademark Defense', desc: 'Securing character names, vocal signatures, and visual models against infringement.' },
+        { time: '23:10', seconds: 1390, title: 'Playout Sign-off & Legal Accreditation', desc: 'Directorate quality sign-off and satellite broadcast certificate generation.' },
+      ]
+    }
+    // Generated chapter checkpoints from points
+    return selectedVideo.points.map((pt, idx) => {
+      const stepSeconds = idx * 240
+      const mins = Math.floor(stepSeconds / 60)
+      const secs = stepSeconds % 60
+      return {
+        time: `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`,
+        seconds: stepSeconds,
+        title: `Chapter ${idx + 1}: ${pt.split(':')[0] || pt.slice(0, 35)}`,
+        desc: pt,
+      }
+    })
+  }, [selectedVideo])
 
   useEffect(() => {
     setIsMounted(true)
@@ -106,7 +123,7 @@ export default function TrainingPortalPage() {
       }
     }
 
-    // Default authenticated officer (fallback so user is never locked out)
+    // Default authenticated officer
     const defaultUser: TrainingUser = {
       id: 'TP-LOV-001',
       name: 'Barrister Lillian Okoye',
@@ -138,12 +155,22 @@ export default function TrainingPortalPage() {
       setCurrentUser(defaultUser)
     }
 
-    // Check query params for tab switching (e.g. ?tab=video or ?tab=accreditation)
+    // Check query params for tab switching or specific video id
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const tabParam = urlParams.get('tab')
-      if (tabParam === 'video' || tabParam === 'watch') setActiveTab('video')
-      else if (tabParam === 'accreditation') setActiveTab('accreditation')
+      const vidParam = urlParams.get('v') || urlParams.get('id')
+      if (vidParam) {
+        const found = ARCHIVED_TRAINING_VIDEOS.find((v) => v.id === vidParam)
+        if (found) {
+          setSelectedVideo(found)
+          setActiveTab('video')
+        }
+      } else if (tabParam === 'video' || tabParam === 'watch') {
+        setActiveTab('video')
+      } else if (tabParam === 'accreditation') {
+        setActiveTab('accreditation')
+      }
     }
   }, [])
 
@@ -161,6 +188,22 @@ export default function TrainingPortalPage() {
   const showNotification = (msg: string) => {
     setToastMessage(msg)
     setTimeout(() => setToastMessage(''), 3500)
+  }
+
+  const handleSelectVideo = (video: VideoItem) => {
+    setSelectedVideo(video)
+    setActiveTab('video')
+    setCurrentTime(0)
+    setActiveChapterIndex(0)
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play().catch(() => {})
+      setIsPlaying(true)
+    }
+    // Smooth scroll to video player
+    if (playerContainerRef.current) {
+      playerContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
   const handleVideoPlayToggle = () => {
@@ -189,13 +232,13 @@ export default function TrainingPortalPage() {
     }
   }
 
-  const toggleModuleCompletion = () => {
-    const current = !!completedModules['vid-1']
+  const toggleModuleCompletion = (videoId: string) => {
+    const current = !!completedModules[videoId]
     const next = !current
-    const updated = { ...completedModules, 'vid-1': next }
+    const updated = { ...completedModules, [videoId]: next }
     setCompletedModules(updated)
     localStorage.setItem('kmm_completed_modules', JSON.stringify(updated))
-    showNotification(next ? '✓ Masterclass marked as completed! Accreditation issued.' : 'Module marked in progress.')
+    showNotification(next ? '✓ Masterclass marked as completed! Milestone recorded.' : 'Module marked in progress.')
   }
 
   const formatSeconds = (sec: number) => {
@@ -203,6 +246,24 @@ export default function TrainingPortalPage() {
     const s = Math.floor(sec % 60)
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
+
+  // Filtered masterclass videos
+  const filteredVideos = useMemo(() => {
+    return ARCHIVED_TRAINING_VIDEOS.filter((v) => {
+      const matchesSearch =
+        !searchQuery.trim() ||
+        v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.speaker.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.desc.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesCategory = categoryFilter === 'all' || v.category === categoryFilter
+      return matchesSearch && matchesCategory
+    })
+  }, [searchQuery, categoryFilter])
+
+  const completedCount = useMemo(() => {
+    return Object.values(completedModules).filter(Boolean).length
+  }, [completedModules])
 
   if (!isMounted) {
     return (
@@ -222,7 +283,7 @@ export default function TrainingPortalPage() {
         </div>
       )}
 
-      {/* Main Layout Container: 100% fixed height, center content scrolls */}
+      {/* Main Layout Container: 100% fixed height, sidebars do not move */}
       <div className="flex-1 flex h-full overflow-hidden">
         {/* ========================================================= */}
         {/* LEFT SIDEBAR: FIXED / STATIONARY (Does not move)          */}
@@ -296,7 +357,10 @@ export default function TrainingPortalPage() {
                 }`}
               >
                 <Tv className={`size-4 ${activeTab === 'video' ? 'text-amber-500' : 'text-slate-400'}`} />
-                <span>Masterclass Video</span>
+                <span>Masterclass Videos</span>
+                <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                  {ARCHIVED_TRAINING_VIDEOS.length}
+                </span>
               </button>
 
               <button
@@ -377,7 +441,7 @@ export default function TrainingPortalPage() {
                   {activeTab === 'overview'
                     ? 'Training Academy Overview'
                     : activeTab === 'video'
-                    ? 'Featured Masterclass Player'
+                    ? selectedVideo.title
                     : 'Accreditation Certificate'}
                 </h1>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
@@ -392,7 +456,7 @@ export default function TrainingPortalPage() {
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search lessons, chapters, covenants..."
+                  placeholder="Search masterclasses, topics, speakers..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-10 py-1.5 rounded-full text-xs bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
@@ -446,7 +510,7 @@ export default function TrainingPortalPage() {
             </div>
           </header>
 
-          {/* DYNAMIC TAB CONTENT (Changes as user switches tabs) */}
+          {/* DYNAMIC TAB CONTENT (Changes smoothly as user switches tabs) */}
           <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl flex-1">
             {/* ========================================================= */}
             {/* TAB 1: OVERVIEW DASHBOARD                                 */}
@@ -458,39 +522,39 @@ export default function TrainingPortalPage() {
                   <div className="space-y-1">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-800 dark:text-amber-300">
                       <Sparkles className="size-3" />
-                      <span>Official KMM Curriculum</span>
+                      <span>{completedCount} of {ARCHIVED_TRAINING_VIDEOS.length} Masterclasses Completed</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                       Welcome back, {currentUser?.name || 'Officer'}
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl">
-                      Master institutional Work-for-Hire vesting, character trademark defense, and minor talent protection under Kiddies Media Ministries.
+                      Access all {ARCHIVED_TRAINING_VIDEOS.length} institutional training masterclasses covering sovereign IP ownership, work-for-hire vesting, and child safeguards.
                     </p>
                   </div>
                   <button
-                    onClick={() => setActiveTab('video')}
+                    onClick={() => handleSelectVideo(ARCHIVED_TRAINING_VIDEOS[0])}
                     className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition cursor-pointer shrink-0"
                   >
                     <Play className="size-3.5 fill-current" />
-                    <span>Watch Masterclass</span>
+                    <span>Resume Premier Masterclass</span>
                   </button>
                 </div>
 
-                {/* Section: Continue Learning (2 Course Cards) */}
+                {/* Section: Continue Learning (Active Cards) */}
                 <section className="space-y-3.5">
                   <div className="flex items-center justify-between">
                     <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
                       Continue Learning
                     </h2>
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      Active Milestones
+                      Curriculum Tracks
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Course 1: The Single Official Masterclass Video */}
+                    {/* Course 1: The Selected Masterclass */}
                     <div
-                      onClick={() => setActiveTab('video')}
+                      onClick={() => handleSelectVideo(selectedVideo)}
                       className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-amber-500/50 dark:hover:border-amber-400/50 transition cursor-pointer space-y-4 group"
                     >
                       <div className="flex items-start gap-3.5">
@@ -499,43 +563,43 @@ export default function TrainingPortalPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                            SOVEREIGN IP &amp; GOVERNANCE
+                            {selectedVideo.categoryLabel}
                           </div>
                           <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                            Protecting Intellectual Properties in Children&apos;s Media
+                            {selectedVideo.title}
                           </h3>
                         </div>
                       </div>
 
-                      {/* Progress Bar (Orange accent like inspiration) */}
+                      {/* Progress Bar */}
                       <div className="space-y-1.5">
                         <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
-                            style={{ width: completedModules['vid-1'] ? '100%' : '65%' }}
+                            style={{ width: completedModules[selectedVideo.id] ? '100%' : '65%' }}
                           />
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                           <span className="flex items-center gap-1">
                             <BookOpen className="size-3 text-amber-500" />
-                            <span>1 Masterclass • 6 Chapters</span>
+                            <span>{selectedVideo.code} &bull; {selectedVideo.duration}</span>
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="size-3 text-slate-400" />
-                            <span>{completedModules['vid-1'] ? 'Completed' : '24 mins left'}</span>
+                            <span>{completedModules[selectedVideo.id] ? 'Completed' : 'In Progress'}</span>
                           </span>
                         </div>
                       </div>
 
                       <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
-                        <span>{completedModules['vid-1'] ? 'Review Masterclass' : 'Resume Masterclass'}</span>
+                        <span>{completedModules[selectedVideo.id] ? 'Review Video' : 'Resume Masterclass'}</span>
                         <span className="group-hover:translate-x-1 transition-transform">➔</span>
                       </div>
                     </div>
 
                     {/* Course 2: Sovereign Title & Deeds */}
                     <div
-                      onClick={() => setActiveTab('video')}
+                      onClick={() => handleSelectVideo(ARCHIVED_TRAINING_VIDEOS[2] || ARCHIVED_TRAINING_VIDEOS[0])}
                       className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-sky-500/50 dark:hover:border-sky-400/50 transition cursor-pointer space-y-4 group"
                     >
                       <div className="flex items-start gap-3.5">
@@ -547,7 +611,7 @@ export default function TrainingPortalPage() {
                             SOVEREIGN WORK-FOR-HIRE
                           </div>
                           <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                            Chain of Title &amp; Legal Deeds Masterclass
+                            Copyright Clearances &amp; Character Likeness
                           </h3>
                         </div>
                       </div>
@@ -560,7 +624,7 @@ export default function TrainingPortalPage() {
                         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                           <span className="flex items-center gap-1">
                             <BookOpen className="size-3 text-sky-500" />
-                            <span>6 Key Chapters</span>
+                            <span>LAW-204 &bull; 22:30</span>
                           </span>
                           <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                             <CheckCircle2 className="size-3" />
@@ -570,112 +634,151 @@ export default function TrainingPortalPage() {
                       </div>
 
                       <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
-                        <span>Review Covenants</span>
+                        <span>Review Masterclass</span>
                         <span className="group-hover:translate-x-1 transition-transform">➔</span>
                       </div>
                     </div>
                   </div>
                 </section>
 
-                {/* Section: Recommended Training Spotlight (Inspired by Focotech mock) */}
+                {/* Section: All Masterclass Videos Grid (Inspired by Focotech "Recommended Courses") */}
                 <section className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                        Featured Institutional Masterclass
+                        Curriculum Masterclasses ({filteredVideos.length})
                       </h2>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Official mandatory training for all children&apos;s media directors and creative teams.
+                        Select any video below to watch the full recording with chapter markers and legal points.
                       </p>
+                    </div>
+
+                    {/* Category Filter Chips */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
+                      {[
+                        { id: 'all', label: 'All' },
+                        { id: 'copyright', label: 'Sovereign IP' },
+                        { id: 'protection', label: 'Safeguards' },
+                        { id: 'broadcast', label: 'Broadcast' },
+                        { id: 'doctrinal', label: 'Scriptural' },
+                      ].map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setCategoryFilter(cat.id)}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                            categoryFilter === cat.id
+                              ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                    {/* Thumbnail Column */}
-                    <div
-                      onClick={() => setActiveTab('video')}
-                      className="md:col-span-5 relative aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 group cursor-pointer shadow-md flex items-center justify-center"
-                    >
-                      <video
-                        src="/kmm-welcome-animation.mp4"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        muted
-                      />
-                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <div className="size-14 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                          <Play className="size-6 fill-current ml-0.5" />
+                  {/* The Video Cards Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredVideos.map((video) => (
+                      <div
+                        key={video.id}
+                        onClick={() => handleSelectVideo(video)}
+                        className={`rounded-2xl bg-white dark:bg-[#151928] border transition cursor-pointer flex flex-col justify-between overflow-hidden group shadow-2xs hover:shadow-md ${
+                          selectedVideo.id === video.id
+                            ? 'border-amber-500 ring-2 ring-amber-500/20'
+                            : 'border-slate-200/80 dark:border-white/10 hover:border-amber-400 dark:hover:border-amber-500/40'
+                        }`}
+                      >
+                        {/* Video Thumbnail Box */}
+                        <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+                          <video
+                            src="/kmm-welcome-animation.mp4"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            muted
+                          />
+                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <div className="size-11 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                              <Play className="size-5 fill-current ml-0.5" />
+                            </div>
+                          </div>
+
+                          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-black/80 text-amber-400 border border-amber-500/30">
+                            {video.code}
+                          </span>
+
+                          <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-black/80 text-white">
+                            {video.duration}
+                          </span>
+
+                          {completedModules[video.id] && (
+                            <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500 text-white flex items-center gap-1 shadow-sm">
+                              <Check className="size-2.5 stroke-3" />
+                              <span>Completed</span>
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Video Details */}
+                        <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                          <div className="space-y-1.5">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                              {video.categoryLabel}
+                            </div>
+                            <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                              {video.title}
+                            </h3>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                              {video.desc}
+                            </p>
+                          </div>
+
+                          <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px]">
+                            <span className="font-medium text-slate-600 dark:text-slate-300 truncate max-w-[130px]">
+                              {video.speaker}
+                            </span>
+                            <span className="font-bold text-amber-500 flex items-center gap-0.5 shrink-0">
+                              ★ 5.0
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/80 text-white text-[10px] font-mono font-bold">
-                        24:30
-                      </span>
-                    </div>
-
-                    {/* Details Column */}
-                    <div className="md:col-span-7 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                          4K MASTER &bull; LAW-101
-                        </span>
-                        <span className="text-xs font-bold text-amber-500 flex items-center gap-1">
-                          ★ 5.0 (Ministry Certified)
-                        </span>
-                      </div>
-
-                      <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-tight">
-                        Protecting Intellectual Properties in Children&apos;s Media
-                      </h3>
-
-                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                        {masterclass.desc}
-                      </p>
-
-                      <div className="flex items-center gap-3 pt-2">
-                        <button
-                          onClick={() => setActiveTab('video')}
-                          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer shadow-xs inline-flex items-center gap-2"
-                        >
-                          <Play className="size-3.5 fill-current" />
-                          <span>Watch Masterclass</span>
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('accreditation')}
-                          className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 font-semibold text-xs transition cursor-pointer"
-                        >
-                          View Credential
-                        </button>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </section>
               </div>
             )}
 
             {/* ========================================================= */}
-            {/* TAB 2: MASTERCLASS VIDEO PLAYER (Dedicated View)          */}
+            {/* TAB 2: MASTERCLASS VIDEO PLAYER (Full Detail View)        */}
             {/* ========================================================= */}
             {activeTab === 'video' && (
-              <div className="space-y-6 animate-in fade-in duration-200">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-8 animate-in fade-in duration-200">
+                {/* Header with Switcher info */}
+                <div ref={playerContainerRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 mb-1">
-                      ★ Official Curriculum Masterclass
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                        {selectedVideo.code} &bull; {selectedVideo.res}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-400">
+                        {selectedVideo.categoryLabel}
+                      </span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                      Protecting Intellectual Properties in Children&apos;s Media
+                      {selectedVideo.title}
                     </h2>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={toggleModuleCompletion}
+                      onClick={() => toggleModuleCompletion(selectedVideo.id)}
                       className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer shadow-xs ${
-                        completedModules['vid-1']
+                        completedModules[selectedVideo.id]
                           ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                           : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
                       }`}
                     >
-                      {completedModules['vid-1'] ? (
+                      {completedModules[selectedVideo.id] ? (
                         <>
                           <CheckCircle className="size-4" />
                           <span>Completed &bull; Retake</span>
@@ -705,7 +808,7 @@ export default function TrainingPortalPage() {
                       }}
                       onEnded={() => {
                         setIsPlaying(false)
-                        if (!completedModules['vid-1']) toggleModuleCompletion()
+                        if (!completedModules[selectedVideo.id]) toggleModuleCompletion(selectedVideo.id)
                       }}
                       playsInline
                     />
@@ -713,7 +816,7 @@ export default function TrainingPortalPage() {
                     {/* Top Overlay Badge */}
                     <div className="absolute top-3 left-3 flex items-center gap-2">
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-950/80 text-amber-400 border border-amber-500/30 backdrop-blur-md">
-                        4K Ultra HD &bull; LAW-101
+                        {selectedVideo.res}
                       </span>
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-950/80 text-white backdrop-blur-md">
                         {formatSeconds(currentTime)} / {formatSeconds(totalDuration)}
@@ -770,7 +873,7 @@ export default function TrainingPortalPage() {
 
                         <div className="flex items-center gap-3 text-slate-300">
                           <span className="text-[11px] font-semibold hidden sm:inline text-amber-300">
-                            {chapters[activeChapterIndex]?.title}
+                            {currentChapters[activeChapterIndex]?.title}
                           </span>
                           <button
                             onClick={() => {
@@ -791,14 +894,14 @@ export default function TrainingPortalPage() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-white/10">
                     <div className="flex items-center gap-3.5">
                       <div className="size-12 rounded-2xl bg-gradient-to-tr from-[#0284C7] to-amber-500 text-white font-bold flex items-center justify-center text-sm shadow-md shrink-0">
-                        LO
+                        {selectedVideo.initials}
                       </div>
                       <div>
                         <div className="font-bold text-sm text-slate-900 dark:text-white">
-                          {masterclass.speaker}
+                          {selectedVideo.speaker}
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
-                          {masterclass.speakerRole}
+                          {selectedVideo.speakerRole}
                         </div>
                       </div>
                     </div>
@@ -824,7 +927,7 @@ export default function TrainingPortalPage() {
                       Curriculum Chapter Markers (Click to Seek)
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {chapters.map((ch, idx) => (
+                      {currentChapters.map((ch, idx) => (
                         <button
                           key={idx}
                           onClick={() => handleSeek(ch.seconds, idx)}
@@ -850,7 +953,7 @@ export default function TrainingPortalPage() {
                       Mandatory Institutional Covenants Covered:
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400">
-                      {masterclass.points.map((pt, i) => (
+                      {selectedVideo.points.map((pt, i) => (
                         <div key={i} className="flex items-start gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-white/5">
                           <CheckCircle2 className="size-3.5 text-amber-500 shrink-0 mt-0.5" />
                           <span className="leading-snug">{pt}</span>
@@ -859,6 +962,56 @@ export default function TrainingPortalPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Section: Select Another Masterclass Video */}
+                <section className="space-y-4 pt-4 border-t border-slate-200/80 dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                        All Curriculum Masterclasses ({ARCHIVED_TRAINING_VIDEOS.length})
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Switch to any other video to review its recording, points, and syllabus.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {ARCHIVED_TRAINING_VIDEOS.map((v) => (
+                      <div
+                        key={v.id}
+                        onClick={() => handleSelectVideo(v)}
+                        className={`p-3.5 rounded-2xl border transition cursor-pointer flex flex-col justify-between space-y-3 ${
+                          selectedVideo.id === v.id
+                            ? 'bg-amber-500/10 border-amber-500 ring-2 ring-amber-500/20'
+                            : 'bg-white dark:bg-[#151928] border-slate-200/80 dark:border-white/10 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-[10px] font-mono font-bold">
+                            <span className="text-amber-600 dark:text-amber-400">{v.code}</span>
+                            <span className="text-slate-400">{v.duration}</span>
+                          </div>
+                          <h4 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-2 leading-snug">
+                            {v.title}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                            {v.desc}
+                          </p>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px]">
+                          <span className="text-slate-600 dark:text-slate-300 font-medium truncate max-w-[120px]">
+                            {v.speaker}
+                          </span>
+                          <span className="font-bold text-xs text-amber-600 dark:text-amber-400">
+                            {selectedVideo.id === v.id ? '▶ Playing' : 'Watch →'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </div>
             )}
 
@@ -924,7 +1077,7 @@ export default function TrainingPortalPage() {
                       {currentUser?.agency || 'Lovetoons Content Operations'}
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed pt-3">
-                      Has satisfactorily completed all curricular requirements under <b>KMM-IP-101: Protecting Intellectual Properties in Children&apos;s Media</b>, validating sovereign chain of title, Work-for-Hire covenants, parental consent deeds, and AI transparency.
+                      Has satisfactorily completed all curricular requirements under <b>{selectedVideo.code}: {selectedVideo.title}</b>, validating sovereign chain of title, Work-for-Hire covenants, parental consent deeds, and AI transparency.
                     </p>
                   </div>
 
@@ -936,7 +1089,7 @@ export default function TrainingPortalPage() {
                     </div>
                     <div>
                       <span className="block text-slate-400 text-[10px] uppercase font-bold">Certificate Hash</span>
-                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">KMM-ACR-2026-IP101</span>
+                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">KMM-ACR-2026-{selectedVideo.id.toUpperCase()}</span>
                     </div>
                     <div>
                       <span className="block text-slate-400 text-[10px] uppercase font-bold">Authority</span>
@@ -952,7 +1105,7 @@ export default function TrainingPortalPage() {
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-white/10">
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText('https://kmm-portal.internal/verify/KMM-ACR-2026-IP101')
+                        navigator.clipboard.writeText(`https://kmm-portal.internal/verify/KMM-ACR-2026-${selectedVideo.id.toUpperCase()}`)
                         setCopiedHash(true)
                         setTimeout(() => setCopiedHash(false), 2000)
                       }}
@@ -1048,7 +1201,39 @@ export default function TrainingPortalPage() {
               </div>
             </div>
 
-            {/* Weekly Streak Tracker (Inspired by inspiration 7-day pill strip) */}
+            {/* Quick Playlist / Up Next (Direct switcher in right sidebar) */}
+            <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-xs text-slate-900 dark:text-white">Up Next &bull; Masterclasses</span>
+                <span className="text-[10px] font-bold text-slate-400">{completedCount}/{ARCHIVED_TRAINING_VIDEOS.length} Completed</span>
+              </div>
+
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {ARCHIVED_TRAINING_VIDEOS.map((v) => (
+                  <button
+                    key={v.id}
+                    onClick={() => handleSelectVideo(v)}
+                    className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between gap-2 cursor-pointer ${
+                      selectedVideo.id === v.id
+                        ? 'bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold'
+                        : 'hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[11px] truncate">{v.title}</div>
+                      <div className="text-[9px] text-slate-400">{v.duration} &bull; {v.speaker.split(' ')[0]}</div>
+                    </div>
+                    {completedModules[v.id] ? (
+                      <CheckCircle2 className="size-3 text-emerald-500 shrink-0" />
+                    ) : (
+                      <Play className="size-3 text-slate-400 shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Weekly Streak Tracker */}
             <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
@@ -1093,26 +1278,26 @@ export default function TrainingPortalPage() {
                 <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700/40 border border-slate-200/60 dark:border-white/5 space-y-1">
                   <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
                     <Tv className="size-3 text-amber-500" />
-                    <span>Masterclass</span>
+                    <span>In Progress</span>
                   </div>
                   <div className="font-black text-sm text-slate-900 dark:text-white">
-                    {completedModules['vid-1'] ? 'Completed' : 'In Progress'}
+                    {ARCHIVED_TRAINING_VIDEOS.length - completedCount} Left
                   </div>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700/40 border border-slate-200/60 dark:border-white/5 space-y-1">
                   <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
-                    <ShieldCheck className="size-3 text-sky-500" />
-                    <span>Curriculum</span>
+                    <ShieldCheck className="size-3 text-emerald-500" />
+                    <span>Completed</span>
                   </div>
                   <div className="font-black text-sm text-slate-900 dark:text-white">
-                    6 Chapters
+                    {completedCount} Videos
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Weekly Watch Time Chart (Inspired by inspiration mini bar chart) */}
+            {/* Weekly Watch Time Chart */}
             <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
@@ -1128,7 +1313,6 @@ export default function TrainingPortalPage() {
               <div className="space-y-2">
                 <div className="text-[10px] font-semibold text-slate-400">Total: 4 hrs 24 mins</div>
                 <div className="h-28 flex items-end justify-between gap-2 pt-6 px-1 relative">
-                  {/* Floating Highlight Callout Bubble (Thu 4:24m like inspiration) */}
                   <div className="absolute top-0 left-[48%] -translate-x-1/2 px-2 py-0.5 rounded-md bg-slate-950 text-white text-[9px] font-mono font-bold shadow-md">
                     4:24m
                   </div>
