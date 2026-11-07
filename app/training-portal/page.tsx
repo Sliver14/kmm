@@ -48,6 +48,12 @@ import {
   Shield,
   AlertTriangle,
   ShieldAlert,
+  Eye,
+  Download,
+  Users,
+  HardDrive,
+  Database,
+  Server,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem } from '@/lib/data/trainingVideosData'
 
@@ -64,6 +70,85 @@ export interface TrainingUser {
   avatar?: string
   registeredAt: string
 }
+
+export interface EnrolledOfficer {
+  id: string
+  name: string
+  email: string
+  agency: string
+  role: string
+  progress: number
+  status: 'Certified' | 'In Progress' | 'Under Review'
+  certificateId?: string
+  lastActive: string
+}
+
+export const MOCK_ENROLLED_OFFICERS: EnrolledOfficer[] = [
+  {
+    id: 'off-1',
+    name: 'Barrister Lillian Okoye',
+    email: 'lillian.okoye@kiddiesmedia.org',
+    agency: 'Legal & IP Directorate',
+    role: 'Lead Counsel & IP Officer',
+    progress: 100,
+    status: 'Certified',
+    certificateId: 'KMM-CERT-2026-001',
+    lastActive: 'Today, 09:40 AM',
+  },
+  {
+    id: 'off-2',
+    name: 'Dr. Stephanie Cole',
+    email: 'stephanie.cole@lovetoons.org',
+    agency: 'Lovetoons Animation',
+    role: 'Child Cognitive Safety Reviewer',
+    progress: 85,
+    status: 'In Progress',
+    lastActive: 'Yesterday',
+  },
+  {
+    id: 'off-3',
+    name: 'Brother Emmanuel Adeleke',
+    email: 'emmanuel.adeleke@lovetoons.org',
+    agency: 'Lovetoons Animation',
+    role: 'Lead 3D Animator & Director',
+    progress: 100,
+    status: 'Certified',
+    certificateId: 'KMM-CERT-2026-002',
+    lastActive: 'May 06, 2026',
+  },
+  {
+    id: 'off-4',
+    name: 'Sister Grace Mensah',
+    email: 'grace.mensah@kiddiesmedia.org',
+    agency: "Children's Ministry",
+    role: 'Scriptwriter & Storyboarder',
+    progress: 100,
+    status: 'Certified',
+    certificateId: 'KMM-CERT-2026-003',
+    lastActive: 'May 05, 2026',
+  },
+  {
+    id: 'off-5',
+    name: 'Deacon Mark Joshua',
+    email: 'mark.joshua@lovetoons.org',
+    agency: 'Publishing & Broadcast',
+    role: 'Broadcast Standards Compliance',
+    progress: 60,
+    status: 'In Progress',
+    lastActive: 'May 04, 2026',
+  },
+  {
+    id: 'off-6',
+    name: 'Sister Deborah Vance',
+    email: 'deborah.vance@kiddiesmedia.org',
+    agency: 'Educational Agency',
+    role: 'Curriculum & Doctrinal Reviewer',
+    progress: 100,
+    status: 'Certified',
+    certificateId: 'KMM-CERT-2026-004',
+    lastActive: 'May 02, 2026',
+  },
+]
 
 export default function TrainingPortalPage() {
   const router = useRouter()
@@ -145,6 +230,13 @@ export default function TrainingPortalPage() {
   const [editPoints, setEditPoints] = useState<string[]>([])
   const [editNewPointInput, setEditNewPointInput] = useState('')
   const [isSavingEdit, setIsSavingEdit] = useState(false)
+
+  // Dedicated Admin Dashboard states
+  const [adminActiveSection, setAdminActiveSection] = useState<'masterclasses' | 'officers' | 'storage'>('masterclasses')
+  const [isLearnerPreviewMode, setIsLearnerPreviewMode] = useState(false)
+  const [previewingVideo, setPreviewingVideo] = useState<VideoItem | null>(null)
+  const [officerSearch, setOfficerSearch] = useState('')
+  const [officerFilter, setOfficerFilter] = useState('all')
 
   // Completed modules tracking (maps video.id to boolean)
   const [completedModules, setCompletedModules] = useState<Record<string, boolean>>({
@@ -258,7 +350,7 @@ export default function TrainingPortalPage() {
           setSelectedVideo(found)
           setActiveTab('video')
         }
-      } else if (tabParam === 'admin') {
+      } else {
         const hasAdminAccess = Boolean(
           activeSessionUser && (
             activeSessionUser.isPortalAdmin ||
@@ -273,15 +365,19 @@ export default function TrainingPortalPage() {
             activeSessionUser.role === 'super_admin'
           )
         )
-        if (hasAdminAccess) {
-          setActiveTab('admin')
-        } else {
+
+        if (tabParam === 'admin') {
+          setActiveTab(hasAdminAccess ? 'admin' : 'overview')
+        } else if (tabParam === 'video' || tabParam === 'watch') {
+          setActiveTab('video')
+        } else if (tabParam === 'accreditation') {
+          setActiveTab('accreditation')
+        } else if (tabParam === 'overview') {
           setActiveTab('overview')
+        } else if (hasAdminAccess) {
+          // Portal Admin defaults to their dedicated Admin Dashboard!
+          setActiveTab('admin')
         }
-      } else if (tabParam === 'video' || tabParam === 'watch') {
-        setActiveTab('video')
-      } else if (tabParam === 'accreditation') {
-        setActiveTab('accreditation')
       }
     }
   }, [router])
@@ -372,6 +468,25 @@ export default function TrainingPortalPage() {
     })
   }, [masterclasses, searchQuery, categoryFilter])
 
+  // Filtered enrolled officers for Admin Directorate
+  const filteredOfficers = useMemo(() => {
+    return MOCK_ENROLLED_OFFICERS.filter((o) => {
+      const matchSearch =
+        !officerSearch.trim() ||
+        o.name.toLowerCase().includes(officerSearch.toLowerCase()) ||
+        o.email.toLowerCase().includes(officerSearch.toLowerCase()) ||
+        o.agency.toLowerCase().includes(officerSearch.toLowerCase()) ||
+        o.role.toLowerCase().includes(officerSearch.toLowerCase()) ||
+        (o.certificateId && o.certificateId.toLowerCase().includes(officerSearch.toLowerCase()))
+      const matchAgency =
+        officerFilter === 'all' ||
+        o.agency === officerFilter ||
+        (officerFilter === 'Certified' && o.status === 'Certified') ||
+        (officerFilter === 'In Progress' && o.status === 'In Progress')
+      return matchSearch && matchAgency
+    })
+  }, [officerSearch, officerFilter])
+
   const completedCount = useMemo(() => {
     return Object.values(completedModules).filter(Boolean).length
   }, [completedModules])
@@ -394,6 +509,43 @@ export default function TrainingPortalPage() {
     }
 
     return data.file.url
+  }
+
+  // Export Masterclasses catalog to JSON file
+  const handleExportCatalogJSON = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(masterclasses, null, 2))
+    const downloadAnchor = document.createElement('a')
+    downloadAnchor.setAttribute('href', dataStr)
+    downloadAnchor.setAttribute('download', `kmm-masterclasses-catalog-${new Date().toISOString().slice(0, 10)}.json`)
+    document.body.appendChild(downloadAnchor)
+    downloadAnchor.click()
+    downloadAnchor.remove()
+    showNotification('📥 Masterclasses catalog JSON exported successfully!')
+  }
+
+  // Export Officers Accreditation roster to CSV file
+  const handleExportOfficersCSV = () => {
+    const headers = ['Officer ID', 'Name', 'Email', 'Ministry Agency', 'Role', 'Progress %', 'Status', 'Certificate ID', 'Last Active']
+    const rows = MOCK_ENROLLED_OFFICERS.map((o) => [
+      o.id,
+      `"${o.name}"`,
+      o.email,
+      `"${o.agency}"`,
+      `"${o.role}"`,
+      `${o.progress}%`,
+      o.status,
+      o.certificateId || 'N/A',
+      `"${o.lastActive}"`,
+    ])
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement('a')
+    link.setAttribute('href', encodedUri)
+    link.setAttribute('download', `kmm-officers-accreditation-roster-${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    showNotification('📊 Officers accreditation CSV roster exported successfully!')
   }
 
   // Video File attachment handler
@@ -749,75 +901,157 @@ export default function TrainingPortalPage() {
 
             {/* Menu Section */}
             <div className="space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 py-1">
-                MENU
-              </div>
+              {isPortalAdmin && !isLearnerPreviewMode ? (
+                <>
+                  <div className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 px-3 py-1 flex items-center justify-between">
+                    <span>DIRECTORATE ADMIN</span>
+                    <span className="text-[8px] bg-amber-500/20 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-sm font-mono font-bold">CONTROL</span>
+                  </div>
 
-              {/* Navigation Items with live tab switching */}
-              <button
-                onClick={() => {
-                  setActiveTab('overview')
-                  setMobileSidebarOpen(false)
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'overview'
-                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                  }`}
-              >
-                <Layers className={`size-4 ${activeTab === 'overview' ? 'text-amber-500' : 'text-slate-400'}`} />
-                <span>Overview</span>
-              </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab('admin')
+                      setAdminActiveSection('masterclasses')
+                      setMobileSidebarOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin' && adminActiveSection === 'masterclasses'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                      }`}
+                  >
+                    <Tv className={`size-4 ${activeTab === 'admin' && adminActiveSection === 'masterclasses' ? 'text-amber-500' : 'text-slate-400'}`} />
+                    <span>Masterclasses &amp; Video</span>
+                    <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                      {masterclasses.length}
+                    </span>
+                  </button>
 
-              <button
-                onClick={() => {
-                  setActiveTab('video')
-                  setSelectedVideo(null)
-                  setMobileSidebarOpen(false)
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'video'
-                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                  }`}
-              >
-                <Tv className={`size-4 ${activeTab === 'video' ? 'text-amber-500' : 'text-slate-400'}`} />
-                <span>Masterclass Videos</span>
-                <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
-                  {masterclasses.length}
-                </span>
-              </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab('admin')
+                      setAdminActiveSection('officers')
+                      setMobileSidebarOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin' && adminActiveSection === 'officers'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                      }`}
+                  >
+                    <Users className={`size-4 ${activeTab === 'admin' && adminActiveSection === 'officers' ? 'text-amber-500' : 'text-slate-400'}`} />
+                    <span>Officer Accreditation</span>
+                    <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      {MOCK_ENROLLED_OFFICERS.length}
+                    </span>
+                  </button>
 
-              <button
-                onClick={() => {
-                  setActiveTab('accreditation')
-                  setMobileSidebarOpen(false)
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'accreditation'
-                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                  }`}
-              >
-                <GraduationCap className={`size-4 ${activeTab === 'accreditation' ? 'text-amber-500' : 'text-slate-400'}`} />
-                <span>Accreditation Certificate</span>
-              </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab('admin')
+                      setAdminActiveSection('storage')
+                      setMobileSidebarOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin' && adminActiveSection === 'storage'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                      }`}
+                  >
+                    <HardDrive className={`size-4 ${activeTab === 'admin' && adminActiveSection === 'storage' ? 'text-amber-500' : 'text-slate-400'}`} />
+                    <span>VPS Storage &amp; DRM</span>
+                    <span className="ml-auto text-[9px] font-mono font-bold px-1 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                      500MB
+                    </span>
+                  </button>
 
-              {/* Admin Dashboard Item - ONLY VISIBLE TO PORTAL ADMIN */}
-              {isPortalAdmin && (
-                <button
-                  onClick={() => {
-                    setActiveTab('admin')
-                    setMobileSidebarOpen(false)
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin'
-                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                    }`}
-                >
-                  <ShieldCheck className={`size-4 ${activeTab === 'admin' ? 'text-amber-500' : 'text-slate-400'}`} />
-                  <span>Admin Dashboard</span>
-                  <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                    Portal Admin
-                  </span>
-                </button>
+                  <div className="pt-3 mt-2 border-t border-slate-100 dark:border-white/5 space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
+                      LEARNER PERSPECTIVE
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsLearnerPreviewMode(true)
+                        setActiveTab('overview')
+                        setMobileSidebarOpen(false)
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent transition cursor-pointer"
+                    >
+                      <Eye className="size-4 text-sky-500" />
+                      <span>Preview Learner View</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* Regular Learner Navigation (or Learner Preview Mode) */
+                <>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 py-1 flex items-center justify-between">
+                    <span>CURRICULUM</span>
+                    {isLearnerPreviewMode && (
+                      <span className="text-[9px] bg-sky-500/20 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded-sm font-mono font-bold">
+                        PREVIEW
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('overview')
+                      setMobileSidebarOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'overview'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                      }`}
+                  >
+                    <Layers className={`size-4 ${activeTab === 'overview' ? 'text-amber-500' : 'text-slate-400'}`} />
+                    <span>Overview</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('video')
+                      setSelectedVideo(null)
+                      setMobileSidebarOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'video'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                      }`}
+                  >
+                    <Tv className={`size-4 ${activeTab === 'video' ? 'text-amber-500' : 'text-slate-400'}`} />
+                    <span>Masterclass Videos</span>
+                    <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                      {masterclasses.length}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('accreditation')
+                      setMobileSidebarOpen(false)
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'accreditation'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
+                      }`}
+                  >
+                    <GraduationCap className={`size-4 ${activeTab === 'accreditation' ? 'text-amber-500' : 'text-slate-400'}`} />
+                    <span>Accreditation Certificate</span>
+                  </button>
+
+                  {isPortalAdmin && isLearnerPreviewMode && (
+                    <div className="pt-3 mt-2 border-t border-slate-100 dark:border-white/5">
+                      <button
+                        onClick={() => {
+                          setIsLearnerPreviewMode(false)
+                          setActiveTab('admin')
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition cursor-pointer shadow-xs"
+                      >
+                        <ShieldCheck className="size-4" />
+                        <span>Return to Admin Panel</span>
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -988,6 +1222,26 @@ export default function TrainingPortalPage() {
               </div>
             </div>
           </header>
+
+          {/* Learner Preview Alert Banner (When Admin is previewing learner mode) */}
+          {isPortalAdmin && isLearnerPreviewMode && (
+            <div className="bg-gradient-to-r from-sky-600 to-indigo-600 text-white px-4 sm:px-6 py-2.5 text-xs font-bold flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-md shrink-0 border-b border-sky-400/30">
+              <div className="flex items-center gap-2">
+                <Eye className="size-4 shrink-0 text-amber-300" />
+                <span>👁️ You are currently previewing the Training Portal in Learner Mode. Student coursework &amp; video player are active for testing.</span>
+              </div>
+              <button
+                onClick={() => {
+                  setIsLearnerPreviewMode(false)
+                  setActiveTab('admin')
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-white text-sky-900 font-extrabold text-xs hover:bg-sky-50 transition cursor-pointer whitespace-nowrap shadow-xs flex items-center gap-1.5"
+              >
+                <ShieldCheck className="size-3.5 text-amber-600" />
+                <span>Return to Admin Command</span>
+              </button>
+            </div>
+          )}
 
           {/* DYNAMIC TAB CONTENT (Changes smoothly as user switches tabs) */}
           <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl flex-1">
@@ -1916,181 +2170,537 @@ export default function TrainingPortalPage() {
             {/* ========================================================= */}
             {activeTab === 'admin' && (
               isPortalAdmin ? (
-                <div className="space-y-8 animate-in fade-in duration-200">
-                {/* Admin Hero Bar */}
-                <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-sky-500/10 border border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
-                  <div className="space-y-2 max-w-xl">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30">
-                      <Shield className="size-3.5 text-amber-500" />
-                      <span>Directorate Admin Panel</span>
-                    </div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                      Masterclass Management &amp; Uploads
-                    </h2>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                      Publish official masterclasses, configure curriculum chapter checkpoints, attach statutory covenants, and govern officer training accreditation.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0">
-                    <button
-                      onClick={() => setShowUploadModal(true)}
-                      className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition-transform active:scale-98 cursor-pointer"
-                    >
-                      <Plus className="size-4 stroke-3" />
-                      <span>Upload Masterclass</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 4 Stats Cards in Row */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Masterclasses</div>
-                    <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">{masterclasses.length}</div>
-                    <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Active in curriculum</div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Custom Uploads</div>
-                    <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
-                      {masterclasses.filter((v) => v.isCustom).length}
-                    </div>
-                    <div className="text-[11px] text-slate-400 font-medium">Added via admin panel</div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Officer Completions</div>
-                    <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
-                      {completedCount}
-                    </div>
-                    <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Verified accreditations</div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Video DRM &amp; Protection</div>
-                    <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 pt-1.5">
-                      <ShieldCheck className="size-4" />
-                      <span>No-Download DRM Active</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400">Stream-only protected playback</div>
-                  </div>
-                </div>
-
-                {/* Masterclasses Table */}
-                <div className="rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs space-y-4 p-5 sm:p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                      <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
-                        Curriculum Masterclasses Repository ({masterclasses.length})
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Review, inspect, or manage all institutional video modules published to the training portal.
+                <div className="space-y-6 animate-in fade-in duration-200">
+                  {/* Admin Directorate Hero Header */}
+                  <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-sky-500/10 border border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
+                    <div className="space-y-2 max-w-xl">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30">
+                        <Shield className="size-3.5 text-amber-500" />
+                        <span>Training Directorate Administrative Panel</span>
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        Curriculum Command &amp; Accreditation Governance
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Manage official masterclasses, configure VPS video uploads up to 500MB, inspect streaming playback, oversee enrolled officer compliance, and audit statutory legal covenants.
                       </p>
                     </div>
 
+                    <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                      <button
+                        onClick={() => setShowUploadModal(true)}
+                        className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition-transform active:scale-98 cursor-pointer"
+                      >
+                        <Plus className="size-4 stroke-3" />
+                        <span>Upload Masterclass</span>
+                      </button>
+                      <button
+                        onClick={handleExportCatalogJSON}
+                        className="px-4 py-3 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-2 transition cursor-pointer"
+                        title="Download Curriculum Catalog JSON Backup"
+                      >
+                        <Download className="size-4 text-amber-500" />
+                        <span>Backup Catalog</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Section Switcher Tabs */}
+                  <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 dark:border-white/10 pb-3">
                     <button
-                      onClick={() => setShowUploadModal(true)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer"
+                      onClick={() => setAdminActiveSection('masterclasses')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                        adminActiveSection === 'masterclasses'
+                          ? 'bg-amber-500 text-slate-950 shadow-xs'
+                          : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+                      }`}
                     >
-                      <Plus className="size-3.5" />
-                      <span>New Masterclass</span>
+                      <Tv className="size-3.5" />
+                      <span>Masterclasses Repository ({masterclasses.length})</span>
+                    </button>
+                    <button
+                      onClick={() => setAdminActiveSection('officers')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                        adminActiveSection === 'officers'
+                          ? 'bg-amber-500 text-slate-950 shadow-xs'
+                          : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      <Users className="size-3.5" />
+                      <span>Officer Accreditation Roster ({MOCK_ENROLLED_OFFICERS.length})</span>
+                    </button>
+                    <button
+                      onClick={() => setAdminActiveSection('storage')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                        adminActiveSection === 'storage'
+                          ? 'bg-amber-500 text-slate-950 shadow-xs'
+                          : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      <HardDrive className="size-3.5" />
+                      <span>VPS Storage &amp; DRM Security</span>
                     </button>
                   </div>
 
-                  {/* Table Container */}
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead>
-                        <tr className="border-b border-slate-200/80 dark:border-white/10 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-                          <th className="py-3 px-3">Module</th>
-                          <th className="py-3 px-3">Category</th>
-                          <th className="py-3 px-3">Duration</th>
-                          <th className="py-3 px-3">Status</th>
-                          <th className="py-3 px-3 text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                        {masterclasses.map((v) => (
-                          <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
-                            <td className="py-3.5 px-3">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  onContextMenu={(e) => { e.preventDefault(); return false; }}
-                                  className="relative size-12 rounded-xl bg-slate-900 overflow-hidden shrink-0 border border-slate-800 flex items-center justify-center select-none"
-                                >
-                                  <video
-                                    src={v.videoUrl || '/kmm-welcome-animation.mp4'}
-                                    className="w-full h-full object-cover pointer-events-none select-none"
-                                    muted
-                                    controlsList="nodownload nofullscreen noplaybackrate"
-                                    disablePictureInPicture
-                                    onContextMenu={(e) => { e.preventDefault(); return false; }}
-                                  />
-                                  <Play className="absolute size-3.5 text-amber-400 fill-current" />
-                                </div>
-                                <div className="min-w-0">
-                                  <div className="font-mono text-[10px] font-bold text-amber-600 dark:text-amber-400">
-                                    {v.code}
-                                  </div>
-                                  <div className="font-bold text-slate-900 dark:text-white truncate max-w-xs sm:max-w-md">
-                                    {v.title}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-3 whitespace-nowrap">
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                                {v.categoryLabel}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-3 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                              {v.duration}
-                            </td>
-                            <td className="py-3.5 px-3 whitespace-nowrap">
-                              {v.isCustom ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                                  <span>Custom Upload</span>
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                                  <span>Core Curriculum</span>
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-3.5 px-3 text-right whitespace-nowrap">
-                              <div className="flex items-center justify-end gap-1.5">
-                                <button
-                                  onClick={() => handleSelectVideo(v)}
-                                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 font-bold text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer inline-flex items-center gap-1"
-                                  title="Play Masterclass"
-                                >
-                                  <Play className="size-3 fill-current text-amber-500" />
-                                  <span>Play</span>
-                                </button>
-                                <button
-                                  onClick={(e) => handleOpenEditModal(v, e)}
-                                  className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-amber-500/10 hover:border-amber-500/30 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
-                                  title="Edit Masterclass"
-                                >
-                                  <Pencil className="size-3.5" />
-                                </button>
-                                <button
-                                  onClick={(e) => handleDeleteMasterclass(v.id, e)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
-                                  title="Delete Masterclass"
-                                >
-                                  <Trash2 className="size-3.5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  {/* ========================================================= */}
+                  {/* SUB-SECTION 1: MASTERCLASSES REPOSITORY                   */}
+                  {/* ========================================================= */}
+                  {adminActiveSection === 'masterclasses' && (
+                    <div className="space-y-6 animate-in fade-in duration-150">
+                      {/* 4 Stats Cards */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Masterclasses</div>
+                          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">{masterclasses.length}</div>
+                          <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Active in curriculum</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Custom VPS Uploads</div>
+                          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                            {masterclasses.filter((v) => v.isCustom || v.videoUrl?.startsWith('/uploads/')).length}
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-medium">Stored in public/uploads</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Core Curriculum</div>
+                          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                            {masterclasses.filter((v) => !v.isCustom).length}
+                          </div>
+                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Institutional standards</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Streaming Protection</div>
+                          <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 pt-1.5">
+                            <ShieldCheck className="size-4" />
+                            <span>No-Download DRM Active</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400">Direct binary downloads disabled</div>
+                        </div>
+                      </div>
+
+                      {/* Filter & Search Bar */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10">
+                        <div className="flex-1 max-w-md relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                          <input
+                            type="text"
+                            placeholder="Filter by title, code, or syllabus description..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 focus:outline-none focus:border-amber-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="h-8.5 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-xs outline-none focus:border-amber-500 cursor-pointer"
+                          >
+                            <option value="all">All Curriculum Categories</option>
+                            <option value="copyright">Copyright &amp; Sovereign IP</option>
+                            <option value="protection">Child Protection &amp; Safety</option>
+                            <option value="broadcast">Broadcast &amp; Playout</option>
+                            <option value="doctrinal">Scriptural Review &amp; Canon</option>
+                            <option value="merchandising">Merchandising &amp; Contracts</option>
+                          </select>
+
+                          <button
+                            onClick={() => setShowUploadModal(true)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer whitespace-nowrap"
+                          >
+                            <Plus className="size-3.5" />
+                            <span>New Module</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Masterclasses Table */}
+                      <div className="rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs">
+                            <thead>
+                              <tr className="border-b border-slate-200/80 dark:border-white/10 text-slate-400 text-[10px] uppercase font-bold tracking-wider bg-slate-50/50 dark:bg-white/2">
+                                <th className="py-3 px-4">Masterclass &amp; Code</th>
+                                <th className="py-3 px-3">Curriculum Category</th>
+                                <th className="py-3 px-3">Duration</th>
+                                <th className="py-3 px-3">Storage Source</th>
+                                <th className="py-3 px-3">Status</th>
+                                <th className="py-3 px-4 text-right">Admin Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                              {filteredVideos.map((v) => (
+                                <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                                  <td className="py-3.5 px-4">
+                                    <div className="flex items-center gap-3">
+                                      <button
+                                        onClick={() => setPreviewingVideo(v)}
+                                        className="relative size-12 rounded-xl bg-slate-900 overflow-hidden shrink-0 border border-slate-800 flex items-center justify-center cursor-pointer group"
+                                        title="Click to preview video playback"
+                                      >
+                                        <video
+                                          src={v.videoUrl || '/kmm-welcome-animation.mp4'}
+                                          className="w-full h-full object-cover pointer-events-none select-none"
+                                          muted
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition-colors">
+                                          <Eye className="size-4 text-amber-400" />
+                                        </div>
+                                      </button>
+                                      <div className="min-w-0">
+                                        <div className="font-mono text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                                          {v.code}
+                                        </div>
+                                        <button
+                                          onClick={() => setPreviewingVideo(v)}
+                                          className="font-bold text-slate-900 dark:text-white truncate max-w-xs sm:max-w-md hover:text-amber-600 dark:hover:text-amber-400 transition text-left cursor-pointer"
+                                        >
+                                          {v.title}
+                                        </button>
+                                        <div className="text-[10px] text-slate-400 truncate max-w-xs sm:max-w-md">
+                                          {v.points?.length || 0} Statutory Covenants attached
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="py-3.5 px-3 whitespace-nowrap">
+                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                      {v.categoryLabel}
+                                    </span>
+                                  </td>
+                                  <td className="py-3.5 px-3 font-mono font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                                    {v.duration}
+                                  </td>
+                                  <td className="py-3.5 px-3 whitespace-nowrap">
+                                    {v.videoUrl?.startsWith('/uploads/') ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                                        <HardDrive className="size-3" />
+                                        <span>VPS Storage</span>
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-lg">
+                                        <Link2 className="size-3" />
+                                        <span>URL / Static</span>
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="py-3.5 px-3 whitespace-nowrap">
+                                    {v.isCustom ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                                        <span>Custom Upload</span>
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                                        <span>Core Curriculum</span>
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                                    <div className="flex items-center justify-end gap-1.5">
+                                      <button
+                                        onClick={() => setPreviewingVideo(v)}
+                                        className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 font-bold text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer inline-flex items-center gap-1"
+                                        title="Inspect Video Quality"
+                                      >
+                                        <Eye className="size-3 text-amber-500" />
+                                        <span>Preview</span>
+                                      </button>
+                                      <button
+                                        onClick={(e) => handleOpenEditModal(v, e)}
+                                        className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-amber-500/10 hover:border-amber-500/30 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
+                                        title="Edit Masterclass"
+                                      >
+                                        <Pencil className="size-3.5" />
+                                      </button>
+                                      <button
+                                        onClick={(e) => handleDeleteMasterclass(v.id, e)}
+                                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
+                                        title="Delete Masterclass"
+                                      >
+                                        <Trash2 className="size-3.5" />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ========================================================= */}
+                  {/* SUB-SECTION 2: OFFICER ACCREDITATION ROSTER               */}
+                  {/* ========================================================= */}
+                  {adminActiveSection === 'officers' && (
+                    <div className="space-y-6 animate-in fade-in duration-150">
+                      {/* 4 Officer KPIs */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Enrolled Officers</div>
+                          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">{MOCK_ENROLLED_OFFICERS.length}</div>
+                          <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Across ministries</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Certified Officers</div>
+                          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                            {MOCK_ENROLLED_OFFICERS.filter((o) => o.status === 'Certified').length}
+                          </div>
+                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">100% Curriculum Completed</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">In Active Training</div>
+                          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                            {MOCK_ENROLLED_OFFICERS.filter((o) => o.status === 'In Progress').length}
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-medium">Undergoing modules</div>
+                        </div>
+
+                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Accreditation Pass Rate</div>
+                          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                            100%
+                          </div>
+                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">High statutory compliance</div>
+                        </div>
+                      </div>
+
+                      {/* Filter & Export Toolbar */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10">
+                        <div className="flex-1 max-w-md relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                          <input
+                            type="text"
+                            placeholder="Search officer name, email, ministry, certificate..."
+                            value={officerSearch}
+                            onChange={(e) => setOfficerSearch(e.target.value)}
+                            className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 focus:outline-none focus:border-amber-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={officerFilter}
+                            onChange={(e) => setOfficerFilter(e.target.value)}
+                            className="h-8.5 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-xs outline-none focus:border-amber-500 cursor-pointer"
+                          >
+                            <option value="all">All Ministries &amp; Status</option>
+                            <option value="Certified">Status: Certified Only</option>
+                            <option value="In Progress">Status: In Progress Only</option>
+                            <option value="Legal & IP Directorate">Legal &amp; IP Directorate</option>
+                            <option value="Lovetoons Animation">Lovetoons Animation</option>
+                            <option value="Children's Ministry">Children&apos;s Ministry</option>
+                            <option value="Publishing & Broadcast">Publishing &amp; Broadcast</option>
+                            <option value="Educational Agency">Educational Agency</option>
+                          </select>
+
+                          <button
+                            onClick={handleExportOfficersCSV}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer whitespace-nowrap"
+                          >
+                            <Download className="size-3.5 text-emerald-500" />
+                            <span>Export CSV Roster</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Officers Roster Table */}
+                      <div className="rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs">
+                            <thead>
+                              <tr className="border-b border-slate-200/80 dark:border-white/10 text-slate-400 text-[10px] uppercase font-bold tracking-wider bg-slate-50/50 dark:bg-white/2">
+                                <th className="py-3 px-4">Officer Name &amp; Email</th>
+                                <th className="py-3 px-3">Ministry Agency</th>
+                                <th className="py-3 px-3">Curriculum Progress</th>
+                                <th className="py-3 px-3">Accreditation Status</th>
+                                <th className="py-3 px-3">Certificate ID</th>
+                                <th className="py-3 px-4 text-right">Verification</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                              {filteredOfficers.map((o) => (
+                                <tr key={o.id} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                                  <td className="py-3.5 px-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="size-9 rounded-xl bg-gradient-to-tr from-[#0284C7] to-amber-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                        {o.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                                      </div>
+                                      <div className="min-w-0">
+                                        <div className="font-bold text-slate-900 dark:text-white truncate">
+                                          {o.name}
+                                        </div>
+                                        <div className="text-[10px] text-slate-400 truncate font-mono">
+                                          {o.email}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="py-3.5 px-3 whitespace-nowrap">
+                                    <div className="font-semibold text-slate-800 dark:text-slate-200">{o.agency}</div>
+                                    <div className="text-[10px] text-slate-400">{o.role}</div>
+                                  </td>
+                                  <td className="py-3.5 px-3 whitespace-nowrap">
+                                    <div className="w-28 space-y-1">
+                                      <div className="flex items-center justify-between text-[10px] font-bold">
+                                        <span className="text-slate-500">{o.progress}%</span>
+                                        <span className={o.progress === 100 ? 'text-emerald-500' : 'text-amber-500'}>
+                                          {o.progress === 100 ? 'Complete' : 'In Course'}
+                                        </span>
+                                      </div>
+                                      <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                        <div
+                                          className={`h-full rounded-full ${o.progress === 100 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                                          style={{ width: `${o.progress}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="py-3.5 px-3 whitespace-nowrap">
+                                    {o.status === 'Certified' ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                                        <CheckCircle className="size-3 text-emerald-500" />
+                                        <span>Certified</span>
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                                        <Clock className="size-3 text-amber-500" />
+                                        <span>In Progress</span>
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="py-3.5 px-3 whitespace-nowrap">
+                                    <span className="font-mono text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                                      {o.certificateId || 'Pending Exam'}
+                                    </span>
+                                  </td>
+                                  <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                                    <button
+                                      onClick={() => showNotification(`✓ Verified: Accreditation for ${o.name} is cryptographically valid under ${o.certificateId || 'training status'}.`)}
+                                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 font-bold text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer inline-flex items-center gap-1"
+                                    >
+                                      <ShieldCheck className="size-3 text-emerald-500" />
+                                      <span>Verify</span>
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ========================================================= */}
+                  {/* SUB-SECTION 3: VPS STORAGE & DRM ARCHITECTURE             */}
+                  {/* ========================================================= */}
+                  {adminActiveSection === 'storage' && (
+                    <div className="space-y-6 animate-in fade-in duration-150">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Server Architecture Card */}
+                        <div className="p-6 rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+                          <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20">
+                              <HardDrive className="size-5" />
+                            </div>
+                            <div>
+                              <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                                VPS File System &amp; Upload Infrastructure
+                              </h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                Persistent server storage on VPS host filesystem
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2.5 pt-2 text-xs">
+                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-slate-500 dark:text-slate-400">Storage Target Directory:</span>
+                              <span className="font-mono font-bold text-amber-600 dark:text-amber-400">public/uploads/</span>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-slate-500 dark:text-slate-400">Upload API Endpoint:</span>
+                              <span className="font-mono font-bold text-slate-900 dark:text-white">/api/upload (POST)</span>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-slate-500 dark:text-slate-400">Maximum Video File Size:</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">500 MB (Expanded)</span>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-slate-500 dark:text-slate-400">Permitted Video Formats:</span>
+                              <span className="font-mono text-slate-700 dark:text-slate-300">MP4, WebM, MOV</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Streaming DRM Protection Card */}
+                        <div className="p-6 rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+                          <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
+                              <ShieldCheck className="size-5" />
+                            </div>
+                            <div>
+                              <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                                Anti-Piracy Streaming &amp; DRM Security
+                              </h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                Proprietary institutional protections against unauthorized video downloads
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2.5 pt-2 text-xs">
+                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-slate-500 dark:text-slate-400">Frontend Download Controls:</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">controlsList=&quot;nodownload&quot;</span>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-slate-500 dark:text-slate-400">Picture-in-Picture Capture:</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">disablePictureInPicture</span>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-slate-500 dark:text-slate-400">Right-Click Context Menu:</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">Blocked on Video Container</span>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-slate-500 dark:text-slate-400">Playback Protocol:</span>
+                              <span className="font-mono text-slate-700 dark:text-slate-300">HTTP 206 Partial Content</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Backup & Recovery Card */}
+                      <div className="p-6 rounded-3xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                            Curriculum Database Backup &amp; Synchronization
+                          </h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Export full JSON snapshots of curriculum metadata, course codes, and statutory covenants.
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleExportCatalogJSON}
+                            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+                          >
+                            <Download className="size-3.5" />
+                            <span>Export JSON Backup</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
               ) : (
                 <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 text-center space-y-4 max-w-lg mx-auto my-12 shadow-sm animate-in fade-in">
                   <div className="size-14 rounded-2xl bg-rose-500/10 text-rose-500 mx-auto flex items-center justify-center border border-rose-500/20">
@@ -2137,10 +2747,155 @@ export default function TrainingPortalPage() {
               >
                 <span>&larr; Close Details</span>
               </button>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Officer Card</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                {isPortalAdmin && !isLearnerPreviewMode ? 'Directorate Panel' : 'Officer Card'}
+              </span>
             </div>
 
-            {/* Profile Summary Card */}
+            {isPortalAdmin && !isLearnerPreviewMode ? (
+              <>
+                {/* 1. Admin Profile Summary Card */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-50 dark:via-slate-800/40 to-transparent border border-amber-500/30 space-y-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="size-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md">
+                      PA
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
+                        {currentUser?.name || 'Portal Administrator'}
+                      </h3>
+                      <p className="text-[11px] text-amber-700 dark:text-amber-300 font-semibold truncate">
+                        Training Directorate Lead
+                      </p>
+                      <div className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 pt-0.5">
+                        <Shield className="size-3 text-amber-500" />
+                        <span>Directorate Super Admin</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3 Admin KPIs */}
+                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-200/60 dark:border-white/10 text-center">
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-black text-slate-900 dark:text-white font-mono">
+                        {masterclasses.length}
+                      </div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase">Modules</div>
+                    </div>
+
+                    <div className="space-y-0.5 border-x border-slate-200/60 dark:border-white/10">
+                      <div className="text-xs font-black text-amber-600 dark:text-amber-400 font-mono">
+                        500 MB
+                      </div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase">VPS Limit</div>
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                        Active
+                      </div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase">DRM Lock</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. VPS Storage & Media Server Health */}
+                <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <HardDrive className="size-3.5 text-amber-500" />
+                      <span>VPS Media Storage</span>
+                    </span>
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                      OPERATIONAL
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5">
+                      <span className="text-slate-500 dark:text-slate-400">Target Path:</span>
+                      <span className="font-mono text-amber-600 dark:text-amber-400 font-bold text-[10px]">public/uploads</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5">
+                      <span className="text-slate-500 dark:text-slate-400">Streaming:</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px]">HTTP 206 Partial</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5">
+                      <span className="text-slate-500 dark:text-slate-400">Protection:</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px]">Anti-Piracy DRM</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Curriculum Distribution by Category */}
+                <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-slate-900 dark:text-white">Curriculum Distribution</span>
+                    <span className="text-[10px] text-slate-400 font-mono">{masterclasses.length} total</span>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs">
+                    {[
+                      { key: 'copyright', label: 'Copyright & Sovereign IP' },
+                      { key: 'protection', label: 'Child Protection & Safety' },
+                      { key: 'broadcast', label: 'Broadcast & Playout' },
+                      { key: 'doctrinal', label: 'Scriptural Review & Canon' },
+                      { key: 'merchandising', label: 'Merchandising & Contracts' },
+                    ].map((cat) => {
+                      const count = masterclasses.filter((v) => (v.category || 'copyright') === cat.key).length
+                      return (
+                        <div key={cat.key} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-white/5 last:border-0 text-[11px]">
+                          <span className="text-slate-600 dark:text-slate-300 truncate max-w-[170px]">{cat.label}</span>
+                          <span className="font-mono font-bold text-slate-900 dark:text-white">{count}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* 4. Quick Administrative Tools */}
+                <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-2.5">
+                  <span className="font-bold text-xs text-slate-900 dark:text-white block">
+                    Quick Directorate Tools
+                  </span>
+                  <div className="space-y-1.5">
+                    <button
+                      onClick={() => setShowUploadModal(true)}
+                      className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 hover:brightness-110 transition cursor-pointer shadow-xs"
+                    >
+                      <Plus className="size-3.5 stroke-3" />
+                      <span>Upload Masterclass</span>
+                    </button>
+                    <button
+                      onClick={handleExportCatalogJSON}
+                      className="w-full py-2 px-3 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Download className="size-3.5 text-amber-500" />
+                      <span>Export Catalog (JSON)</span>
+                    </button>
+                    <button
+                      onClick={handleExportOfficersCSV}
+                      className="w-full py-2 px-3 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Download className="size-3.5 text-emerald-500" />
+                      <span>Export Officers (CSV)</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsLearnerPreviewMode(true)
+                        setActiveTab('overview')
+                      }}
+                      className="w-full py-2 px-3 rounded-xl border border-sky-500/30 text-sky-700 dark:text-sky-300 hover:bg-sky-500/10 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Eye className="size-3.5 text-sky-500" />
+                      <span>Preview Learner View</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Profile Summary Card */}
             <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-3.5">
                 <div className="size-12 rounded-2xl bg-gradient-to-tr from-[#0284C7] to-amber-500 text-white font-black flex items-center justify-center text-sm shadow-md">
@@ -2351,9 +3106,116 @@ export default function TrainingPortalPage() {
                 View Official Certificate
               </button>
             </div>
+              </>
+            )}
           </aside>
         )}
       </div>
+
+      {/* Admin Video Quality & DRM Preview Modal */}
+      {previewingVideo && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="relative w-full max-w-3xl bg-white dark:bg-[#151928] rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl p-6 sm:p-7 space-y-5 max-h-[92vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20">
+                  <FileVideo className="size-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                      {previewingVideo.code}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-400">
+                      Admin Video Quality Inspector
+                    </span>
+                  </div>
+                  <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white line-clamp-1">
+                    {previewingVideo.title}
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setPreviewingVideo(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Video Container (Protected DRM streaming) */}
+            <div
+              onContextMenu={(e) => { e.preventDefault(); return false; }}
+              className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-xl border border-slate-800 flex items-center justify-center"
+            >
+              <video
+                src={previewingVideo.videoUrl || '/kmm-welcome-animation.mp4'}
+                controls
+                autoPlay
+                controlsList="nodownload nofullscreen noplaybackrate"
+                disablePictureInPicture
+                onContextMenu={(e) => { e.preventDefault(); return false; }}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* Video Metadata & Storage Diagnostics */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-white/5 text-xs">
+              <div>
+                <span className="block text-slate-400 text-[10px] uppercase font-bold">Category</span>
+                <span className="font-bold text-slate-900 dark:text-white">{previewingVideo.categoryLabel}</span>
+              </div>
+              <div>
+                <span className="block text-slate-400 text-[10px] uppercase font-bold">Duration</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">{previewingVideo.duration}</span>
+              </div>
+              <div>
+                <span className="block text-slate-400 text-[10px] uppercase font-bold">Storage Type</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400">
+                  {previewingVideo.videoUrl?.startsWith('/uploads/') ? 'VPS Storage (/uploads)' : 'Direct URL / Static'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-slate-400 text-[10px] uppercase font-bold">DRM Protection</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">✓ No-Download Locked</span>
+              </div>
+            </div>
+
+            {/* Video Path */}
+            <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 text-[11px] font-mono text-slate-600 dark:text-slate-400 truncate flex items-center justify-between gap-2 border border-slate-200/60 dark:border-white/5">
+              <span className="truncate">Source: {previewingVideo.videoUrl || '/kmm-welcome-animation.mp4'}</span>
+              <span className="text-[10px] text-amber-600 dark:text-amber-400 shrink-0 font-bold">HTTP 206 Partial</span>
+            </div>
+
+            {/* Description */}
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {previewingVideo.desc}
+            </p>
+
+            {/* Action Bar */}
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-white/10">
+              <button
+                onClick={() => {
+                  const target = previewingVideo
+                  setPreviewingVideo(null)
+                  handleOpenEditModal(target)
+                }}
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+              >
+                <Pencil className="size-3.5" />
+                <span>Edit This Masterclass</span>
+              </button>
+              <button
+                onClick={() => setPreviewingVideo(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 font-semibold text-xs transition cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upload Masterclass Modal */}
       {showUploadModal && (

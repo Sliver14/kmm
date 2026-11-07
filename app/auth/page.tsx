@@ -217,7 +217,11 @@ export default function AuthPage() {
 
       setSuccessMessage(`Welcome back, ${authenticatedUser.name}! Launching Training Portal...`)
       setTimeout(() => {
-        router.push('/training-portal')
+        if (isUserPortalAdmin) {
+          router.push('/training-portal?tab=admin')
+        } else {
+          router.push('/training-portal')
+        }
       }, 500)
     } catch (err: any) {
       setErrorMessage(err?.message || 'Authentication failed. Please check your credentials.')
