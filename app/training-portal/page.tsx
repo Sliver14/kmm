@@ -54,6 +54,7 @@ import {
   HardDrive,
   Database,
   Server,
+  Loader2,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem } from '@/lib/data/trainingVideosData'
 
@@ -135,6 +136,9 @@ export default function TrainingPortalPage() {
   ])
   const [newPointInput, setNewPointInput] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadStatusText, setUploadStatusText] = useState('')
+  const [uploadBytesInfo, setUploadBytesInfo] = useState('')
 
   // Edit Masterclass State
   const [editingVideo, setEditingVideo] = useState<VideoItem | null>(null)
@@ -151,6 +155,8 @@ export default function TrainingPortalPage() {
   const [editPoints, setEditPoints] = useState<string[]>([])
   const [editNewPointInput, setEditNewPointInput] = useState('')
   const [isSavingEdit, setIsSavingEdit] = useState(false)
+  const [editUploadProgress, setEditUploadProgress] = useState(0)
+  const [editUploadStatusText, setEditUploadStatusText] = useState('')
 
   // Dedicated Admin Dashboard states
   const [adminActiveSection, setAdminActiveSection] = useState<'masterclasses' | 'storage'>('masterclasses')
@@ -402,24 +408,60 @@ export default function TrainingPortalPage() {
     return Object.values(completedModules).filter(Boolean).length
   }, [completedModules])
 
-  // Helper to upload a video file directly to the VPS server
-  const uploadVideoToServer = async (file: File): Promise<string> => {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('fileType', 'video')
-    formData.append('ministryId', 'min-kmm')
+  // Helper to upload a video file directly to the VPS server with real-time progress
+  const uploadVideoToServer = async (
+    file: File,
+    onProgress?: (percent: number, loadedBytes: number, totalBytes: number) => void
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('fileType', 'video')
+      formData.append('ministryId', 'min-kmm')
 
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable && onProgress) {
+          // Keep capped at 95% while waiting for server disk write
+          const percent = Math.min(95, Math.round((e.loaded / e.total) * 100))
+          onProgress(percent, e.loaded, e.total)
+        }
+      })
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText)
+            if (data.file?.url) {
+              if (onProgress) onProgress(100, file.size, file.size)
+              resolve(data.file.url)
+            } else {
+              reject(new Error(data.error || 'Upload succeeded but no video URL returned.'))
+            }
+          } catch {
+            reject(new Error('Invalid response from upload server.'))
+          }
+        } else {
+          try {
+            const data = JSON.parse(xhr.responseText)
+            reject(new Error(data.error || `Server responded with HTTP ${xhr.status}`))
+          } catch {
+            reject(new Error(`Server responded with HTTP ${xhr.status}`))
+          }
+        }
+      })
+
+      xhr.addEventListener('error', () => {
+        reject(new Error('Network error during video upload.'))
+      })
+
+      xhr.addEventListener('abort', () => {
+        reject(new Error('Upload was cancelled.'))
+      })
+
+      xhr.open('POST', '/api/upload')
+      xhr.send(formData)
     })
-
-    const data = await res.json()
-    if (!res.ok || !data.file?.url) {
-      throw new Error(data?.error || 'Failed to upload video to VPS server.')
-    }
-
-    return data.file.url
   }
 
   // Export Masterclasses catalog to JSON file
@@ -467,28 +509,49 @@ export default function TrainingPortalPage() {
     }
 
     setIsUploading(true)
+    setUploadProgress(5)
+    setUploadStatusText('Preparing video metadata and packaging...')
+    setUploadBytesInfo('')
 
     // Handle video URL based on selected source type
     let finalVideoUrl = uploadVideoUrl.trim()
 
     if (uploadVideoSourceType === 'upload') {
       if (uploadVideoFile) {
-        showNotification('⏳ Uploading video file to VPS server storage...')
+        setUploadStatusText('Connecting to VPS storage engine...')
         try {
-          finalVideoUrl = await uploadVideoToServer(uploadVideoFile)
+          finalVideoUrl = await uploadVideoToServer(uploadVideoFile, (percent, loaded, total) => {
+            setUploadProgress(percent)
+            const loadedMb = (loaded / (1024 * 1024)).toFixed(1)
+            const totalMb = (total / (1024 * 1024)).toFixed(1)
+            setUploadBytesInfo(`${loadedMb} MB / ${totalMb} MB`)
+            setUploadStatusText(
+              percent >= 95
+                ? 'Processing & verifying video on VPS storage...'
+                : `Uploading video to VPS server (${percent}%)...`
+            )
+          })
         } catch (uploadErr: any) {
           showNotification(`⚠️ Video upload failed: ${uploadErr.message}`)
           setIsUploading(false)
+          setUploadProgress(0)
+          setUploadStatusText('')
+          setUploadBytesInfo('')
           return
         }
       } else if (!finalVideoUrl) {
         finalVideoUrl = '/kmm-welcome-animation.mp4'
       }
     } else {
+      setUploadProgress(35)
+      setUploadStatusText('Verifying direct streaming video URL...')
       if (!finalVideoUrl) {
         finalVideoUrl = '/kmm-welcome-animation.mp4'
       }
     }
+
+    setUploadProgress(85)
+    setUploadStatusText('Registering masterclass in Sovereign IP Curriculum Registry...')
 
     const categoryLabels: Record<string, string> = {
       copyright: 'Copyright & Sovereign IP',
@@ -546,8 +609,15 @@ export default function TrainingPortalPage() {
       console.warn('Could not save custom masterclasses:', saveErr)
     }
 
+    setUploadProgress(100)
+    setUploadStatusText('✓ Masterclass published successfully!')
+    await new Promise((r) => setTimeout(r, 450))
+
     setIsUploading(false)
     setShowUploadModal(false)
+    setUploadProgress(0)
+    setUploadStatusText('')
+    setUploadBytesInfo('')
     // Reset form
     setUploadTitle('')
     setUploadCode('')
@@ -665,19 +735,35 @@ export default function TrainingPortalPage() {
     }
 
     setIsSavingEdit(true)
+    setEditUploadProgress(10)
+    setEditUploadStatusText('Preparing updates...')
 
     // Handle VPS file upload if a new file was chosen in 'upload' mode
     let finalVideoUrl = editVideoUrl.trim() || editingVideo.videoUrl || '/kmm-welcome-animation.mp4'
     if (editVideoSourceType === 'upload' && editVideoFile) {
-      showNotification('⏳ Uploading updated video file to VPS server storage...')
+      setEditUploadStatusText('Uploading updated video to VPS server...')
       try {
-        finalVideoUrl = await uploadVideoToServer(editVideoFile)
+        finalVideoUrl = await uploadVideoToServer(editVideoFile, (percent, loaded, total) => {
+          setEditUploadProgress(percent)
+          const loadedMb = (loaded / (1024 * 1024)).toFixed(1)
+          const totalMb = (total / (1024 * 1024)).toFixed(1)
+          setEditUploadStatusText(
+            percent >= 95
+              ? 'Finalizing video on VPS storage...'
+              : `Uploading video (${percent}%)... ${loadedMb} MB / ${totalMb} MB`
+          )
+        })
       } catch (uploadErr: any) {
         showNotification(`⚠️ Video upload failed: ${uploadErr.message}`)
         setIsSavingEdit(false)
+        setEditUploadProgress(0)
+        setEditUploadStatusText('')
         return
       }
     }
+
+    setEditUploadProgress(85)
+    setEditUploadStatusText('Saving masterclass curriculum metadata...')
 
     const categoryLabels: Record<string, string> = {
       copyright: 'Copyright & Sovereign IP',
@@ -724,9 +810,15 @@ export default function TrainingPortalPage() {
       console.warn('API edit sync skipped:', apiErr)
     }
 
+    setEditUploadProgress(100)
+    setEditUploadStatusText('✓ Updates saved successfully!')
+    await new Promise((r) => setTimeout(r, 400))
+
     setIsSavingEdit(false)
     setEditingVideo(null)
     setEditVideoFile(null)
+    setEditUploadProgress(0)
+    setEditUploadStatusText('')
     showNotification('✓ Masterclass updated and published to curriculum!')
   }
 
@@ -2945,12 +3037,75 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
               <button
-                onClick={() => setShowUploadModal(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                type="button"
+                disabled={isUploading}
+                onClick={() => !isUploading && setShowUploadModal(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <X className="size-5" />
               </button>
             </div>
+
+            {/* Visual Upload Progress Card */}
+            {isUploading && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/30 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Loader2 className="size-4 text-amber-500 animate-spin shrink-0" />
+                    <span className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
+                      {uploadStatusText || 'Uploading & Publishing Masterclass...'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {uploadBytesInfo && (
+                      <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                        {uploadBytesInfo}
+                      </span>
+                    )}
+                    <span className="font-mono font-black text-xs text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-lg border border-amber-500/30 shadow-2xs">
+                      {uploadProgress}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress Bar Container */}
+                <div className="h-3 w-full bg-slate-200/80 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-amber-500/20">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400 rounded-full transition-all duration-300 relative shadow-xs"
+                    style={{ width: `${Math.max(5, uploadProgress)}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/25 animate-pulse rounded-full" />
+                  </div>
+                </div>
+
+                {/* Steps indicator */}
+                <div className="grid grid-cols-3 gap-2 pt-1 text-[10px] text-center font-semibold">
+                  <div className={`p-1.5 rounded-lg border transition-colors ${
+                    uploadProgress >= 10
+                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300 font-bold'
+                      : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
+                  }`}>
+                    1. Packaging
+                  </div>
+                  <div className={`p-1.5 rounded-lg border transition-colors ${
+                    uploadProgress >= 20 && uploadProgress < 85
+                      ? 'bg-amber-500/25 border-amber-500/40 text-amber-800 dark:text-amber-200 font-bold animate-pulse'
+                      : uploadProgress >= 85
+                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-bold'
+                      : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
+                  }`}>
+                    2. VPS Server Transfer
+                  </div>
+                  <div className={`p-1.5 rounded-lg border transition-colors ${
+                    uploadProgress >= 85
+                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-bold animate-pulse'
+                      : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
+                  }`}>
+                    3. Registry Publish
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Upload Form */}
             <form onSubmit={handlePublishMasterclass} className="space-y-4">
@@ -3172,17 +3327,25 @@ export default function TrainingPortalPage() {
               <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end gap-3">
                 <button
                   type="button"
+                  disabled={isUploading}
                   onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isUploading}
-                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs hover:brightness-110 shadow-md cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs hover:brightness-110 shadow-md cursor-pointer disabled:opacity-60 flex items-center gap-2"
                 >
-                  {isUploading ? 'Publishing...' : 'Publish Masterclass'}
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin text-slate-950" />
+                      <span>Uploading ({uploadProgress}%)...</span>
+                    </>
+                  ) : (
+                    <span>Publish Masterclass</span>
+                  )}
                 </button>
               </div>
             </form>
@@ -3210,12 +3373,41 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
               <button
-                onClick={() => setEditingVideo(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                type="button"
+                disabled={isSavingEdit}
+                onClick={() => !isSavingEdit && setEditingVideo(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <X className="size-5" />
               </button>
             </div>
+
+            {/* Visual Edit/Upload Progress Card */}
+            {isSavingEdit && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/30 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Loader2 className="size-4 text-amber-500 animate-spin shrink-0" />
+                    <span className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
+                      {editUploadStatusText || 'Saving Masterclass Changes...'}
+                    </span>
+                  </div>
+                  <span className="font-mono font-black text-xs text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-lg border border-amber-500/30 shadow-2xs">
+                    {editUploadProgress}%
+                  </span>
+                </div>
+
+                {/* Progress Bar Container */}
+                <div className="h-3 w-full bg-slate-200/80 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-amber-500/20">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400 rounded-full transition-all duration-300 relative shadow-xs"
+                    style={{ width: `${Math.max(5, editUploadProgress)}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/25 animate-pulse rounded-full" />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Edit Form */}
             <form onSubmit={handleSaveEditMasterclass} className="space-y-4">
@@ -3454,17 +3646,25 @@ export default function TrainingPortalPage() {
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
+                    disabled={isSavingEdit}
                     onClick={() => setEditingVideo(null)}
-                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingEdit}
-                    className="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs hover:brightness-110 shadow-md cursor-pointer disabled:opacity-50"
+                    className="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs hover:brightness-110 shadow-md cursor-pointer disabled:opacity-60 flex items-center gap-2"
                   >
-                    {isSavingEdit ? 'Saving Changes...' : 'Save Changes'}
+                    {isSavingEdit ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin text-slate-950" />
+                        <span>Saving ({editUploadProgress}%)...</span>
+                      </>
+                    ) : (
+                      <span>Save Changes</span>
+                    )}
                   </button>
                 </div>
               </div>

@@ -169,39 +169,5 @@
       "doc-1",
       "doc-3"
     ]
-  },
-  {
-    "id": "vid-8",
-    "code": "INT-702",
-    "title": "International Subtitling, Dubbing & Multi-Language Harmonization",
-    "category": "copyright",
-    "categoryLabel": "Copyright & IP",
-    "duration": "11:40",
-    "speaker": "Emmanuel Kalu",
-    "speakerRole": "International Distribution Lead",
-    "initials": "EK",
-    "avatarBg": "linear-gradient(135deg, #8B5CF6, #6D28D9)",
-    "desc": "Managing multilingual audio stems, dubbing synch standards, and cross-cultural translation reviews across French, Spanish, Swahili, and Arabic Lovetoons networks.",
-    "gradient": "linear-gradient(135deg, #4C1D95 0%, #2E1065 100%)",
-    "glow": "radial-gradient(circle at 50% 40%, rgba(139, 92, 246, 0.35) 0%, rgba(76, 29, 149, 0.25) 40%, transparent 75%)",
-    "points": [
-      "Phonetic synchronization standards for Spanish, French, and Swahili dub tracks.",
-      "Strict compliance with regional cultural sensitivities and local idioms.",
-      "Storage and version-control protocol for multi-channel 5.1 and stereo audio stems.",
-      "Automated closed-caption timing checks against broadcast playout servers."
-    ],
-    "citations": [
-      "SMPTE ST 2052 Timed Text",
-      "EBU Tech 3264 Subtitling",
-      "WIPO Phonograms Treaty"
-    ],
-    "tools": [
-      "age-rating",
-      "ip-clearance"
-    ],
-    "docIds": [
-      "doc-2",
-      "doc-5"
-    ]
   }
 ]
