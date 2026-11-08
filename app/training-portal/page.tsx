@@ -71,85 +71,6 @@ export interface TrainingUser {
   registeredAt: string
 }
 
-export interface EnrolledOfficer {
-  id: string
-  name: string
-  email: string
-  agency: string
-  role: string
-  progress: number
-  status: 'Certified' | 'In Progress' | 'Under Review'
-  certificateId?: string
-  lastActive: string
-}
-
-export const MOCK_ENROLLED_OFFICERS: EnrolledOfficer[] = [
-  {
-    id: 'off-1',
-    name: 'Barrister Lillian Okoye',
-    email: 'lillian.okoye@kiddiesmedia.org',
-    agency: 'Legal & IP Directorate',
-    role: 'Lead Counsel & IP Officer',
-    progress: 100,
-    status: 'Certified',
-    certificateId: 'KMM-CERT-2026-001',
-    lastActive: 'Today, 09:40 AM',
-  },
-  {
-    id: 'off-2',
-    name: 'Dr. Stephanie Cole',
-    email: 'stephanie.cole@lovetoons.org',
-    agency: 'Lovetoons Animation',
-    role: 'Child Cognitive Safety Reviewer',
-    progress: 85,
-    status: 'In Progress',
-    lastActive: 'Yesterday',
-  },
-  {
-    id: 'off-3',
-    name: 'Brother Emmanuel Adeleke',
-    email: 'emmanuel.adeleke@lovetoons.org',
-    agency: 'Lovetoons Animation',
-    role: 'Lead 3D Animator & Director',
-    progress: 100,
-    status: 'Certified',
-    certificateId: 'KMM-CERT-2026-002',
-    lastActive: 'May 06, 2026',
-  },
-  {
-    id: 'off-4',
-    name: 'Sister Grace Mensah',
-    email: 'grace.mensah@kiddiesmedia.org',
-    agency: "Children's Ministry",
-    role: 'Scriptwriter & Storyboarder',
-    progress: 100,
-    status: 'Certified',
-    certificateId: 'KMM-CERT-2026-003',
-    lastActive: 'May 05, 2026',
-  },
-  {
-    id: 'off-5',
-    name: 'Deacon Mark Joshua',
-    email: 'mark.joshua@lovetoons.org',
-    agency: 'Publishing & Broadcast',
-    role: 'Broadcast Standards Compliance',
-    progress: 60,
-    status: 'In Progress',
-    lastActive: 'May 04, 2026',
-  },
-  {
-    id: 'off-6',
-    name: 'Sister Deborah Vance',
-    email: 'deborah.vance@kiddiesmedia.org',
-    agency: 'Educational Agency',
-    role: 'Curriculum & Doctrinal Reviewer',
-    progress: 100,
-    status: 'Certified',
-    certificateId: 'KMM-CERT-2026-004',
-    lastActive: 'May 02, 2026',
-  },
-]
-
 export default function TrainingPortalPage() {
   const router = useRouter()
   const [isDark, setIsDark] = useState(false)
@@ -232,11 +153,9 @@ export default function TrainingPortalPage() {
   const [isSavingEdit, setIsSavingEdit] = useState(false)
 
   // Dedicated Admin Dashboard states
-  const [adminActiveSection, setAdminActiveSection] = useState<'masterclasses' | 'officers' | 'storage'>('masterclasses')
+  const [adminActiveSection, setAdminActiveSection] = useState<'masterclasses' | 'storage'>('masterclasses')
   const [isLearnerPreviewMode, setIsLearnerPreviewMode] = useState(false)
   const [previewingVideo, setPreviewingVideo] = useState<VideoItem | null>(null)
-  const [officerSearch, setOfficerSearch] = useState('')
-  const [officerFilter, setOfficerFilter] = useState('all')
 
   // Completed modules tracking (maps video.id to boolean)
   const [completedModules, setCompletedModules] = useState<Record<string, boolean>>({
@@ -318,26 +237,37 @@ export default function TrainingPortalPage() {
       console.warn(e)
     }
 
-    // Load persisted masterclasses catalog from storage
+    // Load live masterclasses catalog from backend API & localStorage
+    const deletedRaw = typeof window !== 'undefined' ? localStorage.getItem('kmm_deleted_masterclass_ids') : null
+    const deletedIds: string[] = deletedRaw ? JSON.parse(deletedRaw) : []
+
+    const filterValid = (items: VideoItem[]) =>
+      items.filter((v) => v && !deletedIds.includes(v.id) && v.id !== 'vid-2' && v.id !== 'vid-3')
+
+    // Initial pass from localStorage for instantaneous hydration
     try {
       const storedCatalog = localStorage.getItem('kmm_masterclasses_catalog')
       if (storedCatalog) {
         const catalogItems: VideoItem[] = JSON.parse(storedCatalog)
         if (Array.isArray(catalogItems) && catalogItems.length > 0) {
-          setMasterclasses(catalogItems)
-        }
-      } else {
-        const storedCustom = localStorage.getItem('kmm_custom_masterclasses')
-        if (storedCustom) {
-          const customItems: VideoItem[] = JSON.parse(storedCustom)
-          if (Array.isArray(customItems) && customItems.length > 0) {
-            setMasterclasses([...ARCHIVED_TRAINING_VIDEOS, ...customItems])
-          }
+          setMasterclasses(filterValid(catalogItems))
         }
       }
     } catch (e) {
-      console.warn('Could not load masterclasses catalog', e)
+      console.warn('Could not read cached masterclasses catalog', e)
     }
+
+    // Secondary live fetch from /api/training/masterclasses
+    fetch('/api/training/masterclasses')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.masterclasses)) {
+          const fresh = filterValid(data.masterclasses)
+          setMasterclasses(fresh)
+          localStorage.setItem('kmm_masterclasses_catalog', JSON.stringify(fresh))
+        }
+      })
+      .catch((err) => console.warn('Live masterclasses fetch deferred:', err))
 
     // Check query params for tab switching or specific video id
     if (typeof window !== 'undefined') {
@@ -346,7 +276,7 @@ export default function TrainingPortalPage() {
       const vidParam = urlParams.get('v') || urlParams.get('id')
       if (vidParam) {
         const found = ARCHIVED_TRAINING_VIDEOS.find((v) => v.id === vidParam)
-        if (found) {
+        if (found && !deletedIds.includes(found.id)) {
           setSelectedVideo(found)
           setActiveTab('video')
         }
@@ -468,25 +398,6 @@ export default function TrainingPortalPage() {
     })
   }, [masterclasses, searchQuery, categoryFilter])
 
-  // Filtered enrolled officers for Admin Directorate
-  const filteredOfficers = useMemo(() => {
-    return MOCK_ENROLLED_OFFICERS.filter((o) => {
-      const matchSearch =
-        !officerSearch.trim() ||
-        o.name.toLowerCase().includes(officerSearch.toLowerCase()) ||
-        o.email.toLowerCase().includes(officerSearch.toLowerCase()) ||
-        o.agency.toLowerCase().includes(officerSearch.toLowerCase()) ||
-        o.role.toLowerCase().includes(officerSearch.toLowerCase()) ||
-        (o.certificateId && o.certificateId.toLowerCase().includes(officerSearch.toLowerCase()))
-      const matchAgency =
-        officerFilter === 'all' ||
-        o.agency === officerFilter ||
-        (officerFilter === 'Certified' && o.status === 'Certified') ||
-        (officerFilter === 'In Progress' && o.status === 'In Progress')
-      return matchSearch && matchAgency
-    })
-  }, [officerSearch, officerFilter])
-
   const completedCount = useMemo(() => {
     return Object.values(completedModules).filter(Boolean).length
   }, [completedModules])
@@ -521,31 +432,6 @@ export default function TrainingPortalPage() {
     downloadAnchor.click()
     downloadAnchor.remove()
     showNotification('📥 Masterclasses catalog JSON exported successfully!')
-  }
-
-  // Export Officers Accreditation roster to CSV file
-  const handleExportOfficersCSV = () => {
-    const headers = ['Officer ID', 'Name', 'Email', 'Ministry Agency', 'Role', 'Progress %', 'Status', 'Certificate ID', 'Last Active']
-    const rows = MOCK_ENROLLED_OFFICERS.map((o) => [
-      o.id,
-      `"${o.name}"`,
-      o.email,
-      `"${o.agency}"`,
-      `"${o.role}"`,
-      `${o.progress}%`,
-      o.status,
-      o.certificateId || 'N/A',
-      `"${o.lastActive}"`,
-    ])
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
-    link.setAttribute('download', `kmm-officers-accreditation-roster-${new Date().toISOString().slice(0, 10)}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    showNotification('📊 Officers accreditation CSV roster exported successfully!')
   }
 
   // Video File attachment handler
@@ -630,18 +516,25 @@ export default function TrainingPortalPage() {
       createdAt: new Date().toISOString(),
     }
 
-    // Call API (graceful offline fallback)
+    // Call API
+    let createdItem = newVideo
     try {
-      await fetch('/api/training/masterclasses', {
+      const res = await fetch('/api/training/masterclasses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newVideo),
       })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.masterclass) {
+          createdItem = data.masterclass
+        }
+      }
     } catch (apiErr) {
-      console.warn('API sync skipped:', apiErr)
+      console.warn('API sync failed:', apiErr)
     }
 
-    const updated = [newVideo, ...masterclasses]
+    const updated = [createdItem, ...masterclasses]
     setMasterclasses(updated)
 
     // Save in localStorage
@@ -664,6 +557,7 @@ export default function TrainingPortalPage() {
     setUploadedFileName('')
     setUploadedFileSize('')
     setUploadVideoSourceType('upload')
+    setAdminActiveSection('masterclasses')
     showNotification('🎉 Masterclass uploaded & published to curriculum library!')
   }
 
@@ -684,6 +578,14 @@ export default function TrainingPortalPage() {
     setMasterclasses(updated)
 
     try {
+      // Record deleted id so it never re-appears across refreshes or sessions
+      const deletedRaw = localStorage.getItem('kmm_deleted_masterclass_ids')
+      const deletedIds: string[] = deletedRaw ? JSON.parse(deletedRaw) : []
+      if (!deletedIds.includes(id)) {
+        deletedIds.push(id)
+        localStorage.setItem('kmm_deleted_masterclass_ids', JSON.stringify(deletedIds))
+      }
+
       localStorage.setItem('kmm_masterclasses_catalog', JSON.stringify(updated))
       const customOnly = updated.filter((v) => v.isCustom)
       localStorage.setItem('kmm_custom_masterclasses', JSON.stringify(customOnly))
@@ -923,24 +825,6 @@ export default function TrainingPortalPage() {
                     <span>Masterclasses &amp; Video</span>
                     <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
                       {masterclasses.length}
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setActiveTab('admin')
-                      setAdminActiveSection('officers')
-                      setMobileSidebarOpen(false)
-                    }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin' && adminActiveSection === 'officers'
-                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                      }`}
-                  >
-                    <Users className={`size-4 ${activeTab === 'admin' && adminActiveSection === 'officers' ? 'text-amber-500' : 'text-slate-400'}`} />
-                    <span>Officer Accreditation</span>
-                    <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                      {MOCK_ENROLLED_OFFICERS.length}
                     </span>
                   </button>
 
@@ -1254,17 +1138,17 @@ export default function TrainingPortalPage() {
                 <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-500/10 via-sky-500/10 to-transparent border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-800 dark:text-amber-300">
-                      <span>{completedCount} of {ARCHIVED_TRAINING_VIDEOS.length} Masterclasses Completed</span>
+                      <span>{completedCount} of {masterclasses.length} Masterclasses Completed</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                      Welcome back, {currentUser?.name || 'Officer'}
+                      Welcome back, {currentUser?.name || 'Contributor'}
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl">
-                      Access all {ARCHIVED_TRAINING_VIDEOS.length} institutional training masterclasses covering sovereign IP ownership, work-for-hire vesting, and child safeguards.
+                      Access all {masterclasses.length} institutional training masterclasses covering sovereign IP ownership, work-for-hire vesting, and child safeguards.
                     </p>
                   </div>
                   <button
-                    onClick={() => handleSelectVideo(ARCHIVED_TRAINING_VIDEOS[0])}
+                    onClick={() => masterclasses[0] && handleSelectVideo(masterclasses[0])}
                     className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition cursor-pointer shrink-0"
                   >
                     <Play className="size-3.5 fill-current" />
@@ -1284,92 +1168,99 @@ export default function TrainingPortalPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Course 1: The Introductory IP Masterclass */}
-                    <div
-                      onClick={() => handleSelectVideo(ARCHIVED_TRAINING_VIDEOS[0])}
-                      className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-amber-500/50 dark:hover:border-amber-400/50 transition cursor-pointer space-y-4 group"
-                    >
-                      <div className="flex items-start gap-3.5">
-                        <div className="size-11 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20 group-hover:scale-105 transition-transform">
-                          <Scale className="size-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                            {ARCHIVED_TRAINING_VIDEOS[0].categoryLabel}
+                    {/* Course 1 */}
+                    {masterclasses[0] && (
+                      <div
+                        onClick={() => handleSelectVideo(masterclasses[0])}
+                        className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-amber-500/50 dark:hover:border-amber-400/50 transition cursor-pointer space-y-4 group"
+                      >
+                        <div className="flex items-start gap-3.5">
+                          <div className="size-11 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20 group-hover:scale-105 transition-transform">
+                            <Scale className="size-5" />
                           </div>
-                          <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                            {ARCHIVED_TRAINING_VIDEOS[0].title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar */}
-                      <div className="space-y-1.5">
-                        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
-                            style={{ width: completedModules[ARCHIVED_TRAINING_VIDEOS[0].id] ? '100%' : '65%' }}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="size-3 text-amber-500" />
-                            <span>{ARCHIVED_TRAINING_VIDEOS[0].code} &bull; {ARCHIVED_TRAINING_VIDEOS[0].duration}</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="size-3 text-slate-400" />
-                            <span>{completedModules[ARCHIVED_TRAINING_VIDEOS[0].id] ? 'Completed' : 'In Progress'}</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
-                        <span>{completedModules[ARCHIVED_TRAINING_VIDEOS[0].id] ? 'Review Video' : 'Resume Masterclass'}</span>
-                        <span className="group-hover:translate-x-1 transition-transform">➔</span>
-                      </div>
-                    </div>
-
-                    {/* Course 2: Sovereign Title & Deeds */}
-                    <div
-                      onClick={() => handleSelectVideo(ARCHIVED_TRAINING_VIDEOS[2] || ARCHIVED_TRAINING_VIDEOS[0])}
-                      className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-sky-500/50 dark:hover:border-sky-400/50 transition cursor-pointer space-y-4 group"
-                    >
-                      <div className="flex items-start gap-3.5">
-                        <div className="size-11 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/20 group-hover:scale-105 transition-transform">
-                          <ShieldCheck className="size-5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
-                            SOVEREIGN WORK-FOR-HIRE
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                              {masterclasses[0].categoryLabel}
+                            </div>
+                            <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                              {masterclasses[0].title}
+                            </h3>
                           </div>
-                          <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                            Copyright Clearances &amp; Character Likeness
-                          </h3>
                         </div>
-                      </div>
 
-                      {/* Progress Bar (Sky accent) */}
-                      <div className="space-y-1.5">
-                        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full w-full" />
+                        {/* Progress Bar */}
+                        <div className="space-y-1.5">
+                          <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
+                              style={{ width: completedModules[masterclasses[0].id] ? '100%' : '65%' }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                            <span className="flex items-center gap-1">
+                              <BookOpen className="size-3 text-amber-500" />
+                              <span>{masterclasses[0].code} &bull; {masterclasses[0].duration}</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="size-3 text-slate-400" />
+                              <span>{completedModules[masterclasses[0].id] ? 'Completed' : 'In Progress'}</span>
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="size-3 text-sky-500" />
-                            <span>LAW-204 &bull; 22:30</span>
-                          </span>
-                          <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                            <CheckCircle2 className="size-3" />
-                            <span>Certified Curriculum</span>
-                          </span>
-                        </div>
-                      </div>
 
-                      <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
-                        <span>Review Masterclass</span>
-                        <span className="group-hover:translate-x-1 transition-transform">➔</span>
+                        <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
+                          <span>{completedModules[masterclasses[0].id] ? 'Review Video' : 'Resume Masterclass'}</span>
+                          <span className="group-hover:translate-x-1 transition-transform">➔</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {/* Course 2 */}
+                    {(masterclasses[1] || masterclasses[0]) && (
+                      <div
+                        onClick={() => handleSelectVideo(masterclasses[1] || masterclasses[0])}
+                        className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs hover:border-sky-500/50 dark:hover:border-sky-400/50 transition cursor-pointer space-y-4 group"
+                      >
+                        <div className="flex items-start gap-3.5">
+                          <div className="size-11 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/20 group-hover:scale-105 transition-transform">
+                            <ShieldCheck className="size-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                              {(masterclasses[1] || masterclasses[0]).categoryLabel}
+                            </div>
+                            <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                              {(masterclasses[1] || masterclasses[0]).title}
+                            </h3>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar (Sky accent) */}
+                        <div className="space-y-1.5">
+                          <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full w-full"
+                              style={{ width: completedModules[(masterclasses[1] || masterclasses[0]).id] ? '100%' : '40%' }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                            <span className="flex items-center gap-1">
+                              <BookOpen className="size-3 text-sky-500" />
+                              <span>{(masterclasses[1] || masterclasses[0]).code} &bull; {(masterclasses[1] || masterclasses[0]).duration}</span>
+                            </span>
+                            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="size-3" />
+                              <span>{completedModules[(masterclasses[1] || masterclasses[0]).id] ? 'Completed' : 'Curriculum Track'}</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-sky-600 dark:text-sky-400">
+                          <span>Review Masterclass</span>
+                          <span className="group-hover:translate-x-1 transition-transform">➔</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </section>
 
@@ -1509,7 +1400,7 @@ export default function TrainingPortalPage() {
                   <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
                     <div className="p-4 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs text-center min-w-[110px]">
                       <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
-                        {ARCHIVED_TRAINING_VIDEOS.length}
+                        {masterclasses.length}
                       </div>
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         Masterclasses
@@ -2105,7 +1996,7 @@ export default function TrainingPortalPage() {
                       {currentUser?.agency || 'Lovetoons Content Operations'}
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed pt-3">
-                      Has satisfactorily completed all curricular requirements under <b>{(selectedVideo || ARCHIVED_TRAINING_VIDEOS[0]).code}: {(selectedVideo || ARCHIVED_TRAINING_VIDEOS[0]).title}</b>, validating sovereign chain of title, Work-for-Hire covenants, parental consent deeds, and AI transparency.
+                      Has satisfactorily completed all curricular requirements under <b>{(selectedVideo || masterclasses[0] || ARCHIVED_TRAINING_VIDEOS[0]).code}: {(selectedVideo || masterclasses[0] || ARCHIVED_TRAINING_VIDEOS[0]).title}</b>, validating sovereign chain of title, Work-for-Hire covenants, parental consent deeds, and AI transparency.
                     </p>
                   </div>
 
@@ -2117,7 +2008,7 @@ export default function TrainingPortalPage() {
                     </div>
                     <div>
                       <span className="block text-slate-400 text-[10px] uppercase font-bold">Certificate Hash</span>
-                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">KMM-ACR-2026-{(selectedVideo || ARCHIVED_TRAINING_VIDEOS[0]).id.toUpperCase()}</span>
+                      <span className="font-mono font-bold text-amber-600 dark:text-amber-400">KMM-ACR-2026-{(selectedVideo || masterclasses[0] || ARCHIVED_TRAINING_VIDEOS[0]).id.toUpperCase()}</span>
                     </div>
                     <div>
                       <span className="block text-slate-400 text-[10px] uppercase font-bold">Authority</span>
@@ -2133,7 +2024,7 @@ export default function TrainingPortalPage() {
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-white/10">
                     <button
                       onClick={() => {
-                        const hashId = (selectedVideo || ARCHIVED_TRAINING_VIDEOS[0]).id.toUpperCase()
+                        const hashId = (selectedVideo || masterclasses[0] || ARCHIVED_TRAINING_VIDEOS[0]).id.toUpperCase()
                         navigator.clipboard.writeText(`https://kmm-portal.internal/verify/KMM-ACR-2026-${hashId}`)
                         setCopiedHash(true)
                         setTimeout(() => setCopiedHash(false), 2000)
@@ -2182,7 +2073,7 @@ export default function TrainingPortalPage() {
                         Curriculum Command &amp; Accreditation Governance
                       </h2>
                       <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        Manage official masterclasses, configure VPS video uploads up to 500MB, inspect streaming playback, oversee enrolled officer compliance, and audit statutory legal covenants.
+                        Manage official masterclasses, configure VPS video uploads up to 500MB, inspect streaming playback, and audit statutory legal covenants.
                       </p>
                     </div>
 
@@ -2217,17 +2108,6 @@ export default function TrainingPortalPage() {
                     >
                       <Tv className="size-3.5" />
                       <span>Masterclasses Repository ({masterclasses.length})</span>
-                    </button>
-                    <button
-                      onClick={() => setAdminActiveSection('officers')}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                        adminActiveSection === 'officers'
-                          ? 'bg-amber-500 text-slate-950 shadow-xs'
-                          : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
-                      }`}
-                    >
-                      <Users className="size-3.5" />
-                      <span>Officer Accreditation Roster ({MOCK_ENROLLED_OFFICERS.length})</span>
                     </button>
                     <button
                       onClick={() => setAdminActiveSection('storage')}
@@ -2435,172 +2315,7 @@ export default function TrainingPortalPage() {
                   )}
 
                   {/* ========================================================= */}
-                  {/* SUB-SECTION 2: OFFICER ACCREDITATION ROSTER               */}
-                  {/* ========================================================= */}
-                  {adminActiveSection === 'officers' && (
-                    <div className="space-y-6 animate-in fade-in duration-150">
-                      {/* 4 Officer KPIs */}
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Enrolled Officers</div>
-                          <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">{MOCK_ENROLLED_OFFICERS.length}</div>
-                          <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Across ministries</div>
-                        </div>
-
-                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Certified Officers</div>
-                          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
-                            {MOCK_ENROLLED_OFFICERS.filter((o) => o.status === 'Certified').length}
-                          </div>
-                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">100% Curriculum Completed</div>
-                        </div>
-
-                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">In Active Training</div>
-                          <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
-                            {MOCK_ENROLLED_OFFICERS.filter((o) => o.status === 'In Progress').length}
-                          </div>
-                          <div className="text-[11px] text-slate-400 font-medium">Undergoing modules</div>
-                        </div>
-
-                        <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Accreditation Pass Rate</div>
-                          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
-                            100%
-                          </div>
-                          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">High statutory compliance</div>
-                        </div>
-                      </div>
-
-                      {/* Filter & Export Toolbar */}
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10">
-                        <div className="flex-1 max-w-md relative">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
-                          <input
-                            type="text"
-                            placeholder="Search officer name, email, ministry, certificate..."
-                            value={officerSearch}
-                            onChange={(e) => setOfficerSearch(e.target.value)}
-                            className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 focus:outline-none focus:border-amber-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
-                          />
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <select
-                            value={officerFilter}
-                            onChange={(e) => setOfficerFilter(e.target.value)}
-                            className="h-8.5 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-xs outline-none focus:border-amber-500 cursor-pointer"
-                          >
-                            <option value="all">All Ministries &amp; Status</option>
-                            <option value="Certified">Status: Certified Only</option>
-                            <option value="In Progress">Status: In Progress Only</option>
-                            <option value="Legal & IP Directorate">Legal &amp; IP Directorate</option>
-                            <option value="Lovetoons Animation">Lovetoons Animation</option>
-                            <option value="Children's Ministry">Children&apos;s Ministry</option>
-                            <option value="Publishing & Broadcast">Publishing &amp; Broadcast</option>
-                            <option value="Educational Agency">Educational Agency</option>
-                          </select>
-
-                          <button
-                            onClick={handleExportOfficersCSV}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer whitespace-nowrap"
-                          >
-                            <Download className="size-3.5 text-emerald-500" />
-                            <span>Export CSV Roster</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Officers Roster Table */}
-                      <div className="rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs">
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs">
-                            <thead>
-                              <tr className="border-b border-slate-200/80 dark:border-white/10 text-slate-400 text-[10px] uppercase font-bold tracking-wider bg-slate-50/50 dark:bg-white/2">
-                                <th className="py-3 px-4">Officer Name &amp; Email</th>
-                                <th className="py-3 px-3">Ministry Agency</th>
-                                <th className="py-3 px-3">Curriculum Progress</th>
-                                <th className="py-3 px-3">Accreditation Status</th>
-                                <th className="py-3 px-3">Certificate ID</th>
-                                <th className="py-3 px-4 text-right">Verification</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                              {filteredOfficers.map((o) => (
-                                <tr key={o.id} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
-                                  <td className="py-3.5 px-4">
-                                    <div className="flex items-center gap-3">
-                                      <div className="size-9 rounded-xl bg-gradient-to-tr from-[#0284C7] to-amber-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                                        {o.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                                      </div>
-                                      <div className="min-w-0">
-                                        <div className="font-bold text-slate-900 dark:text-white truncate">
-                                          {o.name}
-                                        </div>
-                                        <div className="text-[10px] text-slate-400 truncate font-mono">
-                                          {o.email}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="py-3.5 px-3 whitespace-nowrap">
-                                    <div className="font-semibold text-slate-800 dark:text-slate-200">{o.agency}</div>
-                                    <div className="text-[10px] text-slate-400">{o.role}</div>
-                                  </td>
-                                  <td className="py-3.5 px-3 whitespace-nowrap">
-                                    <div className="w-28 space-y-1">
-                                      <div className="flex items-center justify-between text-[10px] font-bold">
-                                        <span className="text-slate-500">{o.progress}%</span>
-                                        <span className={o.progress === 100 ? 'text-emerald-500' : 'text-amber-500'}>
-                                          {o.progress === 100 ? 'Complete' : 'In Course'}
-                                        </span>
-                                      </div>
-                                      <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                        <div
-                                          className={`h-full rounded-full ${o.progress === 100 ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                                          style={{ width: `${o.progress}%` }}
-                                        />
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="py-3.5 px-3 whitespace-nowrap">
-                                    {o.status === 'Certified' ? (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                                        <CheckCircle className="size-3 text-emerald-500" />
-                                        <span>Certified</span>
-                                      </span>
-                                    ) : (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                                        <Clock className="size-3 text-amber-500" />
-                                        <span>In Progress</span>
-                                      </span>
-                                    )}
-                                  </td>
-                                  <td className="py-3.5 px-3 whitespace-nowrap">
-                                    <span className="font-mono text-[11px] font-bold text-slate-600 dark:text-slate-400">
-                                      {o.certificateId || 'Pending Exam'}
-                                    </span>
-                                  </td>
-                                  <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                                    <button
-                                      onClick={() => showNotification(`✓ Verified: Accreditation for ${o.name} is cryptographically valid under ${o.certificateId || 'training status'}.`)}
-                                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 font-bold text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer inline-flex items-center gap-1"
-                                    >
-                                      <ShieldCheck className="size-3 text-emerald-500" />
-                                      <span>Verify</span>
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ========================================================= */}
-                  {/* SUB-SECTION 3: VPS STORAGE & DRM ARCHITECTURE             */}
+                  {/* SUB-SECTION 2: VPS STORAGE & DRM ARCHITECTURE             */}
                   {/* ========================================================= */}
                   {adminActiveSection === 'storage' && (
                     <div className="space-y-6 animate-in fade-in duration-150">
@@ -2872,13 +2587,6 @@ export default function TrainingPortalPage() {
                     >
                       <Download className="size-3.5 text-amber-500" />
                       <span>Export Catalog (JSON)</span>
-                    </button>
-                    <button
-                      onClick={handleExportOfficersCSV}
-                      className="w-full py-2 px-3 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                    >
-                      <Download className="size-3.5 text-emerald-500" />
-                      <span>Export Officers (CSV)</span>
                     </button>
                     <button
                       onClick={() => {

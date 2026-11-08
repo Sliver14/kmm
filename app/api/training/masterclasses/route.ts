@@ -1,36 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { VideoItem, ARCHIVED_TRAINING_VIDEOS } from '@/lib/data/trainingVideosData'
 import { verifyToken } from '@/lib/auth'
+import fs from 'fs/promises'
+import path from 'path'
 
-// In-memory store for masterclasses added during server runtime
-let customMasterclasses: VideoItem[] = []
-let updatedOverrides: Record<string, VideoItem> = {}
-let deletedIds: Set<string> = new Set()
+const DATA_FILE_PATH = path.join(process.cwd(), 'data', 'training_masterclasses.json')
+
+// Helper to ensure data file exists and read its content
+async function getStoredMasterclasses(): Promise<VideoItem[]> {
+  try {
+    const raw = await fs.readFile(DATA_FILE_PATH, 'utf-8')
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      // Filter out any obsolete or previously removed IDs like vid-2 and vid-3
+      return parsed.filter((item) => item && item.id !== 'vid-2' && item.id !== 'vid-3')
+    }
+  } catch (err: any) {
+    // File doesn't exist yet or invalid JSON - will initialize below
+  }
+
+  // Initialize with ARCHIVED_TRAINING_VIDEOS (already without vid-2 and vid-3)
+  const initial = ARCHIVED_TRAINING_VIDEOS.filter((item) => item.id !== 'vid-2' && item.id !== 'vid-3')
+  await saveStoredMasterclasses(initial)
+  return initial
+}
+
+async function saveStoredMasterclasses(list: VideoItem[]): Promise<void> {
+  try {
+    const dir = path.dirname(DATA_FILE_PATH)
+    await fs.mkdir(dir, { recursive: true })
+    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(list, null, 2), 'utf-8')
+  } catch (err) {
+    console.error('Failed to write masterclasses to disk:', err)
+  }
+}
+
+function isAuthorized(req: NextRequest): boolean {
+  const sessionCookie = req.cookies.get('kmm_session')?.value
+  if (!sessionCookie) return true // Allow client session managed by portal admin context
+  const payload = verifyToken(sessionCookie)
+  if (!payload || !payload.role) return true
+  const role = String(payload.role).toLowerCase()
+  return role.includes('admin') || role === 'portal_admin' || role === 'portal admn' || role === 'super_admin'
+}
 
 export async function GET() {
-  const baseList = [...ARCHIVED_TRAINING_VIDEOS, ...customMasterclasses]
-    .filter((v) => !deletedIds.has(v.id))
-    .map((v) => updatedOverrides[v.id] || v)
+  try {
+    const list = await getStoredMasterclasses()
+    const customCount = list.filter((v) => v.isCustom).length
 
-  return NextResponse.json({
-    success: true,
-    masterclasses: baseList,
-    customCount: customMasterclasses.filter((v) => !deletedIds.has(v.id)).length,
-    totalCount: baseList.length,
-  })
+    return NextResponse.json({
+      success: true,
+      masterclasses: list,
+      customCount,
+      totalCount: list.length,
+    })
+  } catch (err: any) {
+    console.error('Error fetching masterclasses:', err)
+    return NextResponse.json(
+      { success: false, error: 'Failed to retrieve masterclasses' },
+      { status: 500 }
+    )
+  }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const sessionCookie = req.cookies.get('kmm_session')?.value
-    if (sessionCookie) {
-      const payload = verifyToken(sessionCookie)
-      if (payload && payload.role && payload.role !== 'portal_admin' && payload.role !== 'portal admn' && payload.role !== 'super_admin') {
-        return NextResponse.json(
-          { error: 'Forbidden: Portal Admin role required to upload masterclasses.' },
-          { status: 403 }
-        )
-      }
+    if (!isAuthorized(req)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Portal Admin role required to upload masterclasses.' },
+        { status: 403 }
+      )
     }
 
     const body = await req.json()
@@ -42,6 +82,8 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+
+    const list = await getStoredMasterclasses()
 
     const newVideo: VideoItem = {
       id: `custom-vid-${Date.now().toString().slice(-6)}`,
@@ -64,7 +106,8 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
     }
 
-    customMasterclasses.unshift(newVideo)
+    const updatedList = [newVideo, ...list]
+    await saveStoredMasterclasses(updatedList)
 
     return NextResponse.json({
       success: true,
@@ -82,15 +125,11 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const sessionCookie = req.cookies.get('kmm_session')?.value
-    if (sessionCookie) {
-      const payload = verifyToken(sessionCookie)
-      if (payload && payload.role && payload.role !== 'portal_admin' && payload.role !== 'portal admn' && payload.role !== 'super_admin') {
-        return NextResponse.json(
-          { error: 'Forbidden: Portal Admin role required to edit masterclasses.' },
-          { status: 403 }
-        )
-      }
+    if (!isAuthorized(req)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Portal Admin role required to edit masterclasses.' },
+        { status: 403 }
+      )
     }
 
     const body = await req.json()
@@ -100,15 +139,16 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Masterclass ID is required.' }, { status: 400 })
     }
 
-    // Find in custom or base
-    const existing = [...ARCHIVED_TRAINING_VIDEOS, ...customMasterclasses].find((v) => v.id === id)
-    if (!existing) {
+    const list = await getStoredMasterclasses()
+    const existingIndex = list.findIndex((v) => v.id === id)
+
+    if (existingIndex < 0) {
       return NextResponse.json({ error: 'Masterclass not found.' }, { status: 404 })
     }
 
+    const existing = list[existingIndex]
     const updated: VideoItem = {
       ...existing,
-      ...(updatedOverrides[id] || {}),
       title: title?.trim() || existing.title,
       code: code ? code.trim().toUpperCase() : existing.code,
       category: category || existing.category,
@@ -120,13 +160,8 @@ export async function PUT(req: NextRequest) {
       updatedAt: new Date().toISOString(),
     } as any
 
-    updatedOverrides[id] = updated
-
-    // Also update customMasterclasses array directly if present
-    const customIdx = customMasterclasses.findIndex((v) => v.id === id)
-    if (customIdx >= 0) {
-      customMasterclasses[customIdx] = updated
-    }
+    list[existingIndex] = updated
+    await saveStoredMasterclasses(list)
 
     return NextResponse.json({
       success: true,
@@ -144,15 +179,11 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const sessionCookie = req.cookies.get('kmm_session')?.value
-    if (sessionCookie) {
-      const payload = verifyToken(sessionCookie)
-      if (payload && payload.role && payload.role !== 'portal_admin' && payload.role !== 'portal admn' && payload.role !== 'super_admin') {
-        return NextResponse.json(
-          { error: 'Forbidden: Portal Admin role required to delete masterclasses.' },
-          { status: 403 }
-        )
-      }
+    if (!isAuthorized(req)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Portal Admin role required to delete masterclasses.' },
+        { status: 403 }
+      )
     }
 
     const url = new URL(req.url)
@@ -171,9 +202,21 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Masterclass ID is required.' }, { status: 400 })
     }
 
-    deletedIds.add(id)
-    customMasterclasses = customMasterclasses.filter((v) => v.id !== id)
-    delete updatedOverrides[id]
+    const list = await getStoredMasterclasses()
+    const target = list.find((v) => v.id === id)
+    const filtered = list.filter((v) => v.id !== id)
+
+    await saveStoredMasterclasses(filtered)
+
+    // If it was a VPS uploaded file in /uploads/, optionally attempt to remove it
+    if (target?.videoUrl && target.videoUrl.startsWith('/uploads/')) {
+      try {
+        const filePath = path.join(process.cwd(), 'public', target.videoUrl.replace(/^\//, ''))
+        await fs.unlink(filePath).catch(() => {})
+      } catch {
+        // ignore deletion cleanup error
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -188,4 +231,3 @@ export async function DELETE(req: NextRequest) {
     )
   }
 }
-
