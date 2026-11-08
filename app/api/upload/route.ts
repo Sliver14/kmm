@@ -4,6 +4,10 @@ import { mkdir, writeFile } from 'fs/promises'
 import crypto from 'crypto'
 import { sql } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
 // 500 MB maximum file size limit for VPS storage (videos, masterclasses & media assets)
 const MAX_FILE_SIZE = 500 * 1024 * 1024
 
@@ -69,7 +73,7 @@ export async function POST(req: NextRequest) {
     if (fileSizeBytes > MAX_FILE_SIZE) {
       return NextResponse.json(
         {
-          error: `File size (${formattedSize}) exceeds the maximum allowed VPS storage limit of 50 MB. Please compress or optimize the file before uploading.`,
+          error: `File size (${formattedSize}) exceeds the maximum allowed VPS storage limit of 500 MB. Please compress or optimize the file before uploading.`,
         },
         { status: 400 }
       )

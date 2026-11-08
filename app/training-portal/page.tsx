@@ -139,6 +139,7 @@ export default function TrainingPortalPage() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadStatusText, setUploadStatusText] = useState('')
   const [uploadBytesInfo, setUploadBytesInfo] = useState('')
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   // Edit Masterclass State
   const [editingVideo, setEditingVideo] = useState<VideoItem | null>(null)
@@ -157,6 +158,7 @@ export default function TrainingPortalPage() {
   const [isSavingEdit, setIsSavingEdit] = useState(false)
   const [editUploadProgress, setEditUploadProgress] = useState(0)
   const [editUploadStatusText, setEditUploadStatusText] = useState('')
+  const [editError, setEditError] = useState<string | null>(null)
 
   // Dedicated Admin Dashboard states
   const [adminActiveSection, setAdminActiveSection] = useState<'masterclasses' | 'storage'>('masterclasses')
@@ -442,6 +444,10 @@ export default function TrainingPortalPage() {
             reject(new Error('Invalid response from upload server.'))
           }
         } else {
+          if (xhr.status === 413) {
+            reject(new Error('HTTP_413_PAYLOAD_TOO_LARGE'))
+            return
+          }
           try {
             const data = JSON.parse(xhr.responseText)
             reject(new Error(data.error || `Server responded with HTTP ${xhr.status}`))
@@ -508,6 +514,7 @@ export default function TrainingPortalPage() {
       return
     }
 
+    setUploadError(null)
     setIsUploading(true)
     setUploadProgress(5)
     setUploadStatusText('Preparing video metadata and packaging...')
@@ -532,6 +539,16 @@ export default function TrainingPortalPage() {
             )
           })
         } catch (uploadErr: any) {
+          if (uploadErr.message === 'HTTP_413_PAYLOAD_TOO_LARGE') {
+            setUploadError('413')
+            setIsUploading(false)
+            setUploadProgress(0)
+            setUploadStatusText('')
+            setUploadBytesInfo('')
+            showNotification('⚠️ Serverless payload limit reached (HTTP 413). Please switch to Provide Video URL.')
+            return
+          }
+          setUploadError(uploadErr.message)
           showNotification(`⚠️ Video upload failed: ${uploadErr.message}`)
           setIsUploading(false)
           setUploadProgress(0)
@@ -754,6 +771,15 @@ export default function TrainingPortalPage() {
           )
         })
       } catch (uploadErr: any) {
+        if (uploadErr.message === 'HTTP_413_PAYLOAD_TOO_LARGE') {
+          setEditError('413')
+          setIsSavingEdit(false)
+          setEditUploadProgress(0)
+          setEditUploadStatusText('')
+          showNotification('⚠️ Serverless payload limit reached (HTTP 413). Please switch to Provide Video URL.')
+          return
+        }
+        setEditError(uploadErr.message)
         showNotification(`⚠️ Video upload failed: ${uploadErr.message}`)
         setIsSavingEdit(false)
         setEditUploadProgress(0)
@@ -3107,6 +3133,53 @@ export default function TrainingPortalPage() {
               </div>
             )}
 
+            {/* Error / 413 Banner */}
+            {uploadError && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 space-y-2.5 animate-in fade-in">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="size-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div className="text-xs space-y-1">
+                    <div className="font-extrabold text-slate-900 dark:text-white">
+                      {uploadError === '413'
+                        ? 'Video Payload Exceeds Serverless Proxy Limit (HTTP 413)'
+                        : 'Upload Error'}
+                    </div>
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+                      {uploadError === '413'
+                        ? 'Serverless platforms (like Vercel) limit direct file uploads to 4.5 MB. To publish your masterclass right away, switch to "Provide Video URL" to stream from CDN/YouTube/Vimeo/S3, or continue with the default sovereign curriculum stream.'
+                        : uploadError}
+                    </p>
+                  </div>
+                </div>
+                {uploadError === '413' && (
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadVideoSourceType('url')
+                        setUploadError(null)
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer shadow-xs transition"
+                    >
+                      Switch to Provide Video URL
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadVideoSourceType('url')
+                        setUploadVideoUrl('/kmm-welcome-animation.mp4')
+                        setUploadError(null)
+                        showNotification('✓ Using default curriculum stream. Ready to publish!')
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl border border-amber-500/30 hover:bg-amber-500/20 text-xs font-bold cursor-pointer transition text-amber-800 dark:text-amber-300"
+                    >
+                      Use Default Stream &amp; Publish
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Upload Form */}
             <form onSubmit={handlePublishMasterclass} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -3229,6 +3302,11 @@ export default function TrainingPortalPage() {
                             ✓ File Attached: {uploadedFileName}
                           </div>
                           <div className="text-[10px] text-slate-400 font-mono">{uploadedFileSize} &bull; Uploads to VPS server</div>
+                          {uploadVideoFile && uploadVideoFile.size > 4.5 * 1024 * 1024 && (
+                            <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium pt-1">
+                              💡 Note: If hosted on Vercel (4.5MB limit), switch to &quot;Provide Video URL&quot; above for streaming links.
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div>
@@ -3406,6 +3484,41 @@ export default function TrainingPortalPage() {
                     <div className="absolute inset-0 bg-white/25 animate-pulse rounded-full" />
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Edit Error / 413 Banner */}
+            {editError && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 space-y-2.5 animate-in fade-in">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="size-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div className="text-xs space-y-1">
+                    <div className="font-extrabold text-slate-900 dark:text-white">
+                      {editError === '413'
+                        ? 'Video Payload Exceeds Serverless Proxy Limit (HTTP 413)'
+                        : 'Update Error'}
+                    </div>
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+                      {editError === '413'
+                        ? 'Serverless platforms (like Vercel) limit direct file uploads to 4.5 MB. To update this masterclass without payload restrictions, switch to "Provide Video URL" to stream from CDN/YouTube/Vimeo/S3.'
+                        : editError}
+                    </p>
+                  </div>
+                </div>
+                {editError === '413' && (
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditVideoSourceType('url')
+                        setEditError(null)
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer shadow-xs transition"
+                    >
+                      Switch to Provide Video URL
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
