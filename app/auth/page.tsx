@@ -88,8 +88,18 @@ export default function AuthPage() {
 
   useEffect(() => {
     setIsMounted(true)
-    const savedTheme = localStorage.getItem('kmm_training_theme')
-    setIsDark(savedTheme === 'dark')
+    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('kmm_training_theme') : null
+    const htmlHasDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+    const darkActive = savedTheme ? savedTheme === 'dark' : htmlHasDark
+    setIsDark(darkActive)
+
+    if (typeof document !== 'undefined') {
+      if (darkActive) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    }
 
     // Pre-seed Portal Admin in client storage if not already present
     try {
@@ -329,20 +339,17 @@ export default function AuthPage() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 lg:p-8 relative overflow-hidden transition-colors duration-300 ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-[#F0FAFD] text-slate-900'
-        }`}
+      className="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 lg:p-8 relative overflow-hidden transition-colors duration-300 bg-[#F0FAFD] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100"
       style={{
         fontFamily: 'Figtree, -apple-system, sans-serif',
       }}
     >
       {/* Background ambient radial glows */}
       <div
-        className="fixed -top-40 left-1/10 w-[550px] h-[550px] rounded-full blur-[140px] pointer-events-none opacity-25"
-        style={{ background: isDark ? '#F59E0B' : '#0284C7' }}
+        className="fixed -top-40 left-1/10 w-[550px] h-[550px] rounded-full blur-[140px] pointer-events-none opacity-20 bg-sky-500/30 dark:bg-amber-500/20 transition-colors"
       />
       <div
-        className="fixed -bottom-40 right-1/10 w-[550px] h-[550px] rounded-full blur-[140px] pointer-events-none opacity-20"
-        style={{ background: isDark ? '#38BDF8' : '#FFB800' }}
+        className="fixed -bottom-40 right-1/10 w-[550px] h-[550px] rounded-full blur-[140px] pointer-events-none opacity-20 bg-amber-500/30 dark:bg-sky-500/20 transition-colors"
       />
 
       {/* Top Header Navigation */}
@@ -351,7 +358,7 @@ export default function AuthPage() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#F59E0B] to-[#F97316] text-[#0F172A] flex items-center justify-center text-sm font-black shadow-md group-hover:scale-105 transition-transform">
             ▶
           </div>
-          <span className="font-extrabold tracking-tight" style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}>
+          <span className="font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}>
             KMM Training Portal
           </span>
         </Link>
@@ -368,19 +375,16 @@ export default function AuthPage() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle dark/light theme"
-            className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 border text-xs font-semibold transition-all cursor-pointer ${isDark
-              ? 'bg-slate-900/80 border-white/10 text-amber-400 hover:bg-slate-800'
-              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs'
-              }`}
+            className="px-3 py-1.5 rounded-full flex items-center gap-1.5 border text-xs font-semibold transition-all cursor-pointer bg-white dark:bg-slate-900/80 border-slate-200 dark:border-white/10 text-slate-700 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-2xs"
           >
-            {isMounted && isDark ? (
+            {isDark ? (
               <>
                 <Sun className="size-3.5 text-amber-400" />
                 <span className="hidden xs:inline">Light Theme</span>
               </>
             ) : (
               <>
-                <Moon className="size-3.5 text-slate-600" />
+                <Moon className="size-3.5 text-slate-600 dark:text-slate-300" />
                 <span className="hidden xs:inline">Dark Theme</span>
               </>
             )}
@@ -390,10 +394,7 @@ export default function AuthPage() {
 
       {/* Main Authentication Card */}
       <main
-        className={`w-full max-w-lg my-auto p-6 sm:p-9 rounded-3xl relative z-10 border shadow-2xl backdrop-blur-xl transition-all animate-in fade-in zoom-in-95 duration-200 ${isDark
-          ? 'bg-slate-900/90 border-white/10 shadow-black/50'
-          : 'bg-white/95 border-slate-200/90 shadow-[0_20px_50px_-12px_rgba(2,132,199,0.12)]'
-          }`}
+        className="w-full max-w-lg my-auto p-6 sm:p-9 rounded-3xl relative z-10 border shadow-2xl backdrop-blur-xl transition-all animate-in fade-in zoom-in-95 duration-200 bg-white/95 dark:bg-[#131826]/95 border-slate-200/90 dark:border-white/10 shadow-[0_20px_50px_-12px_rgba(2,132,199,0.12)] dark:shadow-black/60 text-slate-900 dark:text-slate-100"
       >
         {/* Badge & Title */}
         <div className="text-center mb-6">
@@ -470,7 +471,7 @@ export default function AuthPage() {
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type="email"
                   value={signInEmail}
@@ -478,10 +479,7 @@ export default function AuthPage() {
                   placeholder="officer@lovetoons.tv"
                   autoComplete="username"
                   required
-                  className={`w-full h-11 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
-                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                    }`}
+                  className="w-full h-11 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                 />
               </div>
             </div>
@@ -491,7 +489,7 @@ export default function AuthPage() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type={showSignInPassword ? 'text' : 'password'}
                   value={signInPassword}
@@ -499,15 +497,12 @@ export default function AuthPage() {
                   placeholder="••••••••••••"
                   autoComplete="current-password"
                   required
-                  className={`w-full h-11 pl-10 pr-10 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
-                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                    }`}
+                  className="w-full h-11 pl-10 pr-10 rounded-xl border font-medium text-xs transition-all outline-hidden bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                 />
                 <button
                   type="button"
                   onClick={() => setShowSignInPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
                 >
                   {showSignInPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -538,17 +533,14 @@ export default function AuthPage() {
                 Full Name / Officer Title
               </label>
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   value={signUpName}
                   onChange={(e) => setSignUpName(e.target.value)}
                   placeholder="e.g. Pastor Sarah Williams"
                   required
-                  className={`w-full h-10 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
-                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                    }`}
+                  className="w-full h-10 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                 />
               </div>
             </div>
@@ -558,17 +550,14 @@ export default function AuthPage() {
                 Official Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type="email"
                   value={signUpEmail}
                   onChange={(e) => setSignUpEmail(e.target.value)}
                   placeholder="name@lovetoons.tv or ministry.org"
                   required
-                  className={`w-full h-10 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
-                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                    }`}
+                  className="w-full h-10 pl-10 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                 />
               </div>
             </div>
@@ -579,17 +568,14 @@ export default function AuthPage() {
                   Ministry / Department
                 </label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400 pointer-events-none" />
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
                   <select
                     value={signUpAgency}
                     onChange={(e) => setSignUpAgency(e.target.value)}
-                    className={`w-full h-10 pl-9 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden appearance-none cursor-pointer ${isDark
-                      ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
-                      }`}
+                    className="w-full h-10 pl-9 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden appearance-none cursor-pointer bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                   >
                     {MINISTRIES_AND_AGENCIES.map((ag) => (
-                      <option key={ag} value={ag} className="dark:bg-slate-900">
+                      <option key={ag} value={ag} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                         {ag}
                       </option>
                     ))}
@@ -602,10 +588,7 @@ export default function AuthPage() {
                     onChange={(e) => setCustomAgency(e.target.value)}
                     placeholder="Enter ministry / department name"
                     required
-                    className={`w-full h-9 mt-1.5 px-3 rounded-lg border font-medium text-xs transition-all outline-hidden ${isDark
-                      ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
-                      }`}
+                    className="w-full h-9 mt-1.5 px-3 rounded-lg border font-medium text-xs transition-all outline-hidden bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                   />
                 )}
               </div>
@@ -615,17 +598,14 @@ export default function AuthPage() {
                   Officer Designation
                 </label>
                 <div className="relative">
-                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400 pointer-events-none" />
+                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
                   <select
                     value={signUpRole}
                     onChange={(e) => setSignUpRole(e.target.value)}
-                    className={`w-full h-10 pl-9 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden appearance-none cursor-pointer ${isDark
-                      ? 'bg-slate-800 border-white/10 text-white focus:border-amber-400'
-                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
-                      }`}
+                    className="w-full h-10 pl-9 pr-3 rounded-xl border font-medium text-xs transition-all outline-hidden appearance-none cursor-pointer bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                   >
                     {STANDARD_ROLES.map((role) => (
-                      <option key={role} value={role} className="dark:bg-slate-900">
+                      <option key={role} value={role} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                         {role}
                       </option>
                     ))}
@@ -639,22 +619,19 @@ export default function AuthPage() {
                 Create Password (min. 6 characters)
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type={showSignUpPassword ? 'text' : 'password'}
                   value={signUpPassword}
                   onChange={(e) => setSignUpPassword(e.target.value)}
                   placeholder="••••••••••••"
                   required
-                  className={`w-full h-10 pl-10 pr-10 rounded-xl border font-medium text-xs transition-all outline-hidden ${isDark
-                    ? 'bg-slate-800/80 border-white/10 text-white focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
-                    }`}
+                  className="w-full h-10 pl-10 pr-10 rounded-xl border font-medium text-xs transition-all outline-hidden bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-amber-500 dark:focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/20"
                 />
                 <button
                   type="button"
                   onClick={() => setShowSignUpPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
                 >
                   {showSignUpPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
