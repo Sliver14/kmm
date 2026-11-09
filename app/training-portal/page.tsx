@@ -42,6 +42,8 @@ import {
   Plus,
   Trash2,
   Pencil,
+  Lock,
+  RotateCcw,
   Link2,
   LogOut,
   FileVideo,
@@ -496,6 +498,60 @@ export default function TrainingPortalPage() {
     showNotification('📥 Masterclasses catalog JSON exported successfully!')
   }
 
+  // Generate next automatic sequential Institutional Code based on Category
+  const generateNextInstitutionalCode = (
+    category: string,
+    currentList: VideoItem[] = masterclasses
+  ): string => {
+    const configMap: Record<string, { prefix: string; start: number }> = {
+      copyright: { prefix: 'KMM-IP', start: 101 },
+      protection: { prefix: 'KMM-SAF', start: 201 },
+      broadcast: { prefix: 'KMM-BRD', start: 301 },
+      doctrinal: { prefix: 'KMM-DOC', start: 401 },
+      merchandising: { prefix: 'KMM-MER', start: 501 },
+    }
+    const config = configMap[category] || { prefix: 'KMM-TRN', start: 101 }
+    const regex = new RegExp(`^${config.prefix}-(\\d+)$`, 'i')
+    let maxNum = config.start - 1
+
+    currentList.forEach((item) => {
+      const match = item.code?.match(regex)
+      if (match && match[1]) {
+        const val = parseInt(match[1], 10)
+        if (!isNaN(val) && val > maxNum) {
+          maxNum = val
+        }
+      }
+    })
+
+    return `${config.prefix}-${maxNum + 1}`
+  }
+
+  // Open Upload Masterclass Modal with auto-generated code
+  const handleOpenUploadModal = (initialCategory = 'copyright') => {
+    if (!isPortalAdmin) {
+      showNotification('⚠️ Unauthorized: Portal Admin role required to upload masterclasses.')
+      return
+    }
+    const autoCode = generateNextInstitutionalCode(initialCategory)
+    setUploadCategory(initialCategory)
+    setUploadCode(autoCode)
+    setUploadTitle('')
+    setUploadDuration('20:00')
+    setUploadDesc('')
+    setUploadVideoUrl('')
+    setUploadVideoSourceType('upload')
+    setUploadVideoFile(null)
+    setUploadedFileName('')
+    setUploadedFileSize('')
+    setUploadError(null)
+    setIsUploading(false)
+    setUploadProgress(0)
+    setUploadStatusText('')
+    setUploadBytesInfo('')
+    setShowUploadModal(true)
+  }
+
   // Video File attachment handler
   const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -523,10 +579,8 @@ export default function TrainingPortalPage() {
       showNotification('⚠️ Please provide a masterclass title.')
       return
     }
-    if (!uploadCode.trim()) {
-      showNotification('⚠️ Please provide a course code.')
-      return
-    }
+
+    const finalCode = (uploadCode.trim() || generateNextInstitutionalCode(uploadCategory)).toUpperCase()
 
     setUploadError(null)
     setIsUploading(true)
@@ -605,7 +659,7 @@ export default function TrainingPortalPage() {
 
     const newVideo: VideoItem = {
       id: `custom-vid-${Date.now().toString().slice(-6)}`,
-      code: uploadCode.trim().toUpperCase(),
+      code: finalCode,
       title: uploadTitle.trim(),
       category: uploadCategory,
       categoryLabel: categoryLabels[uploadCategory] || 'Sovereign Masterclass',
@@ -776,10 +830,8 @@ export default function TrainingPortalPage() {
       showNotification('⚠️ Please provide a masterclass title.')
       return
     }
-    if (!editCode.trim()) {
-      showNotification('⚠️ Please provide a course code.')
-      return
-    }
+
+    const finalEditCode = (editCode.trim() || editingVideo.code).toUpperCase()
 
     const categoryLabels: Record<string, string> = {
       copyright: 'Copyright & Sovereign IP',
@@ -792,7 +844,7 @@ export default function TrainingPortalPage() {
     const updatedVideo: VideoItem = {
       ...editingVideo,
       title: editTitle.trim(),
-      code: editCode.trim().toUpperCase(),
+      code: finalEditCode,
       category: editCategory,
       categoryLabel: categoryLabels[editCategory] || editingVideo.categoryLabel || 'Sovereign Masterclass',
       duration: editDuration.trim() || editingVideo.duration || '15:00',
@@ -2277,7 +2329,7 @@ export default function TrainingPortalPage() {
 
                     <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                       <button
-                        onClick={() => setShowUploadModal(true)}
+                        onClick={() => handleOpenUploadModal()}
                         className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition-transform active:scale-98 cursor-pointer"
                       >
                         <Plus className="size-4 stroke-3" />
@@ -2385,7 +2437,7 @@ export default function TrainingPortalPage() {
                           </select>
 
                           <button
-                            onClick={() => setShowUploadModal(true)}
+                            onClick={() => handleOpenUploadModal()}
                             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer whitespace-nowrap"
                           >
                             <Plus className="size-3.5" />
@@ -2785,7 +2837,7 @@ export default function TrainingPortalPage() {
                   </span>
                   <div className="space-y-1.5">
                     <button
-                      onClick={() => setShowUploadModal(true)}
+                      onClick={() => handleOpenUploadModal()}
                       className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 hover:brightness-110 transition cursor-pointer shadow-xs"
                     >
                       <Plus className="size-3.5 stroke-3" />
@@ -3289,6 +3341,64 @@ export default function TrainingPortalPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Curriculum Category *
+                  </label>
+                  <select
+                    value={uploadCategory}
+                    onChange={(e) => {
+                      const newCat = e.target.value
+                      setUploadCategory(newCat)
+                      setUploadCode(generateNextInstitutionalCode(newCat))
+                    }}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 cursor-pointer"
+                  >
+                    <option value="copyright">Copyright &amp; Sovereign IP (KMM-IP)</option>
+                    <option value="protection">Child Protection &amp; Safeguards (KMM-SAF)</option>
+                    <option value="broadcast">Broadcast Standards &amp; Playout (KMM-BRD)</option>
+                    <option value="doctrinal">Scriptural Review &amp; Canon (KMM-DOC)</option>
+                    <option value="merchandising">Merchandising &amp; Contracts (KMM-MER)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Institutional Code (Auto-Generated)
+                    </label>
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
+                      <Sparkles className="size-3" />
+                      Auto-Assigned
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={uploadCode || generateNextInstitutionalCode(uploadCategory)}
+                      readOnly
+                      className="w-full h-10 px-3 pl-9 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-slate-900/80 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold tracking-wider outline-hidden cursor-not-allowed select-all"
+                    />
+                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                      <Lock className="size-3.5" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setUploadCode(generateNextInstitutionalCode(uploadCategory))}
+                      title="Refresh sequential code"
+                      className="absolute inset-y-1.5 right-1.5 px-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-amber-500 cursor-pointer flex items-center gap-1 transition shadow-2xs"
+                    >
+                      <RotateCcw className="size-2.5" />
+                      <span>Refresh</span>
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Sequenced automatically to prevent code collisions in curriculum.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
                     Masterclass Title *
                   </label>
                   <input
@@ -3299,39 +3409,6 @@ export default function TrainingPortalPage() {
                     required
                     className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                    Institutional Code *
-                  </label>
-                  <input
-                    type="text"
-                    value={uploadCode}
-                    onChange={(e) => setUploadCode(e.target.value)}
-                    placeholder="e.g. KMM-AI-201"
-                    required
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                    Curriculum Category
-                  </label>
-                  <select
-                    value={uploadCategory}
-                    onChange={(e) => setUploadCategory(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 cursor-pointer"
-                  >
-                    <option value="copyright">Copyright &amp; Sovereign IP</option>
-                    <option value="protection">Child Protection &amp; Safeguards</option>
-                    <option value="broadcast">Broadcast Standards &amp; Playout</option>
-                    <option value="doctrinal">Scriptural Review &amp; Canon</option>
-                    <option value="merchandising">Merchandising &amp; Contracts</option>
-                  </select>
                 </div>
 
                 <div>
@@ -3609,17 +3686,26 @@ export default function TrainingPortalPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                      Institutional Code *
-                    </label>
-                    <input
-                      type="text"
-                      value={editCode}
-                      onChange={(e) => setEditCode(e.target.value)}
-                      placeholder="e.g. KMM-IP-101"
-                      required
-                      className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
-                    />
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Institutional Code
+                      </label>
+                      <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+                        <Lock className="size-3" />
+                        Accredited Identifier
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={editCode}
+                        readOnly
+                        className="w-full h-10 px-3 pl-9 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-slate-900/80 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold tracking-wider outline-hidden cursor-not-allowed select-all"
+                      />
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                        <Lock className="size-3.5" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
