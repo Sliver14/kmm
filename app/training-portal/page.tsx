@@ -55,6 +55,7 @@ import {
   Database,
   Server,
   Loader2,
+  Cloud,
 } from 'lucide-react'
 import { ARCHIVED_TRAINING_VIDEOS, VideoItem } from '@/lib/data/trainingVideosData'
 
@@ -411,10 +412,84 @@ export default function TrainingPortalPage() {
   }, [completedModules])
 
   // Helper to upload a video file directly to the VPS server with real-time progress
+  // Upload Video to Cloudflare R2 via Presigned URL (with automatic fallback to local VPS API)
   const uploadVideoToServer = async (
     file: File,
     onProgress?: (percent: number, loadedBytes: number, totalBytes: number) => void
   ): Promise<string> => {
+    // 1. Primary: Cloudflare R2 Direct Presigned Upload (Unlimited size, 0 MB server load, no 413)
+    try {
+      const presignRes = await fetch('/api/upload/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type || 'video/mp4',
+          fileSize: file.size,
+        }),
+      })
+
+      if (presignRes.status === 503) {
+        // Cloudflare R2 credentials not configured in environment
+        throw new Error('R2_CREDENTIALS_MISSING')
+      }
+
+      if (presignRes.ok) {
+        const presignData = await presignRes.json()
+        if (presignData.uploadUrl && presignData.finalVideoUrl) {
+          return new Promise<string>((resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+
+            xhr.upload.addEventListener('progress', (e) => {
+              if (e.lengthComputable && onProgress) {
+                const percent = Math.min(100, Math.round((e.loaded / e.total) * 100))
+                onProgress(percent, e.loaded, e.total)
+              }
+            })
+
+            xhr.addEventListener('load', () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                if (onProgress) onProgress(100, file.size, file.size)
+                resolve(presignData.finalVideoUrl)
+              } else {
+                reject(
+                  new Error(
+                    `Cloudflare R2 returned HTTP ${xhr.status}. Please ensure your R2 bucket CORS allows PUT requests from this origin.`
+                  )
+                )
+              }
+            })
+
+            xhr.addEventListener('error', () => {
+              reject(new Error('Network error during direct Cloudflare R2 cloud upload.'))
+            })
+
+            xhr.addEventListener('abort', () => {
+              reject(new Error('Upload was cancelled.'))
+            })
+
+            xhr.open('PUT', presignData.uploadUrl)
+            xhr.setRequestHeader('Content-Type', file.type || 'video/mp4')
+            xhr.send(file)
+          })
+        }
+      } else {
+        const errorData = await presignRes.json().catch(() => ({}))
+        if (errorData.error) {
+          throw new Error(errorData.error)
+        }
+      }
+    } catch (r2Error: any) {
+      if (r2Error.message === 'R2_CREDENTIALS_MISSING') {
+        throw r2Error
+      }
+      console.warn('Presigned R2 upload failed, evaluating fallback:', r2Error)
+      if (file.size > 4.5 * 1024 * 1024) {
+        throw r2Error
+      }
+    }
+
+    // 2. Secondary Fallback: VPS Local /api/upload endpoint (for smaller test assets)
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       const formData = new FormData()
@@ -525,7 +600,7 @@ export default function TrainingPortalPage() {
 
     if (uploadVideoSourceType === 'upload') {
       if (uploadVideoFile) {
-        setUploadStatusText('Connecting to VPS storage engine...')
+        setUploadStatusText('Initializing direct cloud upload...')
         try {
           finalVideoUrl = await uploadVideoToServer(uploadVideoFile, (percent, loaded, total) => {
             setUploadProgress(percent)
@@ -533,12 +608,23 @@ export default function TrainingPortalPage() {
             const totalMb = (total / (1024 * 1024)).toFixed(1)
             setUploadBytesInfo(`${loadedMb} MB / ${totalMb} MB`)
             setUploadStatusText(
-              percent >= 95
-                ? 'Processing & verifying video on VPS storage...'
-                : `Uploading video to VPS server (${percent}%)...`
+              percent >= 100
+                ? 'Upload complete! Verifying media stream...'
+                : percent >= 95
+                ? 'Finalizing video on Cloudflare R2...'
+                : `Streaming video to Cloudflare R2 (${percent}%)...`
             )
           })
         } catch (uploadErr: any) {
+          if (uploadErr.message === 'R2_CREDENTIALS_MISSING') {
+            setUploadError('R2_NOT_CONFIGURED')
+            setIsUploading(false)
+            setUploadProgress(0)
+            setUploadStatusText('')
+            setUploadBytesInfo('')
+            showNotification('⚠️ Cloudflare R2 credentials not configured. Please add R2 keys to .env or switch to Video URL.')
+            return
+          }
           if (uploadErr.message === 'HTTP_413_PAYLOAD_TOO_LARGE') {
             setUploadError('413')
             setIsUploading(false)
@@ -2374,7 +2460,12 @@ export default function TrainingPortalPage() {
                                     {v.duration}
                                   </td>
                                   <td className="py-3.5 px-3 whitespace-nowrap">
-                                    {v.videoUrl?.startsWith('/uploads/') ? (
+                                    {v.videoUrl?.includes('r2.') || v.videoUrl?.includes('/masterclasses/') ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-500/20">
+                                        <Cloud className="size-3" />
+                                        <span>Cloudflare R2</span>
+                                      </span>
+                                    ) : v.videoUrl?.startsWith('/uploads/') ? (
                                       <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
                                         <HardDrive className="size-3" />
                                         <span>VPS Storage</span>
@@ -2441,35 +2532,35 @@ export default function TrainingPortalPage() {
                         {/* Server Architecture Card */}
                         <div className="p-6 rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
                           <div className="flex items-center gap-3">
-                            <div className="size-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20">
-                              <HardDrive className="size-5" />
+                            <div className="size-10 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center border border-sky-500/20">
+                              <Cloud className="size-5" />
                             </div>
                             <div>
                               <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                                VPS File System &amp; Upload Infrastructure
+                                Cloudflare R2 &amp; VPS Storage Architecture
                               </h3>
                               <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Persistent server storage on VPS host filesystem
+                                High-bandwidth direct S3 presigned streaming with zero egress fees
                               </p>
                             </div>
                           </div>
 
                           <div className="space-y-2.5 pt-2 text-xs">
                             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Storage Target Directory:</span>
-                              <span className="font-mono font-bold text-amber-600 dark:text-amber-400">public/uploads/</span>
+                              <span className="text-slate-500 dark:text-slate-400">Primary Object Storage:</span>
+                              <span className="font-mono font-bold text-sky-600 dark:text-sky-400">Cloudflare R2 (Global CDN)</span>
                             </div>
                             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Upload API Endpoint:</span>
-                              <span className="font-mono font-bold text-slate-900 dark:text-white">/api/upload (POST)</span>
+                              <span className="text-slate-500 dark:text-slate-400">Upload Protocol:</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">Direct S3 Presigned PUT</span>
                             </div>
                             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
                               <span className="text-slate-500 dark:text-slate-400">Maximum Video File Size:</span>
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">500 MB (Expanded)</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">Unlimited (up to 5 TB)</span>
                             </div>
                             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Permitted Video Formats:</span>
-                              <span className="font-mono text-slate-700 dark:text-slate-300">MP4, WebM, MOV</span>
+                              <span className="text-slate-500 dark:text-slate-400">Bandwidth &amp; Egress Costs:</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">$0 / Free Forever</span>
                             </div>
                           </div>
                         </div>
@@ -3120,7 +3211,7 @@ export default function TrainingPortalPage() {
                       ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-bold'
                       : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
                   }`}>
-                    2. VPS Server Transfer
+                    2. Direct Cloud Upload (R2)
                   </div>
                   <div className={`p-1.5 rounded-lg border transition-colors ${
                     uploadProgress >= 85
@@ -3133,25 +3224,29 @@ export default function TrainingPortalPage() {
               </div>
             )}
 
-            {/* Error / 413 Banner */}
+            {/* Error / 413 / R2 Banner */}
             {uploadError && (
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 space-y-2.5 animate-in fade-in">
                 <div className="flex items-start gap-2.5">
                   <AlertTriangle className="size-5 text-amber-500 shrink-0 mt-0.5" />
                   <div className="text-xs space-y-1">
                     <div className="font-extrabold text-slate-900 dark:text-white">
-                      {uploadError === '413'
+                      {uploadError === 'R2_NOT_CONFIGURED'
+                        ? 'Cloudflare R2 Storage Keys Not Yet Configured in .env'
+                        : uploadError === '413'
                         ? 'Video Payload Exceeds Serverless Proxy Limit (HTTP 413)'
                         : 'Upload Error'}
                     </div>
                     <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
-                      {uploadError === '413'
-                        ? 'Serverless platforms (like Vercel) limit direct file uploads to 4.5 MB. To publish your masterclass right away, switch to "Provide Video URL" to stream from CDN/YouTube/Vimeo/S3, or continue with the default sovereign curriculum stream.'
+                      {uploadError === 'R2_NOT_CONFIGURED'
+                        ? 'Direct cloud uploading for large videos (50MB - 5GB+) uses Cloudflare R2 object storage with $0 egress fees. Please add R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME to your .env file or Vercel dashboard. In the meantime, you can switch to "Provide Video URL" to publish immediately.'
+                        : uploadError === '413'
+                        ? 'Serverless platforms (like Vercel) limit direct file uploads to 4.5 MB. Configure Cloudflare R2 in .env for unlimited file uploads, or switch to "Provide Video URL" to stream from CDN/YouTube/Vimeo/S3.'
                         : uploadError}
                     </p>
                   </div>
                 </div>
-                {uploadError === '413' && (
+                {(uploadError === '413' || uploadError === 'R2_NOT_CONFIGURED') && (
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     <button
                       type="button"
