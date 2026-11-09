@@ -411,137 +411,74 @@ export default function TrainingPortalPage() {
     return Object.values(completedModules).filter(Boolean).length
   }, [completedModules])
 
-  // Helper to upload a video file directly to the VPS server with real-time progress
-  // Upload Video to Cloudflare R2 via Presigned URL (with automatic fallback to local VPS API)
+  // Upload Video directly to Cloudflare R2 via Presigned URL
   const uploadVideoToServer = async (
     file: File,
     onProgress?: (percent: number, loadedBytes: number, totalBytes: number) => void
   ): Promise<string> => {
-    // 1. Primary: Cloudflare R2 Direct Presigned Upload (Unlimited size, 0 MB server load, no 413)
-    try {
-      const presignRes = await fetch('/api/upload/presign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type || 'video/mp4',
-          fileSize: file.size,
-        }),
-      })
+    // 1. Request presigned upload URL from server
+    const presignRes = await fetch('/api/upload/presign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: file.type || 'video/mp4',
+        fileSize: file.size,
+      }),
+    })
 
-      if (presignRes.status === 503) {
-        // Cloudflare R2 credentials not configured in environment
-        throw new Error('R2_CREDENTIALS_MISSING')
-      }
-
-      if (presignRes.ok) {
-        const presignData = await presignRes.json()
-        if (presignData.uploadUrl && presignData.finalVideoUrl) {
-          return new Promise<string>((resolve, reject) => {
-            const xhr = new XMLHttpRequest()
-
-            xhr.upload.addEventListener('progress', (e) => {
-              if (e.lengthComputable && onProgress) {
-                const percent = Math.min(100, Math.round((e.loaded / e.total) * 100))
-                onProgress(percent, e.loaded, e.total)
-              }
-            })
-
-            xhr.addEventListener('load', () => {
-              if (xhr.status >= 200 && xhr.status < 300) {
-                if (onProgress) onProgress(100, file.size, file.size)
-                resolve(presignData.finalVideoUrl)
-              } else {
-                reject(
-                  new Error(
-                    `Cloudflare R2 returned HTTP ${xhr.status}. Please ensure your R2 bucket CORS allows PUT requests from this origin.`
-                  )
-                )
-              }
-            })
-
-            xhr.addEventListener('error', () => {
-              reject(new Error('Network error during direct Cloudflare R2 cloud upload.'))
-            })
-
-            xhr.addEventListener('abort', () => {
-              reject(new Error('Upload was cancelled.'))
-            })
-
-            xhr.open('PUT', presignData.uploadUrl)
-            xhr.setRequestHeader('Content-Type', file.type || 'video/mp4')
-            xhr.send(file)
-          })
-        }
-      } else {
-        const errorData = await presignRes.json().catch(() => ({}))
-        if (errorData.error) {
-          throw new Error(errorData.error)
-        }
-      }
-    } catch (r2Error: any) {
-      if (r2Error.message === 'R2_CREDENTIALS_MISSING') {
-        throw r2Error
-      }
-      console.warn('Presigned R2 upload failed, evaluating fallback:', r2Error)
-      if (file.size > 4.5 * 1024 * 1024) {
-        throw r2Error
-      }
+    if (presignRes.status === 503) {
+      throw new Error('R2_CREDENTIALS_MISSING')
     }
 
-    // 2. Secondary Fallback: VPS Local /api/upload endpoint (for smaller test assets)
-    return new Promise((resolve, reject) => {
+    if (!presignRes.ok) {
+      const errorData = await presignRes.json().catch(() => ({}))
+      throw new Error(errorData.error || `Failed to initiate cloud upload (HTTP ${presignRes.status})`)
+    }
+
+    const presignData = await presignRes.json()
+    if (!presignData.uploadUrl || !presignData.finalVideoUrl) {
+      throw new Error('Upload server did not return a valid cloud storage URL.')
+    }
+
+    // 2. Direct byte-level streaming to Cloudflare R2
+    return new Promise<string>((resolve, reject) => {
       const xhr = new XMLHttpRequest()
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('fileType', 'video')
-      formData.append('ministryId', 'min-kmm')
 
       xhr.upload.addEventListener('progress', (e) => {
         if (e.lengthComputable && onProgress) {
-          // Keep capped at 95% while waiting for server disk write
-          const percent = Math.min(95, Math.round((e.loaded / e.total) * 100))
+          // Scale smoothly to 98% while sending bytes
+          const percent = Math.min(98, Math.round((e.loaded / e.total) * 100))
           onProgress(percent, e.loaded, e.total)
         }
       })
 
       xhr.addEventListener('load', () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data = JSON.parse(xhr.responseText)
-            if (data.file?.url) {
-              if (onProgress) onProgress(100, file.size, file.size)
-              resolve(data.file.url)
-            } else {
-              reject(new Error(data.error || 'Upload succeeded but no video URL returned.'))
-            }
-          } catch {
-            reject(new Error('Invalid response from upload server.'))
-          }
+          if (onProgress) onProgress(100, file.size, file.size)
+          resolve(presignData.finalVideoUrl)
         } else {
-          if (xhr.status === 413) {
-            reject(new Error('HTTP_413_PAYLOAD_TOO_LARGE'))
-            return
-          }
-          try {
-            const data = JSON.parse(xhr.responseText)
-            reject(new Error(data.error || `Server responded with HTTP ${xhr.status}`))
-          } catch {
-            reject(new Error(`Server responded with HTTP ${xhr.status}`))
-          }
+          reject(
+            new Error(
+              `Cloudflare R2 returned HTTP ${xhr.status}. Storage upload could not be verified.`
+            )
+          )
         }
       })
 
       xhr.addEventListener('error', () => {
-        reject(new Error('Network error during video upload.'))
+        reject(new Error('Network error during direct Cloudflare R2 upload.'))
       })
 
       xhr.addEventListener('abort', () => {
         reject(new Error('Upload was cancelled.'))
       })
 
-      xhr.open('POST', '/api/upload')
-      xhr.send(formData)
+      xhr.open('PUT', presignData.uploadUrl)
+      if (file.type) {
+        xhr.setRequestHeader('Content-Type', file.type)
+      }
+      xhr.send(file)
     })
   }
 
@@ -569,7 +506,7 @@ export default function TrainingPortalPage() {
       setUploadedFileName(file.name)
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
       setUploadedFileSize(`${sizeMb} MB`)
-      showNotification(`✓ Video file "${file.name}" selected. Will be saved to VPS server.`)
+      showNotification(`✓ Video file "${file.name}" selected for cloud upload.`)
     }
   }
 
@@ -611,8 +548,8 @@ export default function TrainingPortalPage() {
               percent >= 100
                 ? 'Upload complete! Verifying media stream...'
                 : percent >= 95
-                ? 'Finalizing video on Cloudflare R2...'
-                : `Streaming video to Cloudflare R2 (${percent}%)...`
+                  ? 'Finalizing video on Cloudflare R2...'
+                  : `Streaming video to Cloudflare R2 (${percent}%)...`
             )
           })
         } catch (uploadErr: any) {
@@ -795,7 +732,7 @@ export default function TrainingPortalPage() {
     setEditDuration(video.duration || '15:00')
     setEditDesc(video.desc || '')
     setEditVideoUrl(video.videoUrl || '/kmm-welcome-animation.mp4')
-    setEditVideoSourceType(video.videoUrl?.startsWith('/uploads/') ? 'upload' : 'url')
+    setEditVideoSourceType(video.videoUrl?.includes('r2.') || video.videoUrl?.startsWith('/uploads/') ? 'upload' : 'url')
     setEditVideoFile(null)
     setEditPoints(video.points && video.points.length > 0 ? [...video.points] : [
       'Statutory Work-for-Hire protocol executed and archived.',
@@ -816,7 +753,7 @@ export default function TrainingPortalPage() {
       setEditUploadedFileName(file.name)
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
       setEditUploadedFileSize(`${sizeMb} MB`)
-      showNotification(`✓ New video attached: "${file.name}" (will upload to VPS upon saving)`)
+      showNotification(`✓ New video attached: "${file.name}" (will upload to cloud storage upon saving)`)
     }
   }
 
@@ -841,18 +778,18 @@ export default function TrainingPortalPage() {
     setEditUploadProgress(10)
     setEditUploadStatusText('Preparing updates...')
 
-    // Handle VPS file upload if a new file was chosen in 'upload' mode
+    // Handle Cloudflare R2 file upload if a new file was chosen in 'upload' mode
     let finalVideoUrl = editVideoUrl.trim() || editingVideo.videoUrl || '/kmm-welcome-animation.mp4'
     if (editVideoSourceType === 'upload' && editVideoFile) {
-      setEditUploadStatusText('Uploading updated video to VPS server...')
+      setEditUploadStatusText('Streaming updated video to Cloudflare R2...')
       try {
         finalVideoUrl = await uploadVideoToServer(editVideoFile, (percent, loaded, total) => {
           setEditUploadProgress(percent)
           const loadedMb = (loaded / (1024 * 1024)).toFixed(1)
           const totalMb = (total / (1024 * 1024)).toFixed(1)
           setEditUploadStatusText(
-            percent >= 95
-              ? 'Finalizing video on VPS storage...'
+            percent >= 98
+              ? 'Finalizing video on Cloudflare R2...'
               : `Uploading video (${percent}%)... ${loadedMb} MB / ${totalMb} MB`
           )
         })
@@ -1043,10 +980,10 @@ export default function TrainingPortalPage() {
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
                       }`}
                   >
-                    <HardDrive className={`size-4 ${activeTab === 'admin' && adminActiveSection === 'storage' ? 'text-amber-500' : 'text-slate-400'}`} />
-                    <span>VPS Storage &amp; DRM</span>
-                    <span className="ml-auto text-[9px] font-mono font-bold px-1 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                      500MB
+                    <Cloud className={`size-4 ${activeTab === 'admin' && adminActiveSection === 'storage' ? 'text-amber-500' : 'text-slate-400'}`} />
+                    <span>Cloud Storage &amp; DRM</span>
+                    <span className="ml-auto text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-700 dark:text-sky-300">
+                      R2
                     </span>
                   </button>
 
@@ -1245,8 +1182,8 @@ export default function TrainingPortalPage() {
                   {activeTab === 'video' && selectedVideo
                     ? `${selectedVideo.code} • ${selectedVideo.title}`
                     : activeTab === 'admin'
-                    ? 'Masterclass Uploads & Accreditation Governance'
-                    : 'Sovereign Intellectual Property & Statutory Child Protection'}
+                      ? 'Masterclass Uploads & Accreditation Governance'
+                      : 'Sovereign Intellectual Property & Statutory Child Protection'}
                 </p>
               </div>
             </div>
@@ -2277,7 +2214,7 @@ export default function TrainingPortalPage() {
                         Curriculum Command &amp; Accreditation Governance
                       </h2>
                       <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        Manage official masterclasses, configure VPS video uploads up to 500MB, inspect streaming playback, and audit statutory legal covenants.
+                        Manage official masterclasses, upload high-definition video masterclasses to Cloudflare R2, inspect streaming playback, and audit statutory legal covenants.
                       </p>
                     </div>
 
@@ -2304,25 +2241,23 @@ export default function TrainingPortalPage() {
                   <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 dark:border-white/10 pb-3">
                     <button
                       onClick={() => setAdminActiveSection('masterclasses')}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                        adminActiveSection === 'masterclasses'
-                          ? 'bg-amber-500 text-slate-950 shadow-xs'
-                          : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
-                      }`}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${adminActiveSection === 'masterclasses'
+                        ? 'bg-amber-500 text-slate-950 shadow-xs'
+                        : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+                        }`}
                     >
                       <Tv className="size-3.5" />
                       <span>Masterclasses Repository ({masterclasses.length})</span>
                     </button>
                     <button
                       onClick={() => setAdminActiveSection('storage')}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
-                        adminActiveSection === 'storage'
-                          ? 'bg-amber-500 text-slate-950 shadow-xs'
-                          : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
-                      }`}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${adminActiveSection === 'storage'
+                        ? 'bg-amber-500 text-slate-950 shadow-xs'
+                        : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+                        }`}
                     >
-                      <HardDrive className="size-3.5" />
-                      <span>VPS Storage &amp; DRM Security</span>
+                      <Cloud className="size-3.5" />
+                      <span>Cloud Storage &amp; DRM Security</span>
                     </button>
                   </div>
 
@@ -2340,11 +2275,11 @@ export default function TrainingPortalPage() {
                         </div>
 
                         <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
-                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Custom VPS Uploads</div>
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Custom Cloud Uploads</div>
                           <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
-                            {masterclasses.filter((v) => v.isCustom || v.videoUrl?.startsWith('/uploads/')).length}
+                            {masterclasses.filter((v) => v.isCustom || v.videoUrl?.includes('r2.') || v.videoUrl?.startsWith('/uploads/')).length}
                           </div>
-                          <div className="text-[11px] text-slate-400 font-medium">Stored in public/uploads</div>
+                          <div className="text-[11px] text-slate-400 font-medium">Stored in Cloudflare R2</div>
                         </div>
 
                         <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
@@ -2468,7 +2403,7 @@ export default function TrainingPortalPage() {
                                     ) : v.videoUrl?.startsWith('/uploads/') ? (
                                       <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
                                         <HardDrive className="size-3" />
-                                        <span>VPS Storage</span>
+                                        <span>Local Media</span>
                                       </span>
                                     ) : (
                                       <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-lg">
@@ -2524,7 +2459,7 @@ export default function TrainingPortalPage() {
                   )}
 
                   {/* ========================================================= */}
-                  {/* SUB-SECTION 2: VPS STORAGE & DRM ARCHITECTURE             */}
+                  {/* SUB-SECTION 2: CLOUD STORAGE & DRM ARCHITECTURE           */}
                   {/* ========================================================= */}
                   {adminActiveSection === 'storage' && (
                     <div className="space-y-6 animate-in fade-in duration-150">
@@ -2537,7 +2472,7 @@ export default function TrainingPortalPage() {
                             </div>
                             <div>
                               <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                                Cloudflare R2 &amp; VPS Storage Architecture
+                                Cloudflare R2 Storage Architecture
                               </h3>
                               <p className="text-xs text-slate-500 dark:text-slate-400">
                                 High-bandwidth direct S3 presigned streaming with zero egress fees
@@ -2709,9 +2644,9 @@ export default function TrainingPortalPage() {
 
                     <div className="space-y-0.5 border-x border-slate-200/60 dark:border-white/10">
                       <div className="text-xs font-black text-amber-600 dark:text-amber-400 font-mono">
-                        500 MB
+                        5 TB Max
                       </div>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase">VPS Limit</div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase">Storage Tier</div>
                     </div>
 
                     <div className="space-y-0.5">
@@ -2723,12 +2658,12 @@ export default function TrainingPortalPage() {
                   </div>
                 </div>
 
-                {/* 2. VPS Storage & Media Server Health */}
+                {/* 2. Cloudflare R2 Storage & Media Health */}
                 <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <HardDrive className="size-3.5 text-amber-500" />
-                      <span>VPS Media Storage</span>
+                      <Cloud className="size-3.5 text-sky-500" />
+                      <span>Cloudflare R2 Storage</span>
                     </span>
                     <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
                       OPERATIONAL
@@ -2737,12 +2672,12 @@ export default function TrainingPortalPage() {
 
                   <div className="space-y-2 text-xs">
                     <div className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5">
-                      <span className="text-slate-500 dark:text-slate-400">Target Path:</span>
-                      <span className="font-mono text-amber-600 dark:text-amber-400 font-bold text-[10px]">public/uploads</span>
+                      <span className="text-slate-500 dark:text-slate-400">Target Bucket:</span>
+                      <span className="font-mono text-sky-600 dark:text-sky-400 font-bold text-[10px]">Cloudflare R2 (kmm)</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5">
                       <span className="text-slate-500 dark:text-slate-400">Streaming:</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px]">HTTP 206 Partial</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px]">Edge CDN &bull; $0 Egress</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px] p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5">
                       <span className="text-slate-500 dark:text-slate-400">Protection:</span>
@@ -2813,216 +2748,216 @@ export default function TrainingPortalPage() {
             ) : (
               <>
                 {/* Profile Summary Card */}
-            <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
-              <div className="flex items-center gap-3.5">
-                <div className="size-12 rounded-2xl bg-gradient-to-tr from-[#0284C7] to-amber-500 text-white font-black flex items-center justify-center text-sm shadow-md">
-                  {currentUser?.initials || 'LO'}
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
-                    {currentUser?.name || 'Barrister Lillian'}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                    {currentUser?.roleLabel || currentUser?.role || 'Officer'}
-                  </p>
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 pt-0.5">
-                    <Trophy className="size-3" />
-                    <span>980 Accreditation Points</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3 Stats in Row (Flame / Target / Trophy - Just like inspiration) */}
-              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-200/60 dark:border-white/10 text-center">
-                <div className="space-y-0.5">
-                  <div className="flex items-center justify-center gap-1 text-xs font-black text-slate-900 dark:text-white">
-                    <Flame className="size-3 text-orange-500 fill-orange-500" />
-                    <span>07</span>
-                  </div>
-                  <div className="text-[9px] font-bold text-slate-400 uppercase">Days Streak</div>
-                </div>
-
-                <div className="space-y-0.5 border-x border-slate-200/60 dark:border-white/10">
-                  <div className="flex items-center justify-center gap-1 text-xs font-black text-slate-900 dark:text-white">
-                    <Target className="size-3 text-rose-500" />
-                    <span>04</span>
-                  </div>
-                  <div className="text-[9px] font-bold text-slate-400 uppercase">Goals Month</div>
-                </div>
-
-                <div className="space-y-0.5">
-                  <div className="flex items-center justify-center gap-1 text-xs font-black text-slate-900 dark:text-white">
-                    <Trophy className="size-3 text-amber-500" />
-                    <span>01</span>
-                  </div>
-                  <div className="text-[9px] font-bold text-slate-400 uppercase">Directorate</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Playlist / Up Next (Direct switcher in right sidebar) */}
-            <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-slate-900 dark:text-white">Up Next &bull; Masterclasses</span>
-                <span className="text-[10px] font-bold text-slate-400">{completedCount}/{masterclasses.length} Completed</span>
-              </div>
-
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {masterclasses.map((v) => (
-                  <button
-                    key={v.id}
-                    onClick={() => handleSelectVideo(v)}
-                    className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between gap-2 cursor-pointer ${selectedVideo?.id === v.id
-                      ? 'bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold'
-                      : 'hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
-                      }`}
-                  >
+                <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="size-12 rounded-2xl bg-gradient-to-tr from-[#0284C7] to-amber-500 text-white font-black flex items-center justify-center text-sm shadow-md">
+                      {currentUser?.initials || 'LO'}
+                    </div>
                     <div className="min-w-0">
-                      <div className="text-[11px] truncate">{v.title}</div>
-                      <div className="text-[9px] text-slate-400">{v.code} &bull; {v.duration}</div>
+                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
+                        {currentUser?.name || 'Barrister Lillian'}
+                      </h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        {currentUser?.roleLabel || currentUser?.role || 'Officer'}
+                      </p>
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 pt-0.5">
+                        <Trophy className="size-3" />
+                        <span>980 Accreditation Points</span>
+                      </div>
                     </div>
-                    {completedModules[v.id] ? (
-                      <CheckCircle2 className="size-3 text-emerald-500 shrink-0" />
-                    ) : (
-                      <Play className="size-3 text-slate-400 shrink-0" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
+                  </div>
 
-            {/* Weekly Streak Tracker */}
-            <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-xs text-slate-900 dark:text-white">Weekly Streak</span>
-                  <Info className="size-3 text-slate-400" />
-                </div>
-                <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full border border-slate-200 dark:border-white/10">
-                  May 2026
-                </span>
-              </div>
-
-              {/* 7 Day Calendar Strip */}
-              <div className="space-y-2">
-                <div className="text-[10px] font-semibold text-slate-400">4/4 Weeks Active</div>
-                <div className="grid grid-cols-7 gap-1.5 text-center">
-                  {[
-                    { day: 'Mon', num: 29, active: true },
-                    { day: 'Tue', num: 30, active: true },
-                    { day: 'Wed', num: 31, active: true },
-                    { day: 'Thu', num: 1, active: true },
-                    { day: 'Fri', num: 2, active: false },
-                    { day: 'Sat', num: 3, active: false },
-                    { day: 'Sun', num: 4, active: false },
-                  ].map((item, i) => (
-                    <div
-                      key={i}
-                      className={`py-2 px-1 rounded-xl text-center transition ${item.active
-                        ? 'bg-gradient-to-b from-amber-500 to-orange-500 text-slate-950 font-black shadow-xs'
-                        : 'bg-white dark:bg-slate-700/60 text-slate-600 dark:text-slate-400'
-                        }`}
-                    >
-                      <div className="text-[8px] uppercase tracking-wider">{item.day}</div>
-                      <div className="text-xs font-bold pt-0.5">{item.num}</div>
+                  {/* 3 Stats in Row (Flame / Target / Trophy - Just like inspiration) */}
+                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-200/60 dark:border-white/10 text-center">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center justify-center gap-1 text-xs font-black text-slate-900 dark:text-white">
+                        <Flame className="size-3 text-orange-500 fill-orange-500" />
+                        <span>07</span>
+                      </div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase">Days Streak</div>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Quick Summary Counts */}
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-white/10">
-                <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700/40 border border-slate-200/60 dark:border-white/5 space-y-1">
-                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
-                    <Tv className="size-3 text-amber-500" />
-                    <span>In Progress</span>
-                  </div>
-                  <div className="font-black text-sm text-slate-900 dark:text-white">
-                    {Math.max(0, masterclasses.length - completedCount)} Left
-                  </div>
-                </div>
+                    <div className="space-y-0.5 border-x border-slate-200/60 dark:border-white/10">
+                      <div className="flex items-center justify-center gap-1 text-xs font-black text-slate-900 dark:text-white">
+                        <Target className="size-3 text-rose-500" />
+                        <span>04</span>
+                      </div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase">Goals Month</div>
+                    </div>
 
-                <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700/40 border border-slate-200/60 dark:border-white/5 space-y-1">
-                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
-                    <ShieldCheck className="size-3 text-emerald-500" />
-                    <span>Completed</span>
-                  </div>
-                  <div className="font-black text-sm text-slate-900 dark:text-white">
-                    {completedCount} Videos
+                    <div className="space-y-0.5">
+                      <div className="flex items-center justify-center gap-1 text-xs font-black text-slate-900 dark:text-white">
+                        <Trophy className="size-3 text-amber-500" />
+                        <span>01</span>
+                      </div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase">Directorate</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Weekly Watch Time Chart */}
-            <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-xs text-slate-900 dark:text-white">Weekly Watch Time</span>
-                  <Info className="size-3 text-slate-400" />
-                </div>
-                <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full border border-slate-200 dark:border-white/10">
-                  May 2026
-                </span>
-              </div>
-
-              {/* Bar Chart Visualization */}
-              <div className="space-y-2">
-                <div className="text-[10px] font-semibold text-slate-400">Total: 4 hrs 24 mins</div>
-                <div className="h-28 flex items-end justify-between gap-2 pt-6 px-1 relative">
-                  <div className="absolute top-0 left-[48%] -translate-x-1/2 px-2 py-0.5 rounded-md bg-slate-950 text-white text-[9px] font-mono font-bold shadow-md">
-                    4:24m
+                {/* Quick Playlist / Up Next (Direct switcher in right sidebar) */}
+                <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-slate-900 dark:text-white">Up Next &bull; Masterclasses</span>
+                    <span className="text-[10px] font-bold text-slate-400">{completedCount}/{masterclasses.length} Completed</span>
                   </div>
 
-                  {[
-                    { day: 'M', height: '40%', active: false },
-                    { day: 'T', height: '65%', active: false },
-                    { day: 'W', height: '50%', active: false },
-                    { day: 'T', height: '90%', active: true },
-                    { day: 'F', height: '20%', active: false },
-                    { day: 'S', height: '35%', active: false },
-                    { day: 'S', height: '15%', active: false },
-                  ].map((bar, idx) => (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                      <div
-                        className={`w-full rounded-t-md transition-all ${bar.active
-                          ? 'bg-gradient-to-t from-orange-500 to-amber-500 shadow-xs'
-                          : 'bg-slate-200 dark:bg-slate-700/70 hover:bg-slate-300'
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {masterclasses.map((v) => (
+                      <button
+                        key={v.id}
+                        onClick={() => handleSelectVideo(v)}
+                        className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between gap-2 cursor-pointer ${selectedVideo?.id === v.id
+                          ? 'bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold'
+                          : 'hover:bg-white dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
                           }`}
-                        style={{ height: bar.height }}
-                      />
-                      <span className="text-[9px] font-bold text-slate-400">{bar.day}</span>
-                    </div>
-                  ))}
+                      >
+                        <div className="min-w-0">
+                          <div className="text-[11px] truncate">{v.title}</div>
+                          <div className="text-[9px] text-slate-400">{v.code} &bull; {v.duration}</div>
+                        </div>
+                        {completedModules[v.id] ? (
+                          <CheckCircle2 className="size-3 text-emerald-500 shrink-0" />
+                        ) : (
+                          <Play className="size-3 text-slate-400 shrink-0" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Official Digital Certificate Card */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 space-y-3">
-              <div className="flex items-center gap-2.5">
-                <div className="size-8 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center">
-                  <Award className="size-4" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                    Accreditation Seal
+                {/* Weekly Streak Tracker */}
+                <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">Weekly Streak</span>
+                      <Info className="size-3 text-slate-400" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full border border-slate-200 dark:border-white/10">
+                      May 2026
+                    </span>
                   </div>
-                  <div className="font-extrabold text-xs text-slate-900 dark:text-white">
-                    Official KMM IP Credential
+
+                  {/* 7 Day Calendar Strip */}
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-semibold text-slate-400">4/4 Weeks Active</div>
+                    <div className="grid grid-cols-7 gap-1.5 text-center">
+                      {[
+                        { day: 'Mon', num: 29, active: true },
+                        { day: 'Tue', num: 30, active: true },
+                        { day: 'Wed', num: 31, active: true },
+                        { day: 'Thu', num: 1, active: true },
+                        { day: 'Fri', num: 2, active: false },
+                        { day: 'Sat', num: 3, active: false },
+                        { day: 'Sun', num: 4, active: false },
+                      ].map((item, i) => (
+                        <div
+                          key={i}
+                          className={`py-2 px-1 rounded-xl text-center transition ${item.active
+                            ? 'bg-gradient-to-b from-amber-500 to-orange-500 text-slate-950 font-black shadow-xs'
+                            : 'bg-white dark:bg-slate-700/60 text-slate-600 dark:text-slate-400'
+                            }`}
+                        >
+                          <div className="text-[8px] uppercase tracking-wider">{item.day}</div>
+                          <div className="text-xs font-bold pt-0.5">{item.num}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick Summary Counts */}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-white/10">
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700/40 border border-slate-200/60 dark:border-white/5 space-y-1">
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+                        <Tv className="size-3 text-amber-500" />
+                        <span>In Progress</span>
+                      </div>
+                      <div className="font-black text-sm text-slate-900 dark:text-white">
+                        {Math.max(0, masterclasses.length - completedCount)} Left
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-slate-700/40 border border-slate-200/60 dark:border-white/5 space-y-1">
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+                        <ShieldCheck className="size-3 text-emerald-500" />
+                        <span>Completed</span>
+                      </div>
+                      <div className="font-black text-sm text-slate-900 dark:text-white">
+                        {completedCount} Videos
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                Certified status for Lovetoons and Children&apos;s Media content producers.
-              </p>
-              <button
-                onClick={() => setActiveTab('accreditation')}
-                className="w-full py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:opacity-90 transition cursor-pointer text-center"
-              >
-                View Official Certificate
-              </button>
-            </div>
+
+                {/* Weekly Watch Time Chart */}
+                <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">Weekly Watch Time</span>
+                      <Info className="size-3 text-slate-400" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full border border-slate-200 dark:border-white/10">
+                      May 2026
+                    </span>
+                  </div>
+
+                  {/* Bar Chart Visualization */}
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-semibold text-slate-400">Total: 4 hrs 24 mins</div>
+                    <div className="h-28 flex items-end justify-between gap-2 pt-6 px-1 relative">
+                      <div className="absolute top-0 left-[48%] -translate-x-1/2 px-2 py-0.5 rounded-md bg-slate-950 text-white text-[9px] font-mono font-bold shadow-md">
+                        4:24m
+                      </div>
+
+                      {[
+                        { day: 'M', height: '40%', active: false },
+                        { day: 'T', height: '65%', active: false },
+                        { day: 'W', height: '50%', active: false },
+                        { day: 'T', height: '90%', active: true },
+                        { day: 'F', height: '20%', active: false },
+                        { day: 'S', height: '35%', active: false },
+                        { day: 'S', height: '15%', active: false },
+                      ].map((bar, idx) => (
+                        <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+                          <div
+                            className={`w-full rounded-t-md transition-all ${bar.active
+                              ? 'bg-gradient-to-t from-orange-500 to-amber-500 shadow-xs'
+                              : 'bg-slate-200 dark:bg-slate-700/70 hover:bg-slate-300'
+                              }`}
+                            style={{ height: bar.height }}
+                          />
+                          <span className="text-[9px] font-bold text-slate-400">{bar.day}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Official Digital Certificate Card */}
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="size-8 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center">
+                      <Award className="size-4" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                        Accreditation Seal
+                      </div>
+                      <div className="font-extrabold text-xs text-slate-900 dark:text-white">
+                        Official KMM IP Credential
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                    Certified status for Lovetoons and Children&apos;s Media content producers.
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('accreditation')}
+                    className="w-full py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:opacity-90 transition cursor-pointer text-center"
+                  >
+                    View Official Certificate
+                  </button>
+                </div>
               </>
             )}
           </aside>
@@ -3090,7 +3025,7 @@ export default function TrainingPortalPage() {
               <div>
                 <span className="block text-slate-400 text-[10px] uppercase font-bold">Storage Type</span>
                 <span className="font-bold text-amber-600 dark:text-amber-400">
-                  {previewingVideo.videoUrl?.startsWith('/uploads/') ? 'VPS Storage (/uploads)' : 'Direct URL / Static'}
+                  {previewingVideo.videoUrl?.includes('r2.') ? 'Cloudflare R2 Storage' : previewingVideo.videoUrl?.startsWith('/uploads/') ? 'Local Media' : 'Direct URL / Stream'}
                 </span>
               </div>
               <div>
@@ -3197,27 +3132,24 @@ export default function TrainingPortalPage() {
 
                 {/* Steps indicator */}
                 <div className="grid grid-cols-3 gap-2 pt-1 text-[10px] text-center font-semibold">
-                  <div className={`p-1.5 rounded-lg border transition-colors ${
-                    uploadProgress >= 10
-                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300 font-bold'
-                      : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
-                  }`}>
+                  <div className={`p-1.5 rounded-lg border transition-colors ${uploadProgress >= 10
+                    ? 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300 font-bold'
+                    : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
+                    }`}>
                     1. Packaging
                   </div>
-                  <div className={`p-1.5 rounded-lg border transition-colors ${
-                    uploadProgress >= 20 && uploadProgress < 85
-                      ? 'bg-amber-500/25 border-amber-500/40 text-amber-800 dark:text-amber-200 font-bold animate-pulse'
-                      : uploadProgress >= 85
+                  <div className={`p-1.5 rounded-lg border transition-colors ${uploadProgress >= 20 && uploadProgress < 85
+                    ? 'bg-amber-500/25 border-amber-500/40 text-amber-800 dark:text-amber-200 font-bold animate-pulse'
+                    : uploadProgress >= 85
                       ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-bold'
                       : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
-                  }`}>
+                    }`}>
                     2. Direct Cloud Upload (R2)
                   </div>
-                  <div className={`p-1.5 rounded-lg border transition-colors ${
-                    uploadProgress >= 85
-                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-bold animate-pulse'
-                      : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
-                  }`}>
+                  <div className={`p-1.5 rounded-lg border transition-colors ${uploadProgress >= 85
+                    ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-bold animate-pulse'
+                    : 'text-slate-400 bg-slate-100 dark:bg-white/5 border-transparent'
+                    }`}>
                     3. Registry Publish
                   </div>
                 </div>
@@ -3234,15 +3166,15 @@ export default function TrainingPortalPage() {
                       {uploadError === 'R2_NOT_CONFIGURED'
                         ? 'Cloudflare R2 Storage Keys Not Yet Configured in .env'
                         : uploadError === '413'
-                        ? 'Video Payload Exceeds Serverless Proxy Limit (HTTP 413)'
-                        : 'Upload Error'}
+                          ? 'Video Payload Exceeds Serverless Proxy Limit (HTTP 413)'
+                          : 'Upload Error'}
                     </div>
                     <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
                       {uploadError === 'R2_NOT_CONFIGURED'
                         ? 'Direct cloud uploading for large videos (50MB - 5GB+) uses Cloudflare R2 object storage with $0 egress fees. Please add R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME to your .env file or Vercel dashboard. In the meantime, you can switch to "Provide Video URL" to publish immediately.'
                         : uploadError === '413'
-                        ? 'Serverless platforms (like Vercel) limit direct file uploads to 4.5 MB. Configure Cloudflare R2 in .env for unlimited file uploads, or switch to "Provide Video URL" to stream from CDN/YouTube/Vimeo/S3.'
-                        : uploadError}
+                          ? 'Serverless platforms (like Vercel) limit direct file uploads to 4.5 MB. Configure Cloudflare R2 in .env for unlimited file uploads, or switch to "Provide Video URL" to stream from CDN/YouTube/Vimeo/S3.'
+                          : uploadError}
                     </p>
                   </div>
                 </div>
@@ -3339,14 +3271,14 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
 
-              {/* Video Source Selection (Upload to VPS vs Provide URL) */}
+              {/* Video Source Selection (Cloud Upload vs Provide URL) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                     Masterclass Video Source *
                   </label>
                   <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
-                    Protected Streaming &bull; Download Disabled
+                    Cloudflare R2 Streaming &bull; Download Disabled
                   </span>
                 </div>
 
@@ -3355,30 +3287,28 @@ export default function TrainingPortalPage() {
                   <button
                     type="button"
                     onClick={() => setUploadVideoSourceType('upload')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
-                      uploadVideoSourceType === 'upload'
-                        ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${uploadVideoSourceType === 'upload'
+                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     <Upload className="size-3.5 text-amber-500" />
-                    <span>Upload to Server (VPS)</span>
+                    <span>Upload File (R2 Cloud)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setUploadVideoSourceType('url')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
-                      uploadVideoSourceType === 'url'
-                        ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${uploadVideoSourceType === 'url'
+                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     <Link2 className="size-3.5 text-amber-500" />
                     <span>Provide Video URL</span>
                   </button>
                 </div>
 
-                {/* Mode 1: File Upload (VPS) */}
+                {/* Mode 1: File Upload (Cloudflare R2) */}
                 {uploadVideoSourceType === 'upload' ? (
                   <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
                     <input
@@ -3396,12 +3326,7 @@ export default function TrainingPortalPage() {
                           <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
                             ✓ File Attached: {uploadedFileName}
                           </div>
-                          <div className="text-[10px] text-slate-400 font-mono">{uploadedFileSize} &bull; Uploads to VPS server</div>
-                          {uploadVideoFile && uploadVideoFile.size > 4.5 * 1024 * 1024 && (
-                            <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium pt-1">
-                              💡 Note: If hosted on Vercel (4.5MB limit), switch to &quot;Provide Video URL&quot; above for streaming links.
-                            </div>
-                          )}
+                          <div className="text-[10px] text-slate-400 font-mono">{uploadedFileSize} &bull; Direct Cloudflare R2 Upload</div>
                         </div>
                       ) : (
                         <div>
@@ -3409,7 +3334,7 @@ export default function TrainingPortalPage() {
                             Click to browse or drop video file here
                           </div>
                           <div className="text-[10px] text-slate-400">
-                            MP4, WebM or MOV up to 500MB (Saved to VPS <span className="font-mono text-amber-600 dark:text-amber-400">public/uploads</span>)
+                            MP4, WebM or MOV (Streamed directly to Cloudflare R2 cloud storage)
                           </div>
                         </div>
                       )}
@@ -3681,14 +3606,14 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
 
-              {/* Video Source Selection (Upload / Replace on VPS vs Provide URL) */}
+              {/* Video Source Selection (Cloud Upload vs Provide URL) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                     Video Source Options *
                   </label>
                   <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
-                    Protected Streaming &bull; Download Disabled
+                    Cloudflare R2 Streaming &bull; Download Disabled
                   </span>
                 </div>
 
@@ -3697,30 +3622,28 @@ export default function TrainingPortalPage() {
                   <button
                     type="button"
                     onClick={() => setEditVideoSourceType('upload')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
-                      editVideoSourceType === 'upload'
-                        ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${editVideoSourceType === 'upload'
+                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     <Upload className="size-3.5 text-amber-500" />
-                    <span>Upload to Server (VPS)</span>
+                    <span>Upload File (R2 Cloud)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditVideoSourceType('url')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
-                      editVideoSourceType === 'url'
-                        ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${editVideoSourceType === 'url'
+                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                   >
                     <Link2 className="size-3.5 text-amber-500" />
                     <span>Provide Video URL</span>
                   </button>
                 </div>
 
-                {/* Mode 1: File Upload (VPS) */}
+                {/* Mode 1: File Upload (Cloudflare R2) */}
                 {editVideoSourceType === 'upload' ? (
                   <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
                     <input
@@ -3738,7 +3661,7 @@ export default function TrainingPortalPage() {
                           <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
                             ✓ New File Attached: {editUploadedFileName}
                           </div>
-                          <div className="text-[10px] text-slate-400 font-mono">{editUploadedFileSize} &bull; Will upload to VPS storage on Save</div>
+                          <div className="text-[10px] text-slate-400 font-mono">{editUploadedFileSize} &bull; Uploads directly to Cloudflare R2 on Save</div>
                         </div>
                       ) : (
                         <div>
@@ -3749,7 +3672,7 @@ export default function TrainingPortalPage() {
                             Currently using: <span className="font-mono text-amber-600 dark:text-amber-400 truncate max-w-xs inline-block align-bottom">{editVideoUrl || '/kmm-welcome-animation.mp4'}</span>
                           </p>
                           <p className="text-[10px] text-slate-400">
-                            MP4, WebM or MOV up to 500MB (Saved to VPS <span className="font-mono text-amber-600 dark:text-amber-400">public/uploads</span>)
+                            MP4, WebM or MOV (Streamed directly to Cloudflare R2 cloud storage)
                           </p>
                         </div>
                       )}

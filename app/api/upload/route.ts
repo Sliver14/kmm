@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-// 500 MB maximum file size limit for VPS storage (videos, masterclasses & media assets)
+// 500 MB maximum file size limit for documents & media assets
 const MAX_FILE_SIZE = 500 * 1024 * 1024
 
 // Whitelist of supported and safe formats
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     if (fileSizeBytes > MAX_FILE_SIZE) {
       return NextResponse.json(
         {
-          error: `File size (${formattedSize}) exceeds the maximum allowed VPS storage limit of 500 MB. Please compress or optimize the file before uploading.`,
+          error: `File size (${formattedSize}) exceeds the maximum allowed limit of 500 MB. Please compress or optimize the file before uploading.`,
         },
         { status: 400 }
       )
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
       .slice(0, 60)
     const uniqueFileName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${sanitizedBase}.${ext}`
 
-    // 4. Ensure VPS upload directory exists
+    // 4. Ensure upload directory exists
     const uploadDir = path.join(process.cwd(), 'public', 'uploads')
     await mkdir(uploadDir, { recursive: true })
 
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Security violation: invalid file path.' }, { status: 400 })
     }
 
-    // 5. Write file directly to VPS storage
+    // 5. Write file directly to local storage
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
     await writeFile(targetPath, buffer)
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
           ) VALUES (
             ${fileId}, ${assetId}, ${ministryId}, ${fileName}, ${fileType}, ${mimeType},
             ${fileSizeBytes}, ${formattedSize}, ${resolution}, 0,
-            'vps_local', ${fileUrl}, ${isMaster}, 'active'
+            'local_storage', ${fileUrl}, ${isMaster}, 'active'
           )
         `
 
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'File successfully stored safely in VPS storage.',
+      message: 'File successfully stored safely in local storage.',
       file: {
         id: fileId,
         fileName,
@@ -157,13 +157,13 @@ export async function POST(req: NextRequest) {
         formattedSize,
         resolution,
         url: fileUrl,
-        storageBucket: 'vps_local',
+        storageBucket: 'local_storage',
       },
     })
   } catch (error: any) {
-    console.error('Error in VPS /api/upload:', error)
+    console.error('Error in /api/upload:', error)
     return NextResponse.json(
-      { error: error?.message || 'Failed to save file to VPS storage' },
+      { error: error?.message || 'Failed to save file to local storage' },
       { status: 500 }
     )
   }

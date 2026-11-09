@@ -56,10 +56,10 @@ export async function POST(req: NextRequest) {
     const uniqueKey = `masterclasses/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${sanitizedBase}.${ext}`
 
     const s3Client = getR2Client()
+    // Do not enforce strict ContentType in the command signature so browser can upload without signature mismatch
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET_NAME,
       Key: uniqueKey,
-      ContentType: fileType,
     })
 
     // Presigned upload URL valid for 30 minutes (1800 seconds)
