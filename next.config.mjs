@@ -11,6 +11,14 @@ const nextConfig = {
       bodySizeLimit: '500mb',
     },
   },
+  async rewrites() {
+    return [
+      {
+        source: '/_vercel/insights/script.js',
+        destination: '/api/insights-shim',
+      },
+    ]
+  },
 }
 
 export default nextConfig
