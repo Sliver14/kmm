@@ -37,3 +37,4 @@ export function getR2Client(): S3Client {
 
   return cachedS3Client
 }
+
