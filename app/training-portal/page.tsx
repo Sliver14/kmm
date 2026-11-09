@@ -779,7 +779,6 @@ export default function TrainingPortalPage() {
     setUploadedFileName('')
     setUploadedFileSize('')
     setUploadVideoSourceType('upload')
-    setAdminActiveSection('masterclasses')
     showNotification('🎉 Masterclass uploaded & published to curriculum library!')
   }
 
@@ -1136,36 +1135,17 @@ export default function TrainingPortalPage() {
                   <button
                     onClick={() => {
                       setActiveTab('admin')
-                      setAdminActiveSection('masterclasses')
                       setMobileSidebarOpen(false)
                     }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin' && adminActiveSection === 'masterclasses'
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin'
                       ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
                       }`}
                   >
-                    <Tv className={`size-4 ${activeTab === 'admin' && adminActiveSection === 'masterclasses' ? 'text-amber-500' : 'text-slate-400'}`} />
+                    <Tv className={`size-4 ${activeTab === 'admin' ? 'text-amber-500' : 'text-slate-400'}`} />
                     <span>Masterclasses &amp; Video</span>
                     <span className="ml-auto text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
                       {masterclasses.length}
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setActiveTab('admin')
-                      setAdminActiveSection('storage')
-                      setMobileSidebarOpen(false)
-                    }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'admin' && adminActiveSection === 'storage'
-                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent'
-                      }`}
-                  >
-                    <Cloud className={`size-4 ${activeTab === 'admin' && adminActiveSection === 'storage' ? 'text-amber-500' : 'text-slate-400'}`} />
-                    <span>Cloud Storage &amp; DRM</span>
-                    <span className="ml-auto text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-700 dark:text-sky-300">
-                      R2
                     </span>
                   </button>
 
@@ -2434,35 +2414,7 @@ export default function TrainingPortalPage() {
                     </div>
                   </div>
 
-                  {/* Section Switcher Tabs */}
-                  <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 dark:border-white/10 pb-3">
-                    <button
-                      onClick={() => setAdminActiveSection('masterclasses')}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${adminActiveSection === 'masterclasses'
-                        ? 'bg-amber-500 text-slate-950 shadow-xs'
-                        : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
-                        }`}
-                    >
-                      <Tv className="size-3.5" />
-                      <span>Masterclasses Repository ({masterclasses.length})</span>
-                    </button>
-                    <button
-                      onClick={() => setAdminActiveSection('storage')}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${adminActiveSection === 'storage'
-                        ? 'bg-amber-500 text-slate-950 shadow-xs'
-                        : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
-                        }`}
-                    >
-                      <Cloud className="size-3.5" />
-                      <span>Cloud Storage &amp; DRM Security</span>
-                    </button>
-                  </div>
-
-                  {/* ========================================================= */}
-                  {/* SUB-SECTION 1: MASTERCLASSES REPOSITORY                   */}
-                  {/* ========================================================= */}
-                  {adminActiveSection === 'masterclasses' && (
-                    <div className="space-y-6 animate-in fade-in duration-150">
+                  <div className="space-y-6 animate-in fade-in duration-150">
                       {/* 4 Stats Cards */}
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="p-5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1">
@@ -2669,87 +2621,6 @@ export default function TrainingPortalPage() {
                           </table>
                         </div>
                       </div>
-                    </div>
-                  )}
-
-                  {/* ========================================================= */}
-                  {/* SUB-SECTION 2: CLOUD STORAGE & DRM ARCHITECTURE           */}
-                  {/* ========================================================= */}
-                  {adminActiveSection === 'storage' && (
-                    <div className="space-y-6 animate-in fade-in duration-150">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Server Architecture Card */}
-                        <div className="p-6 rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
-                          <div className="flex items-center gap-3">
-                            <div className="size-10 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center border border-sky-500/20">
-                              <Cloud className="size-5" />
-                            </div>
-                            <div>
-                              <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                                Cloudflare R2 Storage Architecture
-                              </h3>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">
-                                High-bandwidth direct S3 presigned streaming with zero egress fees
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2.5 pt-2 text-xs">
-                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Primary Object Storage:</span>
-                              <span className="font-mono font-bold text-sky-600 dark:text-sky-400">Cloudflare R2 (Global CDN)</span>
-                            </div>
-                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Upload Protocol:</span>
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">Direct S3 Presigned PUT</span>
-                            </div>
-                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Maximum Video File Size:</span>
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">Unlimited (up to 5 TB)</span>
-                            </div>
-                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Bandwidth &amp; Egress Costs:</span>
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">$0 / Free Forever</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Streaming DRM Protection Card */}
-                        <div className="p-6 rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
-                          <div className="flex items-center gap-3">
-                            <div className="size-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
-                              <ShieldCheck className="size-5" />
-                            </div>
-                            <div>
-                              <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                                Anti-Piracy Streaming &amp; DRM Security
-                              </h3>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Proprietary institutional protections against unauthorized video downloads
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2.5 pt-2 text-xs">
-                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Frontend Download Controls:</span>
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">controlsList=&quot;nodownload&quot;</span>
-                            </div>
-                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Picture-in-Picture Capture:</span>
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">disablePictureInPicture</span>
-                            </div>
-                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Right-Click Context Menu:</span>
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">Blocked on Video Container</span>
-                            </div>
-                            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/5 flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-slate-400">Playback Protocol:</span>
-                              <span className="font-mono text-slate-700 dark:text-slate-300">HTTP 206 Partial Content</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
 
                       {/* Backup & Recovery Card */}
                       <div className="p-6 rounded-3xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -2772,9 +2643,8 @@ export default function TrainingPortalPage() {
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              ) : (
+                  </div>
+                ) : (
                 <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10 text-center space-y-4 max-w-lg mx-auto my-12 shadow-sm animate-in fade-in">
                   <div className="size-14 rounded-2xl bg-rose-500/10 text-rose-500 mx-auto flex items-center justify-center border border-rose-500/20">
                     <ShieldAlert className="size-7" />

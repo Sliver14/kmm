@@ -88,7 +88,7 @@ flowchart LR
     - Show that the **Agency / Entity** is automatically bound (Zero-Selection)—no dropdown hassle.
     - Show the **Dynamic Risk Level Assessment** indicator responding in real-time.
     - File Upload: Click **"Browse"** under *Attached Document / Deed Name*. Select a sample PDF (`Minor_Talent_Release_Form.pdf`).
-    - Explain that the file is safely stored directly on our VPS storage (`/uploads/`) with strict 50 MB size and format protections.
+    - Explain that the file is safely stored directly with strict size and format protections.
     - Click **"Register Asset in Archive"**.
 
 ### Voiceover Script (What to Say)
@@ -98,7 +98,7 @@ flowchart LR
 >
 > *Moving to the Asset Registry, every production—from a Lovetoons animated series to a Sunday school curriculum package—is cataloged with full chain-of-title records.*
 >
-> *When registering a new asset, our system introduces zero-selection automatic entity binding. The platform detects the user's agency, calculates real-time risk scores based on minor voice actors and soundtrack clearances, and uploads legal covenants securely to our VPS storage with strict 50 MB limits and sanitized format verification."*
+> *When registering a new asset, our system introduces zero-selection automatic entity binding. The platform detects the user's agency, calculates real-time risk scores based on minor voice actors and soundtrack clearances, and uploads legal covenants securely with strict limits and sanitized format verification."*
 
 ---
 
@@ -241,7 +241,7 @@ flowchart LR
 | :--- | :--- | :--- | :--- |
 | **1. Landing Page** | `/` | Hero, Ministries & Agencies directory, mandates, onboarding banner | None required |
 | **2. IP Portal Auth** | `/signin` | Light/Dark switch, 1-click Super Admin fill | `admin@lovetoons.tv` / `admin123` |
-| **3. Asset Registry** | `/assets` | `+ New Asset` modal, zero-selection entity, VPS file upload | Title: *The Golden Shield Ep 4*, File: Sample PDF |
+| **3. Asset Registry** | `/assets` | `+ New Asset` modal, zero-selection entity, file upload | Title: *The Golden Shield Ep 4*, File: Sample PDF |
 | **4. Approvals** | `/approvals` | Review pending queue, inspect clearance gates, approve | Sample pending asset |
 | **5. Onboarding** | `/onboarding` | Fill department name, contact, get instant code & 1-click login | *Children's Ministry Directorate*, `psarahwilliams` |
 | **6. Training Auth** | `/auth` | Switch to Sign Up tab, register new user | *Brother Samuel Ade*, `samuel@lovetoons.tv` |

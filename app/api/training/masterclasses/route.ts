@@ -208,7 +208,7 @@ export async function DELETE(req: NextRequest) {
 
     await saveStoredMasterclasses(filtered)
 
-    // If it was a VPS uploaded file in /uploads/, optionally attempt to remove it
+    // If it was an uploaded file in /uploads/, optionally attempt to remove it
     if (target?.videoUrl && target.videoUrl.startsWith('/uploads/')) {
       try {
         const filePath = path.join(process.cwd(), 'public', target.videoUrl.replace(/^\//, ''))
