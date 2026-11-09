@@ -45,6 +45,7 @@ import {
   Link2,
   LogOut,
   FileVideo,
+  Video,
   Shield,
   AlertTriangle,
   ShieldAlert,
@@ -144,6 +145,7 @@ export default function TrainingPortalPage() {
 
   // Edit Masterclass State
   const [editingVideo, setEditingVideo] = useState<VideoItem | null>(null)
+  const [editActiveTab, setEditActiveTab] = useState<'details' | 'video'>('details')
   const [editTitle, setEditTitle] = useState('')
   const [editCode, setEditCode] = useState('')
   const [editCategory, setEditCategory] = useState('copyright')
@@ -718,14 +720,15 @@ export default function TrainingPortalPage() {
     showNotification(`🗑️ Masterclass ${targetTitle} has been deleted.`)
   }
 
-  // Open Edit Masterclass Modal
-  const handleOpenEditModal = (video: VideoItem, e?: React.MouseEvent) => {
+  // Open Edit Masterclass Modal (with targeted tab)
+  const handleOpenEditModal = (video: VideoItem, e?: React.MouseEvent, tab: 'details' | 'video' = 'details') => {
     if (e) e.stopPropagation()
     if (!isPortalAdmin) {
       showNotification('⚠️ Unauthorized: Portal Admin role required to edit masterclasses.')
       return
     }
     setEditingVideo(video)
+    setEditActiveTab(tab)
     setEditTitle(video.title)
     setEditCode(video.code)
     setEditCategory(video.category || 'copyright')
@@ -741,9 +744,13 @@ export default function TrainingPortalPage() {
     setEditUploadedFileName('')
     setEditUploadedFileSize('')
     setEditNewPointInput('')
+    setEditError(null)
+    setIsSavingEdit(false)
+    setEditUploadProgress(0)
+    setEditUploadStatusText('')
   }
 
-  // Handle Edit Video File
+  // Handle Edit Video File attachment
   const handleEditVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -753,12 +760,12 @@ export default function TrainingPortalPage() {
       setEditUploadedFileName(file.name)
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1)
       setEditUploadedFileSize(`${sizeMb} MB`)
-      showNotification(`✓ New video attached: "${file.name}" (will upload to cloud storage upon saving)`)
+      showNotification(`✓ Video file "${file.name}" selected. Click "Upload & Save Video" to stream to Cloudflare R2.`)
     }
   }
 
-  // Save Edit Masterclass
-  const handleSaveEditMasterclass = async (e: React.FormEvent) => {
+  // Action 1: Save Masterclass Details (Instantaneous, zero video overhead)
+  const handleSaveEditDetails = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingVideo) return
     if (!isPortalAdmin) {
@@ -773,46 +780,6 @@ export default function TrainingPortalPage() {
       showNotification('⚠️ Please provide a course code.')
       return
     }
-
-    setIsSavingEdit(true)
-    setEditUploadProgress(10)
-    setEditUploadStatusText('Preparing updates...')
-
-    // Handle Cloudflare R2 file upload if a new file was chosen in 'upload' mode
-    let finalVideoUrl = editVideoUrl.trim() || editingVideo.videoUrl || '/kmm-welcome-animation.mp4'
-    if (editVideoSourceType === 'upload' && editVideoFile) {
-      setEditUploadStatusText('Streaming updated video to Cloudflare R2...')
-      try {
-        finalVideoUrl = await uploadVideoToServer(editVideoFile, (percent, loaded, total) => {
-          setEditUploadProgress(percent)
-          const loadedMb = (loaded / (1024 * 1024)).toFixed(1)
-          const totalMb = (total / (1024 * 1024)).toFixed(1)
-          setEditUploadStatusText(
-            percent >= 98
-              ? 'Finalizing video on Cloudflare R2...'
-              : `Uploading video (${percent}%)... ${loadedMb} MB / ${totalMb} MB`
-          )
-        })
-      } catch (uploadErr: any) {
-        if (uploadErr.message === 'HTTP_413_PAYLOAD_TOO_LARGE') {
-          setEditError('413')
-          setIsSavingEdit(false)
-          setEditUploadProgress(0)
-          setEditUploadStatusText('')
-          showNotification('⚠️ Serverless payload limit reached (HTTP 413). Please switch to Provide Video URL.')
-          return
-        }
-        setEditError(uploadErr.message)
-        showNotification(`⚠️ Video upload failed: ${uploadErr.message}`)
-        setIsSavingEdit(false)
-        setEditUploadProgress(0)
-        setEditUploadStatusText('')
-        return
-      }
-    }
-
-    setEditUploadProgress(85)
-    setEditUploadStatusText('Saving masterclass curriculum metadata...')
 
     const categoryLabels: Record<string, string> = {
       copyright: 'Copyright & Sovereign IP',
@@ -830,7 +797,6 @@ export default function TrainingPortalPage() {
       categoryLabel: categoryLabels[editCategory] || editingVideo.categoryLabel || 'Sovereign Masterclass',
       duration: editDuration.trim() || editingVideo.duration || '15:00',
       desc: editDesc.trim() || editingVideo.desc,
-      videoUrl: finalVideoUrl,
       points: editPoints.filter(Boolean),
     }
 
@@ -859,16 +825,92 @@ export default function TrainingPortalPage() {
       console.warn('API edit sync skipped:', apiErr)
     }
 
-    setEditUploadProgress(100)
-    setEditUploadStatusText('✓ Updates saved successfully!')
-    await new Promise((r) => setTimeout(r, 400))
+    setEditingVideo(null)
+    showNotification(`✓ Details for "${updatedVideo.title}" saved successfully!`)
+  }
+
+  // Action 2: Save / Upload Video (Dedicated video upload to Cloudflare R2 or stream URL)
+  const handleSaveEditVideo = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingVideo) return
+    if (!isPortalAdmin) {
+      showNotification('⚠️ Unauthorized: Portal Admin role required.')
+      return
+    }
+
+    setEditError(null)
+    setIsSavingEdit(true)
+    setEditUploadProgress(10)
+    setEditUploadStatusText('Preparing video stream...')
+
+    let finalVideoUrl = editVideoUrl.trim() || editingVideo.videoUrl || '/kmm-welcome-animation.mp4'
+    if (editVideoSourceType === 'upload' && editVideoFile) {
+      setEditUploadStatusText('Streaming video directly to Cloudflare R2...')
+      try {
+        finalVideoUrl = await uploadVideoToServer(editVideoFile, (percent, loaded, total) => {
+          setEditUploadProgress(percent)
+          const loadedMb = (loaded / (1024 * 1024)).toFixed(1)
+          const totalMb = (total / (1024 * 1024)).toFixed(1)
+          setEditUploadStatusText(
+            percent >= 98
+              ? 'Finalizing video on Cloudflare R2...'
+              : `Uploading to Cloudflare R2 (${percent}%)... ${loadedMb} MB / ${totalMb} MB`
+          )
+        })
+      } catch (uploadErr: any) {
+        if (uploadErr.message === 'R2_CREDENTIALS_MISSING') {
+          setEditError('R2_NOT_CONFIGURED')
+          setIsSavingEdit(false)
+          setEditUploadProgress(0)
+          setEditUploadStatusText('')
+          showNotification('⚠️ Cloudflare R2 credentials not configured. Please switch to Provide Video URL.')
+          return
+        }
+        setEditError(uploadErr.message)
+        showNotification(`⚠️ Video upload failed: ${uploadErr.message}`)
+        setIsSavingEdit(false)
+        setEditUploadProgress(0)
+        setEditUploadStatusText('')
+        return
+      }
+    }
+
+    const updatedVideo: VideoItem = {
+      ...editingVideo,
+      videoUrl: finalVideoUrl,
+    }
+
+    const updatedList = masterclasses.map((v) => (v.id === editingVideo.id ? updatedVideo : v))
+    setMasterclasses(updatedList)
+
+    if (selectedVideo?.id === editingVideo.id) {
+      setSelectedVideo(updatedVideo)
+    }
+
+    try {
+      localStorage.setItem('kmm_masterclasses_catalog', JSON.stringify(updatedList))
+      const customOnly = updatedList.filter((v) => v.isCustom)
+      localStorage.setItem('kmm_custom_masterclasses', JSON.stringify(customOnly))
+    } catch (saveErr) {
+      console.warn('Could not save edited catalog:', saveErr)
+    }
+
+    try {
+      await fetch('/api/training/masterclasses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedVideo),
+      })
+    } catch (apiErr) {
+      console.warn('API edit sync skipped:', apiErr)
+    }
 
     setIsSavingEdit(false)
     setEditingVideo(null)
     setEditVideoFile(null)
     setEditUploadProgress(0)
     setEditUploadStatusText('')
-    showNotification('✓ Masterclass updated and published to curriculum!')
+    showNotification(`✓ Video stream updated for "${editingVideo.title}"!`)
   }
 
   // Sign out officer session
@@ -1696,9 +1738,16 @@ export default function TrainingPortalPage() {
                               {isPortalAdmin && (
                                 <>
                                   <button
-                                    onClick={(e) => handleOpenEditModal(video, e)}
+                                    onClick={(e) => handleOpenEditModal(video, e, 'video')}
+                                    className="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-sky-500/10 hover:border-sky-500/30 text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition cursor-pointer shrink-0"
+                                    title="Upload / Replace Video File"
+                                  >
+                                    <Video className="size-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => handleOpenEditModal(video, e, 'details')}
                                     className="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-amber-500/10 hover:border-amber-500/30 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer shrink-0"
-                                    title="Edit Masterclass"
+                                    title="Edit Masterclass Details"
                                   >
                                     <Pencil className="size-3.5" />
                                   </button>
@@ -1774,12 +1823,20 @@ export default function TrainingPortalPage() {
                     {isPortalAdmin && (
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => handleOpenEditModal(selectedVideo)}
+                          onClick={() => handleOpenEditModal(selectedVideo, undefined, 'video')}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 text-xs font-bold transition cursor-pointer"
+                          title="Upload or replace masterclass video file"
+                        >
+                          <Video className="size-3.5" />
+                          <span>Upload Video</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenEditModal(selectedVideo, undefined, 'details')}
                           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold transition cursor-pointer"
-                          title="Edit Masterclass Details"
+                          title="Edit Masterclass Details (Title, Code, Syllabus)"
                         >
                           <Pencil className="size-3.5" />
-                          <span>Edit</span>
+                          <span>Edit Details</span>
                         </button>
                         <button
                           onClick={() => handleDeleteMasterclass(selectedVideo.id)}
@@ -2434,11 +2491,20 @@ export default function TrainingPortalPage() {
                                         <span>Preview</span>
                                       </button>
                                       <button
-                                        onClick={(e) => handleOpenEditModal(v, e)}
-                                        className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 hover:bg-amber-500/10 hover:border-amber-500/30 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
-                                        title="Edit Masterclass"
+                                        onClick={(e) => handleOpenEditModal(v, e, 'video')}
+                                        className="px-2.5 py-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 font-bold text-[11px] transition cursor-pointer inline-flex items-center gap-1"
+                                        title="Upload or Replace Video Stream (Cloudflare R2)"
                                       >
-                                        <Pencil className="size-3.5" />
+                                        <Video className="size-3 text-sky-500" />
+                                        <span>Upload Video</span>
+                                      </button>
+                                      <button
+                                        onClick={(e) => handleOpenEditModal(v, e, 'details')}
+                                        className="px-2.5 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-[11px] transition cursor-pointer inline-flex items-center gap-1"
+                                        title="Edit Masterclass Details (Title, Code, Covenants)"
+                                      >
+                                        <Pencil className="size-3 text-amber-500" />
+                                        <span>Edit Details</span>
                                       </button>
                                       <button
                                         onClick={(e) => handleDeleteMasterclass(v.id, e)}
@@ -3051,12 +3117,23 @@ export default function TrainingPortalPage() {
                 onClick={() => {
                   const target = previewingVideo
                   setPreviewingVideo(null)
-                  handleOpenEditModal(target)
+                  handleOpenEditModal(target, undefined, 'video')
+                }}
+                className="px-3.5 py-2 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+              >
+                <Video className="size-3.5" />
+                <span>Upload Video</span>
+              </button>
+              <button
+                onClick={() => {
+                  const target = previewingVideo
+                  setPreviewingVideo(null)
+                  handleOpenEditModal(target, undefined, 'details')
                 }}
                 className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
               >
                 <Pencil className="size-3.5" />
-                <span>Edit This Masterclass</span>
+                <span>Edit Details</span>
               </button>
               <button
                 onClick={() => setPreviewingVideo(null)}
@@ -3480,326 +3557,399 @@ export default function TrainingPortalPage() {
               </button>
             </div>
 
-            {/* Visual Edit/Upload Progress Card */}
-            {isSavingEdit && (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 border border-amber-500/30 space-y-3 animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Loader2 className="size-4 text-amber-500 animate-spin shrink-0" />
-                    <span className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
-                      {editUploadStatusText || 'Saving Masterclass Changes...'}
-                    </span>
-                  </div>
-                  <span className="font-mono font-black text-xs text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-lg border border-amber-500/30 shadow-2xs">
-                    {editUploadProgress}%
-                  </span>
+            {/* Dedicated Action Mode Tabs */}
+            <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => setEditActiveTab('details')}
+                className={`py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+                  editActiveTab === 'details'
+                    ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs border border-slate-200/80 dark:border-white/10'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Pencil className="size-4 text-amber-500" />
+                <span>1. Masterclass Details</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditActiveTab('video')}
+                className={`py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+                  editActiveTab === 'video'
+                    ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs border border-slate-200/80 dark:border-white/10'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Video className="size-4 text-sky-500" />
+                <span>2. Upload / Replace Video</span>
+              </button>
+            </div>
+
+            {/* TAB 1: MASTERCLASS DETAILS FORM (Instant Update, 0 Video Overhead) */}
+            {editActiveTab === 'details' && (
+              <form onSubmit={handleSaveEditDetails} className="space-y-4 animate-in fade-in">
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                  <Pencil className="size-4 text-amber-500 shrink-0" />
+                  <span>Modifying syllabus, codes, title, covenants, and curriculum tags. Video stream remains untouched.</span>
                 </div>
 
-                {/* Progress Bar Container */}
-                <div className="h-3 w-full bg-slate-200/80 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-amber-500/20">
-                  <div
-                    className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400 rounded-full transition-all duration-300 relative shadow-xs"
-                    style={{ width: `${Math.max(5, editUploadProgress)}%` }}
-                  >
-                    <div className="absolute inset-0 bg-white/25 animate-pulse rounded-full" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                      Masterclass Title *
+                    </label>
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      placeholder="e.g. Protecting Intellectual Properties in Children's Media"
+                      required
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
+                    />
                   </div>
-                </div>
-              </div>
-            )}
 
-            {/* Edit Error / 413 Banner */}
-            {editError && (
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 space-y-2.5 animate-in fade-in">
-                <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="size-5 text-amber-500 shrink-0 mt-0.5" />
-                  <div className="text-xs space-y-1">
-                    <div className="font-extrabold text-slate-900 dark:text-white">
-                      {editError === '413'
-                        ? 'Video Payload Exceeds Serverless Proxy Limit (HTTP 413)'
-                        : 'Update Error'}
-                    </div>
-                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
-                      {editError === '413'
-                        ? 'Serverless platforms (like Vercel) limit direct file uploads to 4.5 MB. To update this masterclass without payload restrictions, switch to "Provide Video URL" to stream from CDN/YouTube/Vimeo/S3.'
-                        : editError}
-                    </p>
+                  <div>
+                    <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                      Institutional Code *
+                    </label>
+                    <input
+                      type="text"
+                      value={editCode}
+                      onChange={(e) => setEditCode(e.target.value)}
+                      placeholder="e.g. KMM-IP-101"
+                      required
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                    />
                   </div>
                 </div>
-                {editError === '413' && (
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                      Curriculum Category
+                    </label>
+                    <select
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 cursor-pointer"
+                    >
+                      <option value="copyright">Copyright &amp; Sovereign IP</option>
+                      <option value="protection">Child Protection &amp; Safeguards</option>
+                      <option value="broadcast">Broadcast Standards &amp; Playout</option>
+                      <option value="doctrinal">Scriptural Review &amp; Canon</option>
+                      <option value="merchandising">Merchandising &amp; Contracts</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                      Video Duration (MM:SS)
+                    </label>
+                    <input
+                      type="text"
+                      value={editDuration}
+                      onChange={(e) => setEditDuration(e.target.value)}
+                      placeholder="e.g. 24:30"
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Masterclass Description / Syllabus Overview
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={editDesc}
+                    onChange={(e) => setEditDesc(e.target.value)}
+                    placeholder="Summarize the legal framework, statutory safeguards, and learning objectives..."
+                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 resize-none leading-relaxed"
+                  />
+                </div>
+
+                {/* Curriculum Safeguard Points / Key Takeaways */}
+                <div>
+                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
+                    Mandatory Legal Covenants &amp; Key Safeguards
+                  </label>
+                  <div className="space-y-2 mb-2 max-h-36 overflow-y-auto">
+                    {editPoints.map((pt, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5 text-xs text-slate-700 dark:text-slate-300"
+                      >
+                        <span className="truncate flex-1">&bull; {pt}</span>
+                        <button
+                          type="button"
+                          onClick={() => setEditPoints(editPoints.filter((_, i) => i !== idx))}
+                          className="p-1 text-slate-400 hover:text-rose-500 cursor-pointer"
+                        >
+                          <X className="size-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={editNewPointInput}
+                      onChange={(e) => setEditNewPointInput(e.target.value)}
+                      placeholder="Add mandatory legal covenant or takeaway..."
+                      className="flex-1 h-9 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-xs outline-hidden focus:border-amber-500"
+                    />
                     <button
                       type="button"
                       onClick={() => {
-                        setEditVideoSourceType('url')
-                        setEditError(null)
+                        if (editNewPointInput.trim()) {
+                          setEditPoints([...editPoints, editNewPointInput.trim()])
+                          setEditNewPointInput('')
+                        }
                       }}
-                      className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer shadow-xs transition"
+                      className="px-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-amber-500 hover:text-slate-950 text-xs font-bold cursor-pointer transition"
                     >
-                      Switch to Provide Video URL
+                      Add
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+
+                {/* Submit Buttons */}
+                <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteMasterclass(editingVideo.id)}
+                    className="px-3.5 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Trash2 className="size-3.5" />
+                    <span>Delete Masterclass</span>
+                  </button>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditingVideo(null)}
+                      className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs hover:brightness-110 shadow-md cursor-pointer flex items-center gap-2"
+                    >
+                      <span>Save Masterclass Details</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
             )}
 
-            {/* Edit Form */}
-            <form onSubmit={handleSaveEditMasterclass} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                    Masterclass Title *
-                  </label>
-                  <input
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    placeholder="e.g. Protecting Intellectual Properties in Children's Media"
-                    required
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                    Institutional Code *
-                  </label>
-                  <input
-                    type="text"
-                    value={editCode}
-                    onChange={(e) => setEditCode(e.target.value)}
-                    placeholder="e.g. KMM-IP-101"
-                    required
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                    Curriculum Category
-                  </label>
-                  <select
-                    value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 cursor-pointer"
-                  >
-                    <option value="copyright">Copyright &amp; Sovereign IP</option>
-                    <option value="protection">Child Protection &amp; Safeguards</option>
-                    <option value="broadcast">Broadcast Standards &amp; Playout</option>
-                    <option value="doctrinal">Scriptural Review &amp; Canon</option>
-                    <option value="merchandising">Merchandising &amp; Contracts</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                    Video Duration (MM:SS)
-                  </label>
-                  <input
-                    type="text"
-                    value={editDuration}
-                    onChange={(e) => setEditDuration(e.target.value)}
-                    placeholder="e.g. 24:30"
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
-                  />
-                </div>
-              </div>
-
-              {/* Video Source Selection (Cloud Upload vs Provide URL) */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Video Source Options *
-                  </label>
-                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
-                    Cloudflare R2 Streaming &bull; Download Disabled
-                  </span>
-                </div>
-
-                {/* Source Mode Toggle */}
-                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/60 dark:border-white/5">
-                  <button
-                    type="button"
-                    onClick={() => setEditVideoSourceType('upload')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${editVideoSourceType === 'upload'
-                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                  >
-                    <Upload className="size-3.5 text-amber-500" />
-                    <span>Upload File (R2 Cloud)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditVideoSourceType('url')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${editVideoSourceType === 'url'
-                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                  >
-                    <Link2 className="size-3.5 text-amber-500" />
-                    <span>Provide Video URL</span>
-                  </button>
-                </div>
-
-                {/* Mode 1: File Upload (Cloudflare R2) */}
-                {editVideoSourceType === 'upload' ? (
-                  <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-5 text-center hover:border-amber-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
-                    <input
-                      type="file"
-                      accept="video/mp4,video/webm,video/quicktime"
-                      onChange={handleEditVideoFileChange}
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                    />
-                    <div className="space-y-2 pointer-events-none">
-                      <div className="size-10 rounded-xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
-                        <FileVideo className="size-5" />
+            {/* TAB 2: UPLOAD / REPLACE VIDEO FORM (Cloudflare R2 Direct Upload & Streaming URL) */}
+            {editActiveTab === 'video' && (
+              <form onSubmit={handleSaveEditVideo} className="space-y-4 animate-in fade-in">
+                {/* Visual Edit/Upload Progress Card */}
+                {isSavingEdit && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-sky-500/5 border border-sky-500/30 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Loader2 className="size-4 text-sky-500 animate-spin shrink-0" />
+                        <span className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
+                          {editUploadStatusText || 'Streaming Video to Cloudflare R2...'}
+                        </span>
                       </div>
-                      {editUploadedFileName ? (
-                        <div>
-                          <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
-                            ✓ New File Attached: {editUploadedFileName}
-                          </div>
-                          <div className="text-[10px] text-slate-400 font-mono">{editUploadedFileSize} &bull; Uploads directly to Cloudflare R2 on Save</div>
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                            Click to select a replacement video file or drag and drop
-                          </p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">
-                            Currently using: <span className="font-mono text-amber-600 dark:text-amber-400 truncate max-w-xs inline-block align-bottom">{editVideoUrl || '/kmm-welcome-animation.mp4'}</span>
-                          </p>
-                          <p className="text-[10px] text-slate-400">
-                            MP4, WebM or MOV (Streamed directly to Cloudflare R2 cloud storage)
-                          </p>
-                        </div>
-                      )}
+                      <span className="font-mono font-black text-xs text-sky-600 dark:text-sky-400 bg-sky-500/15 px-2.5 py-0.5 rounded-lg border border-sky-500/30 shadow-2xs">
+                        {editUploadProgress}%
+                      </span>
                     </div>
-                  </div>
-                ) : (
-                  /* Mode 2: Direct Video URL */
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={editVideoUrl}
-                        onChange={(e) => setEditVideoUrl(e.target.value)}
-                        placeholder="https://.../video.mp4 or /kmm-welcome-animation.mp4"
-                        className="flex-1 h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-amber-500"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setEditVideoUrl('/kmm-welcome-animation.mp4')}
-                        className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 whitespace-nowrap transition cursor-pointer"
+
+                    {/* Progress Bar Container */}
+                    <div className="h-3 w-full bg-slate-200/80 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-sky-500/20">
+                      <div
+                        className="h-full bg-gradient-to-r from-sky-500 via-blue-500 to-sky-400 rounded-full transition-all duration-300 relative shadow-xs"
+                        style={{ width: `${Math.max(5, editUploadProgress)}%` }}
                       >
-                        Default Demo Video
-                      </button>
+                        <div className="absolute inset-0 bg-white/25 animate-pulse rounded-full" />
+                      </div>
                     </div>
-                    <p className="text-[10px] text-slate-400">
-                      Provide a direct MP4, HLS, or CDN streaming URL, or a local server path.
-                    </p>
                   </div>
                 )}
-              </div>
 
-              {/* Description */}
-              <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                  Masterclass Description / Syllabus Overview
-                </label>
-                <textarea
-                  rows={3}
-                  value={editDesc}
-                  onChange={(e) => setEditDesc(e.target.value)}
-                  placeholder="Summarize the legal framework, statutory safeguards, and learning objectives..."
-                  className="w-full p-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-hidden focus:border-amber-500 resize-none leading-relaxed"
-                />
-              </div>
-
-              {/* Curriculum Safeguard Points / Key Takeaways */}
-              <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                  Mandatory Legal Covenants &amp; Key Safeguards
-                </label>
-                <div className="space-y-2 mb-2 max-h-36 overflow-y-auto">
-                  {editPoints.map((pt, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5 text-xs text-slate-700 dark:text-slate-300"
-                    >
-                      <span className="truncate flex-1">&bull; {pt}</span>
-                      <button
-                        type="button"
-                        onClick={() => setEditPoints(editPoints.filter((_, i) => i !== idx))}
-                        className="p-1 text-slate-400 hover:text-rose-500 cursor-pointer"
-                      >
-                        <X className="size-3.5" />
-                      </button>
+                {/* Edit Error Banner */}
+                {editError && (
+                  <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-900 dark:text-rose-200 space-y-2.5 animate-in fade-in">
+                    <div className="flex items-start gap-2.5">
+                      <AlertTriangle className="size-5 text-rose-500 shrink-0 mt-0.5" />
+                      <div className="text-xs space-y-1">
+                        <div className="font-extrabold text-slate-900 dark:text-white">
+                          Video Upload Error
+                        </div>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+                          {editError}
+                        </p>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* Current Active Video Stream Preview */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Current Masterclass Video
+                    </label>
+                    <span className="text-[11px] font-mono text-slate-400 truncate max-w-xs">
+                      {editVideoUrl || '/kmm-welcome-animation.mp4'}
+                    </span>
+                  </div>
+                  <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-sm flex items-center justify-center select-none">
+                    <video
+                      src={editVideoUrl || '/kmm-welcome-animation.mp4'}
+                      controls
+                      controlsList="nodownload"
+                      className="w-full h-full object-cover select-none"
+                    />
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={editNewPointInput}
-                    onChange={(e) => setEditNewPointInput(e.target.value)}
-                    placeholder="Add mandatory legal covenant or takeaway..."
-                    className="flex-1 h-9 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-xs outline-hidden focus:border-amber-500"
-                  />
+
+                {/* Video Source Selection (Cloud Upload vs Provide URL) */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Replacement Source
+                    </label>
+                    <span className="text-[11px] text-sky-600 dark:text-sky-400 font-semibold">
+                      Direct Cloudflare R2 Upload &bull; No File Size Limits
+                    </span>
+                  </div>
+
+                  {/* Source Mode Toggle */}
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/60 dark:border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => setEditVideoSourceType('upload')}
+                      className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                        editVideoSourceType === 'upload'
+                          ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <Upload className="size-3.5 text-sky-500" />
+                      <span>Upload File (Cloudflare R2)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditVideoSourceType('url')}
+                      className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                        editVideoSourceType === 'url'
+                          ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/10'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <Link2 className="size-3.5 text-sky-500" />
+                      <span>Provide Video URL</span>
+                    </button>
+                  </div>
+
+                  {/* Mode 1: File Upload (Cloudflare R2) */}
+                  {editVideoSourceType === 'upload' ? (
+                    <div className="relative border-2 border-dashed border-slate-300 dark:border-white/15 rounded-2xl p-6 text-center hover:border-sky-500/60 transition cursor-pointer bg-slate-50/50 dark:bg-slate-900/30">
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={handleEditVideoFileChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      />
+                      <div className="space-y-2 pointer-events-none">
+                        <div className="size-11 rounded-xl bg-sky-500/10 text-sky-500 mx-auto flex items-center justify-center">
+                          <FileVideo className="size-6" />
+                        </div>
+                        {editUploadedFileName ? (
+                          <div>
+                            <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                              ✓ New Video Ready: {editUploadedFileName}
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                              {editUploadedFileSize} &bull; Uploads directly to Cloudflare R2
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                              Choose a new video file to replace this masterclass
+                            </p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                              MP4, WebM or MOV &bull; Streamed direct to Cloudflare R2
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    /* Mode 2: Direct Video URL */
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={editVideoUrl}
+                          onChange={(e) => setEditVideoUrl(e.target.value)}
+                          placeholder="https://.../video.mp4 or /kmm-welcome-animation.mp4"
+                          className="flex-1 h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-hidden focus:border-sky-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setEditVideoUrl('/kmm-welcome-animation.mp4')}
+                          className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 whitespace-nowrap transition cursor-pointer"
+                        >
+                          Default Demo Video
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-slate-400">
+                        Provide a direct MP4, HLS, or CDN streaming URL, or a local server path.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Submit Buttons */}
+                <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
                   <button
                     type="button"
-                    onClick={() => {
-                      if (editNewPointInput.trim()) {
-                        setEditPoints([...editPoints, editNewPointInput.trim()])
-                        setEditNewPointInput('')
-                      }
-                    }}
-                    className="px-3 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-amber-500 hover:text-slate-950 text-xs font-bold cursor-pointer transition"
+                    onClick={() => setEditActiveTab('details')}
+                    className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
                   >
-                    Add
+                    &larr; Switch to Masterclass Details
                   </button>
-                </div>
-              </div>
 
-              {/* Submit Buttons */}
-              <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => handleDeleteMasterclass(editingVideo.id)}
-                  className="px-3.5 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
-                >
-                  <Trash2 className="size-3.5" />
-                  <span>Delete Masterclass</span>
-                </button>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    disabled={isSavingEdit}
-                    onClick={() => setEditingVideo(null)}
-                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSavingEdit}
-                    className="px-6 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs hover:brightness-110 shadow-md cursor-pointer disabled:opacity-60 flex items-center gap-2"
-                  >
-                    {isSavingEdit ? (
-                      <>
-                        <Loader2 className="size-4 animate-spin text-slate-950" />
-                        <span>Saving ({editUploadProgress}%)...</span>
-                      </>
-                    ) : (
-                      <span>Save Changes</span>
-                    )}
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      disabled={isSavingEdit}
+                      onClick={() => setEditingVideo(null)}
+                      className="px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSavingEdit || (editVideoSourceType === 'upload' && !editVideoFile)}
+                      className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold text-xs hover:brightness-110 shadow-md cursor-pointer disabled:opacity-60 flex items-center gap-2"
+                    >
+                      {isSavingEdit ? (
+                        <>
+                          <Loader2 className="size-4 animate-spin text-white" />
+                          <span>Uploading ({editUploadProgress}%)...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="size-4" />
+                          <span>Upload &amp; Save Video</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            )}
           </div>
         </div>
       )}
