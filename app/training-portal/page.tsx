@@ -115,11 +115,10 @@ export default function TrainingPortalPage() {
   // Video Player state
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
-  const [currentTime, setCurrentTime] = useState(230) // 03:50 into video
-  const totalDuration = 1470 // 24:30
+  const [currentTime, setCurrentTime] = useState(0)
+  const [totalDuration, setTotalDuration] = useState(0)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerContainerRef = useRef<HTMLDivElement | null>(null)
-  const [activeChapterIndex, setActiveChapterIndex] = useState(0)
 
   // Admin & Masterclass Upload State
   const [showUploadModal, setShowUploadModal] = useState(false)
@@ -166,7 +165,6 @@ export default function TrainingPortalPage() {
   const [editError, setEditError] = useState<string | null>(null)
 
   // Dedicated Admin Dashboard states
-  const [adminActiveSection, setAdminActiveSection] = useState<'masterclasses' | 'storage'>('masterclasses')
   const [isLearnerPreviewMode, setIsLearnerPreviewMode] = useState(false)
   const [previewingVideo, setPreviewingVideo] = useState<VideoItem | null>(null)
 
@@ -177,33 +175,6 @@ export default function TrainingPortalPage() {
 
   const [toastMessage, setToastMessage] = useState('')
   const [copiedHash, setCopiedHash] = useState(false)
-
-  // Video Chapters for selected video
-  const currentChapters = useMemo(() => {
-    if (!selectedVideo) return []
-    if (selectedVideo.id === 'vid-1') {
-      return [
-        { time: '00:00', seconds: 0, title: 'Introduction: The Sacred Trust of Children’s IP', desc: 'Understanding the divine stewardship of children’s media and statutory copyright.' },
-        { time: '04:15', seconds: 255, title: 'Statutory Chain of Title & Work-for-Hire', desc: 'Executing unconditional assignments for writers, composers, and animators.' },
-        { time: '09:30', seconds: 570, title: 'Minor Performer & Voice Likeness Consent', desc: 'Step-by-step parental release deeds and on-set chaperone protocols.' },
-        { time: '14:45', seconds: 885, title: 'AI Transparency & Prompt Preservation', desc: 'Mandatory logging of AI tools, human oversight %, and external training data.' },
-        { time: '19:20', seconds: 1160, title: 'Character Silhouette & Trademark Defense', desc: 'Securing character names, vocal signatures, and visual models against infringement.' },
-        { time: '23:10', seconds: 1390, title: 'Playout Sign-off & Legal Accreditation', desc: 'Directorate quality sign-off and satellite broadcast certificate generation.' },
-      ]
-    }
-    // Generated chapter checkpoints from points
-    return selectedVideo.points.map((pt, idx) => {
-      const stepSeconds = idx * 240
-      const mins = Math.floor(stepSeconds / 60)
-      const secs = stepSeconds % 60
-      return {
-        time: `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`,
-        seconds: stepSeconds,
-        title: `Chapter ${idx + 1}: ${pt.split(':')[0] || pt.slice(0, 35)}`,
-        desc: pt,
-      }
-    })
-  }, [selectedVideo])
 
   useEffect(() => {
     setIsMounted(true)
@@ -345,11 +316,11 @@ export default function TrainingPortalPage() {
     setSelectedVideo(video)
     setActiveTab('video')
     setCurrentTime(0)
-    setActiveChapterIndex(0)
+    setTotalDuration(0)
+    setIsPlaying(false)
     if (videoRef.current) {
       videoRef.current.currentTime = 0
       videoRef.current.play().catch(() => { })
-      setIsPlaying(true)
     }
     // Smooth scroll to video player
     if (playerContainerRef.current) {
@@ -371,14 +342,13 @@ export default function TrainingPortalPage() {
     }
   }
 
-  const handleSeek = (seconds: number, index: number) => {
+  const handleSeek = (seconds: number) => {
+    if (!Number.isFinite(seconds)) return
     setCurrentTime(seconds)
-    setActiveChapterIndex(index)
     if (videoRef.current) {
       videoRef.current.currentTime = seconds
       if (!isPlaying) {
         videoRef.current.play().catch(() => { })
-        setIsPlaying(true)
       }
     }
   }
@@ -393,8 +363,13 @@ export default function TrainingPortalPage() {
   }
 
   const formatSeconds = (sec: number) => {
-    const m = Math.floor(sec / 60)
+    if (!Number.isFinite(sec) || sec < 0) return '00:00'
+    const h = Math.floor(sec / 3600)
+    const m = Math.floor((sec % 3600) / 60)
     const s = Math.floor(sec % 60)
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+    }
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
 
@@ -1575,7 +1550,7 @@ export default function TrainingPortalPage() {
                         Curriculum Masterclasses ({filteredVideos.length})
                       </h2>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Select any video below to watch the full recording with chapter markers and legal points.
+                        Select any video below to watch the full masterclass recording.
                       </p>
                     </div>
 
@@ -1696,7 +1671,7 @@ export default function TrainingPortalPage() {
                       Masterclass Video Library
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                      Select any masterclass below to open its dedicated view with cinema video recording and curriculum chapter markers.
+                      Select any masterclass below to open its dedicated view with cinema video playback.
                     </p>
                   </div>
 
@@ -1993,17 +1968,35 @@ export default function TrainingPortalPage() {
                     className="relative aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md flex items-center justify-center group select-none"
                   >
                     <video
+                      key={`${selectedVideo.id}-${selectedVideo.videoUrl || ''}`}
                       ref={videoRef}
                       src={selectedVideo.videoUrl || "/kmm-welcome-animation.mp4"}
+                      preload="metadata"
                       className="w-full h-full object-cover select-none pointer-events-auto"
                       muted={isMuted}
                       controlsList="nodownload nofullscreen noplaybackrate"
                       disablePictureInPicture
                       onContextMenu={(e) => { e.preventDefault(); return false; }}
                       onDragStart={(e) => e.preventDefault()}
-                      onTimeUpdate={() => {
-                        if (videoRef.current) {
-                          setCurrentTime(videoRef.current.currentTime)
+                      onLoadedMetadata={(e) => {
+                        const dur = e.currentTarget.duration
+                        if (Number.isFinite(dur) && dur > 0) {
+                          setTotalDuration(dur)
+                        }
+                      }}
+                      onDurationChange={(e) => {
+                        const dur = e.currentTarget.duration
+                        if (Number.isFinite(dur) && dur > 0) {
+                          setTotalDuration(dur)
+                        }
+                      }}
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
+                      onTimeUpdate={(e) => {
+                        setCurrentTime(e.currentTarget.currentTime)
+                        const dur = e.currentTarget.duration
+                        if (Number.isFinite(dur) && dur > 0 && dur !== totalDuration) {
+                          setTotalDuration(dur)
                         }
                       }}
                       onEnded={() => {
@@ -2016,7 +2009,7 @@ export default function TrainingPortalPage() {
                     {/* Top Overlay Badge */}
                     <div className="absolute top-3 left-3 flex items-center gap-2">
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-950/80 text-white backdrop-blur-md">
-                        {formatSeconds(currentTime)} / {formatSeconds(totalDuration)}
+                        {formatSeconds(currentTime)} / {totalDuration > 0 ? formatSeconds(totalDuration) : '--:--'}
                       </span>
                     </div>
 
@@ -2036,16 +2029,17 @@ export default function TrainingPortalPage() {
                       {/* Scrubber Bar */}
                       <div
                         onClick={(e) => {
+                          if (totalDuration <= 0) return
                           const rect = e.currentTarget.getBoundingClientRect()
                           const clickX = e.clientX - rect.left
                           const pct = Math.max(0, Math.min(1, clickX / rect.width))
-                          handleSeek(pct * totalDuration, activeChapterIndex)
+                          handleSeek(pct * totalDuration)
                         }}
                         className="h-1.5 w-full bg-white/20 hover:h-2.5 rounded-full cursor-pointer transition-all overflow-hidden"
                       >
                         <div
                           className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
-                          style={{ width: `${(currentTime / totalDuration) * 100}%` }}
+                          style={{ width: `${totalDuration > 0 ? Math.min(100, (currentTime / totalDuration) * 100) : 0}%` }}
                         />
                       </div>
 
@@ -2064,13 +2058,13 @@ export default function TrainingPortalPage() {
                             {isMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
                           </button>
                           <span className="font-mono text-[11px] text-slate-300">
-                            {formatSeconds(currentTime)} / {formatSeconds(totalDuration)}
+                            {formatSeconds(currentTime)} / {totalDuration > 0 ? formatSeconds(totalDuration) : '--:--'}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-3 text-slate-300">
-                          <span className="text-[11px] font-semibold hidden sm:inline text-amber-300">
-                            {currentChapters[activeChapterIndex]?.title}
+                          <span className="text-[11px] font-semibold hidden sm:inline text-amber-300 truncate max-w-[260px]">
+                            {selectedVideo.title}
                           </span>
                           <button
                             onClick={() => {
@@ -2088,7 +2082,7 @@ export default function TrainingPortalPage() {
                   </div>
 
                   {/* Curriculum & Meta Info */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-white/10">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <div className="size-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold flex items-center justify-center text-sm shadow-2xs shrink-0 border border-amber-500/20">
                         <Scale className="size-5" />
@@ -2098,7 +2092,7 @@ export default function TrainingPortalPage() {
                           KMM Institutional Curriculum
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
-                          {selectedVideo.categoryLabel} &bull; {selectedVideo.duration}
+                          {selectedVideo.categoryLabel} &bull; {totalDuration > 0 ? formatSeconds(totalDuration) : selectedVideo.duration}
                         </div>
                       </div>
                     </div>
@@ -2115,31 +2109,6 @@ export default function TrainingPortalPage() {
                         <GraduationCap className="size-3.5" />
                         <span>View Accreditation Certificate</span>
                       </button>
-                    </div>
-                  </div>
-
-                  {/* Chapter Navigation Chips */}
-                  <div className="space-y-2">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Curriculum Chapter Markers (Click to Seek)
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {currentChapters.map((ch, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => handleSeek(ch.seconds, idx)}
-                          className={`text-left p-3 rounded-xl border transition text-xs flex flex-col justify-between gap-1 cursor-pointer ${activeChapterIndex === idx
-                            ? 'bg-amber-500/10 border-amber-500 text-amber-900 dark:text-amber-300 font-bold shadow-2xs'
-                            : 'border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300'
-                            }`}
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            <span className="truncate">{ch.title}</span>
-                            <span className="font-mono text-[10px] text-slate-400 shrink-0 ml-1">{ch.time}</span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 font-normal line-clamp-1">{ch.desc}</span>
-                        </button>
-                      ))}
                     </div>
                   </div>
                 </div>
