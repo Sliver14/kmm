@@ -1380,11 +1380,6 @@ export default function TrainingPortalPage() {
               {/* Search Bar (Desktop Global Search with Live Results Dropdown) */}
               <div ref={searchContainerRef} className="flex-1 max-w-md hidden md:block relative">
                 <div className="relative flex items-center group">
-                  <Search
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-500 dark:text-slate-400 group-focus-within:text-amber-500 transition-colors pointer-events-none"
-                    strokeWidth={2.2}
-                    aria-hidden="true"
-                  />
                   <input
                     ref={headerSearchInputRef}
                     type="search"
@@ -1411,35 +1406,46 @@ export default function TrainingPortalPage() {
                         e.currentTarget.blur()
                       }
                     }}
-                    className="w-full h-9 pl-10 pr-12 rounded-full text-xs bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/10 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition [&::-webkit-search-cancel-button]:hidden"
+                    className={`w-full h-9 pl-4 ${searchQuery ? 'pr-16' : 'pr-10'} rounded-full text-xs bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/10 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition [&::-webkit-search-cancel-button]:hidden`}
                     aria-label="Search masterclasses"
                   />
-                  {searchQuery ? (
+                  {searchQuery && (
                     <button
                       type="button"
                       onClick={() => {
                         setSearchQuery('')
                         headerSearchInputRef.current?.focus()
                       }}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 size-5 rounded-full grid place-items-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 transition cursor-pointer"
+                      className="absolute right-9 top-1/2 -translate-y-1/2 size-5 rounded-full grid place-items-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 transition cursor-pointer"
                       title="Clear search"
                       aria-label="Clear search"
                     >
                       <X className="size-3.5" />
                     </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (searchQuery.trim()) {
+                        if (searchMatches.length === 1) {
+                          handleSelectVideo(searchMatches[0])
+                          setIsSearchFocused(false)
+                        } else {
+                          setSelectedVideo(null)
+                          setActiveTab('video')
+                          setIsSearchFocused(false)
+                        }
+                      } else {
                         headerSearchInputRef.current?.focus()
                         setIsSearchFocused(true)
-                      }}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-white/10 text-slate-400 hover:text-amber-500 transition cursor-pointer"
-                      title="Focus search (Ctrl+K)"
-                    >
-                      ⌘K
-                    </button>
-                  )}
+                      }
+                    }}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 size-6 rounded-full grid place-items-center text-slate-500 dark:text-slate-400 hover:bg-amber-500 hover:text-slate-950 transition cursor-pointer"
+                    title="Search masterclasses"
+                    aria-label="Search masterclasses"
+                  >
+                    <Search className="size-3.5" strokeWidth={2.3} />
+                  </button>
                 </div>
 
                 {/* Live Search Results Dropdown */}
