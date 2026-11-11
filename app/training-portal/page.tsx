@@ -102,6 +102,10 @@ export default function TrainingPortalPage() {
   // Navigation tab: 'overview' | 'video' | 'accreditation' | 'admin'
   const [activeTab, setActiveTab] = useState<'overview' | 'video' | 'accreditation' | 'admin'>('overview')
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const headerSearchInputRef = useRef<HTMLInputElement | null>(null)
+  const searchContainerRef = useRef<HTMLDivElement | null>(null)
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [showRightDetails, setShowRightDetails] = useState(true)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
@@ -296,6 +300,38 @@ export default function TrainingPortalPage() {
     }
   }, [router])
 
+  // Keyboard shortcuts (Ctrl+K / Cmd+K to focus search, Esc to close dropdown) & click-outside handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        if (window.innerWidth < 768) {
+          setMobileSearchOpen(true)
+          setTimeout(() => headerSearchInputRef.current?.focus(), 50)
+        } else {
+          headerSearchInputRef.current?.focus()
+          headerSearchInputRef.current?.select()
+        }
+        setIsSearchFocused(true)
+      } else if (e.key === 'Escape') {
+        setIsSearchFocused(false)
+        setMobileSearchOpen(false)
+        headerSearchInputRef.current?.blur()
+      }
+    }
+    const handleMouseDown = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchFocused(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
+  }, [])
+
   const toggleTheme = () => {
     const nextDark = !isDark
     setIsDark(nextDark)
@@ -373,14 +409,28 @@ export default function TrainingPortalPage() {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
 
-  // Filtered masterclass videos
+  const matchesVideoQuery = (v: VideoItem, query: string) => {
+    const q = query.trim().toLowerCase()
+    if (!q) return true
+    return (
+      (v.title || '').toLowerCase().includes(q) ||
+      (v.code || '').toLowerCase().includes(q) ||
+      (v.desc || '').toLowerCase().includes(q) ||
+      (v.categoryLabel || '').toLowerCase().includes(q) ||
+      (v.category || '').toLowerCase().includes(q)
+    )
+  }
+
+  // Live instant search matches across all categories (used by global header search dropdown)
+  const searchMatches = useMemo(() => {
+    if (!searchQuery.trim()) return []
+    return masterclasses.filter((v) => matchesVideoQuery(v, searchQuery))
+  }, [masterclasses, searchQuery])
+
+  // Filtered masterclass videos (respects active category filter + search query)
   const filteredVideos = useMemo(() => {
     return masterclasses.filter((v) => {
-      const matchesSearch =
-        !searchQuery.trim() ||
-        v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        v.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        v.desc.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSearch = matchesVideoQuery(v, searchQuery)
       const matchesCategory = categoryFilter === 'all' || v.category === categoryFilter
       return matchesSearch && matchesCategory
     })
@@ -1286,66 +1336,210 @@ export default function TrainingPortalPage() {
         {/* ========================================================= */}
         <main className="flex-1 h-full overflow-y-auto min-w-0 flex flex-col">
           {/* Top Bar (Sticky Header & Search) */}
-          <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#121624]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4 shrink-0">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setMobileSidebarOpen(true)}
-                className="md:hidden p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300"
-              >
-                <Menu className="size-4" />
-              </button>
-              <div className="relative size-8 shrink-0 rounded-lg overflow-hidden bg-white p-0.5 border border-slate-200/80 dark:border-white/10 hidden sm:flex items-center justify-center shadow-2xs">
-                <Image
-                  src="/kmm-logo.png"
-                  alt="KMM Logo"
-                  width={32}
-                  height={32}
-                  className="object-contain"
-                />
+          <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#121624]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 shrink-0">
+            <div className="px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  onClick={() => setMobileSidebarOpen(true)}
+                  className="md:hidden p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 cursor-pointer"
+                  aria-label="Open Navigation"
+                >
+                  <Menu className="size-4" />
+                </button>
+                <div className="relative size-8 shrink-0 rounded-lg overflow-hidden bg-white p-0.5 border border-slate-200/80 dark:border-white/10 hidden sm:flex items-center justify-center shadow-2xs">
+                  <Image
+                    src="/kmm-logo.png"
+                    alt="KMM Logo"
+                    width={32}
+                    height={32}
+                    className="object-contain"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white capitalize truncate">
+                    {activeTab === 'overview'
+                      ? 'Training Academy Overview'
+                      : activeTab === 'video'
+                        ? selectedVideo
+                          ? selectedVideo.title
+                          : 'Masterclass Video Catalog'
+                        : activeTab === 'accreditation'
+                          ? 'Accreditation Certificate'
+                          : 'Training Portal Admin Dashboard'}
+                  </h1>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block truncate">
+                    {activeTab === 'video' && selectedVideo
+                      ? `${selectedVideo.code} • ${selectedVideo.title}`
+                      : activeTab === 'admin'
+                        ? 'Masterclass Uploads & Accreditation Governance'
+                        : 'Sovereign Intellectual Property & Statutory Child Protection'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white capitalize">
-                  {activeTab === 'overview'
-                    ? 'Training Academy Overview'
-                    : activeTab === 'video'
-                      ? selectedVideo
-                        ? selectedVideo.title
-                        : 'Masterclass Video Catalog'
-                      : activeTab === 'accreditation'
-                        ? 'Accreditation Certificate'
-                        : 'Training Portal Admin Dashboard'}
-                </h1>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-                  {activeTab === 'video' && selectedVideo
-                    ? `${selectedVideo.code} • ${selectedVideo.title}`
-                    : activeTab === 'admin'
-                      ? 'Masterclass Uploads & Accreditation Governance'
-                      : 'Sovereign Intellectual Property & Statutory Child Protection'}
-                </p>
-              </div>
-            </div>
 
-            {/* Search Bar */}
-            <div className="flex-1 max-w-md hidden md:block">
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search masterclasses, topics, syllabi..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-10 py-1.5 rounded-full text-xs bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
-                />
-                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-white/10 text-slate-400">
-                  ⌘K
-                </kbd>
-              </div>
-            </div>
+              {/* Search Bar (Desktop Global Search with Live Results Dropdown) */}
+              <div ref={searchContainerRef} className="flex-1 max-w-md hidden md:block relative">
+                <div className="relative flex items-center group">
+                  <Search
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-500 dark:text-slate-400 group-focus-within:text-amber-500 transition-colors pointer-events-none"
+                    strokeWidth={2.2}
+                    aria-hidden="true"
+                  />
+                  <input
+                    ref={headerSearchInputRef}
+                    type="search"
+                    placeholder="Search masterclasses, codes, or topics..."
+                    value={searchQuery}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value)
+                      setIsSearchFocused(true)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && searchQuery.trim()) {
+                        e.preventDefault()
+                        if (searchMatches.length === 1) {
+                          handleSelectVideo(searchMatches[0])
+                          setIsSearchFocused(false)
+                        } else {
+                          setSelectedVideo(null)
+                          setActiveTab('video')
+                          setIsSearchFocused(false)
+                        }
+                      } else if (e.key === 'Escape') {
+                        setIsSearchFocused(false)
+                        e.currentTarget.blur()
+                      }
+                    }}
+                    className="w-full h-9 pl-10 pr-12 rounded-full text-xs bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/10 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition [&::-webkit-search-cancel-button]:hidden"
+                    aria-label="Search masterclasses"
+                  />
+                  {searchQuery ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('')
+                        headerSearchInputRef.current?.focus()
+                      }}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 size-5 rounded-full grid place-items-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 transition cursor-pointer"
+                      title="Clear search"
+                      aria-label="Clear search"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        headerSearchInputRef.current?.focus()
+                        setIsSearchFocused(true)
+                      }}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-white/10 text-slate-400 hover:text-amber-500 transition cursor-pointer"
+                      title="Focus search (Ctrl+K)"
+                    >
+                      ⌘K
+                    </button>
+                  )}
+                </div>
 
-            {/* Quick Actions (Theme, Notifications, User) */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                onClick={toggleTheme}
+                {/* Live Search Results Dropdown */}
+                {isSearchFocused && searchQuery.trim().length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-2 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/90 dark:border-white/15 shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="px-3.5 py-2 border-b border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] bg-slate-50/70 dark:bg-slate-900/40">
+                      <span className="font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                        <Search className="size-3 text-amber-500" />
+                        <span>Masterclass Matches ({searchMatches.length})</span>
+                      </span>
+                      {searchMatches.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedVideo(null)
+                            setActiveTab('video')
+                            setIsSearchFocused(false)
+                          }}
+                          className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                        >
+                          View in Library &rarr;
+                        </button>
+                      )}
+                    </div>
+
+                    {searchMatches.length === 0 ? (
+                      <div className="p-5 text-center space-y-2">
+                        <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                          No masterclasses match &ldquo;{searchQuery}&rdquo;
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          className="px-3 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[11px] font-bold hover:bg-amber-500/25 transition cursor-pointer"
+                        >
+                          Clear Search
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-white/5">
+                        {searchMatches.slice(0, 6).map((v) => (
+                          <button
+                            key={v.id}
+                            type="button"
+                            onClick={() => {
+                              handleSelectVideo(v)
+                              setIsSearchFocused(false)
+                            }}
+                            className="w-full text-left px-3.5 py-2.5 hover:bg-amber-500/10 transition flex items-center gap-3 cursor-pointer group"
+                          >
+                            <div className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:bg-amber-500 group-hover:text-slate-950 transition">
+                              <Play className="size-3.5 fill-current ml-0.5" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                                  {v.code}
+                                </span>
+                                <span className="text-[10px] text-slate-400 truncate">
+                                  &bull; {v.categoryLabel}
+                                </span>
+                              </div>
+                              <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                                {v.title}
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-mono text-slate-400 shrink-0">
+                              {v.duration}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Actions (Mobile Search, Theme, Notifications, User) */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !mobileSearchOpen
+                    setMobileSearchOpen(next)
+                    if (next) {
+                      setTimeout(() => headerSearchInputRef.current?.focus(), 50)
+                    }
+                  }}
+                  title="Search Masterclasses"
+                  aria-label="Search Masterclasses"
+                  className={`md:hidden p-2 rounded-xl transition cursor-pointer ${mobileSearchOpen || searchQuery
+                    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                    }`}
+                >
+                  <Search className="size-4" strokeWidth={2.2} />
+                </button>
+
+                <button
+                  onClick={toggleTheme}
                 title="Toggle Theme"
                 className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer"
               >
@@ -1383,6 +1577,78 @@ export default function TrainingPortalPage() {
                 </div>
               </div>
             </div>
+            </div>
+
+            {/* Expandable Mobile Search Bar */}
+            {mobileSearchOpen && (
+              <div className="md:hidden px-4 pb-3 pt-1 border-t border-slate-100 dark:border-white/5 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="relative flex items-center">
+                  <Search
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-500 dark:text-slate-400 pointer-events-none"
+                    strokeWidth={2.2}
+                    aria-hidden="true"
+                  />
+                  <input
+                    type="search"
+                    autoFocus
+                    placeholder="Search masterclasses, codes, or topics..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && searchQuery.trim()) {
+                        e.preventDefault()
+                        if (searchMatches.length === 1) {
+                          handleSelectVideo(searchMatches[0])
+                        } else {
+                          setSelectedVideo(null)
+                          setActiveTab('video')
+                        }
+                        setMobileSearchOpen(false)
+                      }
+                    }}
+                    className="w-full h-9 pl-10 pr-9 rounded-full text-xs bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/70 dark:border-white/10 focus:outline-none focus:border-amber-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 [&::-webkit-search-cancel-button]:hidden"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 size-5 rounded-full grid place-items-center text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
+                      aria-label="Clear search"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {searchQuery.trim().length > 0 && (
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200/70 dark:border-white/10 max-h-56 overflow-y-auto divide-y divide-slate-200/60 dark:divide-white/5">
+                    {searchMatches.length === 0 ? (
+                      <div className="p-3 text-center text-xs text-slate-500">
+                        No masterclasses match &ldquo;{searchQuery}&rdquo;
+                      </div>
+                    ) : (
+                      searchMatches.slice(0, 5).map((v) => (
+                        <button
+                          key={v.id}
+                          type="button"
+                          onClick={() => {
+                            handleSelectVideo(v)
+                            setMobileSearchOpen(false)
+                          }}
+                          className="w-full text-left px-3 py-2 flex items-center gap-2.5 hover:bg-amber-500/10 cursor-pointer"
+                        >
+                          <Play className="size-3.5 text-amber-500 fill-current shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400">{v.code}</div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{v.title}</div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </header>
 
           {/* Learner Preview Alert Banner (When Admin is previewing learner mode) */}
@@ -1578,6 +1844,24 @@ export default function TrainingPortalPage() {
                   </div>
 
                   {/* The Video Cards Grid */}
+                  {filteredVideos.length === 0 ? (
+                    <div className="p-10 text-center rounded-3xl bg-white dark:bg-[#151928] border border-dashed border-slate-300 dark:border-white/10 space-y-3">
+                      <Search className="size-9 text-slate-400 mx-auto" />
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">No Masterclasses Found</h3>
+                      <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                        No masterclasses match &ldquo;{searchQuery || categoryFilter}&rdquo;.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setCategoryFilter('all')
+                          setSearchQuery('')
+                        }}
+                        className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer transition"
+                      >
+                        Reset Search &amp; Filters
+                      </button>
+                    </div>
+                  ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filteredVideos.map((video) => (
                       <div
@@ -1650,6 +1934,7 @@ export default function TrainingPortalPage() {
                       </div>
                     ))}
                   </div>
+                  )}
                 </section>
               </div>
             )}
@@ -1695,8 +1980,8 @@ export default function TrainingPortalPage() {
                   </div>
                 </div>
 
-                {/* Filter and Category Strip */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                {/* Filter, Search and Category Strip */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-black text-slate-900 dark:text-white">
                       Curriculum Masterclasses ({filteredVideos.length})
@@ -1708,26 +1993,56 @@ export default function TrainingPortalPage() {
                     )}
                   </div>
 
-                  {/* Category Filter Pills */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
-                    {[
-                      { id: 'all', label: 'All Categories' },
-                      { id: 'copyright', label: 'Sovereign IP' },
-                      { id: 'protection', label: 'Safeguards' },
-                      { id: 'broadcast', label: 'Broadcast' },
-                      { id: 'doctrinal', label: 'Scriptural' },
-                    ].map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setCategoryFilter(cat.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${categoryFilter === cat.id
-                          ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                          : 'bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
-                          }`}
-                      >
-                        {cat.label}
-                      </button>
-                    ))}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+                    {/* Inline Library Search Box */}
+                    <div className="relative w-full sm:w-64 flex items-center group">
+                      <Search
+                        className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500 dark:text-slate-400 group-focus-within:text-amber-500 transition-colors pointer-events-none"
+                        strokeWidth={2.2}
+                        aria-hidden="true"
+                      />
+                      <input
+                        type="search"
+                        placeholder="Search masterclasses..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full h-9 pl-9 pr-8 rounded-xl text-xs bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition [&::-webkit-search-cancel-button]:hidden"
+                        aria-label="Search masterclass library"
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 size-5 rounded-full grid place-items-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition cursor-pointer"
+                          title="Clear search"
+                          aria-label="Clear search"
+                        >
+                          <X className="size-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Category Filter Pills */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
+                      {[
+                        { id: 'all', label: 'All Categories' },
+                        { id: 'copyright', label: 'Sovereign IP' },
+                        { id: 'protection', label: 'Safeguards' },
+                        { id: 'broadcast', label: 'Broadcast' },
+                        { id: 'doctrinal', label: 'Scriptural' },
+                      ].map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setCategoryFilter(cat.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${categoryFilter === cat.id
+                            ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                            : 'bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                            }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -2420,15 +2735,31 @@ export default function TrainingPortalPage() {
 
                       {/* Filter & Search Bar */}
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white dark:bg-[#151928] border border-slate-200/80 dark:border-white/10">
-                        <div className="flex-1 max-w-md relative">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                        <div className="flex-1 max-w-md relative flex items-center group">
+                          <Search
+                            className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500 dark:text-slate-400 group-focus-within:text-amber-500 transition-colors pointer-events-none"
+                            strokeWidth={2.2}
+                            aria-hidden="true"
+                          />
                           <input
-                            type="text"
+                            type="search"
                             placeholder="Filter by title, code, or syllabus description..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 focus:outline-none focus:border-amber-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+                            className="w-full h-9 pl-9 pr-8 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition [&::-webkit-search-cancel-button]:hidden"
+                            aria-label="Filter masterclasses table"
                           />
+                          {searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery('')}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 size-5 rounded-full grid place-items-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/10 transition cursor-pointer"
+                              title="Clear search"
+                              aria-label="Clear search"
+                            >
+                              <X className="size-3.5" />
+                            </button>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -2586,6 +2917,31 @@ export default function TrainingPortalPage() {
                                   </td>
                                 </tr>
                               ))}
+                              {filteredVideos.length === 0 && (
+                                <tr>
+                                  <td colSpan={6} className="py-12 px-4 text-center">
+                                    <div className="space-y-2 max-w-xs mx-auto">
+                                      <Search className="size-8 text-slate-400 mx-auto" />
+                                      <div className="font-bold text-sm text-slate-900 dark:text-white">
+                                        No Masterclasses Found
+                                      </div>
+                                      <p className="text-xs text-slate-500">
+                                        No masterclasses match your active search or category filter.
+                                      </p>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setSearchQuery('')
+                                          setCategoryFilter('all')
+                                        }}
+                                        className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition cursor-pointer"
+                                      >
+                                        Reset Search &amp; Filters
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
                             </tbody>
                           </table>
                         </div>
