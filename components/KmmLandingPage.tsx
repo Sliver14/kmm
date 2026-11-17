@@ -815,9 +815,6 @@ export default function KmmLandingPage() {
               </article>
             </div>
 
-            <p className="text-xs text-[var(--kmm-muted)] mt-8 max-w-3xl">
-              These are Kiddies Media Ministry&apos;s proposed public-facing areas of responsibility, subject to confirmation against officially approved policies and organizational mandates.
-            </p>
           </div>
         </section>
 
@@ -994,9 +991,6 @@ export default function KmmLandingPage() {
               </div>
             </div>
 
-            <p className="text-xs text-[var(--kmm-muted)] mt-8">
-              Official download and website links will be added here once supplied.
-            </p>
           </div>
         </section>
 
