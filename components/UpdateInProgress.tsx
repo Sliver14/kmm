@@ -18,9 +18,7 @@ import {
 export default function UpdateInProgress() {
   const [mounted, setMounted] = useState(false)
   const [currentTime, setCurrentTime] = useState('')
-  const [checking, setChecking] = useState(false)
   const [isResolved, setIsResolved] = useState(false)
-  const [progressVal, setProgressVal] = useState(68)
 
   useEffect(() => {
     setMounted(true)
@@ -35,20 +33,8 @@ export default function UpdateInProgress() {
     return () => clearInterval(timer)
   }, [])
 
-  // Dynamic subtle progress animation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgressVal((prev) => {
-        if (prev >= 92) return 65
-        return prev + 3
-      })
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // Auto-check if maintenance is lifted
+  // Auto-check in background if maintenance is lifted
   const checkStatus = async () => {
-    setChecking(true)
     try {
       const res = await fetch('/api/maintenance-status', { cache: 'no-store' })
       if (res.ok) {
@@ -63,8 +49,6 @@ export default function UpdateInProgress() {
       }
     } catch {
       // Still in maintenance or network error
-    } finally {
-      setTimeout(() => setChecking(false), 800)
     }
   }
 
@@ -161,40 +145,6 @@ export default function UpdateInProgress() {
           We are currently deploying critical platform enhancements, core security updates, and database optimizations across the{' '}
           <span className="text-amber-300 font-medium">Kiddies Media Ministry</span> network. All ministerial dashboards, registries, and learning systems are temporarily offline.
         </p>
-
-        {/* Live Progress Indicator Card */}
-        <div className="w-full max-w-xl bg-white/[0.03] border border-white/10 rounded-2xl p-6 backdrop-blur-md mb-8 text-left shadow-2xl">
-          <div className="flex items-center justify-between mb-3 text-xs">
-            <span className="text-slate-400 font-medium flex items-center gap-1.5">
-              <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${checking ? 'animate-spin' : ''}`} />
-              System Optimization & Database Synchronization
-            </span>
-            <span className="font-mono text-amber-300 font-semibold">{progressVal}%</span>
-          </div>
-
-          {/* Animated Progress Bar */}
-          <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden p-0.5 border border-white/[0.05]">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-400 to-amber-300 transition-all duration-1000 shadow-[0_0_12px_rgba(245,158,11,0.5)]"
-              style={{ width: `${progressVal}%` }}
-            />
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-              All media records & intellectual assets safely vaulted
-            </span>
-            <button
-              onClick={checkStatus}
-              disabled={checking}
-              className="hover:text-amber-300 transition-colors flex items-center gap-1 cursor-pointer font-medium disabled:opacity-50"
-            >
-              <RefreshCw className={`w-3 h-3 ${checking ? 'animate-spin' : ''}`} />
-              {checking ? 'Checking...' : 'Check Status'}
-            </button>
-          </div>
-        </div>
 
         {/* Feature / Safety Highlights */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full max-w-2xl text-left mb-8">
